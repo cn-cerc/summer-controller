@@ -124,11 +124,11 @@ public class LocalService extends CustomLocalProxy implements IServiceProxy {
     }
 
     public String getExportKey() {
-        String tmp = "" + System.currentTimeMillis();
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
+        String exportKey = Long.toString(System.currentTimeMillis());
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), exportKey)) {
             buff.setField("data", this.getDataIn().getJSON());
         }
-        return tmp;
+        return exportKey;
     }
 
     public LocalService setBufferRead(boolean bufferRead) {
