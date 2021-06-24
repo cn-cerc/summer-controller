@@ -13,7 +13,9 @@ import org.springframework.web.context.WebApplicationContext;
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
 import cn.cerc.core.Utils;
+import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.other.MemoryBuffer;
+import redis.clients.jedis.Jedis;
 
 @Component
 @Scope(WebApplicationContext.SCOPE_REQUEST)
@@ -58,6 +60,11 @@ public class AppClient implements IClient, Serializable {
             if (tmp == null || !tmp.equals(def)) {
                 buff.setField(key, def);
             }
+        }
+        // 刷新缓存生命值
+        try (Jedis redis = JedisFactory.getJedis()) {
+            if (redis != null)
+                redis.expire(buff.getKey(), buff.getExpires());
         }
         return result;
     }
