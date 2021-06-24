@@ -77,8 +77,9 @@ public class FormFactory implements ApplicationContextAware {
                 if ("".equals(loginView)) {
                     return null;
                 }
-                if (loginView != null)
+                if (loginView != null) {
                     return loginView;
+                }
             }
 
             // 权限检查
@@ -102,6 +103,16 @@ public class FormFactory implements ApplicationContextAware {
                 return form.getView(funcCode);
             case CHECK:
                 return "redirect:" + Application.getConfig().getVerifyDevicePage();
+            case LOGIN:
+                // 登录验证
+                IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
+                String loginView = appLogin.getLoginView(form);
+                if ("".equals(loginView)) {
+                    return null;
+                }
+                if (loginView != null) {
+                    return loginView;
+                }
             default:
                 resp.setContentType("text/html;charset=UTF-8");
                 JsonPage output = new JsonPage(form);
