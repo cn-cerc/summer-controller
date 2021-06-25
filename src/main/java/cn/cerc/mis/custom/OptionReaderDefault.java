@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import cn.cerc.core.ISession;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.IOptionReader;
 import cn.cerc.mis.core.ISystemTable;
 
@@ -30,7 +30,7 @@ public class OptionReaderDefault implements IOptionReader, IHandle {
         if (Utils.isEmpty(optionKey))
             throw new RuntimeException("corp optionKey is null");
 
-        SqlQuery query = new SqlQuery(this);
+        MysqlQuery query = new MysqlQuery(this);
         query.add("select Value_ from %s", systemTable.getBookOptions());
         query.add("where CorpNo_='%s'", corpNo);
         query.add("and Code_='%s'", Utils.safeString(optionKey));
@@ -44,7 +44,7 @@ public class OptionReaderDefault implements IOptionReader, IHandle {
         if (Utils.isEmpty(optionKey))
             throw new RuntimeException("user optionKey is null");
 
-        SqlQuery query = new SqlQuery(this);
+        MysqlQuery query = new MysqlQuery(this);
         query.add("select Value_ from %s", systemTable.getUserOptions());
         query.add("where UserCode_=N'%s' and Code_=N'%s'", userCode, Utils.safeString(optionKey));
         query.open();

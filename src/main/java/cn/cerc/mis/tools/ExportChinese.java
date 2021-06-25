@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.ISystemTable;
 
@@ -111,7 +111,7 @@ public class ExportChinese {
     public void writeDict(IHandle handle) {
         // FIXME: 此处应该进一步抽象处理
         ISystemTable systemTable = Application.getSystemTable();
-        SqlQuery ds = new SqlQuery(handle);
+        MysqlQuery ds = new MysqlQuery(handle);
         ds.add("select * from %s", systemTable.getLangDict());
         ds.open();
         for (String text : this.getItems()) {

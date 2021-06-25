@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ISession;
 import cn.cerc.core.Record;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 
 public class PushTableDefault implements IPushProcesser {
     private static final Logger log = LoggerFactory.getLogger(PushTableDefault.class);
@@ -30,7 +30,7 @@ public class PushTableDefault implements IPushProcesser {
      */
     @Override
     public boolean appendRecord(Record record) {
-        SqlQuery query = new SqlQuery(this);
+        MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
         query.open();
@@ -40,7 +40,7 @@ public class PushTableDefault implements IPushProcesser {
         }
         if (!this.onAppend(record))
             return false;
-        query.getDefaultOperator().setUpdateKey("");
+        query.getOperator().setUpdateKey("");
         query.append();
         query.copyRecord(record, query.getFieldDefs());
         query.post();
@@ -49,7 +49,7 @@ public class PushTableDefault implements IPushProcesser {
 
     @Override
     public boolean deleteRecord(Record record) {
-        SqlQuery query = new SqlQuery(this);
+        MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
         query.open();
@@ -67,7 +67,7 @@ public class PushTableDefault implements IPushProcesser {
 
     @Override
     public boolean updateRecord(Record record) {
-        SqlQuery query = new SqlQuery(this);
+        MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
         query.open();
@@ -87,7 +87,7 @@ public class PushTableDefault implements IPushProcesser {
 
     @Override
     public boolean resetRecord(Record record) {
-        SqlQuery query = new SqlQuery(this);
+        MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
         query.open();
@@ -95,7 +95,7 @@ public class PushTableDefault implements IPushProcesser {
         if (query.eof()) {
             if (!this.onAppend(record))
                 return false;
-            query.getDefaultOperator().setUpdateKey("");
+            query.getOperator().setUpdateKey("");
             query.append();
             query.copyRecord(record, query.getFieldDefs());
             query.post();

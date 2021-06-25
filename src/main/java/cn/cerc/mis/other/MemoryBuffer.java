@@ -2,12 +2,12 @@ package cn.cerc.mis.other;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.Utils;
-import cn.cerc.db.cache.Buffer;
+import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.IBufferKey;
 import cn.cerc.mis.core.SystemBuffer;
 
-public class MemoryBuffer extends Buffer implements AutoCloseable {
+public class MemoryBuffer extends RedisRecord implements AutoCloseable {
 
     private static final ClassResource res = new ClassResource(MemoryBuffer.class, SummerMIS.ID);
 
@@ -17,7 +17,7 @@ public class MemoryBuffer extends Buffer implements AutoCloseable {
     }
 
     public static void delete(Enum<?> bufferType, String... keys) {
-        Buffer buffer = new Buffer(buildKey(bufferType, keys));
+        RedisRecord buffer = new RedisRecord(buildKey(bufferType, keys));
         buffer.clear();
     }
 

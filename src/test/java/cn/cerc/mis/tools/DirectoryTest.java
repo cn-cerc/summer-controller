@@ -9,7 +9,7 @@ import cn.cerc.core.LanguageResource;
 import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.ISystemTable;
 
@@ -54,7 +54,7 @@ public class DirectoryTest extends Handle {
             return 0;
         }
         ISystemTable systemTable = Application.getSystemTable();
-        SqlQuery dsLang = new SqlQuery(this);
+        MysqlQuery dsLang = new MysqlQuery(this);
         dsLang.add("select * from %s", systemTable.getLanguage());
         dsLang.add("where key_='%s' and lang_='en'", text);
         dsLang.open();

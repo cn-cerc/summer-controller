@@ -8,7 +8,7 @@ import java.util.Map;
 
 import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 
 public class TableDefine implements Iterable<FieldDefine> {
     private Map<String, FieldDefine> fields = new LinkedHashMap<>();
@@ -16,7 +16,7 @@ public class TableDefine implements Iterable<FieldDefine> {
     private String comment;
 
     public void init(ISession session, String dbName) {
-        SqlQuery ds = new SqlQuery(new Handle(session));
+        MysqlQuery ds = new MysqlQuery(new Handle(session));
         ds.add("select COLUMN_NAME,COLUMN_TYPE,EXTRA,IS_NULLABLE,COLUMN_COMMENT,COLUMN_DEFAULT");
         ds.add("from %s", DatabaseDefine.TableColumns);
         ds.add("where TABLE_SCHEMA='%s' and table_name='%s'", dbName, this.getCode());
@@ -92,7 +92,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         }
         print("");
         print(String.format("        String tableId = \"%s\";", this.getCode()));
-        print("        SqlQuery query = new SqlQuery(this);");
+        print("        MysqlQuery query = new MysqlQuery(this);");
         print("        query.add(\"select * from %%s\", tableId);");
         int count = 0;
         for (FieldDefine field : this) {
@@ -138,7 +138,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         }
         print("");
         print("        String tableId = \"%s\";", this.getCode());
-        print("        SqlQuery query = new SqlQuery(this);");
+        print("        MysqlQuery query = new MysqlQuery(this);");
         print("        query.add(\"select * from %%s\", tableId);");
         print("        query.add(\"where materKey_='%%s'\", materKey);");
         print("        query.open();");
@@ -166,7 +166,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         print("        String userCode = headIn.getString(\"user_code_\");");
         print("");
         print("        String tableId = \"%s\";", this.getCode());
-        print("        SqlQuery query = new SqlQuery(this);");
+        print("        MysqlQuery query = new MysqlQuery(this);");
         print("        query.add(\"select * from %%s\", tableId);");
         print("        query.add(\"where materKey_='%%s'\", materKey);");
         print("        query.open();");

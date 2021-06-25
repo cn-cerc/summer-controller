@@ -13,7 +13,7 @@ import org.springframework.web.context.WebApplicationContext;
 import cn.cerc.core.ISession;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
 
@@ -38,7 +38,7 @@ public class AppLanguageDefault implements IAppLanguage {
 
         synchronized (this) {
             try {
-                SqlQuery ds = new SqlQuery(new Handle(session));
+                MysqlQuery ds = new MysqlQuery(new Handle(session));
                 ds.add("select Value_ from %s", systemTable.getUserOptions());
                 ds.add("where Code_='%s' and UserCode_='%s'", "Lang_", userCode);
                 ds.open();

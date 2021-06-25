@@ -1,8 +1,9 @@
 package cn.cerc.mis.core;
 
-import cn.cerc.db.cache.Redis;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import cn.cerc.db.redis.Redis;
 
 import static org.junit.Assert.assertEquals;
 

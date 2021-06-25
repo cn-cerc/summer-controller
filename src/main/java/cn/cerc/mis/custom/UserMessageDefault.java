@@ -14,9 +14,9 @@ import cn.cerc.core.ISession;
 import cn.cerc.core.Record;
 import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
-import cn.cerc.db.cache.Redis;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
+import cn.cerc.db.redis.Redis;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.ISystemTable;
 import cn.cerc.mis.core.IUserMessage;
@@ -38,7 +38,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
     @Override
     public List<String> getWaitList() {
         List<String> result = new ArrayList<>();
-        SqlQuery ds = new SqlQuery(this);
+        MysqlQuery ds = new MysqlQuery(this);
         ds.setMaximum(5);
         ds.add("select ms.UID_ from %s ms", systemTable.getUserMessages());
         ds.add("where ms.Level_=%s", MessageLevel.Service.ordinal());
@@ -56,7 +56,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         // 若为异步任务消息请求
         if (level == MessageLevel.Service) {
             // 若已存在同一公司别同一种回算请求在排队或者执行中，则不重复插入回算请求
-            SqlQuery ds2 = new SqlQuery(this);
+            MysqlQuery ds2 = new MysqlQuery(this);
             ds2.setMaximum(1);
             ds2.add("select UID_ from %s ", systemTable.getUserMessages());
             ds2.add("where CorpNo_='%s' ", corpNo);
@@ -69,7 +69,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
             }
         }
 
-        SqlQuery cdsMsg = new SqlQuery(this);
+        MysqlQuery cdsMsg = new MysqlQuery(this);
         cdsMsg.add("select * from %s", systemTable.getUserMessages());
         cdsMsg.setMaximum(0);
         cdsMsg.open();
@@ -102,7 +102,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
 
     @Override
     public Record readAsyncService(String msgId) {
-        SqlQuery ds = new SqlQuery(this);
+        MysqlQuery ds = new MysqlQuery(this);
         ds.add("select * from %s", systemTable.getUserMessages());
         ds.add("where Level_=%s", MessageLevel.Service.ordinal());
         ds.add("and Process_=%s", MessageProcess.wait.ordinal());
@@ -123,7 +123,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
 
     @Override
     public boolean updateAsyncService(String msgId, String content, MessageProcess process) {
-        SqlQuery cdsMsg = new SqlQuery(this);
+        MysqlQuery cdsMsg = new MysqlQuery(this);
         cdsMsg.add("select * from %s", systemTable.getUserMessages());
         cdsMsg.add("where UID_='%s'", msgId);
         cdsMsg.open();
@@ -152,7 +152,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         return true;
     }
     
-    private void pushToJiGuang(SqlQuery cdsMsg) {
+    private void pushToJiGuang(MysqlQuery cdsMsg) {
         String subject = cdsMsg.getString("Subject_");
         if ("".equals(subject)) {
             subject = Utils.copy(cdsMsg.getString("Content_"), 1, 80);

@@ -20,7 +20,7 @@ import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlServerMaster;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.vcl.TApplication;
 import cn.cerc.mis.vcl.TButton;
@@ -131,7 +131,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
     }
 
     public void run() {
-        SqlQuery ds = new SqlQuery(this);
+        MysqlQuery ds = new MysqlQuery(this);
         ds.add("select table_name,table_comment from %s where table_schema='%s'", DataTables, edtDatabase.getText());
         ds.open();
         try {
@@ -186,7 +186,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
      * @param tableName 表名
      */
     public void getOneTableInfo(String tableName) {
-        SqlQuery ds = new SqlQuery(this);
+        MysqlQuery ds = new MysqlQuery(this);
         ds.add("select table_comment from %s where table_schema='%s'", DataTables, edtDatabase.getText());
         ds.add("and table_name='%s'", tableName);
         ds.open();
@@ -209,7 +209,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
     private Object getTableColumns(String tableName) {
         StringBuilder builder2 = new StringBuilder();
         builder2.append("<columns>");
-        SqlQuery ds = new SqlQuery(this);
+        MysqlQuery ds = new MysqlQuery(this);
         ds.add("select COLUMN_NAME,COLUMN_TYPE,EXTRA,IS_NULLABLE,COLUMN_COMMENT,COLUMN_DEFAULT");
         ds.add("from %s", TableColumns);
         ds.add("where TABLE_SCHEMA='%s' and table_name='%s'", edtDatabase.getText(), tableName);
@@ -251,7 +251,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
     private Object getTableIndex(String tableName) {
         StringBuilder builder2 = new StringBuilder();
         builder2.append("<indexs>");
-        SqlQuery ds = new SqlQuery(this);
+        MysqlQuery ds = new MysqlQuery(this);
         ds.add("show index from %s", tableName);
         ds.open();
         // 读取全部数据再保存

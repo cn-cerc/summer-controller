@@ -10,7 +10,7 @@ import cn.cerc.core.ClassResource;
 import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.cache.CacheResetMode;
 import cn.cerc.mis.cache.IMemoryCache;
@@ -34,7 +34,7 @@ public class LanguageReaderDefault implements ILanguageReader, IMemoryCache {
         if (buff == null) {
             synchronized (this) {
                 buff = new HashMap<>();
-                SqlQuery dsLang = new SqlQuery(handle);
+                MysqlQuery dsLang = new MysqlQuery(handle);
                 dsLang.add("select key_,value_ from %s", systemTable.getLanguage());
                 dsLang.add("where lang_='%s'", langId);
                 dsLang.open();
@@ -59,7 +59,7 @@ public class LanguageReaderDefault implements ILanguageReader, IMemoryCache {
 
         synchronized (this) {
             String result = key;
-            SqlQuery dsLang = new SqlQuery(handle);
+            MysqlQuery dsLang = new MysqlQuery(handle);
             dsLang.add("select * from %s", systemTable.getLanguage());
             dsLang.add("where lang_='%s'", langId);
             dsLang.add("and key_='%s'", key);

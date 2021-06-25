@@ -10,7 +10,7 @@ import cn.cerc.core.LanguageResource;
 import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.mysql.SqlQuery;
+import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
@@ -70,7 +70,7 @@ public class R {
 
     private static void validateKey(IHandle handle, String text, String language) {
         ISystemTable systemTable = Application.getSystemTable();
-        SqlQuery dsLang = new SqlQuery(handle);
+        MysqlQuery dsLang = new MysqlQuery(handle);
         dsLang.add("select Value_ from %s", systemTable.getLanguage());
         dsLang.add("where Key_='%s'", Utils.safeString(text));
         dsLang.add("and Lang_='%s'", language);
@@ -93,7 +93,7 @@ public class R {
 
     private static String getValue(IHandle handle, String text, String language) {
         ISystemTable systemTable = Application.getSystemTable();
-        SqlQuery dsLang = new SqlQuery(handle);
+        MysqlQuery dsLang = new MysqlQuery(handle);
         dsLang.add("select Key_,max(Value_) as Value_ from %s", systemTable.getLanguage());
         dsLang.add("where Key_='%s'", Utils.safeString(text));
         dsLang.add("and (Lang_='%s')", language);
@@ -117,7 +117,7 @@ public class R {
 //
 //        ISystemTable systemTable = Application.getBeanDefault(ISystemTable.class, null);
 //        // 处理英文界面
-//        SqlQuery ds = new SqlQuery(handle);
+//        MysqlQuery ds = new MysqlQuery(handle);
 //        ds.add("select Value_ from %s", systemTable.getLanguage());
 //        ds.add("where Key_='%s'", Utils.safeString(text));
 //        if (!Language.en_US.equals(language)) {

@@ -12,6 +12,6 @@
 
 * IService，定位于业务逻辑，用于接收web输出，以及输出IStatus与DataSet-JSON，并可通过包装类，转化为其它格式如xml的输出，此项与IForm的差别在于：IForm有提供对getRequest().getSession()的访问，可使用HttpSession。IService有提供RESTful接口，可提供第三方访问。
 
-实际使用时，IForm会调用IService，而IService既对内提供业务服务，也对外提供业务服务。
+实际使用时，IForm会调用IService，而IService既对内提供业务服务（微服务），也对外提供业务服务。
 
 欢迎大家使用，同时反馈更多的建议与意见，也欢迎其它业内人士，对此项目进行协同改进！
