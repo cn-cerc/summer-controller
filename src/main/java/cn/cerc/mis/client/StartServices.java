@@ -108,7 +108,7 @@ public class StartServices extends HttpServlet {
             }
             DataSet dataOut = new DataSet();
             IStatus status = bean.execute(dataIn, dataOut);
-            respData.setResult(status.getResult());
+            respData.setResult(status.getState() > 0);
             respData.setMessage(status.getMessage());
             respData.setData(bean.getJSON(dataOut));
         } catch (Exception e) {
