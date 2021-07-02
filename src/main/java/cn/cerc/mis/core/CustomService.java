@@ -22,7 +22,6 @@ public abstract class CustomService extends Handle implements IService {
     protected DataSet dataIn = null; // request
     protected DataSet dataOut = null; // response
     protected String funcCode;
-    private String restPath;
 
     public CustomService init(CustomService owner, boolean refData) {
         this.setSession(owner.getSession());
@@ -158,16 +157,6 @@ public abstract class CustomService extends Handle implements IService {
 
     public final void setDataOut(DataSet dataOut) {
         this.dataOut = dataOut;
-    }
-
-    @Override
-    public final String getRestPath() {
-        return restPath;
-    }
-
-    @Override
-    public final void setRestPath(String restPath) {
-        this.restPath = restPath;
     }
 
     public final IStatus success() {

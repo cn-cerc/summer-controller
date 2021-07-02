@@ -8,10 +8,6 @@ public interface IService extends IHandle {
     DataSet execute(DataSet dataIn) throws ServiceException;
 
     boolean checkSecurity(IHandle handle);
-    
-    String getRestPath();
-
-    void setRestPath(String restPath);
 
     // 仅用于 Delphi Client 调用
     @Deprecated
