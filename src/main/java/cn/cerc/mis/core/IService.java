@@ -9,7 +9,7 @@ public interface IService extends IHandle {
     IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException;
 
     default ServiceStatus fail(String format, Object... args) {
-        ServiceStatus status = new ServiceStatus(false);
+        ServiceStatus status = new ServiceStatus(0);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
         } else {
@@ -19,11 +19,11 @@ public interface IService extends IHandle {
     }
 
     default ServiceStatus success() {
-        return new ServiceStatus(true);
+        return new ServiceStatus(1);
     }
 
     default ServiceStatus success(String format, Object... args) {
-        ServiceStatus status = new ServiceStatus(true);
+        ServiceStatus status = new ServiceStatus(1);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
         } else {

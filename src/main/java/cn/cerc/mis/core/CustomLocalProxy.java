@@ -18,14 +18,14 @@ public abstract class CustomLocalProxy extends Handle {
         try {
             status = ss.execute(dataIn, dataOut);
             if (dataOut.getState() == 0)
-                dataOut.setState(status.getResult() ? 1 : 0);
+                dataOut.setState(status.getState());
             if (dataOut.getMessage() == null)
                 dataOut.setMessage(status.getMessage());
         } catch (ServiceException e) {
-            status = new ServiceStatus(false, e.getMessage());
+            status = new ServiceStatus(0, e.getMessage());
         }
         this.setMessage(status.getMessage());
-        return status.getResult();
+        return status.getState() > 0;
     }
 
     protected Object getServiceObject() {

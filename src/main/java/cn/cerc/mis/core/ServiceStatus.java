@@ -2,31 +2,31 @@ package cn.cerc.mis.core;
 
 public class ServiceStatus implements IStatus {
 //    private int status;
-    private boolean result;
+    private int state;
     private String message;
-    
+
     public ServiceStatus() {
     }
 
-    public ServiceStatus(boolean result) {
-        this.result = result;
+    public ServiceStatus(int state) {
+        this.state = state;
         this.message = "";
 //        this.status = result ? 200 : 100;
     }
 
-    public ServiceStatus(boolean result, String message) {
-        this.result = result;
+    public ServiceStatus(int state, String message) {
+        this.state = state;
         this.message = message;
 //        this.status = result ? 200 : 100;
     }
 
     @Override
-    public boolean getResult() {
-        return result;
+    public int getState() {
+        return state;
     }
 
-    public ServiceStatus setResult(boolean result) {
-        this.result = result;
+    public ServiceStatus setState(int result) {
+        this.state = result;
         return this;
     }
 
@@ -38,6 +38,10 @@ public class ServiceStatus implements IStatus {
     public ServiceStatus setMessage(String message) {
         this.message = message;
         return this;
+    }
+
+    public void setResult(boolean result) {
+        this.state = result ? 1 : 0;
     }
 
 }

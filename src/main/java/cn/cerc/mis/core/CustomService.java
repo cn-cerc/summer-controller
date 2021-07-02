@@ -45,7 +45,7 @@ public abstract class CustomService extends Handle implements IMultiplService, I
             throw new RuntimeException("funcCode is null");
         }
 
-        ServiceStatus ss = new ServiceStatus(false);
+        ServiceStatus ss = new ServiceStatus(0);
         Class<?> self = this.getClass();
         Method mt = null;
         for (Method item : self.getMethods()) {
