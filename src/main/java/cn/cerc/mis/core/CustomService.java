@@ -14,7 +14,7 @@ import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 
-public abstract class CustomService extends Handle implements IService {
+public abstract class CustomService extends Handle implements IService, IRestful {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
     private static final ClassResource res = new ClassResource(CustomService.class, SummerMIS.ID);
     @Autowired
@@ -22,6 +22,7 @@ public abstract class CustomService extends Handle implements IService {
     protected DataSet dataIn = null; // request
     protected DataSet dataOut = null; // response
     protected String funcCode;
+    private String restPath;
 
     public CustomService init(CustomService owner, boolean refData) {
         this.setSession(owner.getSession());
@@ -157,6 +158,16 @@ public abstract class CustomService extends Handle implements IService {
 
     public final void setDataOut(DataSet dataOut) {
         this.dataOut = dataOut;
+    }
+
+    @Override
+    public final String getRestPath() {
+        return restPath;
+    }
+
+    @Override
+    public final void setRestPath(String restPath) {
+        this.restPath = restPath;
     }
 
     public final IStatus success() {

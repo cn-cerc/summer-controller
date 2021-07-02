@@ -9,10 +9,21 @@ import cn.cerc.db.core.IHandle;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public abstract class AbstractService extends Handle implements IService {
+public abstract class AbstractService extends Handle implements IService, IRestful {
     protected DataSet dataOut = new DataSet();
     @Autowired
     public ISystemTable systemTable;
+    private String restPath;
+
+    @Override
+    public final String getRestPath() {
+        return restPath;
+    }
+
+    @Override
+    public final void setRestPath(String restPath) {
+        this.restPath = restPath;
+    }
 
     @Override
     public final DataSet execute(DataSet dataIn) throws ServiceException {

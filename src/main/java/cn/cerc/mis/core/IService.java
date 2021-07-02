@@ -13,10 +13,6 @@ public interface IService extends IHandle {
     @Deprecated
     String getJSON(DataSet dataOut);
 
-//    String getRestPath();
-
-//    void setRestPath(String restPath);
-
     @Deprecated
     default IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException {
         dataOut = this.execute(dataIn);
