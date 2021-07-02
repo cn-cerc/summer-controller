@@ -46,6 +46,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>summer-db</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.jexcelapi</groupId>
