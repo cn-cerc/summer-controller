@@ -20,14 +20,11 @@ import cn.cerc.mis.client.IServiceProxy;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
-public class LocalService extends CustomLocalProxy implements IServiceProxy {
+public class LocalService extends CustomServiceProxy implements IServiceProxy {
     private static final Logger log = LoggerFactory.getLogger(LocalService.class);
     // 是否激活缓存
     private boolean bufferRead = true;
     private boolean bufferWrite = true;
-
-    private DataSet dataIn;
-    private DataSet dataOut;
 
     public LocalService(IHandle handle) {
         super(handle);
@@ -49,63 +46,53 @@ public class LocalService extends CustomLocalProxy implements IServiceProxy {
     // 带缓存调用服务
     @Override
     public boolean exec(Object... args) {
-        if (this.dataIn == null)
-            this.dataIn = new DataSet();
-        if (this.dataOut == null)
-            this.dataOut = new DataSet();
-
         initDataIn(args);
 
         Object object = getServiceObject();
-        if (object == null) {
+        if (object == null)
             return false;
-        }
 
         try {
-            if (!"SvrSession.byUserCode".equals(this.getService())) {
+            if (!"SvrSession.byUserCode".equals(this.getService()))
                 log.debug(this.getService());
-            }
-            if (object instanceof IHandle) {
+            if (object instanceof IHandle)
                 ((IHandle) object).setSession(this.getSession());
-            }
             if (ServerConfig.isServerMaster()) {
-                return executeService(object, this.dataIn, this.dataOut);
+                setDataOut(((IService) object).execute(getDataIn()));
+                return getDataOut().getState() > 0;
             }
 
             // 制作临时缓存Key
-            String key = MD5.get(this.getUserCode() + this.getService() + dataIn.getJSON());
+            String key = MD5.get(this.getUserCode() + this.getService() + getDataIn().getJSON());
 
             if (bufferRead) {
                 String buffValue = Redis.get(key);
                 if (buffValue != null) {
                     log.debug("read from buffer: " + this.getService());
+                    DataSet dataOut = getDataOut();
                     dataOut.setJSON(buffValue);
-                    setMessage(dataOut.getHead().getString("_message_"));
-                    return dataOut.getHead().getBoolean("_result_");
+                    return dataOut.getState() > 0;
                 }
             }
 
             // 没有缓存时，直接读取并存入缓存
-            Boolean result = executeService(object, this.dataIn, this.dataOut);
+            setDataOut(((IService) object).execute(getDataIn()));
             if (bufferWrite) {
                 log.debug("write to buffer: " + this.getService());
-                dataOut.getHead().setField("_message_", this.getMessage());
-                dataOut.getHead().setField("_result_", result);
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     if (jedis != null) {
-                        jedis.set(key, dataOut.getJSON());
+                        jedis.set(key, getDataOut().toString());
                         jedis.expire(key, 3600);
                     }
                 }
             }
-            return result;
+            return getDataOut().getState() > 0;
         } catch (Exception e) {
             Throwable err = e;
-            if (e.getCause() != null) {
+            if (e.getCause() != null) 
                 err = e.getCause();
-            }
             log.error(err.getMessage(), err);
-            setMessage(err.getMessage());
+            getDataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());
             return false;
         }
     }
@@ -139,28 +126,6 @@ public class LocalService extends CustomLocalProxy implements IServiceProxy {
     public LocalService setBufferWrite(boolean bufferWrite) {
         this.bufferWrite = bufferWrite;
         return this;
-    }
-
-    @Override
-    public DataSet getDataOut() {
-        if (this.dataOut == null)
-            this.dataOut = new DataSet();
-        return this.dataOut;
-    }
-
-    @Override
-    public DataSet getDataIn() {
-        if (this.dataIn == null)
-            this.dataIn = new DataSet();
-        return this.dataIn;
-    }
-
-    public void setDataIn(DataSet dataIn) {
-        this.dataIn = dataIn;
-    }
-
-    public void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
     }
 
     @Deprecated

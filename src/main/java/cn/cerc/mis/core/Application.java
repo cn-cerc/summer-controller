@@ -189,8 +189,8 @@ public class Application implements ApplicationContextAware {
             if (context.containsBean(beanId)) {
                 bean = context.getBean(beanId, IService.class);
                 // 支持指定函数
-                if (bean instanceof IMultiplService) {
-                    IMultiplService cs = ((IMultiplService) bean);
+                if (bean instanceof CustomService) {
+                    CustomService cs = ((CustomService) bean);
                     cs.setFuncCode(serviceCode.split("\\.")[1]);
                 }
             } else {

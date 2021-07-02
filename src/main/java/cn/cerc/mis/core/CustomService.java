@@ -14,19 +14,16 @@ import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 
-public abstract class CustomService extends Handle implements IMultiplService, IRestful {
+public abstract class CustomService extends Handle implements IService, IRestful {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
     private static final ClassResource res = new ClassResource(CustomService.class, SummerMIS.ID);
-
     @Autowired
     public ISystemTable systemTable;
     protected DataSet dataIn = null; // request
     protected DataSet dataOut = null; // response
     protected String funcCode;
-    private String message = "";
-    private StringBuffer msg = null;
     private String restPath;
-    
+
     public CustomService init(CustomService owner, boolean refData) {
         this.setSession(owner.getSession());
         if (refData) {
@@ -37,15 +34,12 @@ public abstract class CustomService extends Handle implements IMultiplService, I
     }
 
     @Override
-    public IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException {
+    public DataSet execute(DataSet dataIn) throws ServiceException {
         this.setDataIn(dataIn);
-        this.setDataOut(dataOut);
 
-        if (this.funcCode == null) {
+        if (this.funcCode == null)
             throw new RuntimeException("funcCode is null");
-        }
 
-        ServiceStatus ss = new ServiceStatus(0);
         Class<?> self = this.getClass();
         Method mt = null;
         for (Method item : self.getMethods()) {
@@ -57,9 +51,8 @@ public abstract class CustomService extends Handle implements IMultiplService, I
         if (mt == null) {
             this.setMessage(
                     String.format(res.getString(1, "没有找到服务：%s.%s ！"), this.getClass().getName(), this.funcCode));
-            ss.setMessage(this.getMessage());
-            ss.setResult(false);
-            return ss;
+            dataOut.setState(ServiceState.NOT_FIND_SERVICE);
+            return dataOut;
         }
 
         try {
@@ -67,11 +60,19 @@ public abstract class CustomService extends Handle implements IMultiplService, I
             try {
                 // 执行具体的服务函数
                 if (mt.getParameterCount() == 0) {
-                    ss.setResult((Boolean) mt.invoke(this));
-                    ss.setMessage(this.getMessage());
-                    return ss;
+                    getDataOut().setState((Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR);
+                    getDataOut().setMessage(this.getMessage());
+                    return dataOut;
+                } else if (mt.getParameterCount() == 1) {
+                    dataOut = (DataSet) mt.invoke(this, dataIn);
+                    return dataOut;
                 } else {
-                    return (IStatus) mt.invoke(this, dataIn, dataOut);
+                    IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
+                    if (dataOut.getState() == ServiceState.ERROR)
+                        dataOut.setState(result.getState());
+                    if (dataOut.getMessage() == null)
+                        dataOut.setMessage(result.getMessage());
+                    return dataOut;
                 }
             } finally {
                 if (dataOut != null) {
@@ -90,68 +91,45 @@ public abstract class CustomService extends Handle implements IMultiplService, I
             Throwable err = e.getCause() != null ? e.getCause() : e;
             String msg = err.getMessage() == null ? "error is null" : err.getMessage();
             if ((err instanceof ServiceException)) {
-                this.setMessage(msg);
-                ss.setMessage(msg);
-                ss.setResult(false);
-                return ss;
+                setMessage(msg);
+                getDataOut().setState(ServiceState.ERROR);
+                return dataOut;
             } else {
                 log.error(msg, err);
-                this.setMessage(msg);
-                ss.setMessage(msg);
-                ss.setResult(false);
-                return ss;
+                setMessage(msg);
+                getDataOut().setState(ServiceState.ERROR);
             }
+            return getDataOut();
         }
     }
 
-    @Override
-    public DataSet getDataIn() {
+    public final DataSet getDataIn() {
         if (dataIn == null) {
             dataIn = new DataSet();
         }
         return dataIn;
     }
 
-    @Override
-    public DataSet getDataOut() {
+    public final DataSet getDataOut() {
         if (dataOut == null) {
             dataOut = new DataSet();
         }
         return dataOut;
     }
 
-    // 需要返回的失败讯息, 且永远为 false !
-    public boolean fail(String text) {
-        this.setMessage(text);
+    public final boolean fail(String message) {
+        getDataOut().setMessage(message);
         return false;
     }
 
-    @Deprecated
-    public StringBuffer getMsg() {
-        if (msg == null) {
-            msg = new StringBuffer(message);
-        }
-        return msg;
+    public final String getMessage() {
+        return getDataOut().getMessage();
     }
 
-    public String getMessage() {
-        return msg != null ? msg.toString() : message;
-    }
-
-    public void setMessage(String message) {
-        if (message == null || "".equals(message.trim())) {
+    public final void setMessage(String message) {
+        if (message == null || "".equals(message.trim()))
             return;
-        }
-        if (msg != null) {
-            this.msg.append(message);
-        } else {
-            this.message = message;
-        }
-    }
-
-    @Override
-    public String getJSON(DataSet dataOut) {
-        return String.format("[%s]", this.getDataOut().getJSON());
+        getDataOut().setMessage(message);
     }
 
     // 设置是否需要授权才能登入
@@ -162,33 +140,68 @@ public abstract class CustomService extends Handle implements IMultiplService, I
     }
 
     @Override
-    public String getFuncCode() {
+    public String getJSON(DataSet dataOut) {
+        return String.format("[%s]", this.getDataOut().getJSON());
+    }
+
+    public final String getFuncCode() {
         return funcCode;
     }
 
-    @Override
-    public void setFuncCode(String funcCode) {
+    public final void setFuncCode(String funcCode) {
         this.funcCode = funcCode;
     }
-    
-    @Override
-    public void setDataIn(DataSet dataIn) {
+
+    public final void setDataIn(DataSet dataIn) {
         this.dataIn = dataIn;
     }
 
-    @Override
-    public void setDataOut(DataSet dataOut) {
+    public final void setDataOut(DataSet dataOut) {
         this.dataOut = dataOut;
     }
 
     @Override
-    public String getRestPath() {
+    public final String getRestPath() {
         return restPath;
     }
 
     @Override
-    public void setRestPath(String restPath) {
+    public final void setRestPath(String restPath) {
         this.restPath = restPath;
     }
+
+    public final IStatus success() {
+        return new ServiceStatus(ServiceState.OK);
+    }
+
+    public final IStatus success(String format, Object... args) {
+        ServiceStatus status = new ServiceStatus(ServiceState.OK);
+        if (args.length > 0) {
+            status.setMessage(String.format(format, args));
+        } else {
+            status.setMessage(format);
+        }
+        return status;
+    }
+
+    public final IStatus fail(String format, Object... args) {
+        ServiceStatus status = new ServiceStatus(ServiceState.ERROR);
+        if (args.length > 0) {
+            status.setMessage(String.format(format, args));
+        } else {
+            status.setMessage(format);
+        }
+        return status;
+    }
+
+    @Deprecated
+    public final Object getProperty(String key) {
+        return getSession().getProperty(key);
+    }
+
+//    @Deprecated
+//    public final void setProperty(String key, Object value) {
+//        getSession().setProperty(key, value);
+//    }
 
 }

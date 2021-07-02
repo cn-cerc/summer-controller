@@ -10,7 +10,6 @@ public interface IStatus {
 
     Object setMessage(String message);
 
-    @Deprecated
     default boolean getResult() {
         return this.getState() > 0;
     }
