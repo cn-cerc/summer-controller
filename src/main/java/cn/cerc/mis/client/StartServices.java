@@ -22,7 +22,6 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BasicHandle;
-import cn.cerc.mis.core.IRestful;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.IStatus;
 
@@ -41,8 +40,8 @@ public class StartServices extends HttpServlet {
         }
         services = new HashMap<>();
         Application.setContext(WebApplicationContextUtils.getRequiredWebApplicationContext(req.getServletContext()));
-        for (String serviceCode : Application.getContext().getBeanNamesForType(IRestful.class)) {
-            IRestful service = (IRestful) Application.getBean(handle, serviceCode);
+        for (String serviceCode : Application.getContext().getBeanNamesForType(IService.class)) {
+            IService service = (IService) Application.getBean(handle, serviceCode);
             String path = service.getRestPath();
             if (null != path && !"".equals(path)) {
                 services.put(path, serviceCode);

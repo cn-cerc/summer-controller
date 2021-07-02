@@ -14,7 +14,7 @@ import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 
-public abstract class CustomService extends Handle implements IService, IRestful {
+public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
     private static final ClassResource res = new ClassResource(CustomService.class, SummerMIS.ID);
     @Autowired

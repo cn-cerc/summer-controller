@@ -9,7 +9,7 @@ import cn.cerc.db.core.IHandle;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public abstract class AbstractService extends Handle implements IService, IRestful {
+public abstract class AbstractService extends Handle implements IService {
     protected DataSet dataOut = new DataSet();
     @Autowired
     public ISystemTable systemTable;
