@@ -17,6 +17,10 @@ public abstract class CustomLocalProxy extends Handle {
         IService ss = (IService) bean;
         try {
             status = ss.execute(dataIn, dataOut);
+            if (dataOut.getState() == 0)
+                dataOut.setState(status.getResult() ? 1 : 0);
+            if (dataOut.getMessage() == null)
+                dataOut.setMessage(status.getMessage());
         } catch (ServiceException e) {
             status = new ServiceStatus(false, e.getMessage());
         }
