@@ -66,7 +66,7 @@ public class RemoteService extends Handle implements IServiceProxy {
         try {
             Curl curl = new Curl();
             curl.put("dataIn", getDataIn().getJSON());
-            if (this.server != null)
+            if (this.server != null && server.getToken() != null)
                 curl.put(ISession.TOKEN, this.server.getToken());
             log.debug("url {}", url);
 
@@ -145,7 +145,7 @@ public class RemoteService extends Handle implements IServiceProxy {
 
     @Override
     public final DataSet getDataIn() {
-        if (dataIn == null) 
+        if (dataIn == null)
             dataIn = new DataSet();
         return dataIn;
     }

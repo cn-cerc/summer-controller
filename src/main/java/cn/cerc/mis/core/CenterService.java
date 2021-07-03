@@ -18,6 +18,7 @@ public class CenterService extends RemoteService {
         this.setServer(server);
     }
 
+    @Deprecated
     public CenterService(IHandle handle, String service) {
         super(handle);
         this.setServer(server);
