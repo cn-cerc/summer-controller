@@ -17,6 +17,7 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
@@ -35,6 +36,10 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     protected void initDataIn(Object... args) {
+    }
+
+    @Override
+    public boolean exec(Object... args) {
         if (args.length > 0) {
             Record headIn = getDataIn().getHead();
             if (args.length % 2 != 0) {
@@ -44,15 +49,20 @@ public class RemoteService extends Handle implements IServiceProxy {
                 headIn.setField(args[i].toString(), args[i + 1]);
             }
         }
-    }
 
-    @Override
-    public boolean exec(Object... args) {
-        if (this.server == null) {
-            getDataOut().setMessage("ServiceHost is null");
-            return false;
+        // 若未定义远程主机，则改为执行本地服务
+        if (this.server == null || this.server.getRequestUrl(service) == null) {
+            LocalService svr = new LocalService(this);
+            svr.setService(this.getService());
+            svr.setDataIn(getDataIn());
+            boolean result = svr.exec();
+            this.setDataOut(svr.getDataOut());
+            if (!result) {
+                this.setMessage(svr.getMessage());
+            }
+            return result;
         }
-        
+
         log.debug(this.service);
         if (Utils.isEmpty(this.service)) {
             this.setMessage(res.getString(2, "服务代码不允许为空"));

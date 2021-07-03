@@ -1,8 +1,7 @@
 package cn.cerc.mis.core;
 
-import cn.cerc.core.ClassConfig;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.client.IServiceServer;
 import cn.cerc.mis.client.RemoteService;
 
 /**
@@ -12,35 +11,17 @@ import cn.cerc.mis.client.RemoteService;
  *
  */
 public class CenterService extends RemoteService {
-    private static final ClassConfig config = new ClassConfig(CenterService.class, SummerMIS.ID);
+    private IServiceServer server = new CenterServer();
 
     public CenterService(IHandle handle) {
         super(handle);
+        this.setServer(server);
     }
 
     public CenterService(IHandle handle, String service) {
         super(handle);
+        this.setServer(server);
         this.setService(service);
-    }
-
-    @Override
-    public boolean exec(Object... args) {
-        String site = config.getClassProperty("site", null);
-        if (site != null) {
-            String url = String.format("%s?service=%s", site, this.getService());
-            return this.executeService(url);
-        } else {
-            this.initDataIn(args);
-            LocalService svr = new LocalService(this);
-            svr.setService(this.getService());
-            svr.setDataIn(getDataIn());
-            boolean result = svr.exec();
-            this.setDataOut(svr.getDataOut());
-            if (!result) {
-                this.setMessage(svr.getMessage());
-            }
-            return result;
-        }
     }
 
 }
