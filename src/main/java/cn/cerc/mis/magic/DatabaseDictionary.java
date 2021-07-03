@@ -19,8 +19,8 @@ import cn.cerc.core.Record;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mssql.MssqlServer;
-import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlQuery;
+import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.vcl.TApplication;
 import cn.cerc.mis.vcl.TButton;
@@ -119,6 +119,11 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                         }
                         mysql = null;
                     }
+                }
+
+                @Override
+                public void loadToken(String token) {
+                    throw new RuntimeException("not support loadToken");
                 }
             }) {
                 this.setSession(session);

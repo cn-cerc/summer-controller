@@ -1,5 +1,7 @@
 package cn.cerc.mis.client;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,17 +17,18 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
 
-public abstract class RemoteService extends Handle implements IServiceProxy {
+public class RemoteService extends Handle implements IServiceProxy {
     private static final Logger log = LoggerFactory.getLogger(RemoteService.class);
     private static final ClassResource res = new ClassResource(RemoteService.class, SummerMIS.ID);
+    private IServiceServer server;
     private String service;
     private DataSet dataIn;
     private DataSet dataOut;
     private String message;
-    private String token;
 
     public RemoteService(IHandle handle) {
         super(handle);
@@ -43,34 +46,49 @@ public abstract class RemoteService extends Handle implements IServiceProxy {
         }
     }
 
-    protected boolean executeService(String site) {
+    @Override
+    public boolean exec(Object... args) {
+        if (this.server == null) {
+            getDataOut().setMessage("ServiceHost is null");
+            return false;
+        }
+        
         log.debug(this.service);
         if (Utils.isEmpty(this.service)) {
             this.setMessage(res.getString(2, "服务代码不允许为空"));
             return false;
         }
 
+        String url = server.getRequestUrl(this.getService());
         try {
             Curl curl = new Curl();
             curl.put("dataIn", getDataIn().getJSON());
-            curl.put(ISession.TOKEN, this.token);
-            log.debug("url {}", site);
-            log.debug("params {}", curl.getParameters());
+            if (this.server != null)
+                curl.put(ISession.TOKEN, this.server.getToken());
+            log.debug("url {}", url);
 
-            String response = curl.doPost(site);
-            log.debug("response {}", response);
-
-            if (response == null) {
-                log.warn("url {}", site);
+            String response = null;
+            try {
+                log.debug("params {}", curl.getParameters());
+                response = curl.doPost(url);
+                log.debug("response {}", response);
+            } catch (IOException e) {
+                getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
+                log.warn("url {}", url);
                 log.warn("params {}", curl.getParameters());
-                this.setMessage(res.getString(5, "远程服务异常"));
                 return false;
             }
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response);
-            if (json.get("message") != null) {
+            if (json.has("result"))
+                getDataOut().setState(json.get("result").asBoolean() ? ServiceState.OK : ServiceState.ERROR);
+            if (json.has("state"))
+                getDataOut().setState(json.get("state").asInt());
+
+            if (json.has("message")) {
                 this.setMessage(json.get("message").asText());
+                getDataOut().setMessage(json.get("message").asText());
             }
 
             if (json.has("data")) {
@@ -79,7 +97,7 @@ public abstract class RemoteService extends Handle implements IServiceProxy {
                     this.getDataOut().setJSON(dataJson);
                 }
             }
-            return json.get("result").asBoolean();
+            return getDataOut().getState() > ServiceState.ERROR;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if (e.getCause() != null) {
@@ -135,14 +153,6 @@ public abstract class RemoteService extends Handle implements IServiceProxy {
         this.dataIn = dataIn;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     @Deprecated
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
@@ -150,6 +160,15 @@ public abstract class RemoteService extends Handle implements IServiceProxy {
             buff.setField("data", this.getDataIn().getJSON());
         }
         return tmp;
+    }
+
+    public IServiceServer getServer() {
+        return server;
+    }
+
+    public RemoteService setServer(IServiceServer server) {
+        this.server = server;
+        return this;
     }
 
 }
