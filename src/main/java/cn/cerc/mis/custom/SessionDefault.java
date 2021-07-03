@@ -32,7 +32,6 @@ import redis.clients.jedis.Jedis;
 //@Scope(WebApplicationContext.SCOPE_SESSION)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SessionDefault implements ISession {
-    public static final String TOKEN_CREATE_ENTER = "TOKEN_CREATE_STATUS";
     private static final Logger log = LoggerFactory.getLogger(SessionDefault.class);
     private Map<String, Object> connections = new HashMap<>();
     private Map<String, Object> params = new HashMap<>();
@@ -134,8 +133,6 @@ public class SessionDefault implements ISession {
                     params.clear();
                 else {
                     params.put(key, value);
-                    if (params.get(SessionDefault.TOKEN_CREATE_ENTER) == null)
-                        init((String) value);
                 }
             }
             return;
@@ -176,11 +173,13 @@ public class SessionDefault implements ISession {
         return params;
     }
 
-    public void init(String token) {
+    @Override
+	public void loadToken(String token) {
         if (token.length() < 10) {
             throw new RuntimeException("token value error: length < 10");
         }
-
+        params.put(TOKEN, token);
+        
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Token.SessionBase, token);
                 Jedis redis = JedisFactory.getJedis()) {
             if (buff.isNull()) {

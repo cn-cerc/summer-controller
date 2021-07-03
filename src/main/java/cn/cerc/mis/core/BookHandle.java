@@ -42,6 +42,11 @@ public class BookHandle implements IHandle {
             public void close() {
                 owner.close();
             }
+
+            @Override
+            public void loadToken(String token) {
+                throw new RuntimeException("not support loadToken");
+            }
         };
 
         this.session.setProperty(ISession.CORP_NO, corpNo);
