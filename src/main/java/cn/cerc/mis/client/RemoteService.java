@@ -68,13 +68,13 @@ public class RemoteService extends Handle implements IServiceProxy {
             curl.put("dataIn", getDataIn().getJSON());
             if (this.server != null && server.getToken(this) != null)
                 curl.put(ISession.TOKEN, this.server.getToken(this));
-            log.debug("url {}", url);
+            log.debug("request: {}", url);
 
             String response = null;
             try {
-                log.debug("params {}", curl.getParameters());
+                log.debug("post: {}", curl.getParameters());
                 response = curl.doPost(url);
-                log.debug("response {}", response);
+                log.debug("response: {}", response);
             } catch (IOException e) {
                 getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
                 return false;
