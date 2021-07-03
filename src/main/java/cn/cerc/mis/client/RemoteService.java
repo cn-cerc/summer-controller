@@ -77,13 +77,17 @@ public class RemoteService extends Handle implements IServiceProxy {
                 log.debug("response {}", response);
             } catch (IOException e) {
                 getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
-                log.warn("url {}", url);
-                log.warn("params {}", curl.getParameters());
                 return false;
             }
 
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode json = mapper.readTree(response);
+            JsonNode json = null;
+            try {
+                json = mapper.readTree(response);
+            } catch (Exception e) {
+                getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
+                return false;
+            }
             if (json.has("result"))
                 getDataOut().setState(json.get("result").asBoolean() ? ServiceState.OK : ServiceState.ERROR);
             if (json.has("state"))
