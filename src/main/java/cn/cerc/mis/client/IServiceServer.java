@@ -4,7 +4,7 @@ import cn.cerc.db.core.IHandle;
 
 public interface IServiceServer {
 
-	String getRequestUrl(String service);
+	String getRequestUrl(IHandle handle, String service);
 	
 	String getToken(IHandle handle);
 }

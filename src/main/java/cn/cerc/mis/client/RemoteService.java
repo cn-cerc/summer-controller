@@ -47,7 +47,7 @@ public class RemoteService extends Handle implements IServiceProxy {
         }
 
         // 若未定义远程主机，则改为执行本地服务
-        if (this.server == null || this.server.getRequestUrl(service) == null) {
+        if (this.server == null || this.server.getRequestUrl(this, service) == null) {
             LocalService svr = new LocalService(this);
             svr.setService(this.getService());
             svr.setDataIn(getDataIn());
@@ -62,7 +62,7 @@ public class RemoteService extends Handle implements IServiceProxy {
             return false;
         }
 
-        String url = server.getRequestUrl(this.getService());
+        String url = server.getRequestUrl(this, this.getService());
         try {
             Curl curl = new Curl();
             curl.put("dataIn", getDataIn().getJSON());
