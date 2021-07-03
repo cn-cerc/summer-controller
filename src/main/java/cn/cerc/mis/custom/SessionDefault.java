@@ -175,10 +175,11 @@ public class SessionDefault implements ISession {
 
     @Override
     public void loadToken(String token) {
-        if (token == null || token.length() < 10) {
-            throw new RuntimeException("token value error: length < 10");
-        }
         params.put(TOKEN, token);
+        if (token == null) 
+            return;
+        if (token.length() < 10) 
+            throw new RuntimeException("token value error: length < 10");
 
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Token.SessionBase, token);
                 Jedis redis = JedisFactory.getJedis()) {
