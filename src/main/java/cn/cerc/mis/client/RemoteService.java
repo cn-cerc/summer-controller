@@ -66,8 +66,8 @@ public class RemoteService extends Handle implements IServiceProxy {
         try {
             Curl curl = new Curl();
             curl.put("dataIn", getDataIn().getJSON());
-            if (this.server != null && server.getToken() != null)
-                curl.put(ISession.TOKEN, this.server.getToken());
+            if (this.server != null && server.getToken(this) != null)
+                curl.put(ISession.TOKEN, this.server.getToken(this));
             log.debug("url {}", url);
 
             String response = null;
