@@ -50,7 +50,7 @@ public abstract class AbstractService extends Handle implements IService {
 
     // 主要适用于Delphi Client调用
     @Override
-    public final boolean checkSecurity(IHandle handle) {
+    public final boolean allowGuestUser(IHandle handle) {
         ISession sess = handle.getSession();
         return sess != null && sess.logon();
     }

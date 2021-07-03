@@ -133,7 +133,7 @@ public abstract class CustomService extends Handle implements IService {
 
     // 设置是否需要授权才能登入
     @Override
-    public boolean checkSecurity(IHandle handle) {
+    public boolean allowGuestUser(IHandle handle) {
         ISession sess = handle.getSession();
         return sess != null && sess.logon();
     }
