@@ -13,10 +13,4 @@ public interface IService extends IHandle {
     @Deprecated
     String getJSON(DataSet dataOut);
 
-    @Deprecated
-    default IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException {
-        dataOut = this.execute(dataIn);
-        return new ServiceStatus(dataOut.getState(), dataOut.getMessage());
-    }
-
 }
