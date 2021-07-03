@@ -29,13 +29,9 @@ public class RemoteService extends Handle implements IServiceProxy {
     private String service;
     private DataSet dataIn;
     private DataSet dataOut;
-    private String message;
 
     public RemoteService(IHandle handle) {
         super(handle);
-    }
-
-    protected void initDataIn(Object... args) {
     }
 
     @Override
@@ -55,12 +51,9 @@ public class RemoteService extends Handle implements IServiceProxy {
             LocalService svr = new LocalService(this);
             svr.setService(this.getService());
             svr.setDataIn(getDataIn());
-            boolean result = svr.exec();
+            svr.exec();
             this.setDataOut(svr.getDataOut());
-            if (!result) {
-                this.setMessage(svr.getMessage());
-            }
-            return result;
+            return getDataOut().getState() > ServiceState.ERROR;
         }
 
         log.debug(this.service);
@@ -120,30 +113,29 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     @Override
-    public String getService() {
+    public final String getService() {
         return service;
     }
 
     @Override
-    public RemoteService setService(String service) {
+    public final RemoteService setService(String service) {
         this.service = service;
         return this;
     }
 
     @Override
-    public String getMessage() {
-        return message;
+    public final String getMessage() {
+        return getDataOut().getMessage();
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public final void setMessage(String message) {
+        getDataOut().setMessage(message);
     }
 
     @Override
-    public DataSet getDataOut() {
-        if (dataOut == null) {
+    public final DataSet getDataOut() {
+        if (dataOut == null)
             dataOut = new DataSet();
-        }
         return dataOut;
     }
 
@@ -152,10 +144,9 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     @Override
-    public DataSet getDataIn() {
-        if (dataIn == null) {
+    public final DataSet getDataIn() {
+        if (dataIn == null) 
             dataIn = new DataSet();
-        }
         return dataIn;
     }
 

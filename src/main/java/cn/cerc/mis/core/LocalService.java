@@ -30,9 +30,8 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
         super(handle);
         String pageNo = null;
         HttpServletRequest req = (HttpServletRequest) handle.getSession().getProperty("request");
-        if (req != null) {
+        if (req != null) 
             pageNo = req.getParameter("pageno");
-        }
 
         // 遇到分页符时，尝试读取缓存
         this.bufferRead = pageNo != null;
@@ -46,8 +45,17 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     // 带缓存调用服务
     @Override
     public boolean exec(Object... args) {
-        initDataIn(args);
-
+        if (args.length > 0) {
+            Record headIn = getDataIn().getHead();
+            if (args.length % 2 != 0) {
+                // TODO 此处应该使用 ClassResource
+                throw new RuntimeException("传入的参数数量必须为偶数！");
+            }
+            for (int i = 0; i < args.length; i = i + 2) {
+                headIn.setField(args[i].toString(), args[i + 1]);
+            }
+        }
+    
         Object object = getServiceObject();
         if (object == null)
             return false;
@@ -94,19 +102,6 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             log.error(err.getMessage(), err);
             getDataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());
             return false;
-        }
-    }
-
-    private void initDataIn(Object... args) {
-        if (args.length > 0) {
-            Record headIn = getDataIn().getHead();
-            if (args.length % 2 != 0) {
-                // TODO 此处应该使用 ClassResource
-                throw new RuntimeException("传入的参数数量必须为偶数！");
-            }
-            for (int i = 0; i < args.length; i = i + 2) {
-                headIn.setField(args[i].toString(), args[i + 1]);
-            }
         }
     }
 
