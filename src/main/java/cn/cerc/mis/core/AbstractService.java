@@ -3,7 +3,6 @@ package cn.cerc.mis.core;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.cerc.core.DataSet;
-import cn.cerc.core.FieldMeta.FieldType;
 import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
@@ -23,7 +22,7 @@ public abstract class AbstractService extends Handle implements IService {
         if (dataOut.getMessage() == null)
             dataOut.setMessage(status.getMessage());
         // 防止调用者修改并回写到数据库
-        dataOut.getFieldDefs().forEach(meta -> meta.setType(FieldType.Calculated));
+        dataOut.disableStorage();
         return dataOut;
     }
 
