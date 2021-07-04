@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
+import cn.cerc.core.FieldMeta.FieldType;
 import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
@@ -61,18 +62,18 @@ public abstract class CustomService extends Handle implements IService {
                 if (mt.getParameterCount() == 0) {
                     getDataOut().setState((Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR);
                     getDataOut().setMessage(this.getMessage());
-                    return dataOut;
                 } else if (mt.getParameterCount() == 1) {
                     dataOut = (DataSet) mt.invoke(this, dataIn);
-                    return dataOut;
                 } else {
-                    IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
+                    IStatus result = (IStatus) mt.invoke(this, dataIn, getDataOut());
                     if (dataOut.getState() == ServiceState.ERROR)
                         dataOut.setState(result.getState());
                     if (dataOut.getMessage() == null)
                         dataOut.setMessage(result.getMessage());
-                    return dataOut;
                 }
+                // 防止调用者修改并回写到数据库
+                dataOut.getFieldDefs().forEach(meta -> meta.setType(FieldType.Calculated));
+                return dataOut;
             } finally {
                 if (dataOut != null) {
                     dataOut.first();
