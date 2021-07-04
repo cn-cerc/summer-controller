@@ -1,15 +1,15 @@
 package cn.cerc.mis.excel.output;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+
 import cn.cerc.core.DataSet;
 import jxl.Workbook;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
 
 public class DataSetFile {
     private ExcelTemplate template;
@@ -31,7 +31,7 @@ public class DataSetFile {
         template.setFileName(fileName);
         template.setDataSet(dataSet);
         if (template.getColumns().size() == 0) {
-            for (String field : dataSet.getFieldDefs()) {
+            for (String field : dataSet.getFieldDefs().getFields()) {
                 StringColumn column = new StringColumn();
                 column.setCode(field);
                 column.setName(field);
