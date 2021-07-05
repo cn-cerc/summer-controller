@@ -183,7 +183,7 @@ public class SessionDefault implements ISession {
 
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Token.SessionBase, token);
                 Jedis redis = JedisFactory.getJedis()) {
-            if (buff.isNull()) {
+            if (buff.isNull() || !buff.getBoolean("exists")) {
                 CenterService svr = new CenterService(new Handle(this));
                 svr.setService("SvrSession.byToken");
                 if (!svr.exec("token", token)) {
