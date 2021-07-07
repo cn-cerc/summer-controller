@@ -57,7 +57,8 @@ public class FormFactory implements ApplicationContextAware {
             req.setAttribute("_showMenu_", !AppClient.ee.equals(client.getDevice()));
             form.setClient(client);
 
-            session.loadToken((String) req.getSession().getAttribute(ISession.TOKEN));
+            String token = (String) req.getSession().getAttribute(ISession.TOKEN);
+            session.loadToken(token);
 
             form.setId(formId);
 
