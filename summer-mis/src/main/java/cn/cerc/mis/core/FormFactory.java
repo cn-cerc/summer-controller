@@ -116,9 +116,11 @@ public class FormFactory implements ApplicationContextAware {
                 }
             default:
                 resp.setContentType("text/html;charset=UTF-8");
-                JsonPage output = new JsonPage(form);
-                output.setResultMessage(false, res.getString(2, "对不起，当前设备被禁止使用！"));
-                output.execute();
+                JsonPage jsonPage = new JsonPage(form);
+                String deviceId = form.getClient().getId();
+                jsonPage.setResultMessage(false, res.getString(2, "对不起，当前设备被禁止使用！"));
+                jsonPage.put("deviceId", deviceId);
+                jsonPage.execute();
                 return null;
             }
         } catch (Exception e) {
@@ -145,6 +147,7 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public void outputErrorPage(HttpServletRequest request, HttpServletResponse response, Throwable e) {
+        log.error("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         Throwable err = e.getCause();
         if (err == null) {
             err = e;
@@ -181,7 +184,7 @@ public class FormFactory implements ApplicationContextAware {
         }
 
         if (!context.containsBean(beanId)) {
-            throw new RuntimeException(String.format("form %s not find!", beanId));
+            return null;
         }
 
         IForm form = context.getBean(beanId, IForm.class);

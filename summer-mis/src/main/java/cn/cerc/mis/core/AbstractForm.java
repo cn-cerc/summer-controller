@@ -1,9 +1,12 @@
 package cn.cerc.mis.core;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import cn.cerc.db.core.Handle;
-
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -93,7 +95,7 @@ public abstract class AbstractForm extends Handle implements IForm {
     public final void setCaption(String name) {
         setName(name);
     }
-    
+
     @Override
     public IClient getClient() {
         if (client == null) {
@@ -145,7 +147,8 @@ public abstract class AbstractForm extends Handle implements IForm {
 
     // 执行指定函数，并返回jsp文件名，若自行处理输出则直接返回null
     @Override
-    public String getView(String funcCode) throws Exception {
+    public String getView(String funcCode) throws NoSuchMethodException, SecurityException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, ServletException, IOException {
         HttpServletResponse response = this.getResponse();
         HttpServletRequest request = this.getRequest();
         if ("excel".equals(funcCode)) {
@@ -219,8 +222,9 @@ public abstract class AbstractForm extends Handle implements IForm {
             }
             }
 
-            if (result == null)
+            if (result == null) {
                 return null;
+            }
 
             if (result instanceof IPage) {
                 IPage output = (IPage) result;
@@ -275,5 +279,5 @@ public abstract class AbstractForm extends Handle implements IForm {
     public String getId() {
         return id;
     }
-    
+
 }
