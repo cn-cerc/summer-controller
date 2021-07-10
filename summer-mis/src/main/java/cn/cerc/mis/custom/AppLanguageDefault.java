@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
@@ -18,7 +19,8 @@ import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
 
 @Component
-@Scope(WebApplicationContext.SCOPE_SESSION)
+//@Scope(WebApplicationContext.SCOPE_SESSION)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AppLanguageDefault implements IAppLanguage {
     private static final Logger log = LoggerFactory.getLogger(AppLanguageDefault.class);
     @Autowired
