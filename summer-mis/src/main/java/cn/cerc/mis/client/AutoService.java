@@ -33,10 +33,11 @@ public class AutoService extends CustomServiceProxy {
             ((IHandle) object).setSession(handle.getSession());
         }
 
-        setDataOut(((IService) object).execute(getDataIn()));
+        setDataOut(((IService) object).execute(handle, getDataIn()));
         return getDataOut().getState() > 0;
     }
 
+    @Override
     public String getCorpNo() {
         return corpNo;
     }
@@ -45,6 +46,7 @@ public class AutoService extends CustomServiceProxy {
         this.corpNo = corpNo;
     }
 
+    @Override
     public String getUserCode() {
         return userCode;
     }

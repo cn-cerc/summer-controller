@@ -3,9 +3,9 @@ package cn.cerc.mis.core;
 import cn.cerc.core.DataSet;
 import cn.cerc.db.core.IHandle;
 
-public interface IService extends IHandle {
+public interface IService {
 
-    DataSet execute(DataSet dataIn) throws ServiceException;
+    DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException;
 
     boolean allowGuestUser(IHandle handle);
 

@@ -33,7 +33,8 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     @Override
-    public DataSet execute(DataSet dataIn) throws ServiceException {
+    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
+        this.setSession(handle.getSession());
         this.setDataIn(dataIn);
 
         if (this.funcCode == null)

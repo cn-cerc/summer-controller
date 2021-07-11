@@ -15,7 +15,8 @@ public abstract class AbstractService extends Handle implements IService {
     public ISystemTable systemTable;
 
     @Override
-    public final DataSet execute(DataSet dataIn) throws ServiceException {
+    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
+        this.setSession(handle.getSession());
         IStatus status = execute(dataIn, dataOut);
         if (dataOut.getState() == ServiceState.ERROR)
             dataOut.setState(status.getState());
