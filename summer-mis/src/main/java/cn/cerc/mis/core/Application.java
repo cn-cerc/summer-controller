@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import cn.cerc.core.ClassConfig;
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
+import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.IHandle;
@@ -174,7 +175,7 @@ public class Application implements ApplicationContextAware {
      * @throws ClassNotFoundException
      */
     public static IService getService(IHandle handle, String serviceCode) throws ClassNotFoundException {
-        if (serviceCode == null)
+        if (Utils.isEmpty(serviceCode))
             throw new ClassNotFoundException("serviceCode is null.");
 
         // 读取xml中的配置
