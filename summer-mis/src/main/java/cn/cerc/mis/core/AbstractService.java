@@ -58,12 +58,6 @@ public abstract class AbstractService extends Handle implements IService {
         return sess != null && sess.logon();
     }
 
-    // 主要适用于Delphi Client调用
-    @Override
-    public final String getJSON(DataSet dataOut) {
-        return String.format("[%s]", dataOut.getJSON());
-    }
-
     public abstract IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException;
 
 }

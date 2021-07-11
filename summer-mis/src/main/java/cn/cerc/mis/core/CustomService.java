@@ -139,11 +139,6 @@ public abstract class CustomService extends Handle implements IService {
         return sess != null && sess.logon();
     }
 
-    @Override
-    public String getJSON(DataSet dataOut) {
-        return String.format("[%s]", this.getDataOut().getJSON());
-    }
-
     public final String getFuncCode() {
         return funcCode;
     }
