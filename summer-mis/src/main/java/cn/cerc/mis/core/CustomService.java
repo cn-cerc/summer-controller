@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
-import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
@@ -130,13 +129,6 @@ public abstract class CustomService extends Handle implements IService {
         if (message == null || "".equals(message.trim()))
             return;
         getDataOut().setMessage(message);
-    }
-
-    // 设置是否需要授权才能登入
-    @Override
-    public boolean allowGuestUser(IHandle handle) {
-        ISession sess = handle.getSession();
-        return sess != null && sess.logon();
     }
 
     public final String getFuncCode() {

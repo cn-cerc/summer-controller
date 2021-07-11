@@ -10,7 +10,7 @@ public class ServiceStatus implements IStatus {
 
     public ServiceStatus(int state) {
         this.state = state;
-        this.message = "";
+//        this.message = "";
 //        this.status = result ? 200 : 100;
     }
 
@@ -25,6 +25,7 @@ public class ServiceStatus implements IStatus {
         return state;
     }
 
+    @Override
     public ServiceStatus setState(int result) {
         this.state = result;
         return this;
@@ -35,6 +36,7 @@ public class ServiceStatus implements IStatus {
         return message;
     }
 
+    @Override
     public ServiceStatus setMessage(String message) {
         this.message = message;
         return this;

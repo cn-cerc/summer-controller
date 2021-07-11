@@ -3,7 +3,6 @@ package cn.cerc.mis.core;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.cerc.core.DataSet;
-import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 
@@ -49,13 +48,6 @@ public abstract class AbstractService extends Handle implements IService {
             status.setMessage(format);
         }
         return status;
-    }
-
-    // 主要适用于Delphi Client调用
-    @Override
-    public final boolean allowGuestUser(IHandle handle) {
-        ISession sess = handle.getSession();
-        return sess != null && sess.logon();
     }
 
     public abstract IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException;
