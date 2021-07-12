@@ -21,5 +21,5 @@ public @interface Permission {
     // 其它命名建议，如财务经理 user.finance.manager
 
     // 当前授权码
-    String value() default USERS;
+    String value() default "";
 }
