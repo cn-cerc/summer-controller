@@ -71,7 +71,7 @@ public class R {
     private static void validateKey(IHandle handle, String text, String language) {
         ISystemTable systemTable = Application.getSystemTable();
         MysqlQuery dsLang = new MysqlQuery(handle);
-        dsLang.add("select Value_ from %s", systemTable.getLanguage());
+        dsLang.add("select * from %s", systemTable.getLanguage());
         dsLang.add("where Key_='%s'", Utils.safeString(text));
         dsLang.add("and Lang_='%s'", language);
         dsLang.open();
