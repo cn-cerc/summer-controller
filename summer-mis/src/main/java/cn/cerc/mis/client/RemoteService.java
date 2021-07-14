@@ -5,9 +5,6 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
@@ -79,31 +76,8 @@ public class RemoteService extends Handle implements IServiceProxy {
                 getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
                 return false;
             }
+            this.getDataOut().setJSON(response);
 
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode json = null;
-            try {
-                json = mapper.readTree(response);
-            } catch (Exception e) {
-                getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
-                return false;
-            }
-            if (json.has("result"))
-                getDataOut().setState(json.get("result").asBoolean() ? ServiceState.OK : ServiceState.ERROR);
-            if (json.has("state"))
-                getDataOut().setState(json.get("state").asInt());
-
-            if (json.has("message")) {
-                this.setMessage(json.get("message").asText());
-                getDataOut().setMessage(json.get("message").asText());
-            }
-
-            if (json.has("data")) {
-                String dataJson = json.get("data").asText();
-                if (dataJson != null) {
-                    this.getDataOut().setJSON(dataJson);
-                }
-            }
             return getDataOut().getState() > ServiceState.ERROR;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
