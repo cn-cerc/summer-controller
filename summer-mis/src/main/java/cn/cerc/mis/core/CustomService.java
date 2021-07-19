@@ -82,8 +82,8 @@ public abstract class CustomService extends Handle implements IService {
                 if (totalTime > timeout) {
                     String[] tmp = this.getClass().getName().split("\\.");
                     String service = tmp[tmp.length - 1] + "." + this.funcCode;
-                    log.warn(String.format("corpNo:%s, userCode:%s, service:%s, tickCount:%s", getCorpNo(),
-                            getUserCode(), service, totalTime));
+                    log.warn("corpNo:{}, userCode:{}, service:{}, tickCount:{}, dataIn:{}", getCorpNo(), getUserCode(),
+                            service, totalTime, dataIn);
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

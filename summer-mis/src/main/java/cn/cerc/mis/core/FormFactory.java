@@ -147,7 +147,7 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public void outputErrorPage(HttpServletRequest request, HttpServletResponse response, Throwable e) {
-        log.error("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
+        log.info("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         Throwable err = e.getCause();
         if (err == null) {
             err = e;

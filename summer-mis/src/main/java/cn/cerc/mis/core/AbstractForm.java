@@ -257,7 +257,7 @@ public abstract class AbstractForm extends Handle implements IForm {
             if (dataIn.length() > 200) {
                 dataIn = dataIn.substring(0, 200);
             }
-            log.warn("{}, tickCount: {}, dataIn: {}", pageCode, totalTime, dataIn);
+            log.info("{}, tickCount: {}, dataIn: {}", pageCode, totalTime, dataIn);
         }
     }
 
