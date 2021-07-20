@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.ISession;
+import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 
 @Component
@@ -30,13 +31,13 @@ public class FormFactory implements ApplicationContextAware {
         Application.setContext(applicationContext);
     }
 
-    public String getFormView(HttpServletRequest req, HttpServletResponse resp, String formId, String funcCode,
+    public String getFormView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId, String funcCode,
             String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
 
         // 建立数据库资源
-        try (BasicHandle handle = new BasicHandle()) {
+        try {
             req.setAttribute("myappHandle", handle);
             ISession session = handle.getSession();
             session.setProperty(Application.SessionId, req.getSession().getId());
