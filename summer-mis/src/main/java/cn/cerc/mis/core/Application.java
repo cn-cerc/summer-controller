@@ -209,6 +209,9 @@ public class Application implements ApplicationContextAware {
         return getBean(handle, IPassport.class);
     }
 
+    /**
+     * 获取应用级的语言类型
+     */
     public static String getLanguageId() {
         String lang = ServerConfig.getInstance().getProperty(ISession.LANGUAGE_ID);
         if (lang == null || "".equals(lang) || LanguageResource.appLanguage.equals(lang)) {

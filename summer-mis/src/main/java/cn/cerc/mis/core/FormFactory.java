@@ -31,8 +31,8 @@ public class FormFactory implements ApplicationContextAware {
         Application.setContext(applicationContext);
     }
 
-    public String getFormView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId, String funcCode,
-            String... pathVariables) {
+    public String getFormView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId,
+            String funcCode, String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
 
@@ -50,17 +50,19 @@ public class FormFactory implements ApplicationContextAware {
             }
             form.setSession(session);
 
-            // 设备讯息
-            AppClient client = new AppClient();
-            client.setRequest(req);
-            session.setProperty(ISession.LANGUAGE_ID, client.getLanguage());
-
-            req.setAttribute("_showMenu_", !AppClient.ee.equals(client.getDevice()));
-            form.setClient(client);
-
             String token = (String) req.getSession().getAttribute(ISession.TOKEN);
             session.loadToken(token);
 
+            // 取出session中用户设置的语言类型，并写入到request
+            req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
+            req.getSession().setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
+
+            // 设备讯息
+            AppClient client = new AppClient();
+            client.setRequest(req);
+            req.setAttribute("_showMenu_", !AppClient.ee.equals(client.getDevice()));
+
+            form.setClient(client);
             form.setId(formId);
 
             // 传递路径变量

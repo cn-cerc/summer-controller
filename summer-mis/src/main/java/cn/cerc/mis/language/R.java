@@ -24,7 +24,11 @@ public class R {
             log.warn("handle is null.");
             return null;
         }
-        Object temp = handle.getSession().getProperty(ISession.LANGUAGE_ID);
+        ISession session = handle.getSession();
+        if (session == null) {
+            return null;
+        }
+        Object temp = session.getProperty(ISession.LANGUAGE_ID);
         if (temp == null || "".equals(temp)) {
             log.debug("handle language is null");
             Object request = handle.getSession().getProperty("request");
