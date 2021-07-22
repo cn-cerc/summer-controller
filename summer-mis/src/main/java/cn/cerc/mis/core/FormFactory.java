@@ -49,6 +49,10 @@ public class FormFactory implements ApplicationContextAware {
                 return null;
             }
             form.setSession(session);
+            // 设备讯息，此操作需要在获取token前执行，因为setRequest方法中，会把req中的sid，存到session中，否则req.getSession()会取不到token
+            // 防止.net客户端调用时，req已经变成一个新的对象
+            AppClient client = new AppClient();
+            client.setRequest(req);
 
             String token = (String) req.getSession().getAttribute(ISession.TOKEN);
             session.loadToken(token);
@@ -57,9 +61,6 @@ public class FormFactory implements ApplicationContextAware {
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
             req.getSession().setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
-            // 设备讯息
-            AppClient client = new AppClient();
-            client.setRequest(req);
             req.setAttribute("_showMenu_", !AppClient.ee.equals(client.getDevice()));
 
             form.setClient(client);
