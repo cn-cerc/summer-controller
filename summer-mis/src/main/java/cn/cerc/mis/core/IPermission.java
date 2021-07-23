@@ -9,20 +9,23 @@ public interface IPermission {
     default boolean isSecurityDevice() {
         return passDevice();
     }
-    
+
     @Deprecated
     default boolean passDevice() {
         return false;
     }
-	
+
     // 匿名可用否
     default boolean allowGuestUser() {
         return logon();
     }
-    
+
+    /**
+     * 已取消，请改为使用 allowGuestUser
+     */
     @Deprecated
     default boolean logon() {
         return false;
     }
-	
+
 }
