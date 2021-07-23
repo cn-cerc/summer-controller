@@ -22,7 +22,7 @@ import cn.cerc.mis.SummerMIS;
 public class FormFactory implements ApplicationContextAware {
     private static final Logger log = LoggerFactory.getLogger(FormFactory.class);
     // FIXME: 此处资源文件引用特殊，需要连动所有项目一起才能修改
-    private static final ClassResource res = new ClassResource(Application.class, SummerMIS.ID);
+    private static final ClassResource res = new ClassResource(FormFactory.class, SummerMIS.ID);
     private ApplicationContext context;
 
     @Override
