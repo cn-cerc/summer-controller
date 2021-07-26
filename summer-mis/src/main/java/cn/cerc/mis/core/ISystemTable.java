@@ -18,8 +18,8 @@ public interface ISystemTable {
     // 用户自定义菜单
     String getUserMenus(); // "UserMenu";
 
-    // 用户资料表
-    String getUserInfo(); // "Account";
+    // 公司别用户资料表
+    String getUserInfo(); // "s_userinfo";
 
     // 用户参数表
     String getUserOptions(); // "UserOptions";
