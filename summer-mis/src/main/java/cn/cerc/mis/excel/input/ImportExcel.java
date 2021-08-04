@@ -1,5 +1,23 @@
 package cn.cerc.mis.excel.input;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.Record;
@@ -10,20 +28,11 @@ import jxl.CellType;
 import jxl.NumberCell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.read.biff.BiffException;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-import org.apache.commons.fileupload.FileItem;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-import java.util.List;
 
 public class ImportExcel extends ImportExcelFile {
     private static final ClassResource res = new ClassResource(ImportExcel.class, SummerMIS.ID);
@@ -133,6 +142,51 @@ public class ImportExcel extends ImportExcelFile {
 
     public DataSet readFileData(Record record) throws Exception {
         FileItem file = this.getFile(record);
+        DataSet ds = new DataSet();
+        if (file.getName().endsWith(".csv")) {
+            readFileFromCSV(file, ds);
+        } else {
+            readFileFromXLS(file, ds);
+        }
+        return ds;
+    }
+
+    private void readFileFromCSV(FileItem file, DataSet ds) throws UnsupportedEncodingException, IOException {
+        InputStreamReader inre = new InputStreamReader(file.getInputStream(), "GBK");
+        BufferedReader reader = new BufferedReader(inre);
+        String readLine;
+        int i = 0;
+        String[] fields = null;
+        while ((readLine = reader.readLine()) != null) {
+            if (i == 0) {
+                fields = readLine.split(",");
+            } else {
+                ds.append();
+                // 即 \G(?:^|,)(?:"([^"]*+(?:""[^"]*+)*+)"|([^",]*+))，解析CSV
+                String reg = "\\G(?:^|,)(?:\"([^\"]*+(?:\"\"[^\"]*+)*+)\"|([^\",]*+))";
+                Matcher matcherMain = Pattern.compile(reg).matcher("");
+                Matcher matcherQuoto = Pattern.compile("\"\"").matcher("");
+                matcherMain.reset(readLine);
+                List<String> strList = new ArrayList<>();
+                while (matcherMain.find()) {
+                    String field;
+                    if (matcherMain.start(2) >= 0) {
+                        field = matcherMain.group(2);
+                    } else {
+                        field = matcherQuoto.reset(matcherMain.group(1)).replaceAll("\"");
+                    }
+                    strList.add(field);
+                }
+                for (int j = 0; j < strList.size(); j++) {
+                    ds.setField(fields[j], strList.get(j));
+                }
+            }
+            i++;
+        }
+    }
+
+    private void readFileFromXLS(FileItem file, DataSet ds)
+            throws IOException, BiffException, Exception, ColumnValidateException {
         // 获取Excel文件对象
         Workbook rwb = Workbook.getWorkbook(file.getInputStream());
         // 获取文件的指定工作表 默认的第一个
@@ -140,11 +194,11 @@ public class ImportExcel extends ImportExcelFile {
 
         ImportExcelTemplate template = this.getTemplate();
         if (template.getColumns().size() != sheet.getColumns()) {
-            throw new RuntimeException(String.format(res.getString(1, "导入的文件：<b>%s</b>, 其总列数为 %d，而模版总列数为  %d 二者不一致，无法导入！"),
-                    file.getName(), sheet.getColumns(), template.getColumns().size()));
+            throw new RuntimeException(
+                    String.format(res.getString(1, "导入的文件：<b>%s</b>, 其总列数为 %d，而模版总列数为  %d 二者不一致，无法导入！"), file.getName(),
+                            sheet.getColumns(), template.getColumns().size()));
         }
 
-        DataSet ds = new DataSet();
         for (int row = 0; row < sheet.getRows(); row++) {
             if (row == 0) {
                 for (int col = 0; col < sheet.getColumns(); col++) {
@@ -153,8 +207,8 @@ public class ImportExcel extends ImportExcelFile {
                     String title = template.getColumns().get(col).getName();
                     if (!title.equals(value)) {
                         throw new RuntimeException(
-                                String.format(res.getString(2, "导入的文件：<b>%s</b>，其标题第 %d 列为【 %s】, 模版中为【%s】，二者不一致，无法导入！"), file.getName(),
-                                        col + 1, value, title));
+                                String.format(res.getString(2, "导入的文件：<b>%s</b>，其标题第 %d 列为【 %s】, 模版中为【%s】，二者不一致，无法导入！"),
+                                        file.getName(), col + 1, value, title));
                     }
                 }
             } else {
@@ -169,7 +223,8 @@ public class ImportExcel extends ImportExcelFile {
                     }
                     ImportColumn column = template.getColumns().get(col);
                     if (!column.validate(row, col, value)) {
-                        ColumnValidateException err = new ColumnValidateException(String.format(res.getString(3, "其数据不符合模版要求，当前值为：%s"), value));
+                        ColumnValidateException err = new ColumnValidateException(
+                                String.format(res.getString(3, "其数据不符合模版要求，当前值为：%s"), value));
                         err.setTitle(column.getName());
                         err.setValue(value);
                         err.setCol(col);
@@ -185,7 +240,6 @@ public class ImportExcel extends ImportExcelFile {
                 }
             }
         }
-        return ds;
     }
 
     public ImportError getErrorHandle() {
