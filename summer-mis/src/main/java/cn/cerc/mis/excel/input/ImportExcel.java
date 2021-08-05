@@ -152,22 +152,19 @@ public class ImportExcel extends ImportExcelFile {
     }
 
     private void readFileFromCSV(FileItem file, DataSet ds) throws UnsupportedEncodingException, IOException {
-        InputStreamReader inre = new InputStreamReader(file.getInputStream(), "GBK");
-        BufferedReader reader = new BufferedReader(inre);
+        InputStreamReader isr = new InputStreamReader(file.getInputStream(), "GBK");
+        BufferedReader reader = new BufferedReader(isr);
+        // 即 \G(?:^|,)(?:"([^"]*+(?:""[^"]*+)*+)"|([^",]*+))，解析CSV
+        String reg = "\\G(?:^|,)(?:\"([^\"]*+(?:\"\"[^\"]*+)*+)\"|([^\",]*+))";
+        Matcher matcherMain = Pattern.compile(reg).matcher("");
+        Matcher matcherQuoto = Pattern.compile("\"\"").matcher("");
+        List<String> fields = null;
         String readLine;
         int i = 0;
-        String[] fields = null;
         while ((readLine = reader.readLine()) != null) {
+            matcherMain.reset(readLine);
             if (i == 0) {
-                fields = readLine.split(",");
-            } else {
-                ds.append();
-                // 即 \G(?:^|,)(?:"([^"]*+(?:""[^"]*+)*+)"|([^",]*+))，解析CSV
-                String reg = "\\G(?:^|,)(?:\"([^\"]*+(?:\"\"[^\"]*+)*+)\"|([^\",]*+))";
-                Matcher matcherMain = Pattern.compile(reg).matcher("");
-                Matcher matcherQuoto = Pattern.compile("\"\"").matcher("");
-                matcherMain.reset(readLine);
-                List<String> strList = new ArrayList<>();
+                fields = new ArrayList<>();
                 while (matcherMain.find()) {
                     String field;
                     if (matcherMain.start(2) >= 0) {
@@ -175,10 +172,22 @@ public class ImportExcel extends ImportExcelFile {
                     } else {
                         field = matcherQuoto.reset(matcherMain.group(1)).replaceAll("\"");
                     }
-                    strList.add(field);
+                    fields.add(field);
                 }
-                for (int j = 0; j < strList.size(); j++) {
-                    ds.setField(fields[j], strList.get(j));
+            } else {
+                ds.append();
+                List<String> valList = new ArrayList<>();
+                while (matcherMain.find()) {
+                    String value;
+                    if (matcherMain.start(2) >= 0) {
+                        value = matcherMain.group(2);
+                    } else {
+                        value = matcherQuoto.reset(matcherMain.group(1)).replaceAll("\"");
+                    }
+                    valList.add(value);
+                }
+                for (int j = 0; j < valList.size(); j++) {
+                    ds.setField(fields.get(j), valList.get(j));
                 }
             }
             i++;
