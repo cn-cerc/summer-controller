@@ -61,7 +61,7 @@ public class SystemBuffer {
 
         @Override
         public int getMaximumNumber() {
-            return 1;
+            return 2;
         }
 
     }

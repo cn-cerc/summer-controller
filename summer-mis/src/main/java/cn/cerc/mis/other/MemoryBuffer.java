@@ -27,7 +27,6 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
         }
 
         IBufferKey bufferKey = (IBufferKey) bufferType;
-
         if (keys.length < bufferKey.getMinimumNumber()) {
             throw new RuntimeException(res.getString(3, "参数数量不足！"));
         }
@@ -37,21 +36,13 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
         }
 
         StringBuffer result = new StringBuffer();
-
         result.append(bufferKey.getStartingPoint() + bufferType.ordinal());
-
         for (String key : keys) {
             if (key == null)
                 throw new RuntimeException(res.getString(2, "传值有误！"));
             result.append(".").append(key);
         }
-
         return result.toString();
-    }
-
-    @Override
-    public final void close() {
-        this.post();
     }
 
     public static String buildObjectKey(Class<?> class1) {
@@ -73,6 +64,11 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
             throw new RuntimeException("userCode is empty");
         return String.format("%d.%s.%s.%d", SystemBuffer.UserObject.ClassName.ordinal(), class1.getName(), userCode,
                 version);
+    }
+
+    @Override
+    public final void close() {
+        this.post();
     }
 
     public static void main(String[] args) {
