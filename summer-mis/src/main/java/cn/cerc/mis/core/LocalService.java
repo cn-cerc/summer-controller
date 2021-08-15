@@ -71,14 +71,14 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             }
 
             // 制作临时缓存Key
-            String key = MD5.get(this.getUserCode() + this.getService() + getDataIn().getJSON());
+            String key = MD5.get(this.getUserCode() + this.getService() + getDataIn().toJson());
 
             if (bufferRead) {
                 String buffValue = Redis.get(key);
                 if (buffValue != null) {
                     log.debug("read from buffer: " + this.getService());
                     DataSet dataOut = getDataOut();
-                    dataOut.setJSON(buffValue);
+                    dataOut = DataSet.fromJson(buffValue);
                     return dataOut.getState() > 0;
                 }
             }
@@ -108,7 +108,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
-            buff.setField("data", this.getDataIn().getJSON());
+            buff.setField("data", this.getDataIn().toJson());
         }
         return tmp;
     }

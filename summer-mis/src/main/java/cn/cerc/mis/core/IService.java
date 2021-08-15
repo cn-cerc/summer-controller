@@ -10,7 +10,7 @@ public interface IService {
     // 仅用于 Delphi Client 调用
     @Deprecated
     default String getJSON(DataSet dataOut) {
-        return String.format("[%s]", dataOut.getJSON());
+        return String.format("[%s]", dataOut.toJson());
     }
 
 }

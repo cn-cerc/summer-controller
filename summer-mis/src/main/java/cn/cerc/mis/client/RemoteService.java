@@ -62,7 +62,7 @@ public class RemoteService extends Handle implements IServiceProxy {
         String url = server.getRequestUrl(this, this.getService());
         try {
             Curl curl = new Curl();
-            curl.put("dataIn", getDataIn().getJSON());
+            curl.put("dataIn", getDataIn().toJson());
             if (this.server != null && server.getToken(this) != null)
                 curl.put(ISession.TOKEN, this.server.getToken(this));
             log.debug("request: {}", url);
@@ -76,7 +76,7 @@ public class RemoteService extends Handle implements IServiceProxy {
                 getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
                 return false;
             }
-            this.getDataOut().setJSON(response);
+            this.setDataOut(DataSet.fromJson(response));
 
             return getDataOut().getState() > ServiceState.ERROR;
         } catch (Exception e) {
@@ -136,7 +136,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
-            buff.setField("data", this.getDataIn().getJSON());
+            buff.setField("data", this.getDataIn().toJson());
         }
         return tmp;
     }

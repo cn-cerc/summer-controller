@@ -94,7 +94,7 @@ public class ResponseData {
     }
 
     public void setDataOut(DataSet dataOut) {
-        this.data = String.format("[%s]", dataOut.getJSON());
+        this.data = String.format("[%s]", dataOut.toJson());
     }
 
     public IPage setResultMessage(boolean result, String message) {

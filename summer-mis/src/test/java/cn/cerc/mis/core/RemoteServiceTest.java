@@ -40,7 +40,7 @@ public class RemoteServiceTest {
         String dataJson = json.get("dataOut").asText();
         DataSet dataOut = new DataSet();
         if (dataJson != null) {
-            dataOut.setJSON(dataJson);
+            dataOut = DataSet.fromJson(dataJson);
         }
         log.info("{}", dataOut.size());
 
@@ -53,7 +53,7 @@ public class RemoteServiceTest {
         DataSet dataIn = new DataSet();
         dataIn.getHead().setField("CusCorpNo_", "155174");
         dataIn.getHead().setField("MaxRecord_", "3");
-        System.out.println(dataIn.getJSON());
+        System.out.println(dataIn.toJson());
     }
 
 }

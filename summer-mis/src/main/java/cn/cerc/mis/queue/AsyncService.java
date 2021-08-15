@@ -86,10 +86,10 @@ public class AsyncService implements IServiceProxy {
         JsonNode json = mapper.readTree(jsonString);
         this.setService(json.get("service").asText());
         if (json.has("dataOut")) {
-            this.getDataOut().setJSON(json.get("dataOut").asText());
+            this.setDataOut(DataSet.fromJson(json.get("dataOut").asText()));
         }
         if (json.has("dataIn")) {
-            this.getDataIn().setJSON(json.get("dataIn").asText());
+            this.setDataIn(DataSet.fromJson(json.get("dataIn").asText()));
         }
         if (json.has("process")) {
             this.setProcess(MessageProcess.values()[json.get("process").asInt()]);
@@ -166,10 +166,10 @@ public class AsyncService implements IServiceProxy {
 
         content.put("service", this.service);
         if (this.dataIn != null) {
-            content.put("dataIn", dataIn.getJSON());
+            content.put("dataIn", dataIn.toJson());
         }
         if (this.dataOut != null) {
-            content.put("dataOut", dataOut.getJSON());
+            content.put("dataOut", dataOut.toJson());
         }
         content.put("timer", this.timer);
         content.put("process", this.process.ordinal());
@@ -288,5 +288,5 @@ public class AsyncService implements IServiceProxy {
     public String getMsgId() {
         return msgId;
     }
-    
+
 }
