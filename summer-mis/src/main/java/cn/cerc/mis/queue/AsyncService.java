@@ -86,10 +86,10 @@ public class AsyncService implements IServiceProxy {
         JsonNode json = mapper.readTree(jsonString);
         this.setService(json.get("service").asText());
         if (json.has("dataOut")) {
-            this.setDataOut(DataSet.fromJson(json.get("dataOut").asText()));
+            this.getDataOut().fromJson(json.get("dataOut").asText());
         }
         if (json.has("dataIn")) {
-            this.setDataIn(DataSet.fromJson(json.get("dataIn").asText()));
+            this.getDataIn().fromJson(json.get("dataIn").asText());
         }
         if (json.has("process")) {
             this.setProcess(MessageProcess.values()[json.get("process").asInt()]);

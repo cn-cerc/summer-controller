@@ -76,7 +76,7 @@ public class RemoteService extends Handle implements IServiceProxy {
                 getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
                 return false;
             }
-            this.setDataOut(DataSet.fromJson(response));
+            this.getDataOut().fromJson(response);
 
             return getDataOut().getState() > ServiceState.ERROR;
         } catch (Exception e) {
