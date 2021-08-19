@@ -15,7 +15,7 @@ public class PrintQueue {
     private String reportParams = "";
     // 要打印的份数
     private int reportNum = 1;
-    // 打印机账号
+    // 打印机帐号
     private String userCode;
     // 打印行高
     private double reportLineHeight = 1;

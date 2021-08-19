@@ -1,6 +1,5 @@
 package cn.cerc.mis.custom;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,28 +8,23 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import cn.cerc.core.ClassResource;
 import cn.cerc.core.ISession;
 import cn.cerc.core.Record;
 import cn.cerc.core.TDateTime;
-import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.redis.Redis;
-import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.ISystemTable;
 import cn.cerc.mis.core.IUserMessage;
 import cn.cerc.mis.core.SystemBufferType;
-import cn.cerc.mis.message.JPushRecord;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.message.MessageRecord;
-import cn.cerc.mis.queue.AsyncService;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class UserMessageDefault implements IHandle, IUserMessage {
-    private static final ClassResource res = new ClassResource(UserMessageDefault.class, SummerMIS.ID);
+
     @Autowired
     private ISystemTable systemTable;
     private ISession session;
@@ -130,7 +124,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         if (cdsMsg.eof()) {
             return false;
         }
-        
+
         cdsMsg.edit();
         cdsMsg.setField("Content_", content);
         cdsMsg.setField("Process_", process.ordinal());
@@ -145,31 +139,9 @@ public class UserMessageDefault implements IHandle, IUserMessage {
                     cdsMsg.getString("CorpNo_"), cdsMsg.getString("UserCode_"));
             Redis.delete(buffKey);
         }
-        if (!cdsMsg.getString("Subject_").contains(res.getString(1, "月账单明细回算"))) {
-            // 极光推送
-            pushToJiGuang(cdsMsg);
-        }
         return true;
     }
-    
-    private void pushToJiGuang(MysqlQuery cdsMsg) {
-        String subject = cdsMsg.getString("Subject_");
-        if ("".equals(subject)) {
-            subject = Utils.copy(cdsMsg.getString("Content_"), 1, 80);
-        }
-        if (cdsMsg.getInt("Level_") == MessageLevel.Service.ordinal()) {
-            subject += "【" + AsyncService.getProcessTitle(cdsMsg.getInt("Process_")) + "】";
-        }
 
-        String corpNo = cdsMsg.getString("CorpNo_");
-        String userCode = cdsMsg.getString("UserCode_");
-        BigInteger msgId = cdsMsg.getBigInteger("UID_");
-
-        JPushRecord jPush = new JPushRecord(corpNo, userCode, msgId.toString());
-        jPush.setAlert(subject);
-        jPush.send(this);
-    }
-    
     @Override
     public ISession getSession() {
         return session;
