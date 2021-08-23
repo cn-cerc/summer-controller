@@ -32,7 +32,7 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public String getFormView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId,
-            String funcCode, String... pathVariables) {
+                              String funcCode, String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
 
@@ -57,7 +57,7 @@ public class FormFactory implements ApplicationContextAware {
             String token = (String) req.getSession().getAttribute(ISession.TOKEN);
             session.loadToken(token);
 
-            // 取出session中用户设置的语言类型，并写入到request
+            // 取出自定义session中用户设置的语言类型，并写入到request
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
             req.getSession().setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
@@ -102,7 +102,7 @@ public class FormFactory implements ApplicationContextAware {
             }
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
-            switch (deviceCheck.pass(form)) {
+            switch (deviceCheck.pass(form)){
             case PASS:
                 log.debug("{}.{}", formId, funcCode);
                 return form.getView(funcCode);
@@ -151,7 +151,7 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public void outputErrorPage(HttpServletRequest request, HttpServletResponse response, Throwable e) {
-        log.info("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
+        log.info("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
         Throwable err = e.getCause();
         if (err == null) {
             err = e;

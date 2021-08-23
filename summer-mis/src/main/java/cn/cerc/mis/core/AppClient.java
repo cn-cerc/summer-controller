@@ -23,7 +23,7 @@ public class AppClient implements IClient, Serializable {
     private static final Logger log = LoggerFactory.getLogger(AppClient.class);
     private static final long serialVersionUID = -3593077761901636920L;
 
-    public static final String CLIENT_ID = "CLIENTID";
+    public static final String CLIENT_ID = "CLIENTID";// deviceId, machineCode 表示同一个设备码栏位
     public static final String DEVICE = "device";
 
     // 手机
