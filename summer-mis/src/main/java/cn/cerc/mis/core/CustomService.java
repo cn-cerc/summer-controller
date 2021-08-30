@@ -7,11 +7,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gson.Gson;
+
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.other.MemoryBuffer;
+import redis.clients.jedis.Jedis;
 
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
@@ -82,8 +87,19 @@ public abstract class CustomService extends Handle implements IService {
                 if (totalTime > timeout) {
                     String[] tmp = this.getClass().getName().split("\\.");
                     String service = tmp[tmp.length - 1] + "." + this.funcCode;
-                    log.warn("corpNo:{}, userCode:{}, service:{}, tickCount:{}, dataIn:{}", getCorpNo(), getUserCode(),
-                            service, totalTime, dataIn);
+
+                    TimeOut timeOut = new TimeOut();
+                    timeOut.setCorpNo(getCorpNo());
+                    timeOut.setUserCode(getUserCode());
+                    timeOut.setService(service);
+                    timeOut.setTimer(totalTime);
+                    timeOut.setDataIn(dataIn.toJson());
+                    String json = new Gson().toJson(timeOut);
+                    log.warn(json);
+                    try (Jedis redis = JedisFactory.getJedis()) {
+                        String key = MemoryBuffer.buildKey(SystemBuffer.Global.TimeOut);
+                        redis.lpush(key, json);
+                    }
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -180,5 +196,54 @@ public abstract class CustomService extends Handle implements IService {
 //    public final void setProperty(String key, Object value) {
 //        getSession().setProperty(key, value);
 //    }
+
+    public class TimeOut {
+        private String corpNo;
+        private String userCode;
+        private String service;
+        private long timer;
+        private String dataIn;
+
+        public String getCorpNo() {
+            return corpNo;
+        }
+
+        public void setCorpNo(String corpNo) {
+            this.corpNo = corpNo;
+        }
+
+        public String getUserCode() {
+            return userCode;
+        }
+
+        public void setUserCode(String userCode) {
+            this.userCode = userCode;
+        }
+
+        public String getService() {
+            return service;
+        }
+
+        public void setService(String service) {
+            this.service = service;
+        }
+
+        public long getTimer() {
+            return timer;
+        }
+
+        public void setTimer(long timer) {
+            this.timer = timer;
+        }
+
+        public String getDataIn() {
+            return dataIn;
+        }
+
+        public void setDataIn(String dataIn) {
+            this.dataIn = dataIn;
+        }
+
+    }
 
 }

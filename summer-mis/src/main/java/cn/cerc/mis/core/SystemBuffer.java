@@ -28,7 +28,25 @@ public class SystemBuffer {
     }
 
     public enum Global implements IBufferKey {
-        OnlineUsers, CacheReset, ErrorUrl;
+        /**
+         * 在线用户
+         */
+        OnlineUsers,
+
+        /**
+         * 缓存重置
+         */
+        CacheReset,
+
+        /**
+         * 错误网址
+         */
+        ErrorUrl,
+
+        /**
+         * 超时服务
+         */
+        TimeOut;
 
         @Override
         public int getStartingPoint() {
