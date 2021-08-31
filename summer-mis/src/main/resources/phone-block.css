@@ -1292,7 +1292,7 @@ button[role='button_phone_search'] {
     text-align: left;
     border-radius: 0.3em;
     margin: 0 0.5em;
-    word-break: break-all;
+    word-break: break-word;
 }
 
 .block902 div[role='title'] {
