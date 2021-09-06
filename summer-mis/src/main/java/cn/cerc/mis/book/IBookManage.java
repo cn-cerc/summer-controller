@@ -1,6 +1,7 @@
 package cn.cerc.mis.book;
 
 import cn.cerc.core.ClassResource;
+import cn.cerc.core.Datetime;
 import cn.cerc.core.TDateTime;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
@@ -25,10 +26,10 @@ public interface IBookManage extends IHandle {
 
     default void setBookMonth(String beginYearMonth) {
         // 传入日期年月大于当前年月则默认为当前年月
-        if (beginYearMonth.compareTo(TDateTime.now().getYearMonth()) > 0) {
-            beginYearMonth = TDateTime.now().getYearMonth();
+        if (beginYearMonth.compareTo(new Datetime().getYearMonth()) > 0) {
+            beginYearMonth = new Datetime().getYearMonth();
         }
-        setDateRange(TDateTime.fromYearMonth(beginYearMonth), TDateTime.now(), false);
+        setDateRange(new TDateTime(beginYearMonth), TDateTime.now(), false);
     }
 
     // 是否预览变更而不保存

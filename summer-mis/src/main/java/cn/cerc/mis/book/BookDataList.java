@@ -1,16 +1,17 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.TDateTime;
-import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.tools.DurationSection;
-
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import com.google.gson.Gson;
+
+import cn.cerc.core.ClassResource;
+import cn.cerc.core.Datetime.DateType;
+import cn.cerc.core.TDateTime;
+import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.tools.DurationSection;
 
 public class BookDataList implements Iterable<IBookData>, Iterator<IBookData> {
     private static final ClassResource res = new ClassResource(BookDataList.class, SummerMIS.ID);
@@ -62,7 +63,7 @@ public class BookDataList implements Iterable<IBookData>, Iterator<IBookData> {
         items.sort(new Comparator<IBookData>() {
             @Override
             public int compare(IBookData o1, IBookData o2) {
-                return o2.getDate().compareDay(o1.getDate());
+                return o2.getDate().subtract(DateType.Day, o1.getDate());
             }
         });
         this.itemNo = -1;

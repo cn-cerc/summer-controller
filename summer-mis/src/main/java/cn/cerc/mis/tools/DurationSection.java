@@ -1,5 +1,6 @@
 package cn.cerc.mis.tools;
 
+import cn.cerc.core.Datetime;
 import cn.cerc.core.TDateTime;
 
 public class DurationSection {
@@ -13,6 +14,7 @@ public class DurationSection {
     }
 
     public TDateTime getDateFrom() {
+        dateFrom.setOptions(Datetime.yyyyMMdd_HHmmss);
         return dateFrom;
     }
 
@@ -21,6 +23,7 @@ public class DurationSection {
     }
 
     public TDateTime getDateTo() {
+        dateTo.setOptions(Datetime.yyyyMMdd_HHmmss);
         return dateTo;
     }
 

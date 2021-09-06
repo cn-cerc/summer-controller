@@ -1,5 +1,13 @@
 package cn.cerc.mis.excel.output;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.List;
+
+import com.aliyun.oss.model.GeneratePresignedUrlRequest;
+
 import cn.cerc.core.DataSet;
 import cn.cerc.core.LanguageResource;
 import cn.cerc.core.TDate;
@@ -7,7 +15,6 @@ import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.mis.config.ApplicationConfig;
-import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import jxl.write.DateFormat;
 import jxl.write.DateTime;
 import jxl.write.Label;
@@ -16,12 +23,6 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.util.Date;
-import java.util.List;
 
 public class ExcelTemplate {
     private String fileName;
@@ -134,7 +135,7 @@ public class ExcelTemplate {
                 sheet.addCell(item);
             } else {
                 TDate day = (TDate) column.getValue();
-                DateTime item = new DateTime(col, row, day.getData(), new WritableCellFormat(df1));
+                DateTime item = new DateTime(col, row, day.asBaseDate(), new WritableCellFormat(df1));
                 sheet.addCell(item);
             }
         } else if (column instanceof DateTimeColumn) {
@@ -154,7 +155,7 @@ public class ExcelTemplate {
                     }
                     GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(oss.getBucket(), imageUrl);
                     // 设置失效时间
-                    req.setExpiration(TDateTime.now().incMinute(5).getData());
+                    req.setExpiration(TDateTime.now().incMinute(5).asBaseDate());
                     // 压缩方式，长宽80，png格式
                     req.setProcess("image/resize,m_lfit,h_80,w_80/format,png");
                     InputStream inputStream = oss.getClient().generatePresignedUrl(req).openStream();

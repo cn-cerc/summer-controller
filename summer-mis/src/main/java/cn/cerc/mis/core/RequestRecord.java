@@ -1,14 +1,15 @@
 package cn.cerc.mis.core;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+import javax.servlet.http.HttpServletRequest;
+
 import cn.cerc.core.IRecord;
 import cn.cerc.core.TDate;
 import cn.cerc.core.TDateTime;
 
-import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
-public class RequestRecord implements IRecord {
+public class RequestRecord {
     private HttpServletRequest req = null;
 
     public RequestRecord(HttpServletRequest req) {
@@ -23,7 +24,6 @@ public class RequestRecord implements IRecord {
         return !"".equals(val);
     }
 
-    @Override
     public String getString(String field) {
         return req.getParameter(field);
     }
@@ -46,17 +46,14 @@ public class RequestRecord implements IRecord {
         return true;
     }
 
-    @Override
     public int getInt(String field) {
         return Integer.parseInt(req.getParameter(field));
     }
 
-    @Override
     public BigInteger getBigInteger(String field) {
         return new BigInteger(req.getParameter(field));
     }
 
-    @Override
     public BigDecimal getBigDecimal(String field) {
         return new BigDecimal(req.getParameter(field));
     }
@@ -79,7 +76,6 @@ public class RequestRecord implements IRecord {
         return true;
     }
 
-    @Override
     public double getDouble(String field) {
         return Double.parseDouble(req.getParameter(field));
     }
@@ -92,7 +88,6 @@ public class RequestRecord implements IRecord {
         return !"".equals(val);
     }
 
-    @Override
     public boolean getBoolean(String field) {
         return "true".equals(req.getParameter(field));
     }
@@ -102,7 +97,7 @@ public class RequestRecord implements IRecord {
         return !dt.isEmpty();
     }
 
-    @Override
+    @Deprecated
     public TDate getDate(String field) {
         TDateTime result = this.getDateTime(field);
         if (result != null) {
@@ -112,7 +107,6 @@ public class RequestRecord implements IRecord {
         }
     }
 
-    @Override
     public TDateTime getDateTime(String field) {
         String value = req.getParameter(field);
         if (value != null) {
@@ -122,18 +116,15 @@ public class RequestRecord implements IRecord {
         }
     }
 
-    @Override
     public IRecord setField(String field, Object value) {
         req.setAttribute(field, value);
         return null;
     }
 
-    @Override
     public boolean exists(String field) {
         return req.getParameter(field) != null;
     }
 
-    @Override
     public Object getField(String field) {
         return req.getParameter(field);
     }
