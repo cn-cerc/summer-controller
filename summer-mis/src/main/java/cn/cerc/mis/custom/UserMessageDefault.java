@@ -8,9 +8,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
 import cn.cerc.core.Record;
-import cn.cerc.core.TDateTime;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.redis.Redis;
@@ -78,7 +78,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
             cdsMsg.setField("Content_", content);
         }
         cdsMsg.setField("AppUser_", session.getUserCode());
-        cdsMsg.setField("AppDate_", TDateTime.now());
+        cdsMsg.setField("AppDate_", new Datetime());
         // 日志类消息默认为已读
         cdsMsg.setField("Status_", level == MessageLevel.Logger ? 1 : 0);
         cdsMsg.setField("Process_", process == null ? 0 : process.ordinal());

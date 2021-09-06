@@ -5,9 +5,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
-import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
@@ -88,9 +88,9 @@ public class R {
             dsLang.setField("SupportIphone_", false);
             dsLang.setField("Enable_", true);
             dsLang.setField("UpdateUser_", Utils.isEmpty(handle.getUserCode()) ? "admin" : handle.getUserCode());
-            dsLang.setField("UpdateDate_", TDateTime.now());
+            dsLang.setField("UpdateDate_", new Datetime());
             dsLang.setField("CreateUser_", Utils.isEmpty(handle.getUserCode()) ? "admin" : handle.getUserCode());
-            dsLang.setField("CreateDate_", TDateTime.now());
+            dsLang.setField("CreateDate_", new Datetime());
             dsLang.post();
         }
     }
@@ -137,9 +137,9 @@ public class R {
 //            ds.setField("Lang_", language);
 //            ds.setField("Value_", "");
 //            ds.setField("UpdateUser_", handle.getUserCode());
-//            ds.setField("UpdateTime_", TDateTime.now());
+//            ds.setField("UpdateTime_", new Datetime());
 //            ds.setField("CreateUser_", handle.getUserCode());
-//            ds.setField("CreateTime_", TDateTime.now());
+//            ds.setField("CreateTime_", new Datetime());
 //            ds.post();
 //            return text;
 //        }

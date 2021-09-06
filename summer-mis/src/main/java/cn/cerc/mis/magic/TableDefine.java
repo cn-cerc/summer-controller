@@ -113,9 +113,9 @@ public class TableDefine implements Iterable<FieldDefine> {
                     .println(String.format("        query.setField(\"%s\", %s);", field.getCode(), field.getVarCode()));
         }
         print("        query.setField(\"create_user_\", this.getUserCode());");
-        print("        query.setField(\"create_time_\", TDateTime.now());");
+        print("        query.setField(\"create_time_\", new Datetime());");
         print("        query.setField(\"update_user_\", this.getUserCode());");
-        print("        query.setField(\"update_time_\", TDateTime.now());");
+        print("        query.setField(\"update_time_\", new Datetime());");
         print("        query.post();");
         print("");
         print("        getDataOut().getHead().copyValues(query.getCurrent());");
@@ -149,7 +149,7 @@ public class TableDefine implements Iterable<FieldDefine> {
             print("        query.setField(\"%s\", %s);", field.getCode(), field.getVarCode());
         }
         print("        query.setField(\"update_user_\", this.getUserCode());");
-        print("        query.setField(\"update_time_\", TDateTime.now());");
+        print("        query.setField(\"update_time_\", new Datetime());");
         print("        query.post();");
         print("        return true;");
         print("    }");

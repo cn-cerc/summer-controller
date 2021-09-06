@@ -4,9 +4,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
-import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.mysql.MysqlQuery;
@@ -68,9 +68,9 @@ public class DirectoryTest extends Handle {
             dsLang.setField("supportIphone_", false);
             dsLang.setField("enable_", true);
             dsLang.setField("updateUser_", this.getUserCode());
-            dsLang.setField("updateDate_", TDateTime.now());
+            dsLang.setField("updateDate_", new Datetime());
             dsLang.setField("createUser_", this.getUserCode());
-            dsLang.setField("createDate_", TDateTime.now());
+            dsLang.setField("createDate_", new Datetime());
             dsLang.post();
             return 1;
         }

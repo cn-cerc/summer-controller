@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ClassResource;
-import cn.cerc.core.TDateTime;
+import cn.cerc.core.Datetime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
@@ -68,9 +68,9 @@ public class LanguageReaderDefault implements ILanguageReader, IMemoryCache {
                 dsLang.append();
                 dsLang.setField("Lang_", langId);
                 dsLang.setField("Key_", key);
-                dsLang.setField("CreateDate_", TDateTime.now());
+                dsLang.setField("CreateDate_", new Datetime());
                 dsLang.setField("CreateUser_", "admin");
-                dsLang.setField("UpdateDate_", TDateTime.now());
+                dsLang.setField("UpdateDate_", new Datetime());
                 dsLang.setField("UpdateUser_", "admin");
                 dsLang.post();
             } else {

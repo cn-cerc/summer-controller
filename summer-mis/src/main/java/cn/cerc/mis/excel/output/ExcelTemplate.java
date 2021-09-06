@@ -9,9 +9,10 @@ import java.util.List;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 
 import cn.cerc.core.DataSet;
+import cn.cerc.core.Datetime;
+import cn.cerc.core.Datetime.DateType;
 import cn.cerc.core.LanguageResource;
 import cn.cerc.core.TDate;
-import cn.cerc.core.TDateTime;
 import cn.cerc.core.Utils;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.mis.config.ApplicationConfig;
@@ -155,7 +156,7 @@ public class ExcelTemplate {
                     }
                     GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(oss.getBucket(), imageUrl);
                     // 设置失效时间
-                    req.setExpiration(TDateTime.now().incMinute(5).asBaseDate());
+                    req.setExpiration(new Datetime().inc(DateType.Minute, 5).asBaseDate());
                     // 压缩方式，长宽80，png格式
                     req.setProcess("image/resize,m_lfit,h_80,w_80/format,png");
                     InputStream inputStream = oss.getClient().generatePresignedUrl(req).openStream();

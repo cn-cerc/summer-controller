@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ClassConfig;
-import cn.cerc.core.TDateTime;
+import cn.cerc.core.Datetime;
 import cn.cerc.core.Utils;
 
 public class SmtpServer {
@@ -142,7 +142,7 @@ public class SmtpServer {
         Mail mail = new SmtpServer(prop).createMail("l1091462907@qq.com", "itjun");
 //        mail.addFile("d:\\a.txt");
 //        mail.addFile("d:\\b.txt");
-        mail.send("test mail " + TDateTime.now().toString(), "1");
+        mail.send("test mail " + new Datetime().toString(), "1");
     }
 
     private static void sendQQ() {
@@ -154,6 +154,6 @@ public class SmtpServer {
         prop.setProperty(MAIL_SMTP_DEBUG, "true");
 
         Mail aliyunMail = new SmtpServer(prop).createMail("l1091462907@qq.com", "itjun");
-        aliyunMail.send("test mail " + TDateTime.now().toString(), "1");
+        aliyunMail.send("test mail " + new Datetime().toString(), "1");
     }
 }

@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
 import cn.cerc.core.Record;
-import cn.cerc.core.TDateTime;
 import cn.cerc.mis.client.AutoService;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IUserMessage;
@@ -86,7 +86,7 @@ public class ProcessService extends AbstractTask {
      * 更新队列的消息状态
      */
     private void updateTaskprocess(AsyncService async, String msgId, String subject) {
-        async.setProcessTime(TDateTime.now().toString());
+        async.setProcessTime(new Datetime().toString());
         IUserMessage um = Application.getBean(this, IUserMessage.class);
         if (!um.updateAsyncService(msgId, async.toString(), async.getProcess())) {
             throw new RuntimeException(String.format("msgId %s not find.", msgId));
