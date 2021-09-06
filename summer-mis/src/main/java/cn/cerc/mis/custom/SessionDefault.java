@@ -192,7 +192,7 @@ public class SessionDefault implements ISession {
                     return;
                 }
                 Record record = svr.getDataOut().getHead();
-                buff.setField("LoginTime_", record.getDateTime("LoginTime_"));
+                buff.setField("LoginTime_", record.getDatetime("LoginTime_"));
                 buff.setField("UserID_", record.getString("UserID_"));
                 buff.setField("UserCode_", record.getString("UserCode_"));
                 buff.setField("CorpNo_", record.getString("CorpNo_"));
@@ -205,7 +205,7 @@ public class SessionDefault implements ISession {
 
             if (buff.getBoolean("exists")) {
                 // 将用户信息赋值到句柄
-                params.put(Application.LoginTime, buff.getDateTime("LoginTime_"));
+                params.put(Application.LoginTime, buff.getDatetime("LoginTime_"));
                 params.put(ISession.CORP_NO, buff.getString("CorpNo_"));
                 params.put(Application.UserId, buff.getString("UserID_"));
                 params.put(ISession.USER_CODE, buff.getString("UserCode_"));

@@ -5,6 +5,7 @@ import java.math.BigInteger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cn.cerc.core.Datetime;
 import cn.cerc.core.IRecord;
 import cn.cerc.core.TDate;
 import cn.cerc.core.TDateTime;
@@ -92,9 +93,18 @@ public class RequestRecord {
         return "true".equals(req.getParameter(field));
     }
 
+    public boolean hasDatetime(String field) {
+        return !getDatetime(field).isEmpty();
+    }
+
+    @Deprecated
     public boolean hasDateTime(String field) {
         TDateTime dt = new TDateTime(req.getParameter(field));
         return !dt.isEmpty();
+    }
+
+    public Datetime getDatetime(String field) {
+        return new Datetime(req.getParameter(field));
     }
 
     @Deprecated
@@ -107,6 +117,7 @@ public class RequestRecord {
         }
     }
 
+    @Deprecated
     public TDateTime getDateTime(String field) {
         String value = req.getParameter(field);
         if (value != null) {

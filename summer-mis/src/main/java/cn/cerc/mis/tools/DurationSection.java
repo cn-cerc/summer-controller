@@ -1,33 +1,32 @@
 package cn.cerc.mis.tools;
 
 import cn.cerc.core.Datetime;
-import cn.cerc.core.TDateTime;
 
 public class DurationSection {
-    private TDateTime dateFrom;
-    private TDateTime dateTo;
+    private Datetime dateFrom;
+    private Datetime dateTo;
 
-    public DurationSection(TDateTime dateFrom, TDateTime dateTo) {
+    public DurationSection(Datetime dateFrom, Datetime dateTo) {
         super();
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
     }
 
-    public TDateTime getDateFrom() {
+    public Datetime getDateFrom() {
         dateFrom.setOptions(Datetime.yyyyMMdd_HHmmss);
         return dateFrom;
     }
 
-    public void setDateFrom(TDateTime dateFrom) {
+    public void setDateFrom(Datetime dateFrom) {
         this.dateFrom = dateFrom;
     }
 
-    public TDateTime getDateTo() {
+    public Datetime getDateTo() {
         dateTo.setOptions(Datetime.yyyyMMdd_HHmmss);
         return dateTo;
     }
 
-    public void setDateTo(TDateTime dateTo) {
+    public void setDateTo(Datetime dateTo) {
         this.dateTo = dateTo;
     }
 

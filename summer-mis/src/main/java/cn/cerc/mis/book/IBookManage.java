@@ -2,7 +2,6 @@ package cn.cerc.mis.book;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.Datetime;
-import cn.cerc.core.TDateTime;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 
@@ -13,11 +12,11 @@ public interface IBookManage extends IHandle {
     boolean isBatchMode();
 
     // 设置过帐日期范围，在用于回算时令 force=false, 在用于查询或超过2个月的记录要进行过帐时，令fore=true
-    void setDateRange(TDateTime beginDate, TDateTime endDate, boolean forceExecute);
+    void setDateRange(Datetime beginDate, Datetime endDate, boolean forceExecute);
 
     // 取得回算年月
     default String getBookMonth() {
-        TDateTime dateFrom = getDateFrom();
+        Datetime dateFrom = getDateFrom();
         if (dateFrom == null) {
             throw new RuntimeException(res.getString(1, "帐本年月不允许为空！"));
         }
@@ -29,7 +28,7 @@ public interface IBookManage extends IHandle {
         if (beginYearMonth.compareTo(new Datetime().getYearMonth()) > 0) {
             beginYearMonth = new Datetime().getYearMonth();
         }
-        setDateRange(new TDateTime(beginYearMonth), TDateTime.now(), false);
+        setDateRange(new Datetime(beginYearMonth), new Datetime(), false);
     }
 
     // 是否预览变更而不保存
@@ -39,10 +38,10 @@ public interface IBookManage extends IHandle {
     String getPartCode();
 
     // 取得开始日期
-    TDateTime getDateFrom();
+    Datetime getDateFrom();
 
     // 取得结束日期
-    TDateTime getDateTo();
+    Datetime getDateTo();
 
     // 取得期初年月
     String getInitMonth();

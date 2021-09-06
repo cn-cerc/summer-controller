@@ -1,9 +1,9 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.core.TDateTime;
+import cn.cerc.core.Datetime;
 
 public interface IBookData {
-    TDateTime getDate();
+    Datetime getDate();
 
     boolean check();
 }

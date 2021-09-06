@@ -1,16 +1,17 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.core.TDateTime;
+import cn.cerc.core.Datetime;
+import cn.cerc.core.Datetime.DateType;
 
 public class VirtualData implements IBookData {
-    private TDateTime date;
+    private Datetime date;
     private IBook book;
     private IBookData bookData;
 
     public VirtualData(IBook book, IBookData bookData, int month) {
         this.book = book;
         this.bookData = bookData;
-        this.date = bookData.getDate().incMonth(month).monthBof();
+        this.date = bookData.getDate().inc(DateType.Month, month).toMonthBof();
     }
 
     public IBookData getBookData() {
@@ -22,7 +23,7 @@ public class VirtualData implements IBookData {
     }
 
     @Override
-    public TDateTime getDate() {
+    public Datetime getDate() {
         return date;
     }
 

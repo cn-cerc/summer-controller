@@ -8,8 +8,8 @@ import java.util.List;
 import com.google.gson.Gson;
 
 import cn.cerc.core.ClassResource;
+import cn.cerc.core.Datetime;
 import cn.cerc.core.Datetime.DateType;
-import cn.cerc.core.TDateTime;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.tools.DurationSection;
 
@@ -34,8 +34,8 @@ public class BookDataList implements Iterable<IBookData>, Iterator<IBookData> {
     }
 
     public void check(IBookData data) {
-        TDateTime dateFrom = section.getDateFrom();
-        TDateTime dateTo = section.getDateTo();
+        Datetime dateFrom = section.getDateFrom();
+        Datetime dateTo = section.getDateTo();
         String s1 = dateFrom.getDate();
         String s2 = dateTo.getDate();
         String s3 = data.getDate().getDate();
@@ -50,11 +50,11 @@ public class BookDataList implements Iterable<IBookData>, Iterator<IBookData> {
         }
     }
 
-    public TDateTime getDateFrom() {
+    public Datetime getDateFrom() {
         return section.getDateFrom();
     }
 
-    public TDateTime getDateTo() {
+    public Datetime getDateTo() {
         return section.getDateTo();
     }
 
