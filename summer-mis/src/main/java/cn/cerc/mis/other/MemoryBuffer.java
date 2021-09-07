@@ -35,7 +35,7 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
             throw new RuntimeException(res.getString(4, "参数数量过多！"));
         }
 
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append(bufferKey.getStartingPoint() + bufferType.ordinal());
         for (String key : keys) {
             if (key == null)
