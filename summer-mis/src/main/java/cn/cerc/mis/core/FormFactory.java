@@ -90,9 +90,7 @@ public class FormFactory implements ApplicationContextAware {
             // 权限检查
             if (!Application.getPassport(form).pass(form)) {
                 resp.setContentType("text/html;charset=UTF-8");
-                JsonPage output = new JsonPage(form);
-                output.setResultMessage(false, res.getString(1, "对不起，您没有权限执行此功能！"));
-                output.execute();
+                outputErrorPage(req, resp, new RuntimeException(res.getString(1, "对不起，您没有权限执行此功能！")));
                 return null;
             }
 
@@ -120,11 +118,7 @@ public class FormFactory implements ApplicationContextAware {
                 }
             default:
                 resp.setContentType("text/html;charset=UTF-8");
-                JsonPage jsonPage = new JsonPage(form);
-                String deviceId = form.getClient().getId();
-                jsonPage.setResultMessage(false, res.getString(2, "对不起，当前设备被禁止使用！"));
-                jsonPage.put("deviceId", deviceId);
-                jsonPage.execute();
+                outputErrorPage(req, resp, new RuntimeException(res.getString(2, "对不起，当前设备被禁止使用！")));
                 return null;
             }
         } catch (Exception e) {
