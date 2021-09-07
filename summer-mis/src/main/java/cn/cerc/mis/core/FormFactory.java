@@ -17,6 +17,7 @@ import cn.cerc.core.ClassResource;
 import cn.cerc.core.ISession;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.other.PageNotFoundException;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -32,7 +33,7 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public String getFormView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId,
-                              String funcCode, String... pathVariables) {
+            String funcCode, String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
 
@@ -44,10 +45,9 @@ public class FormFactory implements ApplicationContextAware {
             session.setProperty(ISession.REQUEST, req);
 
             IForm form = getForm(req, resp, formId);
-            if (form == null) {
-                outputErrorPage(req, resp, new RuntimeException("error servlet:" + req.getServletPath()));
-                return null;
-            }
+            if (form == null)
+                throw new PageNotFoundException(req.getServletPath());
+
             form.setSession(session);
             // 设备讯息，此操作需要在获取token前执行，因为setRequest方法中，会把req中的sid，存到session中，否则req.getSession()会取不到token
             // 防止.net客户端调用时，req已经变成一个新的对象
@@ -100,7 +100,7 @@ public class FormFactory implements ApplicationContextAware {
             }
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
-            switch (deviceCheck.pass(form)){
+            switch (deviceCheck.pass(form)) {
             case PASS:
                 log.debug("{}.{}", formId, funcCode);
                 return form.getView(funcCode);
@@ -145,7 +145,10 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public void outputErrorPage(HttpServletRequest request, HttpServletResponse response, Throwable e) {
-        log.info("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
+        if (e instanceof PageNotFoundException)
+            log.warn("client ip {}, page not found: {}", AppClient.getClientIP(request), e.getMessage());
+        else
+            log.warn("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
         Throwable err = e.getCause();
         if (err == null) {
             err = e;
