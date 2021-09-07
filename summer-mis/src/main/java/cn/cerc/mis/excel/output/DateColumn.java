@@ -10,6 +10,7 @@ public class DateColumn extends Column {
         super(code, name, width);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Object getValue() {
         return getRecord().hasValue(getCode()) ? getRecord().getDate(getCode()) : "";
