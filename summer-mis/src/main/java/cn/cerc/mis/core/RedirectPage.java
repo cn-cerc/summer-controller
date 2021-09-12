@@ -1,14 +1,15 @@
 package cn.cerc.mis.core;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
 public class RedirectPage implements IPage {
-    protected IForm form;
+    protected IForm origin;
     private String url;
     private Map<String, String> params = new HashMap<>();
 
@@ -18,23 +19,29 @@ public class RedirectPage implements IPage {
 
     public RedirectPage(IForm form) {
         super();
-        this.setForm(form);
+        this.setOrigin(form);
     }
 
     public RedirectPage(IForm form, String url) {
         super();
-        this.setForm(form);
+        this.setOrigin(form);
         this.url = url;
     }
 
     @Override
     public IForm getForm() {
-        return form;
+        return origin;
     }
 
     @Override
-    public void setForm(IForm form) {
-        this.form = form;
+    public RedirectPage setOrigin(Object form) {
+        this.origin = (IForm) form;
+        return this;
+    }
+
+    @Override
+    public IForm getOrigin() {
+        return this.origin;
     }
 
     @Override

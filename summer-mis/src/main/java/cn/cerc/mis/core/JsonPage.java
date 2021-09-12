@@ -1,15 +1,16 @@
 package cn.cerc.mis.core;
 
-import com.google.gson.Gson;
-
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
+import com.google.gson.Gson;
+
 public class JsonPage implements IPage {
-    protected IForm form;
+    protected IForm origin;
     private Object data;
     private Map<String, Object> items = null;
 
@@ -19,24 +20,30 @@ public class JsonPage implements IPage {
 
     public JsonPage(IForm form) {
         super();
-        this.setForm(form);
+        this.setOrigin(form);
     }
 
     @Deprecated
     public JsonPage(IForm form, Object data) {
         super();
-        this.setForm(form);
+        this.setOrigin(form);
         this.data = data;
     }
 
     @Override
     public IForm getForm() {
-        return form;
+        return origin;
     }
 
     @Override
-    public void setForm(IForm form) {
-        this.form = form;
+    public JsonPage setOrigin(Object form) {
+        this.origin = (IForm) form;
+        return this;
+    }
+
+    @Override
+    public IForm getOrigin() {
+        return this.origin;
     }
 
     @Override
