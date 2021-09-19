@@ -2,7 +2,7 @@ package cn.cerc.mis.core;
 
 import java.util.List;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 
@@ -25,7 +25,7 @@ public interface IUserMessage {
     /**
      * 读取待处理的任务：队列服务
      */
-    Record readAsyncService(String msgId);
+    DataRow readAsyncService(String msgId);
     /**
      * 更新任务处理进度：队列服务
      */

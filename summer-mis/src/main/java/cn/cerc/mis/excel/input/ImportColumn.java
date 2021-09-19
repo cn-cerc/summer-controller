@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.input;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 
 public abstract class ImportColumn {
     // 对应数据集字段名
@@ -8,7 +8,7 @@ public abstract class ImportColumn {
     // 对应数据集字段标题
     private String name;
     // 数据源
-    private Record record;
+    private DataRow record;
 
     // 取得数据
     public abstract Object getValue();
@@ -33,11 +33,11 @@ public abstract class ImportColumn {
         this.name = name;
     }
 
-    public Record getRecord() {
+    public DataRow getRecord() {
         return record;
     }
 
-    public void setRecord(Record record) {
+    public void setRecord(DataRow record) {
         this.record = record;
     }
 

@@ -1,7 +1,7 @@
 package cn.cerc.mis.excel.input;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 
 public interface ImportRecord {
-    boolean process(Record rs) throws Exception;
+    boolean process(DataRow rs) throws Exception;
 }

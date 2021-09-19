@@ -2,7 +2,7 @@ package cn.cerc.mis.excel.output;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.config.ApplicationConfig;
 import jxl.write.Label;
@@ -27,8 +27,8 @@ public class BatchFormTemplate extends FormTemplate {
         for (DataSet dataSet : items) {
             this.setDataSet(dataSet);
             this.setFooter((template, sheet1) -> {
-                Record footer = new Record();
-                for (Record item : dataSet) {
+                DataRow footer = new DataRow();
+                for (DataRow item : dataSet) {
                     footer.setField(res.getString(1, "合计数量"), footer.getDouble(res.getString(1, "合计数量")) + item.getDouble("Num_"));
                     footer.setField(res.getString(2, "合计金额"), footer.getDouble(res.getString(2, "合计金额")) + item.getDouble("OriAmount_"));
                 }

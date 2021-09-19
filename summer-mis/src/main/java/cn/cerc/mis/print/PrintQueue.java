@@ -1,6 +1,6 @@
 package cn.cerc.mis.print;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
@@ -54,7 +54,7 @@ public class PrintQueue {
         }
 
         // 设置参数
-        Record headIn = query.getHead();
+        DataRow headIn = query.getHead();
         headIn.setJSON(reportParams);
         headIn.setField("_printerId_", printerId);
         headIn.setField("_reportId_", reportId);

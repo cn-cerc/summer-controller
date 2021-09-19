@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.mis.client.AutoService;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IUserMessage;
@@ -47,7 +47,7 @@ public class ProcessService extends AbstractTask {
     private void processService(String taskId) throws JsonProcessingException {
         // 此任务可能被其它主机抢占
         IUserMessage um = Application.getBean(this, IUserMessage.class);
-        Record ds = um.readAsyncService(taskId);
+        DataRow ds = um.readAsyncService(taskId);
         if (ds == null) {
             return;
         }

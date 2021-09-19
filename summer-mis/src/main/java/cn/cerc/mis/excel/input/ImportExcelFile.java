@@ -1,7 +1,7 @@
 package cn.cerc.mis.excel.input;
 
 import cn.cerc.core.DataSet;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -41,7 +41,7 @@ public class ImportExcelFile {
                 } else {
                     // 文件数据
                     if (fileItem.getSize() > 0) {
-                        Record rs = dataSet.append().getCurrent();
+                        DataRow rs = dataSet.append().getCurrent();
                         rs.setField("_FieldNo", i);
                         rs.setField("_FieldName", fileItem.getFieldName());
                         rs.setField("_ContentType", fileItem.getContentType());
@@ -55,7 +55,7 @@ public class ImportExcelFile {
         return dataSet.size();
     }
 
-    public FileItem getFile(Record record) {
+    public FileItem getFile(DataRow record) {
         int fileNo = record.getInt("_FieldNo");
         return uploadFiles.get(fileNo);
     }

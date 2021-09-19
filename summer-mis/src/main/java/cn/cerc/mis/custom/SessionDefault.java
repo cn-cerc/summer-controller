@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.jiguang.JiguangConnection;
 import cn.cerc.db.mongo.MongoDB;
@@ -191,7 +191,7 @@ public class SessionDefault implements ISession {
                     params.put(ISession.TOKEN, null);
                     return;
                 }
-                Record record = svr.getDataOut().getHead();
+                DataRow record = svr.getDataOut().getHead();
                 buff.setField("LoginTime_", record.getDatetime("LoginTime_"));
                 buff.setField("UserID_", record.getString("UserID_"));
                 buff.setField("UserCode_", record.getString("UserCode_"));

@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
@@ -22,7 +22,7 @@ public class FormTemplate extends ExcelTemplate {
     @Override
     public void output(WritableSheet sheet) throws WriteException {
         // 输出列头
-        Record head = this.getDataSet().getHead();
+        DataRow head = this.getDataSet().getHead();
         if (heads != null) {
             for (int lineNo = 0; lineNo < heads.size(); lineNo++) {
                 Column column = heads.get(lineNo);

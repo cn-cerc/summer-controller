@@ -17,7 +17,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.core.Handle;
 import cn.cerc.mis.excel.output.Column;
 
@@ -116,7 +116,7 @@ public class PrintTemplate extends Handle {
         // 表格内容行数的填充
         dataSet.first();
         while (dataSet.fetch()) {
-            Record record = dataSet.getCurrent();
+            DataRow record = dataSet.getCurrent();
             for (Column column : this.getColumns()) {
                 String field = column.getCode();
                 pdfTableContentCell.setPhrase(new Paragraph(record.getString(field), f8));

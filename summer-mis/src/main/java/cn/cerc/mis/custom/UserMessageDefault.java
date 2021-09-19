@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.redis.Redis;
@@ -95,7 +95,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
     }
 
     @Override
-    public Record readAsyncService(String msgId) {
+    public DataRow readAsyncService(String msgId) {
         MysqlQuery ds = new MysqlQuery(this);
         ds.add("select * from %s", systemTable.getUserMessages());
         ds.add("where Level_=%s", MessageLevel.Service.ordinal());
@@ -107,7 +107,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
             return null;
         }
 
-        Record result = new Record();
+        DataRow result = new DataRow();
         result.setField("corpNo", ds.getString("CorpNo_"));
         result.setField("userCode", ds.getString("UserCode_"));
         result.setField("subject", ds.getString("Subject_"));

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.DataSet;
 import cn.cerc.core.FieldMeta;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import jxl.Cell;
 import jxl.CellType;
@@ -72,14 +72,14 @@ public abstract class ExcelHelper implements AutoCloseable {
     }
 
     public interface ReadCellEvent {
-        void writeValue(Record ds, Cell cell);
+        void writeValue(DataRow ds, Cell cell);
     }
 
     public void OnReadCell(ReadCellEvent event) {
         this.onReadCell = event;
     }
 
-    protected void readCell(Record ds, int row, int col) {
+    protected void readCell(DataRow ds, int row, int col) {
         Cell cell = getSheet().getCell(col, row);
         if (onReadCell == null) {
             String value = cell.getContents();

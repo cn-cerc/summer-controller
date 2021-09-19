@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.mis.core.Application;
 
 public class SyncDatabase implements IPopProcesser {
@@ -16,8 +16,8 @@ public class SyncDatabase implements IPopProcesser {
         this.queue = queue;
     }
 
-    public void push(ISession session, String tableCode, Record record, SyncOpera opera) {
-        Record rs = new Record();
+    public void push(ISession session, String tableCode, DataRow record, SyncOpera opera) {
+        DataRow rs = new DataRow();
         rs.setField("__table", tableCode);
         rs.setField("__opera", opera.ordinal());
         rs.copyValues(record);
@@ -29,7 +29,7 @@ public class SyncDatabase implements IPopProcesser {
     }
 
     @Override
-    public boolean popRecord(ISession session, Record record, boolean isQueue) {
+    public boolean popRecord(ISession session, DataRow record, boolean isQueue) {
         String tableCode = record.getString("__table");
         int opera = record.getInt("__opera");
         int error = record.getInt("__error");

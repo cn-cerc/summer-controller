@@ -1,10 +1,10 @@
 package cn.cerc.mis.sync;
 
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 
 public interface IPopProcesser {
 
-    boolean popRecord(ISession session, Record record, boolean isQueue);
+    boolean popRecord(ISession session, DataRow record, boolean isQueue);
 
 }

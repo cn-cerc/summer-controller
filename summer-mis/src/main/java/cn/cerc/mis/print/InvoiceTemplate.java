@@ -1,7 +1,7 @@
 package cn.cerc.mis.print;
 
 import cn.cerc.core.ClassResource;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.excel.output.Column;
 
@@ -81,7 +81,7 @@ public class InvoiceTemplate extends PrintTemplate {
         // 表格内容行数的填充
         dataSet.first();
         while (dataSet.fetch()) {
-            Record record = dataSet.getCurrent();
+            DataRow record = dataSet.getCurrent();
             for (Column column : this.getColumns()) {
                 pdfTableContentCell_1.setPhrase(new Phrase(column.getName(), f8));
                 pdfTable.addCell(pdfTableContentCell_1);

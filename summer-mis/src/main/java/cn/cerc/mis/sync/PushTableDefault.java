@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.mysql.MysqlQuery;
 
 public class PushTableDefault implements IPushProcesser {
@@ -29,7 +29,7 @@ public class PushTableDefault implements IPushProcesser {
      * <p>
      */
     @Override
-    public boolean appendRecord(Record record) {
+    public boolean appendRecord(DataRow record) {
         MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
@@ -48,7 +48,7 @@ public class PushTableDefault implements IPushProcesser {
     }
 
     @Override
-    public boolean deleteRecord(Record record) {
+    public boolean deleteRecord(DataRow record) {
         MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
@@ -66,7 +66,7 @@ public class PushTableDefault implements IPushProcesser {
     }
 
     @Override
-    public boolean updateRecord(Record record) {
+    public boolean updateRecord(DataRow record) {
         MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
@@ -86,7 +86,7 @@ public class PushTableDefault implements IPushProcesser {
     }
 
     @Override
-    public boolean resetRecord(Record record) {
+    public boolean resetRecord(DataRow record) {
         MysqlQuery query = new MysqlQuery(this);
         query.add("select * from %s", tableCode);
         query.add("where UID_=%d", record.getInt("UID_"));
@@ -110,19 +110,19 @@ public class PushTableDefault implements IPushProcesser {
     }
 
     @Override
-    public void abortRecord(Record record, SyncOpera opera) {
+    public void abortRecord(DataRow record, SyncOpera opera) {
         log.error("sync {}.{} abort.", tableCode, SyncOpera.getName(opera));
     }
 
-    protected boolean onAppend(Record newRecord) {
+    protected boolean onAppend(DataRow newRecord) {
         return true;
     }
 
-    protected boolean onDelete(Record current) {
+    protected boolean onDelete(DataRow current) {
         return true;
     }
 
-    protected boolean onUpdate(Record current, Record newRecord) {
+    protected boolean onUpdate(DataRow current, DataRow newRecord) {
         return true;
     }
 

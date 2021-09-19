@@ -15,7 +15,7 @@ import javax.swing.JTextField;
 import cn.cerc.core.ClassConfig;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mssql.MssqlServer;
@@ -279,7 +279,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
         }
         for (String key : items.keySet()) {
             DataSet dataIn = items.get(key);
-            Record record = dataIn.getHead();
+            DataRow record = dataIn.getHead();
             int non_unique = record.getInt("Non_unique");
             String keyName = record.getString("Key_name");
             StringBuilder builder3 = new StringBuilder();

@@ -1,18 +1,18 @@
 package cn.cerc.mis.sync;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.core.IHandle;
 
 public interface IPushProcesser extends IHandle {
 
-    boolean appendRecord(Record record);
+    boolean appendRecord(DataRow record);
 
-    boolean deleteRecord(Record record);
+    boolean deleteRecord(DataRow record);
 
-    boolean updateRecord(Record record);
+    boolean updateRecord(DataRow record);
 
-    boolean resetRecord(Record record);
+    boolean resetRecord(DataRow record);
 
-    void abortRecord(Record record, SyncOpera opera);
+    void abortRecord(DataRow record, SyncOpera opera);
 
 }

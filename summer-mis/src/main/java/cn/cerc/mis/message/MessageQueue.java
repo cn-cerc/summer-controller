@@ -2,7 +2,7 @@ package cn.cerc.mis.message;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.queue.QueueDB;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
@@ -63,7 +63,7 @@ public class MessageQueue {
         query.add("select * from %s", QueueDB.MESSAGE);
         query.open();
 
-        Record headIn = query.getHead();
+        DataRow headIn = query.getHead();
         headIn.setField("CorpNo_", sendCorpNo);
         headIn.setField("UserCode_", userCode);
         headIn.setField("Level_", level.ordinal());

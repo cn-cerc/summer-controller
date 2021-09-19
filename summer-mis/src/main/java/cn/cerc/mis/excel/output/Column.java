@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 
 public abstract class Column {
     public static final String LEFT = "left";
@@ -15,7 +15,7 @@ public abstract class Column {
     // 排列方式
     private String align;
     // 数据源
-    private Record record;
+    private DataRow record;
 
     // 标记
     private int tag = 0;
@@ -55,11 +55,11 @@ public abstract class Column {
         return this;
     }
 
-    public Record getRecord() {
+    public DataRow getRecord() {
         return record;
     }
 
-    public void setRecord(Record record) {
+    public void setRecord(DataRow record) {
         this.record = record;
     }
 

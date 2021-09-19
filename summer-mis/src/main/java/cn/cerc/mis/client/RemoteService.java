@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.Handle;
@@ -34,7 +34,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
-            Record headIn = getDataIn().getHead();
+            DataRow headIn = getDataIn().getHead();
             if (args.length % 2 != 0) {
                 throw new RuntimeException(res.getString(1, "传入的参数数量必须为偶数！"));
             }

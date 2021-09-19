@@ -1,17 +1,17 @@
 package cn.cerc.mis.sync;
 
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 
 public class SyncQueueTest implements ISyncServer {
 
     @Override
-    public void push(ISession session, Record record) {
+    public void push(ISession session, DataRow record) {
         System.out.println("push:" + record);
     }
 
     @Override
-    public void repush(ISession session, Record record) {
+    public void repush(ISession session, DataRow record) {
         System.out.println("repush:" + record);
     }
 

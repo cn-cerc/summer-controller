@@ -20,7 +20,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import jxl.Cell;
@@ -140,7 +140,7 @@ public class ImportExcel extends ImportExcelFile {
         return this;
     }
 
-    public DataSet readFileData(Record record) throws Exception {
+    public DataSet readFileData(DataRow record) throws Exception {
         FileItem file = this.getFile(record);
         DataSet ds = new DataSet();
         if (file.getName().endsWith(".csv")) {

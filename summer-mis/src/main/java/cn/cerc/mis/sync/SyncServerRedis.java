@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 import cn.cerc.mis.other.MemoryBuffer;
@@ -34,7 +34,7 @@ public class SyncServerRedis implements ISyncServer {
      * 从左边推入
      */
     @Override
-    public void push(ISession session, Record record) {
+    public void push(ISession session, DataRow record) {
         if (pushFrom == null)
             throw new RuntimeException("pushFrom is null");
         if (pushTo == null)
@@ -51,7 +51,7 @@ public class SyncServerRedis implements ISyncServer {
      * 从右边推入
      */
     @Override
-    public void repush(ISession session, Record record) {
+    public void repush(ISession session, DataRow record) {
         if (popFrom == null)
             throw new RuntimeException("popFrom is null");
         if (popTo == null)
@@ -84,7 +84,7 @@ public class SyncServerRedis implements ISyncServer {
                     return i;
                 }
 
-                Record record = new Record();
+                DataRow record = new DataRow();
                 record.setJSON(data);
                 try {
                     popProcesser.popRecord(session, record, false);

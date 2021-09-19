@@ -2,7 +2,7 @@ package cn.cerc.mis.excel.output;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.mis.SummerMIS;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
@@ -35,7 +35,7 @@ public class BOMTemplate extends ExcelTemplate {
     @Override
     public void output(WritableSheet sheet) throws WriteException {
         // 输出列头
-        Record head = this.getDataSet().getHead();
+        DataRow head = this.getDataSet().getHead();
         if (heads != null) {
             for (int lineNo = 0; lineNo < heads.size(); lineNo++) {
                 Column column = heads.get(lineNo);

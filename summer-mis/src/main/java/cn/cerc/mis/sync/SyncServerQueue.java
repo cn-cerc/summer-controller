@@ -7,7 +7,7 @@ import com.aliyun.mns.client.CloudQueue;
 import com.aliyun.mns.model.Message;
 
 import cn.cerc.core.ISession;
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
@@ -32,7 +32,7 @@ public class SyncServerQueue implements ISyncServer {
     }
 
     @Override
-    public void push(ISession session, Record record) {
+    public void push(ISession session, DataRow record) {
         if (pushFrom == null)
             throw new RuntimeException("pushFrom is null");
         if (pushTo == null)
@@ -51,7 +51,7 @@ public class SyncServerQueue implements ISyncServer {
     }
 
     @Override
-    public void repush(ISession session, Record record) {
+    public void repush(ISession session, DataRow record) {
         throw new RuntimeException("this is repush disabled.");
     }
 
@@ -79,7 +79,7 @@ public class SyncServerQueue implements ISyncServer {
                 continue;
             }
 
-            Record record = new Record();
+            DataRow record = new DataRow();
             record.setJSON(body);
             try {
                 if (!popProcesser.popRecord(session, record, true)) {

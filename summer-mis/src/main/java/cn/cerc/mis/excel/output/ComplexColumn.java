@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.Record;
+import cn.cerc.core.DataRow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class ComplexColumn extends Column {
 
     @Override
     public String getValue() {
-        Record record = this.getRecord();
+        DataRow record = this.getRecord();
         StringBuffer buff = new StringBuffer();
         for (String field : fields) {
             if (record.hasValue(field)) {
