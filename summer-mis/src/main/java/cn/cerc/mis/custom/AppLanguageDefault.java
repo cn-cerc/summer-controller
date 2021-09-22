@@ -14,13 +14,14 @@ import cn.cerc.core.ISession;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.mysql.MysqlQuery;
+import cn.cerc.mis.cache.ISessionCache;
 import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
 
 @Component
 @Scope(WebApplicationContext.SCOPE_SESSION)
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class AppLanguageDefault implements IAppLanguage {
+public class AppLanguageDefault implements IAppLanguage, ISessionCache {
     private static final Logger log = LoggerFactory.getLogger(AppLanguageDefault.class);
     @Autowired
     private ISystemTable systemTable;
@@ -53,6 +54,11 @@ public class AppLanguageDefault implements IAppLanguage {
         }
 
         return result;
+    }
+
+    @Override
+    public void clearCache() {
+        this.items.clear();
     }
 
 }

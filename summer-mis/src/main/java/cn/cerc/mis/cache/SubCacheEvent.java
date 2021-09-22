@@ -7,8 +7,9 @@ import cn.cerc.mis.core.BasicHandle;
 import redis.clients.jedis.JedisPubSub;
 
 public class SubCacheEvent extends JedisPubSub {
+
     private static final Logger log = LoggerFactory.getLogger(SubCacheEvent.class);
-    
+
     @Override
     public void onMessage(String channel, String message) {
         if (!MemoryListener.CacheChannel.equals(channel)) {
