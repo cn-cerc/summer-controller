@@ -95,11 +95,12 @@ public abstract class CustomService extends Handle implements IService {
                     timeOut.setTimer(totalTime);
                     timeOut.setDataIn(dataIn.toJson());
                     String json = new Gson().toJson(timeOut);
-                    log.warn(json);
                     try (Jedis redis = JedisFactory.getJedis()) {
                         String key = MemoryBuffer.buildKey(SystemBuffer.Global.TimeOut);
                         redis.lpush(key, json);
                     }
+                    log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
+                            timeOut.getTimer());
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
