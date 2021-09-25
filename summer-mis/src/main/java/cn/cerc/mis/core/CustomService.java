@@ -13,6 +13,7 @@ import cn.cerc.core.ClassResource;
 import cn.cerc.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.other.MemoryBuffer;
@@ -83,12 +84,11 @@ public abstract class CustomService extends Handle implements IService {
                     dataOut.first();
                 }
                 long totalTime = System.currentTimeMillis() - startTime;
-                long timeout = 1000;
-                if (totalTime > timeout) {
+                if (totalTime > 1000) {
                     String[] tmp = this.getClass().getName().split("\\.");
                     String service = tmp[tmp.length - 1] + "." + this.funcCode;
-
                     TimeOut timeOut = new TimeOut();
+                    timeOut.setProject(ServerConfig.getAppName());
                     timeOut.setCorpNo(getCorpNo());
                     timeOut.setUserCode(getUserCode());
                     timeOut.setService(service);
@@ -198,11 +198,20 @@ public abstract class CustomService extends Handle implements IService {
 //    }
 
     public class TimeOut {
+        private String project;
         private String corpNo;
         private String userCode;
         private String service;
         private long timer;
         private String dataIn;
+
+        public String getProject() {
+            return project;
+        }
+
+        public void setProject(String project) {
+            this.project = project;
+        }
 
         public String getCorpNo() {
             return corpNo;
