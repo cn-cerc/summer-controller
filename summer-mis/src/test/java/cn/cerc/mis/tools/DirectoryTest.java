@@ -61,16 +61,16 @@ public class DirectoryTest extends Handle {
         if (dsLang.eof()) {
             System.out.println(text);
             dsLang.append();
-            dsLang.setField("key_", Utils.safeString(text));
-            dsLang.setField("lang_", LanguageResource.LANGUAGE_EN);
-            dsLang.setField("value_", "");
-            dsLang.setField("supportAndroid_", false);
-            dsLang.setField("supportIphone_", false);
-            dsLang.setField("enable_", true);
-            dsLang.setField("updateUser_", this.getUserCode());
-            dsLang.setField("updateDate_", new Datetime());
-            dsLang.setField("createUser_", this.getUserCode());
-            dsLang.setField("createDate_", new Datetime());
+            dsLang.setValue("key_", Utils.safeString(text));
+            dsLang.setValue("lang_", LanguageResource.LANGUAGE_EN);
+            dsLang.setValue("value_", "");
+            dsLang.setValue("supportAndroid_", false);
+            dsLang.setValue("supportIphone_", false);
+            dsLang.setValue("enable_", true);
+            dsLang.setValue("updateUser_", this.getUserCode());
+            dsLang.setValue("updateDate_", new Datetime());
+            dsLang.setValue("createUser_", this.getUserCode());
+            dsLang.setValue("createDate_", new Datetime());
             dsLang.post();
             return 1;
         }

@@ -56,11 +56,11 @@ public class PrintQueue {
         // 设置参数
         DataRow headIn = query.getHead();
         headIn.setJSON(reportParams);
-        headIn.setField("_printerId_", printerId);
-        headIn.setField("_reportId_", reportId);
-        headIn.setField("_reportNum_", reportNum);
-        headIn.setField("_reportLineHeight_", reportLineHeight);
-        headIn.setField("_reportRptHead_", reportRptHead);
+        headIn.setValue("_printerId_", printerId);
+        headIn.setValue("_reportId_", reportId);
+        headIn.setValue("_reportNum_", reportNum);
+        headIn.setValue("_reportLineHeight_", reportLineHeight);
+        headIn.setValue("_reportRptHead_", reportRptHead);
         query.save();
     }
 

@@ -37,16 +37,16 @@ public class ImportExcelFile {
                 if (fileItem.isFormField()) {
                     // 普通数据
                     String val = new String(fileItem.getString().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                    dataSet.getHead().setField(fileItem.getFieldName(), val);
+                    dataSet.getHead().setValue(fileItem.getFieldName(), val);
                 } else {
                     // 文件数据
                     if (fileItem.getSize() > 0) {
                         DataRow rs = dataSet.append().getCurrent();
-                        rs.setField("_FieldNo", i);
-                        rs.setField("_FieldName", fileItem.getFieldName());
-                        rs.setField("_ContentType", fileItem.getContentType());
-                        rs.setField("_FileName", fileItem.getName());
-                        rs.setField("_FileSize", fileItem.getSize());
+                        rs.setValue("_FieldNo", i);
+                        rs.setValue("_FieldName", fileItem.getFieldName());
+                        rs.setValue("_ContentType", fileItem.getContentType());
+                        rs.setValue("_FileName", fileItem.getName());
+                        rs.setValue("_FileSize", fileItem.getSize());
                     }
                 }
             }

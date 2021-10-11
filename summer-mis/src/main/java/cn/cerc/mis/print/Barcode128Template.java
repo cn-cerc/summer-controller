@@ -66,8 +66,8 @@ public class Barcode128Template extends PrintTemplate {
             this.setDataSet(dataSet);
         }
         dataSet.append();
-        dataSet.setField("Code_", barcode);
-        dataSet.setField("Name_", description);
+        dataSet.setValue("Code_", barcode);
+        dataSet.setValue("Name_", description);
         return this;
     }
 

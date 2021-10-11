@@ -192,15 +192,15 @@ public class SessionDefault implements ISession {
                     return;
                 }
                 DataRow record = svr.getDataOut().getHead();
-                buff.setField("LoginTime_", record.getDatetime("LoginTime_"));
-                buff.setField("UserID_", record.getString("UserID_"));
-                buff.setField("UserCode_", record.getString("UserCode_"));
-                buff.setField("CorpNo_", record.getString("CorpNo_"));
-                buff.setField("UserName_", record.getString("UserName_"));
-                buff.setField("RoleCode_", record.getString("RoleCode_"));
-                buff.setField("ProxyUsers_", record.getString("ProxyUsers_"));
-                buff.setField("Language_", record.getString("Language_"));
-                buff.setField("exists", true);
+                buff.setValue("LoginTime_", record.getDatetime("LoginTime_"));
+                buff.setValue("UserID_", record.getString("UserID_"));
+                buff.setValue("UserCode_", record.getString("UserCode_"));
+                buff.setValue("CorpNo_", record.getString("CorpNo_"));
+                buff.setValue("UserName_", record.getString("UserName_"));
+                buff.setValue("RoleCode_", record.getString("RoleCode_"));
+                buff.setValue("ProxyUsers_", record.getString("ProxyUsers_"));
+                buff.setValue("Language_", record.getString("Language_"));
+                buff.setValue("exists", true);
             }
 
             if (buff.getBoolean("exists")) {

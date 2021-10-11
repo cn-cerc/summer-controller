@@ -29,8 +29,8 @@ public class BatchFormTemplate extends FormTemplate {
             this.setFooter((template, sheet1) -> {
                 DataRow footer = new DataRow();
                 for (DataRow item : dataSet) {
-                    footer.setField(res.getString(1, "合计数量"), footer.getDouble(res.getString(1, "合计数量")) + item.getDouble("Num_"));
-                    footer.setField(res.getString(2, "合计金额"), footer.getDouble(res.getString(2, "合计金额")) + item.getDouble("OriAmount_"));
+                    footer.setValue(res.getString(1, "合计数量"), footer.getDouble(res.getString(1, "合计数量")) + item.getDouble("Num_"));
+                    footer.setValue(res.getString(2, "合计金额"), footer.getDouble(res.getString(2, "合计金额")) + item.getDouble("OriAmount_"));
                 }
                 int row = template.getRow();
                 for (String field : footer.getItems().keySet()) {

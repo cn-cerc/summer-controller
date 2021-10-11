@@ -39,7 +39,7 @@ public class RemoteService extends Handle implements IServiceProxy {
                 throw new RuntimeException(res.getString(1, "传入的参数数量必须为偶数！"));
             }
             for (int i = 0; i < args.length; i = i + 2) {
-                headIn.setField(args[i].toString(), args[i + 1]);
+                headIn.setValue(args[i].toString(), args[i + 1]);
             }
         }
 
@@ -136,7 +136,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
-            buff.setField("data", this.getDataIn().toJson());
+            buff.setValue("data", this.getDataIn().toJson());
         }
         return tmp;
     }

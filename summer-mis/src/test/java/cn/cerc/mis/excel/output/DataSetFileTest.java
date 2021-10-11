@@ -17,9 +17,9 @@ public class DataSetFileTest {
     public void testExecute() throws WriteException, IOException {
         DataSet ds = new DataSet();
         ds.append();
-        ds.setField("code", "code1");
+        ds.setValue("code", "code1");
         ds.append();
-        ds.setField("code", "code2");
+        ds.setValue("code", "code2");
 
         String fileName = "d:\\tempfile.xls";
         new DataSetFile(ds).save(fileName);

@@ -18,8 +18,8 @@ public class SyncDatabase implements IPopProcesser {
 
     public void push(ISession session, String tableCode, DataRow record, SyncOpera opera) {
         DataRow rs = new DataRow();
-        rs.setField("__table", tableCode);
-        rs.setField("__opera", opera.ordinal());
+        rs.setValue("__table", tableCode);
+        rs.setValue("__opera", opera.ordinal());
         rs.copyValues(record);
         queue.push(session, rs);
     }
@@ -69,9 +69,9 @@ public class SyncDatabase implements IPopProcesser {
             return result;
 
         if (!result) {
-            record.setField("__table", tableCode);
-            record.setField("__opera", opera);
-            record.setField("__error", error + 1);
+            record.setValue("__table", tableCode);
+            record.setValue("__opera", opera);
+            record.setValue("__error", error + 1);
             if (error < 5) {
                 queue.repush(session, record);
                 log.warn("sync {}.{} fail, times {}, record {}", tableCode, opera, error, record);

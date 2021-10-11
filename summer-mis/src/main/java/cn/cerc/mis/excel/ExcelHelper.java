@@ -87,7 +87,7 @@ public abstract class ExcelHelper implements AutoCloseable {
                 NumberCell numberCell = (NumberCell) cell;
                 value = Utils.formatFloat("0.######", numberCell.getValue());
             }
-            ds.setField(asId(cell.getColumn()), value);
+            ds.setValue(asId(cell.getColumn()), value);
         } else {
             onReadCell.writeValue(ds, cell);
         }

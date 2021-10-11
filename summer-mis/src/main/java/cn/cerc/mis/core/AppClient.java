@@ -58,7 +58,7 @@ public class AppClient implements IClient, Serializable {
         // 如果def有值，且与缓存不同时，更新缓存
         if (def != null && !"".equals(def)) {
             if (tmp == null || !tmp.equals(def)) {
-                buff.setField(key, def);
+                buff.setValue(key, def);
             }
         }
         // 刷新缓存生命值

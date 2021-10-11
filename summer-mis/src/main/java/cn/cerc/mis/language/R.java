@@ -81,16 +81,16 @@ public class R {
         dsLang.open();
         if (dsLang.eof()) {
             dsLang.append();
-            dsLang.setField("Key_", Utils.safeString(text));
-            dsLang.setField("Lang_", language);
-            dsLang.setField("Value_", "");
-            dsLang.setField("SupportAndroid_", false);
-            dsLang.setField("SupportIphone_", false);
-            dsLang.setField("Enable_", true);
-            dsLang.setField("UpdateUser_", Utils.isEmpty(handle.getUserCode()) ? "admin" : handle.getUserCode());
-            dsLang.setField("UpdateDate_", new Datetime());
-            dsLang.setField("CreateUser_", Utils.isEmpty(handle.getUserCode()) ? "admin" : handle.getUserCode());
-            dsLang.setField("CreateDate_", new Datetime());
+            dsLang.setValue("Key_", Utils.safeString(text));
+            dsLang.setValue("Lang_", language);
+            dsLang.setValue("Value_", "");
+            dsLang.setValue("SupportAndroid_", false);
+            dsLang.setValue("SupportIphone_", false);
+            dsLang.setValue("Enable_", true);
+            dsLang.setValue("UpdateUser_", Utils.isEmpty(handle.getUserCode()) ? "admin" : handle.getUserCode());
+            dsLang.setValue("UpdateDate_", new Datetime());
+            dsLang.setValue("CreateUser_", Utils.isEmpty(handle.getUserCode()) ? "admin" : handle.getUserCode());
+            dsLang.setValue("CreateDate_", new Datetime());
             dsLang.post();
         }
     }

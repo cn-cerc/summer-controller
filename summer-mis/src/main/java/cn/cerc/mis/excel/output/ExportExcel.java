@@ -100,7 +100,7 @@ public class ExportExcel implements IHandle {
         this.setTemplateId("ExportMessage");
         DataSet ds = new DataSet();
         ds.append();
-        ds.setField("message_", message);
+        ds.setValue("message_", message);
         this.getTemplate().setDataSet(ds);
         exportDataSet();
     }

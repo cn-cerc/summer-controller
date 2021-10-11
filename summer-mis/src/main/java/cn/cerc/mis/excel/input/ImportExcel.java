@@ -187,7 +187,7 @@ public class ImportExcel extends ImportExcelFile {
                     valList.add(value);
                 }
                 for (int j = 0; j < valList.size(); j++) {
-                    ds.setField(fields.get(j), valList.get(j));
+                    ds.setValue(fields.get(j), valList.get(j));
                 }
             }
             i++;
@@ -242,7 +242,7 @@ public class ImportExcel extends ImportExcelFile {
                             throw err;
                         }
                     }
-                    ds.setField(column.getCode(), value);
+                    ds.setValue(column.getCode(), value);
                 }
                 if (readHandle != null && !readHandle.process(ds.getCurrent())) {
                     break;

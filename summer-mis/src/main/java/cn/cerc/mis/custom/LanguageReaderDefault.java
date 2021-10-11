@@ -66,12 +66,12 @@ public class LanguageReaderDefault implements ILanguageReader, IMemoryCache {
             dsLang.open();
             if (dsLang.eof()) {
                 dsLang.append();
-                dsLang.setField("Lang_", langId);
-                dsLang.setField("Key_", key);
-                dsLang.setField("CreateDate_", new Datetime());
-                dsLang.setField("CreateUser_", "admin");
-                dsLang.setField("UpdateDate_", new Datetime());
-                dsLang.setField("UpdateUser_", "admin");
+                dsLang.setValue("Lang_", langId);
+                dsLang.setValue("Key_", key);
+                dsLang.setValue("CreateDate_", new Datetime());
+                dsLang.setValue("CreateUser_", "admin");
+                dsLang.setValue("UpdateDate_", new Datetime());
+                dsLang.setValue("UpdateUser_", "admin");
                 dsLang.post();
             } else {
                 result = dsLang.getString("Value_");

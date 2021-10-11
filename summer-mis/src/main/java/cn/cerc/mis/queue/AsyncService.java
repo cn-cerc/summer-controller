@@ -111,10 +111,10 @@ public class AsyncService implements IServiceProxy {
                 throw new RuntimeException(res.getString(6, "传入的参数数量必须为偶数！"));
             }
             for (int i = 0; i < args.length; i = i + 2) {
-                headIn.setField(args[i].toString(), args[i + 1]);
+                headIn.setValue(args[i].toString(), args[i + 1]);
             }
         }
-        headIn.setField("token", handle.getSession().getToken());
+        headIn.setValue("token", handle.getSession().getToken());
 
         String subject = this.getSubject();
         if ("".equals(subject)) {
@@ -122,7 +122,7 @@ public class AsyncService implements IServiceProxy {
         }
         this.send(); // 发送到队列服务器
 
-        getDataOut().getHead().setField("_msgId_", msgId);
+        getDataOut().getHead().setValue("_msgId_", msgId);
         if (this.process == MessageProcess.working) {
             // 返回消息的编号插入到阿里云消息队列
             QueueQuery ds = new QueueQuery(handle);
@@ -130,11 +130,11 @@ public class AsyncService implements IServiceProxy {
             ds.add("select * from %s", QueueDB.SUMMER);
             ds.open();
             ds.appendDataSet(this.getDataIn(), true);
-            ds.getHead().setField("_queueId_", msgId);
-            ds.getHead().setField("_service_", this.service);
-            ds.getHead().setField("_corpNo_", this.corpNo);
-            ds.getHead().setField("_userCode_", this.userCode);
-            ds.getHead().setField("_content_", this.toString());
+            ds.getHead().setValue("_queueId_", msgId);
+            ds.getHead().setValue("_service_", this.service);
+            ds.getHead().setValue("_corpNo_", this.corpNo);
+            ds.getHead().setValue("_userCode_", this.userCode);
+            ds.getHead().setValue("_content_", this.toString());
             ds.save();
         }
         return !"".equals(msgId);
@@ -278,11 +278,11 @@ public class AsyncService implements IServiceProxy {
     }
 
     public void setSubject(String subject) {
-        getDataIn().getHead().setField("_subject_", subject);
+        getDataIn().getHead().setValue("_subject_", subject);
     }
 
     public void setSubject(String format, Object... args) {
-        getDataIn().getHead().setField("_subject_", String.format(format, args));
+        getDataIn().getHead().setValue("_subject_", String.format(format, args));
     }
 
     public String getMsgId() {

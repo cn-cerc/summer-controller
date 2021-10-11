@@ -51,8 +51,8 @@ public class RemoteServiceTest {
 
     public static void main(String[] args) {
         DataSet dataIn = new DataSet();
-        dataIn.getHead().setField("CusCorpNo_", "155174");
-        dataIn.getHead().setField("MaxRecord_", "3");
+        dataIn.getHead().setValue("CusCorpNo_", "155174");
+        dataIn.getHead().setValue("MaxRecord_", "3");
         System.out.println(dataIn.toJson());
     }
 

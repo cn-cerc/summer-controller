@@ -64,13 +64,13 @@ public class MessageQueue {
         query.open();
 
         DataRow headIn = query.getHead();
-        headIn.setField("CorpNo_", sendCorpNo);
-        headIn.setField("UserCode_", userCode);
-        headIn.setField("Level_", level.ordinal());
-        headIn.setField("Process_", process);
-        headIn.setField("Subject_", subject);
-        headIn.setField("Content_", content.toString());
-        headIn.setField("Sound_", sound);
+        headIn.setValue("CorpNo_", sendCorpNo);
+        headIn.setValue("UserCode_", userCode);
+        headIn.setValue("Level_", level.ordinal());
+        headIn.setValue("Process_", process);
+        headIn.setValue("Subject_", subject);
+        headIn.setValue("Content_", content.toString());
+        headIn.setValue("Sound_", sound);
         query.save();
     }
 

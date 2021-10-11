@@ -117,7 +117,7 @@ public class ExportChinese {
         for (String text : this.getItems()) {
             if (!ds.locate("cn_", text)) {
                 ds.append();
-                ds.setField("cn_", text);
+                ds.setValue("cn_", text);
                 ds.post();
             }
         }

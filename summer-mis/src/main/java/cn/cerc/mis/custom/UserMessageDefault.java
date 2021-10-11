@@ -70,19 +70,19 @@ public class UserMessageDefault implements IHandle, IUserMessage {
 
         // 保存到数据库
         cdsMsg.append();
-        cdsMsg.setField("CorpNo_", corpNo);
-        cdsMsg.setField("UserCode_", userCode);
-        cdsMsg.setField("Level_", level.ordinal());
-        cdsMsg.setField("Subject_", subject);
+        cdsMsg.setValue("CorpNo_", corpNo);
+        cdsMsg.setValue("UserCode_", userCode);
+        cdsMsg.setValue("Level_", level.ordinal());
+        cdsMsg.setValue("Subject_", subject);
         if (content.length() > 0) {
-            cdsMsg.setField("Content_", content);
+            cdsMsg.setValue("Content_", content);
         }
-        cdsMsg.setField("AppUser_", session.getUserCode());
-        cdsMsg.setField("AppDate_", new Datetime());
+        cdsMsg.setValue("AppUser_", session.getUserCode());
+        cdsMsg.setValue("AppDate_", new Datetime());
         // 日志类消息默认为已读
-        cdsMsg.setField("Status_", level == MessageLevel.Logger ? 1 : 0);
-        cdsMsg.setField("Process_", process == null ? 0 : process.ordinal());
-        cdsMsg.setField("Final_", false);
+        cdsMsg.setValue("Status_", level == MessageLevel.Logger ? 1 : 0);
+        cdsMsg.setValue("Process_", process == null ? 0 : process.ordinal());
+        cdsMsg.setValue("Final_", false);
         cdsMsg.post();
 
         // 清除缓存
@@ -108,10 +108,10 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         }
 
         DataRow result = new DataRow();
-        result.setField("corpNo", ds.getString("CorpNo_"));
-        result.setField("userCode", ds.getString("UserCode_"));
-        result.setField("subject", ds.getString("Subject_"));
-        result.setField("content", ds.getString("Content_"));
+        result.setValue("corpNo", ds.getString("CorpNo_"));
+        result.setValue("userCode", ds.getString("UserCode_"));
+        result.setValue("subject", ds.getString("Subject_"));
+        result.setValue("content", ds.getString("Content_"));
         return result;
     }
 
@@ -126,10 +126,10 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         }
 
         cdsMsg.edit();
-        cdsMsg.setField("Content_", content);
-        cdsMsg.setField("Process_", process.ordinal());
+        cdsMsg.setValue("Content_", content);
+        cdsMsg.setValue("Process_", process.ordinal());
         if (process == MessageProcess.ok) {
-            cdsMsg.setField("Status_", 1);
+            cdsMsg.setValue("Status_", 1);
         }
         cdsMsg.post();
 

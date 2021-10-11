@@ -36,7 +36,7 @@ public class HtmlGrid extends HtmlControl {
         }
         row = head.addRow();
         for (String field : ds.getHead().getFieldDefs().getFields()) {
-            row.addCol(ds.getHead().getField(field));
+            row.addCol(ds.getHead().getValue(field));
         }
 
         // 加入单身
@@ -49,7 +49,7 @@ public class HtmlGrid extends HtmlControl {
         while (ds.fetch()) {
             row = detail.addRow();
             for (String field : ds.getFieldDefs().getFields()) {
-                row.addCol(ds.getField(field));
+                row.addCol(ds.getValue(field));
             }
         }
         sb.append("<!DOCTYPE html>");

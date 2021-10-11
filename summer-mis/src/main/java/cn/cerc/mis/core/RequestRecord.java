@@ -1,16 +1,12 @@
 package cn.cerc.mis.core;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import javax.servlet.http.HttpServletRequest;
 
-import cn.cerc.core.Datetime;
 import cn.cerc.core.IRecord;
 import cn.cerc.core.TDate;
 import cn.cerc.core.TDateTime;
 
-public class RequestRecord {
+public class RequestRecord implements IRecord {
     private HttpServletRequest req = null;
 
     public RequestRecord(HttpServletRequest req) {
@@ -23,10 +19,6 @@ public class RequestRecord {
             return false;
         }
         return !"".equals(val);
-    }
-
-    public String getString(String field) {
-        return req.getParameter(field);
     }
 
     public boolean hasInt(String field) {
@@ -47,18 +39,6 @@ public class RequestRecord {
         return true;
     }
 
-    public int getInt(String field) {
-        return Integer.parseInt(req.getParameter(field));
-    }
-
-    public BigInteger getBigInteger(String field) {
-        return new BigInteger(req.getParameter(field));
-    }
-
-    public BigDecimal getBigDecimal(String field) {
-        return new BigDecimal(req.getParameter(field));
-    }
-
     public boolean hasDouble(String field) {
         String val = req.getParameter(field);
         if (val == null) {
@@ -77,20 +57,12 @@ public class RequestRecord {
         return true;
     }
 
-    public double getDouble(String field) {
-        return Double.parseDouble(req.getParameter(field));
-    }
-
     public boolean hasBoolean(String field) {
         String val = req.getParameter(field);
         if (val == null) {
             return false;
         }
         return !"".equals(val);
-    }
-
-    public boolean getBoolean(String field) {
-        return "true".equals(req.getParameter(field));
     }
 
     public boolean hasDatetime(String field) {
@@ -101,10 +73,6 @@ public class RequestRecord {
     public boolean hasDateTime(String field) {
         TDateTime dt = new TDateTime(req.getParameter(field));
         return !dt.isEmpty();
-    }
-
-    public Datetime getDatetime(String field) {
-        return new Datetime(req.getParameter(field));
     }
 
     @Deprecated
@@ -127,16 +95,29 @@ public class RequestRecord {
         }
     }
 
+    @Deprecated
     public IRecord setField(String field, Object value) {
         req.setAttribute(field, value);
         return null;
     }
 
+    @Override
     public boolean exists(String field) {
         return req.getParameter(field) != null;
     }
 
+    @Deprecated
     public Object getField(String field) {
+        return getValue(field);
+    }
+
+    @Override
+    public Object setValue(String field, Object value) {
+        throw new RuntimeException("not support method: setValue");
+    }
+
+    @Override
+    public String getValue(String field) {
         return req.getParameter(field);
     }
 

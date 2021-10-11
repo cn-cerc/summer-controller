@@ -10,7 +10,7 @@ public class HtmlGridTest {
     public void test_getDataSet() {
         DataSet ds = new DataSet();
         for (int i = 1; i < 3; i++)
-            ds.append().setField("Code", "C00" + i).setField("Name", "N00" + i);
+            ds.append().setValue("Code", "C00" + i).setValue("Name", "N00" + i);
         String str = HtmlGrid.getDataSet(ds);
         assertTrue(!"".equals(str));
     }

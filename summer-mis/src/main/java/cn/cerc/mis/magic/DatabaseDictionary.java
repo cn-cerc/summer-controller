@@ -274,8 +274,8 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                 dataIn = items.get(oldKeyName);
             }
             dataIn.append();
-            dataIn.setField("Column_name", ds.getString("Column_name"));
-            dataIn.setField("Collation", ds.getString("Collation"));
+            dataIn.setValue("Column_name", ds.getString("Column_name"));
+            dataIn.setValue("Collation", ds.getString("Collation"));
         }
         for (String key : items.keySet()) {
             DataSet dataIn = items.get(key);
