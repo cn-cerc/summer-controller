@@ -269,7 +269,8 @@ public abstract class CustomService extends Handle implements IService {
 
         HttpServletRequest request = (HttpServletRequest) this.getSession().getProperty(ISession.REQUEST);
         String sessionId = request.getSession().getId();
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, sessionId, MD5.get(dataIn.toJson()))) {
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, this.getClass().getName(), sessionId,
+                MD5.get(dataIn.toJson()))) {
             if (buff.isNull()) {
                 buff.setValue("beginDate", headIn.getDatetime(fromField));
                 buff.setValue("endDate", headIn.getDatetime(toField).toDayEnd());

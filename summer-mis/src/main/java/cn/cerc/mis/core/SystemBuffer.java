@@ -141,12 +141,12 @@ public class SystemBuffer {
 
         @Override
         public int getMinimumNumber() {
-            return 2;
+            return 3;
         }
 
         @Override
         public int getMaximumNumber() {
-            return 2;
+            return 3;
         }
 
     }
