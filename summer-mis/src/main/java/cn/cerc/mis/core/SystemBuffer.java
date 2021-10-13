@@ -128,4 +128,27 @@ public class SystemBuffer {
         }
     }
 
+    /**
+     * key = sessionId + MD5(dataIn)
+     */
+    public enum Service implements IBufferKey {
+        BigData;
+
+        @Override
+        public int getStartingPoint() {
+            return 50;
+        }
+
+        @Override
+        public int getMinimumNumber() {
+            return 2;
+        }
+
+        @Override
+        public int getMaximumNumber() {
+            return 2;
+        }
+
+    }
+
 }

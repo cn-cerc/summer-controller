@@ -3,6 +3,8 @@ package cn.cerc.mis.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.gson.Gson;
 
 import cn.cerc.core.ClassResource;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
+import cn.cerc.core.Datetime.DateType;
+import cn.cerc.core.ISession;
+import cn.cerc.core.MD5;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServerConfig;
@@ -22,6 +28,7 @@ import redis.clients.jedis.Jedis;
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
     private static final ClassResource res = new ClassResource(CustomService.class, SummerMIS.ID);
+
     @Autowired
     public ISystemTable systemTable;
     protected DataSet dataIn = null; // request
@@ -253,7 +260,39 @@ public abstract class CustomService extends Handle implements IService {
         public void setDataIn(String dataIn) {
             this.dataIn = dataIn;
         }
+    }
 
+    protected boolean enbaleSegmentQuery(String fromField, String toField) {
+        DataRow headIn = this.dataIn.getHead();
+        if (!headIn.getBoolean("segmentQuery"))
+            return false;
+
+        HttpServletRequest request = (HttpServletRequest) this.getSession().getProperty(ISession.REQUEST);
+        String sessionId = request.getSession().getId();
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, sessionId, MD5.get(dataIn.toJson()))) {
+            if (buff.isNull()) {
+                buff.setValue("beginDate", headIn.getDatetime(fromField));
+                buff.setValue("endDate", headIn.getDatetime(toField).toDayEnd());
+                buff.setValue("curBegin", headIn.getDatetime(fromField));
+                buff.setValue("curEnd", headIn.getDatetime(fromField).toDayEnd());
+                headIn.setValue(fromField, buff.getDatetime("beginDate"));
+                headIn.setValue(toField, headIn.getDatetime(fromField).inc(DateType.Month, 1).toDayEnd());
+            } else {
+                headIn.setValue(fromField, buff.getDatetime("curEnd").inc(DateType.Day, 1).toDayStart());
+                headIn.setValue(toField, buff.getDatetime("curEnd").inc(DateType.Month, 1).toDayEnd());
+            }
+
+            if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) > 0) {
+                headIn.setValue(toField, buff.getDatetime("endDate"));
+                buff.clear();
+            } else {
+                buff.setValue("curBegin", headIn.getDatetime(fromField));
+                buff.setValue("curEnd", headIn.getDatetime(toField));
+                buff.post();
+                this.getDataOut().getHead().setValue("_has_next_", true);
+            }
+        }
+        return true;
     }
 
 }
