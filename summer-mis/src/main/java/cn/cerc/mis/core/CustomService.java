@@ -73,8 +73,8 @@ public abstract class CustomService extends Handle implements IService {
                 // 执行具体的服务函数
                 if (mt.getParameterCount() == 0) {
                     int state = (Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
-                    dataOut.setState(state);
-                    dataOut.setMessage(this.getMessage());
+                    getDataOut().setState(state);
+                    getDataOut().setMessage(this.getMessage());
                 } else if (mt.getParameterCount() == 1) {
                     dataOut = (DataSet) mt.invoke(this, dataIn);
                 } else {
