@@ -264,6 +264,10 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     protected boolean enbaleSegmentQuery(String fromField, String toField) {
+        return enbaleSegmentQuery(fromField, toField, DateType.Month);
+    }
+
+    protected boolean enbaleSegmentQuery(String fromField, String toField, DateType dateType) {
         DataRow headIn = this.dataIn.getHead();
         if (!headIn.getBoolean("segmentQuery"))
             return false;
@@ -278,10 +282,10 @@ public abstract class CustomService extends Handle implements IService {
                 buff.setValue("curBegin", headIn.getDatetime(fromField));
                 buff.setValue("curEnd", headIn.getDatetime(fromField).toDayEnd());
                 headIn.setValue(fromField, buff.getDatetime("beginDate"));
-                headIn.setValue(toField, headIn.getDatetime(fromField).inc(DateType.Month, 1).toDayEnd());
+                headIn.setValue(toField, headIn.getDatetime(fromField).inc(dateType, 1).toDayEnd());
             } else {
                 headIn.setValue(fromField, buff.getDatetime("curEnd").inc(DateType.Day, 1).toDayStart());
-                headIn.setValue(toField, buff.getDatetime("curEnd").inc(DateType.Month, 1).toDayEnd());
+                headIn.setValue(toField, buff.getDatetime("curEnd").inc(dateType, 1).toDayEnd());
             }
 
             if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) > 0) {
