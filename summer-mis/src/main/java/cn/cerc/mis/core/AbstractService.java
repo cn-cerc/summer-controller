@@ -9,13 +9,13 @@ import cn.cerc.db.core.IHandle;
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public abstract class AbstractService extends Handle implements IService {
-    protected DataSet dataOut = new DataSet();
     @Autowired
     public ISystemTable systemTable;
 
     @Override
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
+        DataSet dataOut = new DataSet();
         IStatus status = execute(dataIn, dataOut);
         if (dataOut.getState() == ServiceState.ERROR)
             dataOut.setState(status.getState());
