@@ -10,6 +10,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ClassConfig;
+import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
 import cn.cerc.core.Utils;
@@ -174,7 +175,8 @@ public class Application implements ApplicationContextAware {
      * @param serviceCode
      * @throws ClassNotFoundException
      */
-    public static IService getService(IHandle handle, String serviceCode) throws ClassNotFoundException {
+    public static IService getService(IHandle handle, String serviceCode, DataSet dataIn)
+            throws ClassNotFoundException {
         if (Utils.isEmpty(serviceCode))
             throw new ClassNotFoundException("serviceCode is null.");
 
@@ -184,24 +186,21 @@ public class Application implements ApplicationContextAware {
             bean = context.getBean(serviceCode, IService.class);
         } else {
             // 读取注解的配置，并自动将第一个字母改为小写
-            String beanId = serviceCode.split("\\.")[0];
+            String[] params = serviceCode.split("\\.");
+            // 支持指定执行函数
+            if (params.length > 1)
+                dataIn.getHead().setValue("_function_", params[1]);
+
+            String beanId = params[0];
             if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
                 beanId = beanId.substring(0, 1).toLowerCase() + beanId.substring(1);
-            if (context.containsBean(beanId)) {
+            if (context.containsBean(beanId))
                 bean = context.getBean(beanId, IService.class);
-                // 支持指定函数
-                if (bean instanceof CustomService) {
-                    CustomService cs = ((CustomService) bean);
-                    cs.setFuncCode(serviceCode.split("\\.")[1]);
-                }
-            } else {
+            else
                 throw new RuntimeException(String.format("bean %s not find", serviceCode));
-            }
         }
-
-        if (bean instanceof IHandle) {
+        if (bean instanceof IHandle)
             ((IHandle) bean).setSession(handle.getSession());
-        }
         return (IService) bean;
     }
 

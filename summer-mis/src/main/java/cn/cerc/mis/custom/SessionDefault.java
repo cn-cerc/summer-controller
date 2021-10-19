@@ -9,9 +9,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import cn.cerc.core.DataRow;
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
-import cn.cerc.core.DataRow;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.jiguang.JiguangConnection;
 import cn.cerc.db.mongo.MongoDB;
@@ -35,7 +35,7 @@ public class SessionDefault implements ISession {
     private static final Logger log = LoggerFactory.getLogger(SessionDefault.class);
     private Map<String, Object> connections = new HashMap<>();
     private Map<String, Object> params = new HashMap<>();
-    private static int currentSize = 0;
+//    private static int currentSize = 0;
 
     public SessionDefault() {
         params.put(Application.SessionId, "");
@@ -46,10 +46,10 @@ public class SessionDefault implements ISession {
         params.put(ISession.CORP_NO, "");
         params.put(ISession.LANGUAGE_ID, LanguageResource.appLanguage);
         log.debug("new SessionDefault");
-        synchronized (this.getClass()) {
-            ++currentSize;
+//        synchronized (this.getClass()) {
+//            ++currentSize;
 //            log.info("current size: {}", currentSize);
-        }
+//        }
     }
 
     @Override
@@ -163,10 +163,10 @@ public class SessionDefault implements ISession {
             }
         }
         connections.clear();
-        synchronized (this.getClass()) {
-            --currentSize;
+//        synchronized (this.getClass()) {
+//            --currentSize;
 //            log.info("current size: {}", currentSize);
-        }
+//        }
     }
 
     public Map<String, Object> getParams() {

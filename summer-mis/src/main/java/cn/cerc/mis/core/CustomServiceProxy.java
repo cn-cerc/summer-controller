@@ -13,7 +13,7 @@ public abstract class CustomServiceProxy extends Handle {
         super(handle);
     }
 
-    protected final Object getServiceObject() {
+    protected final Object getServiceObject(DataSet dataIn) {
         if (getSession() == null) {
             getDataOut().setMessage("session is null.");
             return null;
@@ -24,7 +24,7 @@ public abstract class CustomServiceProxy extends Handle {
         }
 
         try {
-            return Application.getService(this, getService());
+            return Application.getService(this, getService(), dataIn);
         } catch (ClassNotFoundException e) {
             getDataOut().setMessage(e.getMessage());
             return null;

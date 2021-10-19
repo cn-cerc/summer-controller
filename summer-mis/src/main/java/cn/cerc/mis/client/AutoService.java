@@ -22,7 +22,7 @@ public class AutoService extends CustomServiceProxy {
             throw new RuntimeException("not specified service");
         }
 
-        Object object = getServiceObject();
+        Object object = getServiceObject(getDataIn());
         if (object == null) {
             return false;
         }

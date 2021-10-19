@@ -32,8 +32,8 @@ public class StartServices {
         Application.setContext(context);
         try (BasicHandle handle = new BasicHandle()) {
             try {
-                IService bean = Application.getService(handle, service + "." + method);
                 DataSet params = new DataSet().fromJson(dataIn);
+                IService bean = Application.getService(handle, service + "." + method, params);
                 DataSet dataOut = bean.execute(handle, params);
                 return RecordFilter.execute(params, dataOut).toJson();
             } catch (Exception e) {

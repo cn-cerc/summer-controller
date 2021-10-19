@@ -25,6 +25,7 @@ import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
 
+@SuppressWarnings("deprecation")
 public class ExcelTemplate {
     private String fileName;
     private List<Column> columns;
@@ -135,6 +136,7 @@ public class ExcelTemplate {
                 Label item = new Label(col, row, value.toString());
                 sheet.addCell(item);
             } else {
+                @SuppressWarnings("deprecation")
                 TDate day = (TDate) column.getValue();
                 DateTime item = new DateTime(col, row, day.asBaseDate(), new WritableCellFormat(df1));
                 sheet.addCell(item);

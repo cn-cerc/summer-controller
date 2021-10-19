@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.MD5;
-import cn.cerc.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.redis.JedisFactory;
@@ -30,7 +30,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
         super(handle);
         String pageNo = null;
         HttpServletRequest req = (HttpServletRequest) handle.getSession().getProperty("request");
-        if (req != null) 
+        if (req != null)
             pageNo = req.getParameter("pageno");
 
         // 遇到分页符时，尝试读取缓存
@@ -55,8 +55,8 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
                 headIn.setValue(args[i].toString(), args[i + 1]);
             }
         }
-    
-        Object object = getServiceObject();
+
+        Object object = getServiceObject(getDataIn());
         if (object == null)
             return false;
 
@@ -97,7 +97,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             return getDataOut().getState() > 0;
         } catch (Exception e) {
             Throwable err = e;
-            if (e.getCause() != null) 
+            if (e.getCause() != null)
                 err = e.getCause();
             log.error(err.getMessage(), err);
             getDataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());

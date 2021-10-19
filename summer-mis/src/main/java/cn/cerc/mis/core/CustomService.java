@@ -3,37 +3,24 @@ package cn.cerc.mis.core;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.Gson;
-
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
-import cn.cerc.core.Datetime.DateType;
-import cn.cerc.core.ISession;
-import cn.cerc.core.MD5;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ServerConfig;
-import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.other.MemoryBuffer;
-import redis.clients.jedis.Jedis;
+import cn.cerc.mis.other.TimeOut;
 
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
-    private static final ClassResource res = new ClassResource(CustomService.class, SummerMIS.ID);
 
     @Autowired
     public ISystemTable systemTable;
-    protected DataSet dataIn = null; // request
-    protected DataSet dataOut = null; // response
-    protected String funcCode;
+    // 单例模式下不能使用下述变量
+    private DataSet dataIn = null; // request
+    private DataSet dataOut = null; // response
+    private String funcCode;
 
     public CustomService init(CustomService owner, boolean refData) {
         this.setSession(owner.getSession());
@@ -47,98 +34,80 @@ public abstract class CustomService extends Handle implements IService {
     @Override
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
-        this.setDataIn(dataIn);
+        this.dataIn = dataIn;
+        String funcCode = dataIn.getHead().getString("_function_");
+        this.funcCode = funcCode;
+        DataSet dataOut = new DataSet();
+        this.dataOut = dataOut;
 
-        if (this.funcCode == null)
-            throw new RuntimeException("funcCode is null");
+        if (funcCode == null)
+            return dataOut.setMessage("haed[_function_] is null");
 
         Class<?> self = this.getClass();
         Method mt = null;
         for (Method item : self.getMethods()) {
-            if (item.getName().equals(this.funcCode)) {
+            if (item.getName().equals(funcCode)) {
                 mt = item;
                 break;
             }
         }
+
         if (mt == null) {
-            this.setMessage(
-                    String.format(res.getString(1, "没有找到服务：%s.%s ！"), this.getClass().getName(), this.funcCode));
+            dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
             dataOut.setState(ServiceState.NOT_FIND_SERVICE);
             return dataOut;
         }
 
         try {
             long startTime = System.currentTimeMillis();
-            try {
-                // 执行具体的服务函数
-                if (mt.getParameterCount() == 0) {
-                    int state = (Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
-                    getDataOut().setState(state);
-                    getDataOut().setMessage(this.getMessage());
-                } else if (mt.getParameterCount() == 1) {
-                    dataOut = (DataSet) mt.invoke(this, dataIn);
-                } else {
-                    IStatus result = (IStatus) mt.invoke(this, dataIn, getDataOut());
-                    if (dataOut.getState() == ServiceState.ERROR)
-                        dataOut.setState(result.getState());
-                    if (dataOut.getMessage() == null)
-                        dataOut.setMessage(result.getMessage());
-                }
-                // 防止调用者修改并回写到数据库
-                dataOut.disableStorage();
-                return dataOut;
-            } finally {
-                if (dataOut != null) {
-                    dataOut.first();
-                }
-                long totalTime = System.currentTimeMillis() - startTime;
-                if (totalTime > 1000) {
-                    String[] tmp = this.getClass().getName().split("\\.");
-                    String service = tmp[tmp.length - 1] + "." + this.funcCode;
-                    TimeOut timeOut = new TimeOut();
-                    timeOut.setProject(ServerConfig.getAppName());
-                    timeOut.setCorpNo(getCorpNo());
-                    timeOut.setUserCode(getUserCode());
-                    timeOut.setService(service);
-                    timeOut.setTimer(totalTime);
-                    timeOut.setDataIn(dataIn.toJson());
-                    String json = new Gson().toJson(timeOut);
-                    try (Jedis redis = JedisFactory.getJedis()) {
-                        String key = MemoryBuffer.buildKey(SystemBuffer.Global.TimeOut);
-                        redis.lpush(key, json);
-                    }
-                    log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
-                            timeOut.getTimer());
-                }
+            // 执行具体的服务函数
+            if (mt.getParameterCount() == 0) {
+                int state = (Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
+                dataOut.setState(state);
+            } else if (mt.getParameterCount() == 1) {
+                dataOut = (DataSet) mt.invoke(this, dataIn);
+                this.dataOut = dataOut;
+            } else {
+                IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
+                if (dataOut.getState() == ServiceState.ERROR)
+                    dataOut.setState(result.getState());
+                if (dataOut.getMessage() == null)
+                    dataOut.setMessage(result.getMessage());
             }
+            // 防止调用者修改并回写到数据库
+            dataOut.disableStorage();
+            dataOut.first();
+            //
+            long totalTime = System.currentTimeMillis() - startTime;
+            if (totalTime > 1000) {
+                TimeOut timeOut = new TimeOut(handle, dataIn, funcCode, totalTime);
+                log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
+                        timeOut.getTimer());
+            }
+            //
+            return dataOut;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             Throwable err = e.getCause() != null ? e.getCause() : e;
             String msg = err.getMessage() == null ? "error is null" : err.getMessage();
             if ((err instanceof ServiceException)) {
-                setMessage(msg);
-                getDataOut().setState(ServiceState.ERROR);
-                return dataOut;
+                return new DataSet().setState(ServiceState.ERROR).setMessage(msg);
             } else {
                 log.error(msg, err);
-                setMessage(msg);
-                getDataOut().setState(ServiceState.ERROR);
+                return new DataSet().setState(ServiceState.ERROR).setMessage(msg);
             }
-            return getDataOut();
         }
     }
 
     public final DataSet getDataIn() {
-        if (dataIn == null) {
-            dataIn = new DataSet();
-        }
-        return dataIn;
+        if (this.dataIn == null)
+            this.dataIn = new DataSet();
+        return this.dataIn;
     }
 
     public final DataSet getDataOut() {
-        if (dataOut == null) {
-            dataOut = new DataSet();
-        }
-        return dataOut;
+        if (this.dataOut == null)
+            this.dataOut = new DataSet();
+        return this.dataOut;
     }
 
     public final boolean fail(String message) {
@@ -156,20 +125,12 @@ public abstract class CustomService extends Handle implements IService {
         getDataOut().setMessage(message);
     }
 
+//    public final void setDataIn(DataSet dataIn) {
+//        this.dataIn = dataIn;
+//    }
+
     public final String getFuncCode() {
-        return funcCode;
-    }
-
-    public final void setFuncCode(String funcCode) {
-        this.funcCode = funcCode;
-    }
-
-    public final void setDataIn(DataSet dataIn) {
-        this.dataIn = dataIn;
-    }
-
-    public final void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
+        return this.funcCode;
     }
 
     public final IStatus success() {
@@ -205,100 +166,5 @@ public abstract class CustomService extends Handle implements IService {
 //    public final void setProperty(String key, Object value) {
 //        getSession().setProperty(key, value);
 //    }
-
-    public class TimeOut {
-        private String project;
-        private String corpNo;
-        private String userCode;
-        private String service;
-        private long timer;
-        private String dataIn;
-
-        public String getProject() {
-            return project;
-        }
-
-        public void setProject(String project) {
-            this.project = project;
-        }
-
-        public String getCorpNo() {
-            return corpNo;
-        }
-
-        public void setCorpNo(String corpNo) {
-            this.corpNo = corpNo;
-        }
-
-        public String getUserCode() {
-            return userCode;
-        }
-
-        public void setUserCode(String userCode) {
-            this.userCode = userCode;
-        }
-
-        public String getService() {
-            return service;
-        }
-
-        public void setService(String service) {
-            this.service = service;
-        }
-
-        public long getTimer() {
-            return timer;
-        }
-
-        public void setTimer(long timer) {
-            this.timer = timer;
-        }
-
-        public String getDataIn() {
-            return dataIn;
-        }
-
-        public void setDataIn(String dataIn) {
-            this.dataIn = dataIn;
-        }
-    }
-
-    protected boolean enbaleSegmentQuery(String fromField, String toField) {
-        return enbaleSegmentQuery(fromField, toField, DateType.Month);
-    }
-
-    protected boolean enbaleSegmentQuery(String fromField, String toField, DateType dateType) {
-        DataRow headIn = this.dataIn.getHead();
-        if (!headIn.getBoolean("segmentQuery"))
-            return false;
-
-        HttpServletRequest request = (HttpServletRequest) this.getSession().getProperty(ISession.REQUEST);
-        String sessionId = request.getSession().getId();
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, this.getClass().getName(), sessionId,
-                MD5.get(dataIn.toJson()))) {
-            if (buff.isNull()) {
-                buff.setValue("beginDate", headIn.getDatetime(fromField));
-                buff.setValue("endDate", headIn.getDatetime(toField).toDayEnd());
-                buff.setValue("curBegin", headIn.getDatetime(fromField));
-                buff.setValue("curEnd", headIn.getDatetime(fromField).toDayEnd());
-                headIn.setValue(fromField, buff.getDatetime("beginDate"));
-                headIn.setValue(toField, headIn.getDatetime(fromField).inc(dateType, 1).toDayEnd());
-            } else {
-                headIn.setValue(fromField, buff.getDatetime("curEnd").inc(DateType.Day, 1).toDayStart());
-                headIn.setValue(toField, buff.getDatetime("curEnd").inc(dateType, 1).toDayEnd());
-            }
-
-            if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) > 0) {
-                headIn.setValue(toField, buff.getDatetime("endDate"));
-                buff.clear();
-            } else {
-                buff.setValue("curBegin", headIn.getDatetime(fromField));
-                buff.setValue("curEnd", headIn.getDatetime(toField));
-                buff.post();
-                this.getDataOut().getHead().setValue("_has_next_", true);
-            }
-        }
-        return true;
-    }
 
 }
