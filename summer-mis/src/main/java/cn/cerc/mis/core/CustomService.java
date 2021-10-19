@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.cerc.core.DataSet;
+import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.other.TimeOut;
@@ -36,11 +37,15 @@ public abstract class CustomService extends Handle implements IService {
         this.setSession(handle.getSession());
         this.dataIn = dataIn;
         String funcCode = dataIn.getHead().getString("_function_");
-        this.funcCode = funcCode;
+        if (Utils.isEmpty(funcCode))
+            funcCode = this.funcCode;
+        else
+            this.funcCode = funcCode;
+
         DataSet dataOut = new DataSet();
         this.dataOut = dataOut;
 
-        if (funcCode == null)
+        if (Utils.isEmpty(funcCode))
             return dataOut.setMessage("haed[_function_] is null");
 
         Class<?> self = this.getClass();
@@ -131,6 +136,10 @@ public abstract class CustomService extends Handle implements IService {
 
     public final String getFuncCode() {
         return this.funcCode;
+    }
+
+    public final void setFuncCode(String funcCode) {
+        this.funcCode = funcCode;
     }
 
     public final IStatus success() {
