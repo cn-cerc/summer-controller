@@ -14,5 +14,6 @@
 
     <modules>
         <module>summer-mis</module>
+        <module>summer-boot</module>
     </modules>
 </project>
