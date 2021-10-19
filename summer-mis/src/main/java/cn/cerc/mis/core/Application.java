@@ -197,7 +197,7 @@ public class Application implements ApplicationContextAware {
             if (context.containsBean(beanId))
                 bean = context.getBean(beanId, IService.class);
             else
-                throw new RuntimeException(String.format("bean %s not find", serviceCode));
+                throw new ClassNotFoundException(String.format("bean %s not find", serviceCode));
         }
         if (bean instanceof IHandle)
             ((IHandle) bean).setSession(handle.getSession());
