@@ -36,12 +36,14 @@ public abstract class DataService implements IService {
             return dataOut;
         }
         // 执行具体的服务函数
-        if (method.getParameterCount() != 1)
-            return dataOut.setMessage("service format error");
+        if (method.getParameterCount() != 2) {
+            String str = String.format("service format error, ParameterCount: %s", method.getParameterCount());
+            return dataOut.setMessage(str);
+        }
 
         try {
             long startTime = System.currentTimeMillis();
-            dataOut = (DataSet) method.invoke(this, dataIn);
+            dataOut = (DataSet) method.invoke(this, handle, dataIn);
             // 防止调用者修改并回写到数据库
             dataOut.disableStorage();
             dataOut.first();
