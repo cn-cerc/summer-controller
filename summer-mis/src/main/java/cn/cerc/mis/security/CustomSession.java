@@ -11,6 +11,7 @@ import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.db.queue.QueueServer;
+import cn.cerc.mis.core.Application;
 
 public abstract class CustomSession implements ISession {
 //    private static final Logger log = LoggerFactory.getLogger(CustomSession.class);
@@ -143,7 +144,16 @@ public abstract class CustomSession implements ISession {
     public boolean logon() {
         return this.getProperty(ISession.TOKEN) != null;
     }
-    
+
+    @Override
+    public void loadToken(String token) {
+        SecurityService ws = Application.getBean(SecurityService.class);
+        if (ws != null) {
+            ws.initSession(this, token);
+            this.permissions = ws.getPermissions(this);
+        }
+    }
+
     @Override
     public final String getPermissions() {
         return this.permissions;

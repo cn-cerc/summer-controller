@@ -24,7 +24,7 @@ public class PermissionPolice {
         return permission.startsWith(Permission.GUEST);
     }
 
-    private final boolean checkPassed(String permissions, String request) {
+    public final boolean checkPassed(String permissions, String request) {
         if (Utils.isEmpty(permissions) || Utils.isEmpty(request))
             return true;
 

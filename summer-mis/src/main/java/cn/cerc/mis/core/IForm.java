@@ -1,5 +1,7 @@
 package cn.cerc.mis.core;
 
+import javax.servlet.http.HttpServletRequest;
+
 import cn.cerc.db.core.IHandle;
 
 public interface IForm extends IHandle, IRequestOwner, IResponseOwner, IPermission {
@@ -36,9 +38,15 @@ public interface IForm extends IHandle, IRequestOwner, IResponseOwner, IPermissi
         return getSession().getProperty(key);
     }
 
+    @Override
     @Deprecated
     default void setProperty(String key, Object value) {
         getSession().setProperty(key, value);
+    }
+
+    @Override
+    default HttpServletRequest getRequest() {
+        return IHandle.super.getRequest();
     }
 
 }

@@ -18,6 +18,7 @@ import cn.cerc.mis.core.CenterService;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
 import cn.cerc.mis.security.CustomSession;
+import cn.cerc.mis.security.SecurityService;
 import redis.clients.jedis.Jedis;
 
 @Component
@@ -56,6 +57,13 @@ public class SessionDefault extends CustomSession {
 
     @Override
     public void loadToken(String token) {
+        SecurityService ws = Application.getBean(SecurityService.class);
+        if (ws != null) {
+            ws.initSession(this, token);
+            this.permissions = ws.getPermissions(this);
+            return;
+        }
+
         params.put(TOKEN, token);
         if (token == null)
             return;
