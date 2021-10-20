@@ -15,12 +15,12 @@ public abstract class DataService implements IService {
 
     @Override
     public final DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
-        String funcCode = dataIn.getHead().getString("_function_");
         DataSet dataOut = new DataSet();
-
+        String funcCode = dataIn.getHead().getString("_function_");
         if (funcCode == null)
             return dataOut.setMessage("haed[_function_] is null");
-
+        if ("execute".equals(funcCode))
+            return dataOut.setMessage("haed[_function_] is execute");
         Class<?> self = this.getClass();
         Method method = null;
         for (Method item : self.getMethods()) {
@@ -29,19 +29,16 @@ public abstract class DataService implements IService {
                 break;
             }
         }
-
         if (method == null) {
             dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
-            dataOut.setState(ServiceState.NOT_FIND_SERVICE);
-            return dataOut;
+            return dataOut.setState(ServiceState.NOT_FIND_SERVICE);
         }
-        // 执行具体的服务函数
         if (method.getParameterCount() != 2) {
-            String str = String.format("service format error, ParameterCount: %s", method.getParameterCount());
-            return dataOut.setMessage(str);
+            return dataOut.setMessage(String.format("service error, ParameterCount: %s", method.getParameterCount()));
         }
 
         try {
+            // 执行具体的服务函数
             long startTime = System.currentTimeMillis();
             dataOut = (DataSet) method.invoke(this, handle, dataIn);
             // 防止调用者修改并回写到数据库
@@ -49,11 +46,10 @@ public abstract class DataService implements IService {
             dataOut.first();
             long totalTime = System.currentTimeMillis() - startTime;
             if (totalTime > 1000) {
-                TimeOut timeOut = new TimeOut(handle, dataIn, funcCode, totalTime);
+                TimeOut timeOut = new TimeOut(handle, dataIn, method.getName(), totalTime);
                 log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
                         timeOut.getTimer());
             }
-
             return dataOut;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             Throwable err = e.getCause() != null ? e.getCause() : e;
