@@ -72,6 +72,9 @@ public abstract class CustomService extends Handle implements IService {
             } else if (mt.getParameterCount() == 1) {
                 dataOut = (DataSet) mt.invoke(this, dataIn);
                 this.dataOut = dataOut;
+            } else if (mt.getParameterCount() == 2) {
+                dataOut = (DataSet) mt.invoke(this, handle, dataIn);
+                this.dataOut = dataOut;
             } else {
                 IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
                 if (dataOut.getState() == ServiceState.ERROR)
