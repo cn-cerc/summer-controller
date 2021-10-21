@@ -9,12 +9,14 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
 @Service
 public @interface WebService {
+
+    String value() default "";
 
     String describe();
 
