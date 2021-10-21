@@ -85,7 +85,7 @@ public abstract class CustomService extends Handle implements IService {
             //
             long totalTime = System.currentTimeMillis() - startTime;
             if (totalTime > 1000) {
-                TimeOut timeOut = new TimeOut(handle, dataIn, funcCode, totalTime);
+                TimeOut timeOut = new TimeOut(this, dataIn, funcCode, totalTime);
                 log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
                         timeOut.getTimer());
             }
