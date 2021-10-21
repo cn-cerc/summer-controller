@@ -45,11 +45,6 @@ public class SessionDefault extends CustomSession {
         return corpNo != null && !"".equals(corpNo);
     }
 
-    @Override
-    public final String getCorpNo() {
-        return (String) this.getProperty(ISession.CORP_NO);
-    }
-
     @Deprecated
     public Map<String, Object> getParams() {
         return params;
