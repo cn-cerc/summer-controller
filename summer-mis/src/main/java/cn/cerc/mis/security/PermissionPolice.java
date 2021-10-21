@@ -2,10 +2,12 @@ package cn.cerc.mis.security;
 
 import java.lang.annotation.Annotation;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
+import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.IService;
@@ -16,6 +18,8 @@ import cn.cerc.mis.core.ServiceState;
 
 @Component
 public class PermissionPolice {
+    @Autowired
+    SecurityService security;
 
     private final boolean allowGuestUser(String permission) {
         if (Permission.GUEST.length() > permission.length())
@@ -129,14 +133,18 @@ public class PermissionPolice {
         return false;
     }
 
-    private final String getPermission(Class<?> class1) {
+    private final String getPermission(IHandle handle, Class<?> class1) {
+        boolean find = false;
         String permission = Permission.USERS;
         for (Annotation item : class1.getDeclaredAnnotations()) {
             if (item instanceof Permission) {
                 permission = ((Permission) item).value();
                 if ("".equals(permission))
                     permission = Permission.USERS;
+                find = true;
             }
+            if (!find)
+                break;
             if (item instanceof Operators) {
                 StringBuffer sb = new StringBuffer(permission);
                 sb.append("[");
@@ -151,11 +159,18 @@ public class PermissionPolice {
                 permission = sb.toString();
             }
         }
+        if (!find) {
+            String[] path = class1.getName().split("\\.");
+            KeyValue outParam = new KeyValue(permission).key(path[path.length - 1]);
+            security.loadPermission(handle, outParam);
+            permission = outParam.asString();
+        }
+
         return permission;
     }
 
     public DataSet call(IHandle handle, IService bean, DataSet dataIn) throws ServiceException {
-        String permission = getPermission(bean.getClass());
+        String permission = getPermission(handle, bean.getClass());
         if (this.allowGuestUser(permission))
             return bean.execute(handle, dataIn);
 
