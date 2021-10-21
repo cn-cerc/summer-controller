@@ -59,8 +59,8 @@ public class SessionDefault extends CustomSession {
     public void loadToken(String token) {
         SecurityService ws = Application.getBean(SecurityService.class);
         if (ws != null) {
-            ws.initSession(this, token);
-            this.permissions = ws.getPermissions(this);
+            if (ws != null && ws.initSession(this, token))
+                this.permissions = ws.getPermissions(this);
             return;
         }
 

@@ -148,10 +148,8 @@ public abstract class CustomSession implements ISession {
     @Override
     public void loadToken(String token) {
         SecurityService ws = Application.getBean(SecurityService.class);
-        if (ws != null) {
-            ws.initSession(this, token);
+        if (ws != null && ws.initSession(this, token))
             this.permissions = ws.getPermissions(this);
-        }
     }
 
     @Override
