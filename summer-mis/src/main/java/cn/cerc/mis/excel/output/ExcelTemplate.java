@@ -136,7 +136,6 @@ public class ExcelTemplate {
                 Label item = new Label(col, row, value.toString());
                 sheet.addCell(item);
             } else {
-                @SuppressWarnings("deprecation")
                 TDate day = (TDate) column.getValue();
                 DateTime item = new DateTime(col, row, day.asBaseDate(), new WritableCellFormat(df1));
                 sheet.addCell(item);

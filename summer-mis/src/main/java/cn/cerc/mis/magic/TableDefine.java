@@ -177,6 +177,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         print("    }");
     }
 
+    @SuppressWarnings("unlikely-arg-type")
     public void createCodeSearchService() {
         print("    // 查询服务");
         print("    public boolean search() {");
