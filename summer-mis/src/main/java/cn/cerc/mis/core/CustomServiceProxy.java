@@ -1,6 +1,7 @@
 package cn.cerc.mis.core;
 
 import cn.cerc.core.DataSet;
+import cn.cerc.core.KeyValue;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 
@@ -13,7 +14,7 @@ public abstract class CustomServiceProxy extends Handle {
         super(handle);
     }
 
-    protected final Object getServiceObject(DataSet dataIn) {
+    protected final Object getServiceObject(KeyValue function) {
         if (getSession() == null) {
             getDataOut().setMessage("session is null.");
             return null;
@@ -24,7 +25,7 @@ public abstract class CustomServiceProxy extends Handle {
         }
 
         try {
-            return Application.getService(this, getService(), dataIn);
+            return Application.getService(this, getService(), function);
         } catch (ClassNotFoundException e) {
             getDataOut().setMessage(e.getMessage());
             return null;

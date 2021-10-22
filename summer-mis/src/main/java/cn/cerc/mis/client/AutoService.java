@@ -1,5 +1,6 @@
 package cn.cerc.mis.client;
 
+import cn.cerc.core.KeyValue;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.CustomServiceProxy;
@@ -22,7 +23,8 @@ public class AutoService extends CustomServiceProxy {
             throw new RuntimeException("not specified service");
         }
 
-        Object object = getServiceObject(getDataIn());
+        KeyValue function = new KeyValue("execute").key(getService());
+        Object object = getServiceObject(function);
         if (object == null) {
             return false;
         }
@@ -33,7 +35,7 @@ public class AutoService extends CustomServiceProxy {
             ((IHandle) object).setSession(handle.getSession());
         }
 
-        setDataOut(((IService) object).execute(handle, getDataIn()));
+        setDataOut(((IService) object).call(handle, getDataIn(), function));
         return getDataOut().getState() > 0;
     }
 

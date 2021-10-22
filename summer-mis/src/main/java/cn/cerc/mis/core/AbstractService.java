@@ -12,8 +12,7 @@ public abstract class AbstractService extends Handle implements IService {
     @Autowired
     public ISystemTable systemTable;
 
-    @Override
-    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
+    public final DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         DataSet dataOut = new DataSet();
         IStatus status = execute(dataIn, dataOut);
@@ -25,6 +24,8 @@ public abstract class AbstractService extends Handle implements IService {
         dataOut.disableStorage();
         return dataOut;
     }
+
+    public abstract IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException;
 
     public final IStatus success() {
         return new ServiceStatus(ServiceState.OK);
@@ -49,7 +50,5 @@ public abstract class AbstractService extends Handle implements IService {
         }
         return status;
     }
-
-    public abstract IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException;
 
 }

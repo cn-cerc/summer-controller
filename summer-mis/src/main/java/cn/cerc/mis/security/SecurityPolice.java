@@ -17,7 +17,7 @@ import cn.cerc.mis.core.ServiceException;
 import cn.cerc.mis.core.ServiceState;
 
 @Component
-public class PermissionPolice {
+public class SecurityPolice {
 
     private final boolean allowGuestUser(String permission) {
         if (Permission.GUEST.length() > permission.length())
@@ -141,23 +141,24 @@ public class PermissionPolice {
                     permission = Permission.USERS;
                 find = true;
             }
-            if (!find)
-                break;
-            if (item instanceof Operators) {
-                StringBuffer sb = new StringBuffer(permission);
-                sb.append("[");
-                int count = 0;
-                for (String detail : ((Operators) item).value()) {
-                    if (count > 0)
-                        sb.append(",");
-                    sb.append(detail);
-                    count++;
-                }
-                sb.append("]");
-                permission = sb.toString();
-            }
         }
-        if (!find) {
+        if (find) {
+            for (Annotation item : class1.getDeclaredAnnotations()) {
+                if (item instanceof Operators) {
+                    StringBuffer sb = new StringBuffer(permission);
+                    sb.append("[");
+                    int count = 0;
+                    for (String detail : ((Operators) item).value()) {
+                        if (count > 0)
+                            sb.append(",");
+                        sb.append(detail);
+                        count++;
+                    }
+                    sb.append("]");
+                    permission = sb.toString();
+                }
+            }
+        } else {
             SecurityService security = Application.getBean(SecurityService.class);
             if (security != null) {
                 String[] path = class1.getName().split("\\.");
@@ -170,10 +171,10 @@ public class PermissionPolice {
         return permission;
     }
 
-    public DataSet call(IHandle handle, IService bean, DataSet dataIn) throws ServiceException {
+    public DataSet call(IHandle handle, IService bean, DataSet dataIn, KeyValue function) throws ServiceException {
         String permission = getPermission(handle, bean.getClass());
         if (this.allowGuestUser(permission))
-            return bean.execute(handle, dataIn);
+            return bean.call(handle, dataIn, function);
 
         ISession session = handle.getSession();
         if ((session == null) || (!session.logon()))
@@ -183,7 +184,7 @@ public class PermissionPolice {
         if (!this.checkPassed(handle.getSession().getPermissions(), permission))
             return new DataSet().setMessage("您的执行权限不足").setState(ServiceState.ACCESS_DISABLED);
 
-        return bean.execute(handle, dataIn);
+        return bean.call(handle, dataIn, function);
     }
 
 }

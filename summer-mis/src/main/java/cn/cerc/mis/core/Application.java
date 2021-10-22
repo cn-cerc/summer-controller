@@ -10,8 +10,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ClassConfig;
-import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
+import cn.cerc.core.KeyValue;
 import cn.cerc.core.LanguageResource;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
@@ -175,7 +175,7 @@ public class Application implements ApplicationContextAware {
      * @param serviceCode
      * @throws ClassNotFoundException
      */
-    public static IService getService(IHandle handle, String serviceCode, DataSet dataIn)
+    public static IService getService(IHandle handle, String serviceCode, KeyValue function)
             throws ClassNotFoundException {
         if (Utils.isEmpty(serviceCode))
             throw new ClassNotFoundException("serviceCode is null.");
@@ -189,7 +189,7 @@ public class Application implements ApplicationContextAware {
             String[] params = serviceCode.split("\\.");
             // 支持指定执行函数
             if (params.length > 1)
-                dataIn.getHead().setValue("_function_", params[1]);
+                function.value(params[1]);
 
             String beanId = params[0];
             if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))

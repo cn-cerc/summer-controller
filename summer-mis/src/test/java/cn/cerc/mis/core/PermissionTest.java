@@ -7,14 +7,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import cn.cerc.mis.security.PermissionPolice;
+import cn.cerc.mis.security.SecurityPolice;
 
 public class PermissionTest {
-    private PermissionPolice police;
+    private SecurityPolice police;
 
     @Before
     public void setUp() throws Exception {
-        police = new PermissionPolice();
+        police = new SecurityPolice();
     }
 
     @After
