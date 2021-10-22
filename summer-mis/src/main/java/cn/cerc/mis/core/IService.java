@@ -10,7 +10,6 @@ import cn.cerc.core.DataSet;
 import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.other.TimeOut;
 
 public interface IService {
     static final Logger _log = LoggerFactory.getLogger(IService.class);
@@ -48,17 +47,10 @@ public interface IService {
 
         try {
             // 执行具体的服务函数
-            long startTime = System.currentTimeMillis();
             dataOut = (DataSet) method.invoke(this, handle, dataIn);
             // 防止调用者修改并回写到数据库
             dataOut.disableStorage();
             dataOut.first();
-            long totalTime = System.currentTimeMillis() - startTime;
-            if (totalTime > 1000) {
-                TimeOut timeOut = new TimeOut(handle, dataIn, method.getName(), totalTime);
-                _log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
-                        timeOut.getTimer());
-            }
             return dataOut;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             Throwable err = e.getCause() != null ? e.getCause() : e;
