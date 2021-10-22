@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import cn.cerc.core.DataSet;
+import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
@@ -32,6 +33,17 @@ public abstract class CustomService extends Handle implements IService {
         return this;
     }
 
+    @Override
+    public DataSet call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {
+        if (function == null || Utils.isEmpty(function.asString()))
+            return new DataSet().setMessage("function is null");
+        if ("call".equals(function.asString()))
+            return new DataSet().setMessage("function is call");
+        this.setFuncCode(function.asString());
+        return this.execute(handle, dataIn);
+    }
+
+    
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         this.dataIn = dataIn;
