@@ -19,6 +19,7 @@ public abstract class CustomService extends Handle implements IService {
 
     @Autowired
     public ISystemTable systemTable;
+
     // 单例模式下不能使用下述变量
     private DataSet dataIn = null; // request
     private DataSet dataOut = null; // response
@@ -39,7 +40,8 @@ public abstract class CustomService extends Handle implements IService {
             return new DataSet().setMessage("function is null");
         if ("call".equals(function.asString()))
             return new DataSet().setMessage("function is call");
-        this.setFuncCode(function.asString());
+        if (Utils.isEmpty(this.funcCode))
+            this.setFuncCode(function.asString());
         return this.execute(handle, dataIn);
     }
 

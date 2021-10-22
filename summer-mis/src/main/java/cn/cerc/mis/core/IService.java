@@ -26,10 +26,16 @@ public interface IService {
         Class<?> self = this.getClass();
         Method method = null;
         for (Method item : self.getMethods()) {
-            if (item.getName().equals(funcCode)) {
-                method = item;
-                break;
-            }
+            if (!item.getName().equals(funcCode))
+                continue;
+            if (!item.getReturnType().equals(DataSet.class))
+                continue;
+            if (item.getParameterCount() != 2)
+                continue;
+            if (!item.getParameters()[1].getType().equals(DataSet.class))
+                continue;
+            method = item;
+            break;
         }
         if (method == null) {
             dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
