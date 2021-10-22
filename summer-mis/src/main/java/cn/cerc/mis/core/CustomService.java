@@ -12,7 +12,6 @@ import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.other.TimeOut;
 
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
@@ -77,7 +76,6 @@ public abstract class CustomService extends Handle implements IService {
         }
 
         try {
-            long startTime = System.currentTimeMillis();
             // 执行具体的服务函数
             if (mt.getParameterCount() == 0) {
                 int state = (Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
@@ -100,14 +98,6 @@ public abstract class CustomService extends Handle implements IService {
             // 防止调用者修改并回写到数据库
             dataOut.disableStorage();
             dataOut.first();
-            //
-            long totalTime = System.currentTimeMillis() - startTime;
-            if (totalTime > 1000) {
-                TimeOut timeOut = new TimeOut(this, dataIn, funcCode, totalTime);
-                log.warn("{}, {}, {}, {}", timeOut.getCorpNo(), timeOut.getUserCode(), timeOut.getService(),
-                        timeOut.getTimer());
-            }
-            //
             return dataOut;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             Throwable err = e.getCause() != null ? e.getCause() : e;
@@ -121,50 +111,46 @@ public abstract class CustomService extends Handle implements IService {
         }
     }
 
-    public final DataSet getDataIn() {
+    public  DataSet getDataIn() {
         if (this.dataIn == null)
             this.dataIn = new DataSet();
         return this.dataIn;
     }
 
-    public final DataSet getDataOut() {
+    public  DataSet getDataOut() {
         if (this.dataOut == null)
             this.dataOut = new DataSet();
         return this.dataOut;
     }
 
-    public final boolean fail(String message) {
+    public  boolean fail(String message) {
         getDataOut().setMessage(message);
         return false;
     }
 
-    public final String getMessage() {
+    public  String getMessage() {
         return getDataOut().getMessage();
     }
 
-    public final void setMessage(String message) {
+    public  void setMessage(String message) {
         if (message == null || "".equals(message.trim()))
             return;
         getDataOut().setMessage(message);
     }
 
-//    public final void setDataIn(DataSet dataIn) {
-//        this.dataIn = dataIn;
-//    }
-
-    public final String getFuncCode() {
+    public  String getFuncCode() {
         return this.funcCode;
     }
 
-    public final void setFuncCode(String funcCode) {
+    public  void setFuncCode(String funcCode) {
         this.funcCode = funcCode;
     }
 
-    public final IStatus success() {
+    public  IStatus success() {
         return new ServiceStatus(ServiceState.OK);
     }
 
-    public final IStatus success(String format, Object... args) {
+    public  IStatus success(String format, Object... args) {
         ServiceStatus status = new ServiceStatus(ServiceState.OK);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
@@ -174,7 +160,7 @@ public abstract class CustomService extends Handle implements IService {
         return status;
     }
 
-    public final IStatus fail(String format, Object... args) {
+    public  IStatus fail(String format, Object... args) {
         ServiceStatus status = new ServiceStatus(ServiceState.ERROR);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
@@ -185,12 +171,12 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     @Deprecated
-    public final Object getProperty(String key) {
+    public  Object getProperty(String key) {
         return getSession().getProperty(key);
     }
 
 //    @Deprecated
-//    public final void setProperty(String key, Object value) {
+//    public  void setProperty(String key, Object value) {
 //        getSession().setProperty(key, value);
 //    }
 

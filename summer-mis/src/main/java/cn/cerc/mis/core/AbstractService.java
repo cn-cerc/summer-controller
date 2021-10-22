@@ -12,7 +12,7 @@ public abstract class AbstractService extends Handle implements IService {
     @Autowired
     public ISystemTable systemTable;
 
-    public final DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
+    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         DataSet dataOut = new DataSet();
         IStatus status = execute(dataIn, dataOut);
@@ -27,11 +27,11 @@ public abstract class AbstractService extends Handle implements IService {
 
     public abstract IStatus execute(DataSet dataIn, DataSet dataOut) throws ServiceException;
 
-    public final IStatus success() {
+    public IStatus success() {
         return new ServiceStatus(ServiceState.OK);
     }
 
-    public final IStatus success(String format, Object... args) {
+    public IStatus success(String format, Object... args) {
         ServiceStatus status = new ServiceStatus(ServiceState.OK);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
@@ -41,7 +41,7 @@ public abstract class AbstractService extends Handle implements IService {
         return status;
     }
 
-    public final IStatus fail(String format, Object... args) {
+    public IStatus fail(String format, Object... args) {
         ServiceStatus status = new ServiceStatus(ServiceState.ERROR);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
