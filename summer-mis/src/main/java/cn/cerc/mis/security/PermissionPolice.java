@@ -2,7 +2,6 @@ package cn.cerc.mis.security;
 
 import java.lang.annotation.Annotation;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.core.DataSet;
@@ -10,6 +9,7 @@ import cn.cerc.core.ISession;
 import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.Operators;
 import cn.cerc.mis.core.Permission;
@@ -18,8 +18,6 @@ import cn.cerc.mis.core.ServiceState;
 
 @Component
 public class PermissionPolice {
-    @Autowired
-    SecurityService security;
 
     private final boolean allowGuestUser(String permission) {
         if (Permission.GUEST.length() > permission.length())
@@ -160,10 +158,13 @@ public class PermissionPolice {
             }
         }
         if (!find) {
-            String[] path = class1.getName().split("\\.");
-            KeyValue outParam = new KeyValue(permission).key(path[path.length - 1]);
-            security.loadPermission(handle, outParam);
-            permission = outParam.asString();
+            SecurityService security = Application.getBean(SecurityService.class);
+            if (security != null) {
+                String[] path = class1.getName().split("\\.");
+                KeyValue outParam = new KeyValue(permission).key(path[path.length - 1]);
+                security.loadPermission(handle, outParam);
+                permission = outParam.asString();
+            }
         }
 
         return permission;
