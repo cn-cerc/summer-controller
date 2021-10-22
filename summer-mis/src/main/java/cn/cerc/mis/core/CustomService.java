@@ -72,15 +72,17 @@ public abstract class CustomService extends Handle implements IService {
             } else if (mt.getParameterCount() == 1) {
                 dataOut = (DataSet) mt.invoke(this, dataIn);
                 this.dataOut = dataOut;
-            } else if (mt.getParameterCount() == 2) {
-                dataOut = (DataSet) mt.invoke(this, handle, dataIn);
-                this.dataOut = dataOut;
             } else {
-                IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
-                if (dataOut.getState() == ServiceState.ERROR)
-                    dataOut.setState(result.getState());
-                if (dataOut.getMessage() == null)
-                    dataOut.setMessage(result.getMessage());
+                if (mt.getReturnType().equals(IStatus.class)) {
+                    IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
+                    if (dataOut.getState() == ServiceState.ERROR)
+                        dataOut.setState(result.getState());
+                    if (dataOut.getMessage() == null)
+                        dataOut.setMessage(result.getMessage());
+                } else {
+                    dataOut = (DataSet) mt.invoke(this, handle, dataIn);
+                    this.dataOut = dataOut;
+                }
             }
             // 防止调用者修改并回写到数据库
             dataOut.disableStorage();
