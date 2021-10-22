@@ -28,21 +28,22 @@ public interface IService {
         for (Method item : self.getMethods()) {
             if (!item.getName().equals(funcCode))
                 continue;
-            if (!item.getReturnType().equals(DataSet.class))
-                continue;
             if (item.getParameterCount() != 2)
                 continue;
             if (!item.getParameters()[1].getType().equals(DataSet.class))
                 continue;
+            if (!item.getReturnType().equals(DataSet.class))
+                continue;
+            if (method != null) {
+                dataOut.setMessage(
+                        String.format("find two or more method: %s.%s ！", this.getClass().getName(), funcCode));
+                return dataOut.setState(ServiceState.NOT_FIND_SERVICE);
+            }
             method = item;
-            break;
         }
         if (method == null) {
             dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
             return dataOut.setState(ServiceState.NOT_FIND_SERVICE);
-        }
-        if (method.getParameterCount() != 2) {
-            return dataOut.setMessage(String.format("service error, ParameterCount: %s", method.getParameterCount()));
         }
 
         try {
