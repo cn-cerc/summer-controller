@@ -3,7 +3,14 @@ package cn.cerc.mis.security;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import cn.cerc.core.ISession;
+import cn.cerc.core.LanguageResource;
 import cn.cerc.db.jiguang.JiguangConnection;
 import cn.cerc.db.mongo.MongoDB;
 import cn.cerc.db.mssql.MssqlServer;
@@ -11,24 +18,39 @@ import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.db.queue.QueueServer;
+import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.core.SystemBuffer;
+import cn.cerc.mis.other.MemoryBuffer;
+import redis.clients.jedis.Jedis;
 
-public abstract class CustomSession implements ISession {
-//    private static final Logger log = LoggerFactory.getLogger(CustomSession.class);
+//@Scope(WebApplicationContext.SCOPE_REQUEST)
+//@Scope(WebApplicationContext.SCOPE_SESSION)
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class CustomSession implements ISession {
+    private static final Logger log = LoggerFactory.getLogger(CustomSession.class);
     protected Map<String, Object> connections = new HashMap<>();
-    protected Map<String, Object> params = new HashMap<>();
+    private Map<String, Object> params = new HashMap<>();
     protected String permissions = null;
-//  private static int currentSize = 0;
+//    private static int currentSize = 0;
 
     public CustomSession() {
         super();
+        params.put(ISession.CORP_NO, "");
         params.put(ISession.USER_CODE, "");
         params.put(ISession.USER_NAME, "");
-//        log.debug("new Session");
-//      synchronized (this.getClass()) {
-//          ++currentSize;
-//          log.info("current size: {}", currentSize);
-//      }
+        params.put(Application.ClientIP, "0.0.0.0");
+        params.put(ISession.LANGUAGE_ID, LanguageResource.appLanguage);
+
+        params.put(Application.SessionId, "");
+        params.put(Application.ProxyUsers, "");
+
+        log.debug("new Session");
+//        synchronized (this.getClass()) {
+//            ++currentSize;
+//            log.info("current size: {}", currentSize);
+//        }
     }
 
     @Override
@@ -153,12 +175,24 @@ public abstract class CustomSession implements ISession {
     @Override
     public void loadToken(String token) {
         SecurityService ws = Application.getBean(SecurityService.class);
-        if (ws != null && ws.initSession(this, token))
-            this.permissions = ws.getPermissions(this);
+        if (ws != null && ws.initSession(this, token)) {
+            String key = MemoryBuffer.buildKey(SystemBuffer.UserObject.Permissions, token);
+            try (Jedis jedis = JedisFactory.getJedis()) {
+                String value = jedis.get(key);
+                if (value == null) {
+                    value = ws.getPermissions(this);
+                    jedis.set(key, value);
+                    jedis.expire(key, 3600);
+                }
+                this.permissions = value;
+            }
+        }
+        log.debug(this.permissions);
     }
 
     @Override
     public final String getPermissions() {
         return this.permissions;
     }
+
 }

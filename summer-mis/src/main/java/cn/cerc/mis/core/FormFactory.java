@@ -18,6 +18,7 @@ import cn.cerc.core.ISession;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.other.PageNotFoundException;
+import cn.cerc.mis.security.SecurityPolice;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -88,7 +89,14 @@ public class FormFactory implements ApplicationContextAware {
             }
 
             // 权限检查
-            if (!Application.getPassport(form).pass(form)) {
+            SecurityPolice police = Application.getBean(SecurityPolice.class);
+            boolean check1 = police.checkClass(form);
+            boolean check2 = Application.getPassport(form).pass(form);
+            if(check1 != check2)
+                log.warn("异常：新旧版本的权限判断结果不一致：{}", form.getClass().getName());
+//                outputErrorPage(req, resp, new RuntimeException("异常：新旧版本的权限判断结果不一致"));
+
+            if (!check2) {
                 resp.setContentType("text/html;charset=UTF-8");
                 outputErrorPage(req, resp, new RuntimeException(res.getString(1, "对不起，您没有权限执行此功能！")));
                 return null;

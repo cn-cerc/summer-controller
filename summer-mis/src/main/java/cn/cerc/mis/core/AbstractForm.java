@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import cn.cerc.db.core.Handle;
+import cn.cerc.mis.security.SecurityPolice;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -178,6 +179,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class);
                 }
+                SecurityPolice police = Application.getBean(SecurityPolice.class);
+                if (!police.checkMethod(this, method))
+                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
                 result = method.invoke(this, this.pathVariables[0]);
                 break;
             }
@@ -191,6 +195,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class, String.class);
                 }
+                SecurityPolice police = Application.getBean(SecurityPolice.class);
+                if (!police.checkMethod(this, method))
+                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
                 result = method.invoke(this, this.pathVariables[0], this.pathVariables[1]);
                 break;
             }
@@ -205,6 +212,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class, String.class, String.class);
                 }
+                SecurityPolice police = Application.getBean(SecurityPolice.class);
+                if (!police.checkMethod(this, method))
+                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
                 result = method.invoke(this, this.pathVariables[0], this.pathVariables[1], this.pathVariables[2]);
                 break;
             }
@@ -218,13 +228,15 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode);
                 }
+                SecurityPolice police = Application.getBean(SecurityPolice.class);
+                if (!police.checkMethod(this, method))
+                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
                 result = method.invoke(this);
             }
             }
 
-            if (result == null) {
+            if (result == null)
                 return null;
-            }
 
             if (result instanceof IPage) {
                 IPage output = (IPage) result;
@@ -237,20 +249,14 @@ public abstract class AbstractForm extends Handle implements IForm {
             this.setParam("message", e.getMessage());
             return e.getViewFile();
         } finally {
-            if (method != null) {
-                long timeout = 1000;
-                Webpage webpage = method.getAnnotation(Webpage.class);
-                if (webpage != null) {
-                    timeout = webpage.timeout();
-                }
-                checkTimeout(this, funcCode, startTime, timeout);
-            }
+            if (method != null)
+                checkTimeout(this, funcCode, startTime);
         }
     }
 
-    private void checkTimeout(IForm form, String funcCode, long startTime, long timeout) {
+    private void checkTimeout(IForm form, String funcCode, long startTime) {
         long totalTime = System.currentTimeMillis() - startTime;
-        if (totalTime > timeout) {
+        if (totalTime > 3000) {
             String[] tmp = form.getClass().getName().split("\\.");
             String pageCode = tmp[tmp.length - 1] + "." + funcCode;
             String dataIn = new Gson().toJson(form.getRequest().getParameterMap());

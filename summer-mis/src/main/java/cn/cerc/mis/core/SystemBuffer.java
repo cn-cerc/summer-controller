@@ -8,7 +8,7 @@ public class SystemBuffer {
      *
      */
     public enum UserObject implements IBufferKey {
-        ClassName;
+        ClassName, Permissions, Permission;
 
         @Override
         public int getStartingPoint() {

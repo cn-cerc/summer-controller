@@ -12,6 +12,7 @@ import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.security.SecurityPolice;
 
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
@@ -44,7 +45,6 @@ public abstract class CustomService extends Handle implements IService {
         return this.execute(handle, dataIn);
     }
 
-    
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         this.dataIn = dataIn;
@@ -61,37 +61,40 @@ public abstract class CustomService extends Handle implements IService {
             return dataOut.setMessage("haed[_function_] is null");
 
         Class<?> self = this.getClass();
-        Method mt = null;
+        Method method = null;
         for (Method item : self.getMethods()) {
             if (item.getName().equals(funcCode)) {
-                mt = item;
+                method = item;
                 break;
             }
         }
 
-        if (mt == null) {
+        if (method == null) {
             dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
             dataOut.setState(ServiceState.NOT_FIND_SERVICE);
             return dataOut;
         }
 
         try {
+            SecurityPolice police = Application.getBean(SecurityPolice.class);
+            if (!police.checkMethod(this, method))
+                log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
             // 执行具体的服务函数
-            if (mt.getParameterCount() == 0) {
-                int state = (Boolean) mt.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
+            if (method.getParameterCount() == 0) {
+                int state = (Boolean) method.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
                 dataOut.setState(state);
-            } else if (mt.getParameterCount() == 1) {
-                dataOut = (DataSet) mt.invoke(this, dataIn);
+            } else if (method.getParameterCount() == 1) {
+                dataOut = (DataSet) method.invoke(this, dataIn);
                 this.dataOut = dataOut;
             } else {
-                if (mt.getReturnType().equals(IStatus.class)) {
-                    IStatus result = (IStatus) mt.invoke(this, dataIn, dataOut);
+                if (method.getReturnType().equals(IStatus.class)) {
+                    IStatus result = (IStatus) method.invoke(this, dataIn, dataOut);
                     if (dataOut.getState() == ServiceState.ERROR)
                         dataOut.setState(result.getState());
                     if (dataOut.getMessage() == null)
                         dataOut.setMessage(result.getMessage());
                 } else {
-                    dataOut = (DataSet) mt.invoke(this, handle, dataIn);
+                    dataOut = (DataSet) method.invoke(this, handle, dataIn);
                     this.dataOut = dataOut;
                 }
             }
@@ -111,46 +114,46 @@ public abstract class CustomService extends Handle implements IService {
         }
     }
 
-    public  DataSet getDataIn() {
+    public DataSet getDataIn() {
         if (this.dataIn == null)
             this.dataIn = new DataSet();
         return this.dataIn;
     }
 
-    public  DataSet getDataOut() {
+    public DataSet getDataOut() {
         if (this.dataOut == null)
             this.dataOut = new DataSet();
         return this.dataOut;
     }
 
-    public  boolean fail(String message) {
+    public boolean fail(String message) {
         getDataOut().setMessage(message);
         return false;
     }
 
-    public  String getMessage() {
+    public String getMessage() {
         return getDataOut().getMessage();
     }
 
-    public  void setMessage(String message) {
+    public void setMessage(String message) {
         if (message == null || "".equals(message.trim()))
             return;
         getDataOut().setMessage(message);
     }
 
-    public  String getFuncCode() {
+    public String getFuncCode() {
         return this.funcCode;
     }
 
-    public  void setFuncCode(String funcCode) {
+    public void setFuncCode(String funcCode) {
         this.funcCode = funcCode;
     }
 
-    public  IStatus success() {
+    public IStatus success() {
         return new ServiceStatus(ServiceState.OK);
     }
 
-    public  IStatus success(String format, Object... args) {
+    public IStatus success(String format, Object... args) {
         ServiceStatus status = new ServiceStatus(ServiceState.OK);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
@@ -160,7 +163,7 @@ public abstract class CustomService extends Handle implements IService {
         return status;
     }
 
-    public  IStatus fail(String format, Object... args) {
+    public IStatus fail(String format, Object... args) {
         ServiceStatus status = new ServiceStatus(ServiceState.ERROR);
         if (args.length > 0) {
             status.setMessage(String.format(format, args));
@@ -171,7 +174,7 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     @Deprecated
-    public  Object getProperty(String key) {
+    public Object getProperty(String key) {
         return getSession().getProperty(key);
     }
 

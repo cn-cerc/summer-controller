@@ -1,4 +1,4 @@
-package cn.cerc.mis.core;
+package cn.cerc.mis.security;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,15 +16,15 @@ public @interface Operators {
     final String DELETE = "delete";
 
     // 审核
-    final String ENABLE = "enable";
+    final String FINAL = "final";
     // 撤消
-    final String DISABLE = "disable";
+    final String CANCEL = "cancel";
     // 作废
-    final String DISCARD = "discard";
+    final String NULLIFY = "nullify";
 
     // 打印机报表输出、发送邮件报表
     final String REPORT = "report";
-    // 数据导出
+    // 数据导出权限
     final String EXPORT = "export";
     // 界面设置、报表设置
     final String DESIGN = "design";

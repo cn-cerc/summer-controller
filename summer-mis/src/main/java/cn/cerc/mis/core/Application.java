@@ -31,8 +31,8 @@ public class Application implements ApplicationContextAware {
     // tomcat JSESSION.ID
     public static final String SessionId = "sessionId";
     // FIXME 如下2个常量需要取消其引用，改为直接使用ISession
-    @Deprecated
-    public static final String UserId = "UserID";
+//    @Deprecated
+//    public static final String UserId = "UserID";
     // 签核代理用户列表，代理多个用户以半角逗号隔开
     public static final String ProxyUsers = "ProxyUsers";
     // 客户端代码
@@ -53,12 +53,12 @@ public class Application implements ApplicationContextAware {
     public static final String roleCode = "roleCode";
     @Deprecated
     public static final String userCode = ISession.USER_CODE;
-    @Deprecated
-    public static final String userId = UserId;
-    @Deprecated
-    public static final String token = ISession.TOKEN;
-    @Deprecated
-    public static final String bookNo = ISession.CORP_NO;
+//    @Deprecated
+//    public static final String userId = UserId;
+//    @Deprecated
+//    public static final String token = ISession.TOKEN;
+//    @Deprecated
+//    public static final String bookNo = ISession.CORP_NO;
 
     static {
         staticPath = config.getString("app.static.path", "");

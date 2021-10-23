@@ -1,11 +1,11 @@
-package cn.cerc.mis.core;
+package cn.cerc.mis.security;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Permission {
     // 匿名用户可用，不需要登录且放开一切管控，若Service有此标识，则代表此Service不需要登录即可调用

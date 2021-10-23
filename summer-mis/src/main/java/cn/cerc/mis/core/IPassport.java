@@ -1,9 +1,13 @@
 package cn.cerc.mis.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.rds.PassportRecord;
 
 public interface IPassport extends IHandle {
+    static final Logger _log = LoggerFactory.getLogger(IPassport.class);
 
     // 是否有菜单的执行权限
     default boolean pass(IForm form) {
@@ -13,6 +17,7 @@ public interface IPassport extends IHandle {
         }
         String verList = form.getParam("verlist", null);
         String procCode = form.getPermission();
+        _log.debug("getPermission: {}", procCode);
         return passProc(verList, procCode);
     }
 

@@ -1,7 +1,7 @@
 package cn.cerc.mis.sync;
 
 import cn.cerc.core.DataRow;
-import cn.cerc.mis.custom.SessionDefault;
+import cn.cerc.mis.security.SessionDefault;
 
 public class SyncDatabaseTest {
 

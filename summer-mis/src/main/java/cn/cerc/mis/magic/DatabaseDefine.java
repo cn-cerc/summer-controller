@@ -14,7 +14,7 @@ import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.custom.SessionDefault;
+import cn.cerc.mis.security.SessionDefault;
 
 public class DatabaseDefine implements Iterable<TableDefine> {
     private static final Logger log = LoggerFactory.getLogger(DatabaseDefine.class);
