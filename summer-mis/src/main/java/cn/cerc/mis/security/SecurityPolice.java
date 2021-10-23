@@ -91,6 +91,8 @@ public class SecurityPolice {
         log.debug("{}:{}", value, permissions);
         if (permissions == null)
             return true;
+        if (value == null)
+            return true;
         String values = permissions;
         int site = permissions.indexOf("#");
         if (site > -1)
@@ -289,14 +291,14 @@ public class SecurityPolice {
     }
 
     public static void main(String[] args) {
-        String values = "base.account.update;base.default;base.product.manage;other.addressbook;other.product.repair;other.vi"
+        String permissions = "base.account.update;base.default;base.product.manage;other.addressbook;other.product.repair;other.vi"
                 + "pcard.manage;sell.base.manage[insert,update,delete,nullify];sell.discount.manage;sell.order.wholesal"
                 + "e[insert,update,delete,final,cancel,nullify];sell.report.process[export];sell.report.total[export];s"
                 + "ell.stock.out.retail[insert,update,delete,final,cancel,nullify];sell.stock.out.scanner[insert,update"
                 + ",delete,final,cancel,nullify];sell.stock.out.wholesale[insert,update,delete,final,cancel,nullify];"
                 + "sell.stock.return[insert,update,delete,final,cancel,nullify];stock.report.inout";
         SecurityPolice police = new SecurityPolice();
-        System.out.println(police.checkValue(values, "sell.stock.return"));
-        System.out.println(police.checkValue(values, "sell.stock.return[insert]"));
+        System.out.println(police.checkValue(permissions, "sell.stock.return"));
+        System.out.println(police.checkValue(permissions, "sell.stock.return[insert]"));
     }
 }
