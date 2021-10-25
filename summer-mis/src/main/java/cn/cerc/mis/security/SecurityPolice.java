@@ -30,7 +30,15 @@ public class SecurityPolice {
     }
 
     public final boolean checkClass(IHandle handle, Class<?> clazz) {
-        boolean result = checkValue(handle.getSession().getPermissions(), getPermission(clazz, handle));
+        String value = handle.getSession().getPermissions();
+        String child = getPermission(clazz, handle);
+        boolean result = checkValue(value, child);
+        if ("1310010010".equals(handle.getUserCode())) {
+            if (!result) {
+                log.warn("checkClass, {}:{}", value, child);
+                log.warn("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
+            }
+        }
         log.debug("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
         return result;
     }
