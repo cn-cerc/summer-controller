@@ -93,7 +93,7 @@ public class FormFactory implements ApplicationContextAware {
             boolean check1 = police.checkClass(form);
             boolean check2 = Application.getPassport(form).pass(form);
             if(check1 != check2)
-                log.warn("异常：新旧版本的权限判断结果不一致：{}", form.getClass().getName());
+                log.warn("异常：新旧版本的权限判断结果不一致：{},{},{}", form.getClass().getName(), form.getCorpNo(), form.getUserCode());
 //                outputErrorPage(req, resp, new RuntimeException("异常：新旧版本的权限判断结果不一致"));
 
             if (!check2) {

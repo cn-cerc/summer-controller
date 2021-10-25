@@ -230,7 +230,8 @@ public abstract class AbstractForm extends Handle implements IForm {
                 }
                 SecurityPolice police = Application.getBean(SecurityPolice.class);
                 if (!police.checkMethod(this, method))
-                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
+                    log.warn("{}.{} police: stop,{},{}", this.getClass().getName(), method.getName(), this.getCorpNo(),
+                            this.getUserCode());
                 result = method.invoke(this);
             }
             }
