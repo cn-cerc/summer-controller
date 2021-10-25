@@ -11,6 +11,7 @@ import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.security.SecurityPolice;
+import cn.cerc.mis.security.SecurityStopException;
 
 public interface IService {
     static final Logger _log = LoggerFactory.getLogger(IService.class);
@@ -48,9 +49,10 @@ public interface IService {
 
         try {
             // 执行具体的服务函数
-            SecurityPolice police = Application.getBean(SecurityPolice.class);
-            if (!police.checkMethod(handle, this.getClass(), method))
-                _log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
+            if (!SecurityPolice.check(handle, method, this)) {
+                return new DataSet().setMessage(SecurityStopException.getAccessDisabled())
+                        .setState(ServiceState.ACCESS_DISABLED);
+            }
             dataOut = (DataSet) method.invoke(this, handle, dataIn);
             // 防止调用者修改并回写到数据库
             dataOut.disableStorage();

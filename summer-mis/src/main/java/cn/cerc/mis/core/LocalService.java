@@ -57,7 +57,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             }
         }
 
-        KeyValue function = new KeyValue("execute").key(getService());
+        KeyValue function = new KeyValue("execute").setKey(getService());
         Object object = getServiceObject(function);
         if (object == null)
             return false;

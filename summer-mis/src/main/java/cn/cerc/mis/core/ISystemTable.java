@@ -12,7 +12,6 @@ public interface ISystemTable {
     String getAppMenus(); // "s_menus";
 
     // 客户客制化菜单
-    @Deprecated
     String getCustomMenus(); // "cusmenu";
 
     // 用户自定义菜单

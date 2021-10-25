@@ -13,90 +13,78 @@ import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.core.IForm;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceException;
 import cn.cerc.mis.core.ServiceState;
+import cn.cerc.mis.core.SupportBeanName;
 
 @Component
 public class SecurityPolice {
     private static final Logger log = LoggerFactory.getLogger(SecurityPolice.class);
 
-    public final boolean checkClass(IHandle sender) {
-        return checkClass(sender, sender.getClass());
+    public static boolean check(IHandle handle, Class<?> clazz) {
+        return check(handle, clazz, null);
     }
 
-    public final boolean checkClass(IHandle handle, Object sender) {
-        return checkClass(handle, sender.getClass());
-    }
+    public static boolean check(IHandle handle, Class<?> clazz, Object bean) {
+        String[] path = clazz.getName().split("\\.");
 
-    public final boolean checkClass(IHandle handle, Class<?> clazz) {
-        String value = handle.getSession().getPermissions();
-        String child = getPermission(clazz, handle);
-        boolean result = checkValue(value, child);
-//        if ("1310010010".equals(handle.getUserCode())) {
-//            if (!result) {
-//                log.warn("checkClass, {}:{}", value, child);
-//                log.warn("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
-//            }
-//        }
-        log.debug("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
+        Permission permission = findPermission(clazz.getDeclaredAnnotations());
+        Operators operators = findOperators(clazz.getDeclaredAnnotations());
+
+        String value = getValue(handle, bean, permission, operators);
+        boolean result = validate(handle.getSession().getPermissions(), value);
+
+        if (log.isDebugEnabled()) {
+            String beanId = path[path.length - 1];
+            if (bean != null && bean instanceof SupportBeanName)
+                beanId = ((SupportBeanName) bean).getBeanName();
+            log.debug("check Class:{} ${}={}", beanId, value, result ? "pass" : "stop");
+        }
         return result;
     }
 
-    public final boolean checkMethod(IHandle handle, Method method) {
-        return checkMethod(handle, handle.getClass(), method);
-    }
+    public static boolean check(IHandle handle, Method method, Object bean) {
+        Class<?> clazz = method.getDeclaringClass();
+        Permission permission = findPermission(method.getDeclaredAnnotations(), clazz.getDeclaredAnnotations());
+        Operators operators = findOperators(method.getDeclaredAnnotations(), clazz.getDeclaredAnnotations());
+        String value = getValue(handle, bean, permission, operators);
 
-    public final boolean checkMethod(IHandle handle, Class<?> clazz, Method method) {
-        boolean find = false;
-        String permission = Permission.USERS;
-        for (Annotation item : method.getDeclaredAnnotations()) {
-            if (item instanceof Permission) {
-                permission = ((Permission) item).value();
-                if ("".equals(permission))
-                    permission = Permission.USERS;
-                find = true;
-            }
+        boolean result = validate(handle.getSession().getPermissions(), value);
+        if (log.isDebugEnabled()) {
+            String[] path = clazz.getName().split("\\.");
+            String beanId = path[path.length - 1];
+            if (bean != null && bean instanceof SupportBeanName)
+                beanId = ((SupportBeanName) bean).getBeanName();
+            log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
-        if (!find) {
-            for (Annotation item : clazz.getDeclaredAnnotations()) {
-                if (item instanceof Permission) {
-                    permission = ((Permission) item).value();
-                    if ("".equals(permission))
-                        permission = Permission.USERS;
-                    find = true;
-                }
-            }
-        }
-
-        boolean result;
-        if (find) {
-            for (Annotation item : method.getDeclaredAnnotations()) {
-                if (item instanceof Operators) {
-                    StringBuffer sb = new StringBuffer(permission);
-                    sb.append("[");
-                    int count = 0;
-                    for (String detail : ((Operators) item).value()) {
-                        if (count > 0)
-                            sb.append(",");
-                        sb.append(detail);
-                        count++;
-                    }
-                    sb.append("]");
-                    permission = sb.toString();
-                }
-            }
-            result = this.checkValue(handle.getSession().getPermissions(), permission);
-            log.debug("{}.{}, check method:{}", clazz.getName(), method.getName(), result ? "pass" : "stop");
-        } else {
-            result = this.checkClass(handle, clazz);
-        }
-
         return result;
     }
 
-    public final boolean checkValue(String permissions, String value) {
-        log.debug("{}:{}", value, permissions);
+    public static boolean check(IHandle handle, Enum<?> clazz, String operator) {
+        OperatorData data = new OperatorData(clazz.name().replaceAll("_", "."), operator);
+        return check(handle, data);
+    }
+
+    public static boolean check(IHandle handle, String permission, String operator) {
+        return check(handle, new OperatorData(permission, operator));
+    }
+
+    public static boolean check(IHandle handle, OperatorData data) {
+        boolean result = validate(handle.getSession().getPermissions(), data.toString());
+        if (log.isDebugEnabled()) {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            StackTraceElement el = stackTrace[2];
+            String[] path = el.getClassName().split("\\.");
+            String beanId = path[path.length - 1];
+            log.debug("checkValue:{}.{} ${}={}", beanId, el.getMethodName(), data.toString(), result ? "pass" : "stop");
+        }
+        return result;
+    }
+
+    public static boolean validate(String permissions, String value) {
+//        log.debug("validate:{} in {}", value, permissions);
         if (permissions == null)
             return true;
         if (value == null)
@@ -167,23 +155,38 @@ public class SecurityPolice {
         return false;
     }
 
-    public DataSet call(IHandle handle, IService bean, DataSet dataIn, KeyValue function) throws ServiceException {
-        String permission = getPermission(bean.getClass(), handle);
-        if (this.allowGuestUser(permission))
+    public static DataSet call(IHandle handle, IService bean, DataSet dataIn, KeyValue function)
+            throws ServiceException {
+        Class<?> clazz = bean.getClass();
+        Permission permission = findPermission(clazz.getDeclaredAnnotations());
+        Operators operators = findOperators(clazz.getDeclaredAnnotations());
+
+        String value = getValue(handle, bean, permission, operators);
+
+        if (allowGuestUser(value))
             return bean.call(handle, dataIn, function);
 
         ISession session = handle.getSession();
         if ((session == null) || (!session.logon()))
-            return new DataSet().setMessage("请您先登入系统").setState(ServiceState.ACCESS_DISABLED);
+            return new DataSet().setMessage(SecurityStopException.getPleaseLogin())
+                    .setState(ServiceState.ACCESS_DISABLED);
 
         // 检查权限代码是否匹配
-        if (!this.checkValue(handle.getSession().getPermissions(), permission))
-            return new DataSet().setMessage("您的执行权限不足").setState(ServiceState.ACCESS_DISABLED);
+        if (!validate(handle.getSession().getPermissions(), value))
+            return new DataSet().setMessage(SecurityStopException.getAccessDisabled())
+                    .setState(ServiceState.ACCESS_DISABLED);
 
         return bean.call(handle, dataIn, function);
     }
 
-    private final boolean compareMaster(String master, String request) {
+    private static boolean allowGuestUser(String permission) {
+        if (Permission.GUEST.length() > permission.length())
+            return false;
+
+        return permission.startsWith(Permission.GUEST);
+    }
+
+    private static boolean compareMaster(String master, String request) {
         if (master.equals(Permission.ADMIN))
             return true;
 
@@ -202,14 +205,7 @@ public class SecurityPolice {
         return false;
     }
 
-    private final boolean allowGuestUser(String permission) {
-        if (Permission.GUEST.length() > permission.length())
-            return false;
-
-        return permission.startsWith(Permission.GUEST);
-    }
-
-    private final boolean compareDetail(String master, String request) {
+    private static boolean compareDetail(String master, String request) {
         // 检查是否存在[]
         String masterText = master;
         int masterStart = master.indexOf("[");
@@ -249,7 +245,7 @@ public class SecurityPolice {
         return false;
     }
 
-    private final boolean inArray(final String value, final String[] list) {
+    private static boolean inArray(final String value, final String[] list) {
         for (String item : list) {
             if (value.equals(item))
                 return true;
@@ -257,56 +253,73 @@ public class SecurityPolice {
         return false;
     }
 
-    private final String getPermission(Class<?> clazz, IHandle handle) {
-        boolean find = false;
-        String permission = Permission.USERS;
-        for (Annotation item : clazz.getDeclaredAnnotations()) {
-            if (item instanceof Permission) {
-                permission = ((Permission) item).value();
-                if ("".equals(permission))
-                    permission = Permission.USERS;
-                find = true;
-            }
-        }
-        if (find) {
-            for (Annotation item : clazz.getDeclaredAnnotations()) {
-                if (item instanceof Operators) {
-                    StringBuffer sb = new StringBuffer(permission);
+    private static String getValue(IHandle handle, Object bean, Permission permission, Operators operators) {
+        String result = "";
+        String defaultValue = Permission.USERS;
+        if (permission != null) {
+            result = permission.value();
+            if (!"".equals(result)) {
+                if (operators != null) {
+                    StringBuffer sb = new StringBuffer(result);
                     sb.append("[");
                     int count = 0;
-                    for (String detail : ((Operators) item).value()) {
+                    for (String detail : operators.value()) {
                         if (count > 0)
                             sb.append(",");
                         sb.append(detail);
                         count++;
                     }
                     sb.append("]");
-                    permission = sb.toString();
+                    result = sb.toString();
                 }
             }
         } else if (handle != null) {
-            SecurityService security = Application.getBean(SecurityService.class);
-            if (security != null) {
-                String[] path = clazz.getName().split("\\.");
-                KeyValue outParam = new KeyValue(permission).key(path[path.length - 1]);
-                security.loadPermission(handle, outParam);
-                permission = outParam.asString();
+            if (bean != null && bean instanceof IForm) {
+                IForm form = (IForm) bean;
+                result = form.getPermission();
+            }
+            if ("".equals(result)) {
+                String[] path = bean.getClass().getName().split("\\.");
+                String beanId = path[path.length - 1];
+                if (bean != null && bean instanceof SupportBeanName) {
+                    beanId = ((SupportBeanName) bean).getBeanName();
+                    defaultValue = Permission.ADMIN;
+                    SecurityService security = Application.getBean(SecurityService.class);
+                    if (security != null) {
+                        KeyValue outParam = new KeyValue().setKey(beanId);
+                        security.loadPermission(handle, outParam);
+                        result = outParam.asString();
+                    }
+                }
             }
         }
+        return "".equals(result) ? defaultValue : result;
+    }
 
-        log.debug("{}={}", clazz.getName(), permission);
-        return permission;
+    private static Permission findPermission(Annotation[]... list) {
+        for (Annotation[] items : list) {
+            for (Annotation item : items) {
+                if (item instanceof Permission)
+                    return (Permission) item;
+            }
+        }
+        return null;
+    }
+
+    private static Operators findOperators(Annotation[]... list) {
+        for (Annotation[] items : list) {
+            for (Annotation item : items) {
+                if (item instanceof Operators)
+                    return (Operators) item;
+            }
+        }
+        return null;
     }
 
     public static void main(String[] args) {
-        String permissions = "base.account.update;base.default;base.product.manage;other.addressbook;other.product.repair;other.vi"
-                + "pcard.manage;sell.base.manage[insert,update,delete,nullify];sell.discount.manage;sell.order.wholesal"
-                + "e[insert,update,delete,final,cancel,nullify];sell.report.process[export];sell.report.total[export];s"
-                + "ell.stock.out.retail[insert,update,delete,final,cancel,nullify];sell.stock.out.scanner[insert,update"
-                + ",delete,final,cancel,nullify];sell.stock.out.wholesale[insert,update,delete,final,cancel,nullify];"
-                + "sell.stock.return[insert,update,delete,final,cancel,nullify];stock.report.inout";
-        SecurityPolice police = new SecurityPolice();
-        System.out.println(police.checkValue(permissions, "sell.stock.return"));
-        System.out.println(police.checkValue(permissions, "sell.stock.return[insert]"));
+        String permissions = "users#4";
+        String value = "base.product.manage#4,2,";
+        System.out.println(SecurityPolice.validate(permissions, value));
     }
+
 }

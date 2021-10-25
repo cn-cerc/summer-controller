@@ -16,7 +16,7 @@ public @interface Operators {
     final String DELETE = "delete";
 
     // 审核
-    final String FINAL = "final";
+    final String FINISH = "finish";
     // 撤消
     final String CANCEL = "cancel";
     // 作废

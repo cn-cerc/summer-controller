@@ -23,7 +23,7 @@ public class AutoService extends CustomServiceProxy {
             throw new RuntimeException("not specified service");
         }
 
-        KeyValue function = new KeyValue("execute").key(getService());
+        KeyValue function = new KeyValue("execute").setKey(getService());
         Object object = getServiceObject(function);
         if (object == null) {
             return false;

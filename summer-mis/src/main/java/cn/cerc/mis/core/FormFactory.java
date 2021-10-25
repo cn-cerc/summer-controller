@@ -18,7 +18,7 @@ import cn.cerc.core.ISession;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.other.PageNotFoundException;
-import cn.cerc.mis.security.SecurityPolice;
+import cn.cerc.mis.security.SecurityStopException;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -88,20 +88,6 @@ public class FormFactory implements ApplicationContextAware {
                 }
             }
 
-            // 权限检查
-            SecurityPolice police = Application.getBean(SecurityPolice.class);
-            boolean check1 = police.checkClass(form);
-            boolean check2 = Application.getPassport(form).pass(form);
-            if(check1 != check2)
-                log.warn("异常：新旧版本的权限判断结果不一致：{},{},{}", form.getClass().getName(), form.getCorpNo(), form.getUserCode());
-//                outputErrorPage(req, resp, new RuntimeException("异常：新旧版本的权限判断结果不一致"));
-
-            if (!check2) {
-                resp.setContentType("text/html;charset=UTF-8");
-                outputErrorPage(req, resp, new RuntimeException(res.getString(1, "对不起，您没有权限执行此功能！")));
-                return null;
-            }
-
             // 设备检查
             if (form.isSecurityDevice()) {
                 return form.getView(funcCode);
@@ -155,8 +141,10 @@ public class FormFactory implements ApplicationContextAware {
     public void outputErrorPage(HttpServletRequest request, HttpServletResponse response, Throwable e) {
         if (e instanceof PageNotFoundException)
             log.warn("client ip {}, page not found: {}", AppClient.getClientIP(request), e.getMessage());
+        else if (e instanceof SecurityStopException)
+            log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         else
-            log.warn("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
+            log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
         Throwable err = e.getCause();
         if (err == null) {
             err = e;

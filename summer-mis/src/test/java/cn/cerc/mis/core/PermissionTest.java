@@ -25,88 +25,86 @@ public class PermissionTest {
 
     @Test
     public void testCheck_empty() {
-        assertTrue(police.checkValue(null, null));
-        assertTrue(police.checkValue("", ""));
-        assertTrue(police.checkValue(null, ""));
-        assertTrue(police.checkValue("", null));
+        assertTrue(SecurityPolice.validate("", ""));
+        assertTrue(SecurityPolice.validate("", null));
     }
 
     @Test
     public void testCheck_admin() {
-        assertTrue(police.checkValue(Permission.ADMIN, Permission.GUEST));
-        assertTrue(police.checkValue(Permission.ADMIN, Permission.USERS));
-        assertTrue(police.checkValue(Permission.ADMIN, Permission.ADMIN));
-        assertTrue(police.checkValue(Permission.ADMIN, "acc"));
-        assertTrue(police.checkValue(Permission.ADMIN, "acc.*"));
-        assertTrue(police.checkValue(Permission.ADMIN, "acc.*[]"));
-        assertTrue(police.checkValue(Permission.ADMIN, "acc.*[append,update]"));
-        assertTrue(police.checkValue(Permission.ADMIN, "acc.*;-acc.*[update]"));
-        assertFalse(police.checkValue("admin;-acc[delete]", "acc[delete]"));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, Permission.GUEST));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, Permission.USERS));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, Permission.ADMIN));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, "acc"));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, "acc.*"));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, "acc.*[]"));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, "acc.*[append,update]"));
+        assertTrue(SecurityPolice.validate(Permission.ADMIN, "acc.*;-acc.*[update]"));
+        assertFalse(SecurityPolice.validate("admin;-acc[delete]", "acc[delete]"));
     }
 
     @Test
     public void testCheck_guest() {
-        assertTrue(police.checkValue(Permission.GUEST, Permission.GUEST));
-        assertFalse(police.checkValue(Permission.GUEST, Permission.USERS));
-        assertFalse(police.checkValue(Permission.GUEST, Permission.ADMIN));
-        assertFalse(police.checkValue(Permission.GUEST, "acc"));
-        assertFalse(police.checkValue(Permission.GUEST, "acc.*"));
-        assertFalse(police.checkValue(Permission.GUEST, "acc.*[]"));
-        assertFalse(police.checkValue(Permission.GUEST, "acc.*[append,update]"));
-        assertFalse(police.checkValue(Permission.GUEST, "acc.*;acc.*[update]"));
+        assertTrue(SecurityPolice.validate(Permission.GUEST, Permission.GUEST));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, Permission.USERS));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, Permission.ADMIN));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, "acc"));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, "acc.*"));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, "acc.*[]"));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, "acc.*[append,update]"));
+        assertFalse(SecurityPolice.validate(Permission.GUEST, "acc.*;acc.*[update]"));
     }
 
     @Test
     public void testCheck_users() {
-        assertTrue(police.checkValue(Permission.USERS, Permission.GUEST));
-        assertTrue(police.checkValue(Permission.USERS, Permission.USERS));
-        assertFalse(police.checkValue(Permission.USERS, Permission.ADMIN));
-        assertFalse(police.checkValue(Permission.USERS, "acc"));
-        assertFalse(police.checkValue(Permission.USERS, "acc.*"));
-        assertFalse(police.checkValue(Permission.USERS, "acc.*[]"));
-        assertFalse(police.checkValue(Permission.USERS, "acc.*[append,update]"));
-        assertFalse(police.checkValue(Permission.USERS, "acc.*;acc.*[update]"));
+        assertTrue(SecurityPolice.validate(Permission.USERS, Permission.GUEST));
+        assertTrue(SecurityPolice.validate(Permission.USERS, Permission.USERS));
+        assertFalse(SecurityPolice.validate(Permission.USERS, Permission.ADMIN));
+        assertFalse(SecurityPolice.validate(Permission.USERS, "acc"));
+        assertFalse(SecurityPolice.validate(Permission.USERS, "acc.*"));
+        assertFalse(SecurityPolice.validate(Permission.USERS, "acc.*[]"));
+        assertFalse(SecurityPolice.validate(Permission.USERS, "acc.*[append,update]"));
+        assertFalse(SecurityPolice.validate(Permission.USERS, "acc.*;acc.*[update]"));
     }
 
     @Test
     public void testCheck_star() {
-        assertTrue(police.checkValue("acc.*", "acc"));
-        assertTrue(police.checkValue("acc.*", "acc."));
-        assertTrue(police.checkValue("acc.*", "acc.cash"));
+        assertTrue(SecurityPolice.validate("acc.*", "acc"));
+        assertTrue(SecurityPolice.validate("acc.*", "acc."));
+        assertTrue(SecurityPolice.validate("acc.*", "acc.cash"));
         //
-        assertFalse(police.checkValue("acc*", "acc"));
-        assertFalse(police.checkValue("acc.*", "ac"));
+        assertFalse(SecurityPolice.validate("acc*", "acc"));
+        assertFalse(SecurityPolice.validate("acc.*", "ac"));
     }
 
     @Test
     public void testCheck_detail() {
-        assertTrue(police.checkValue("acc[insert,delete,update]", "acc[insert,update,delete]"));
-        assertTrue(police.checkValue("acc[insert,update,delete]", "acc[insert,update,delete]"));
-        assertTrue(police.checkValue("acc", "acc[insert,update,delete]"));
-        assertTrue(police.checkValue("acc[*]", "acc[insert,update,delete]"));
-        assertFalse(police.checkValue("acc[]", "acc[insert,update,delete]"));
-        assertTrue(police.checkValue("acc[abc,update]", "acc[abc]"));
-        assertTrue(police.checkValue("acc[abc,update]", "acc[]"));
-        assertFalse(police.checkValue("acc[abc,update]", "acc[*]"));
+        assertTrue(SecurityPolice.validate("acc[insert,delete,update]", "acc[insert,update,delete]"));
+        assertTrue(SecurityPolice.validate("acc[insert,update,delete]", "acc[insert,update,delete]"));
+        assertTrue(SecurityPolice.validate("acc", "acc[insert,update,delete]"));
+        assertTrue(SecurityPolice.validate("acc[*]", "acc[insert,update,delete]"));
+        assertFalse(SecurityPolice.validate("acc[]", "acc[insert,update,delete]"));
+        assertTrue(SecurityPolice.validate("acc[abc,update]", "acc[abc]"));
+        assertTrue(SecurityPolice.validate("acc[abc,update]", "acc[]"));
+        assertFalse(SecurityPolice.validate("acc[abc,update]", "acc[*]"));
     }
 
     @Test
     public void testCheck_diff() {
-        assertTrue(police.checkValue("acc", "acc[delete]"));
-        assertFalse(police.checkValue("acc;-acc[delete]", "acc"));
-        assertFalse(police.checkValue("acc;-acc[delete]", "acc[insert,update,delete]"));
+        assertTrue(SecurityPolice.validate("acc", "acc[delete]"));
+        assertFalse(SecurityPolice.validate("acc;-acc[delete]", "acc"));
+        assertFalse(SecurityPolice.validate("acc;-acc[delete]", "acc[insert,update,delete]"));
     }
 
     @Test
     public void testCheck_other() {
-        assertTrue(police.checkValue("admin;-acc[delete]", "acc[]"));
-        assertTrue(police.checkValue("admin;-acc[delete];hr", "acc[]"));
-        assertTrue(police.checkValue("admin;-acc[delete];hr", "hr"));
-        assertTrue(police.checkValue("admin;-acc[delete]", "acc[update]"));
-        assertFalse(police.checkValue("admin;-acc[delete]", "acc"));
-        assertFalse(police.checkValue("admin;-acc[delete]", "acc[delete]"));
-        assertFalse(police.checkValue("admin;-acc[]", "acc[update]"));
-        assertFalse(police.checkValue("admin;-acc", "acc[update]"));
-        assertTrue(police.checkValue("admin", "guest[update]"));
+        assertTrue(SecurityPolice.validate("admin;-acc[delete]", "acc[]"));
+        assertTrue(SecurityPolice.validate("admin;-acc[delete];hr", "acc[]"));
+        assertTrue(SecurityPolice.validate("admin;-acc[delete];hr", "hr"));
+        assertTrue(SecurityPolice.validate("admin;-acc[delete]", "acc[update]"));
+        assertFalse(SecurityPolice.validate("admin;-acc[delete]", "acc"));
+        assertFalse(SecurityPolice.validate("admin;-acc[delete]", "acc[delete]"));
+        assertFalse(SecurityPolice.validate("admin;-acc[]", "acc[update]"));
+        assertFalse(SecurityPolice.validate("admin;-acc", "acc[update]"));
+        assertTrue(SecurityPolice.validate("admin", "guest[update]"));
     }
 }

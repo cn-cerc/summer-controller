@@ -13,6 +13,7 @@ import cn.cerc.core.Utils;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.security.SecurityPolice;
+import cn.cerc.mis.security.SecurityStopException;
 
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
@@ -76,9 +77,11 @@ public abstract class CustomService extends Handle implements IService {
         }
 
         try {
-            SecurityPolice police = Application.getBean(SecurityPolice.class);
-            if (!police.checkMethod(this, method))
-                log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
+            if (!SecurityPolice.check(this, method, this)) {
+                dataOut.setMessage(SecurityStopException.getAccessDisabled());
+                dataOut.setState(ServiceState.ACCESS_DISABLED);
+                return dataOut;
+            }
             // 执行具体的服务函数
             if (method.getParameterCount() == 0) {
                 int state = (Boolean) method.invoke(this) ? ServiceState.OK : ServiceState.ERROR;

@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 
 import cn.cerc.db.core.Handle;
 import cn.cerc.mis.security.SecurityPolice;
+import cn.cerc.mis.security.SecurityStopException;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -35,6 +36,7 @@ public abstract class AbstractForm extends Handle implements IForm {
     private String permission;
     private String module;
     private String[] pathVariables;
+    private String beanName;
 
     public Map<String, String> getParams() {
         return params;
@@ -179,9 +181,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class);
                 }
-                SecurityPolice police = Application.getBean(SecurityPolice.class);
-                if (!police.checkMethod(this, method))
-                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
+                if (!SecurityPolice.check(this, method, this)) {
+                    throw new SecurityStopException(method, this);
+                }
                 result = method.invoke(this, this.pathVariables[0]);
                 break;
             }
@@ -195,9 +197,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class, String.class);
                 }
-                SecurityPolice police = Application.getBean(SecurityPolice.class);
-                if (!police.checkMethod(this, method))
-                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
+                if (!SecurityPolice.check(this, method, this)) {
+                    throw new SecurityStopException(method, this);
+                }
                 result = method.invoke(this, this.pathVariables[0], this.pathVariables[1]);
                 break;
             }
@@ -212,9 +214,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class, String.class, String.class);
                 }
-                SecurityPolice police = Application.getBean(SecurityPolice.class);
-                if (!police.checkMethod(this, method))
-                    log.warn("{}.{} police: stop", this.getClass().getName(), method.getName());
+                if (!SecurityPolice.check(this, method, this)) {
+                    throw new SecurityStopException(method, this);
+                }
                 result = method.invoke(this, this.pathVariables[0], this.pathVariables[1], this.pathVariables[2]);
                 break;
             }
@@ -228,10 +230,9 @@ public abstract class AbstractForm extends Handle implements IForm {
                 } else {
                     method = this.getClass().getMethod(funcCode);
                 }
-                SecurityPolice police = Application.getBean(SecurityPolice.class);
-                if (!police.checkMethod(this, method))
-                    log.warn("{}.{} police: stop,{},{}", this.getClass().getName(), method.getName(), this.getCorpNo(),
-                            this.getUserCode());
+                if (!SecurityPolice.check(this, method, this)) {
+                    throw new SecurityStopException(method, this);
+                }
                 result = method.invoke(this);
             }
             }
@@ -285,6 +286,16 @@ public abstract class AbstractForm extends Handle implements IForm {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String getBeanName() {
+        return beanName;
+    }
+
+    @Override
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
     }
 
 }

@@ -189,7 +189,7 @@ public class Application implements ApplicationContextAware {
             String[] params = serviceCode.split("\\.");
             // 支持指定执行函数
             if (params.length > 1)
-                function.value(params[1]);
+                function.setValue(params[1]);
 
             String beanId = params[0];
             if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
@@ -202,10 +202,6 @@ public class Application implements ApplicationContextAware {
         if (bean instanceof IHandle)
             ((IHandle) bean).setSession(handle.getSession());
         return (IService) bean;
-    }
-
-    public static IPassport getPassport(IHandle handle) {
-        return getBean(handle, IPassport.class);
     }
 
     /**
