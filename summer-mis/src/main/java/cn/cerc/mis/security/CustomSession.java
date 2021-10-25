@@ -153,12 +153,12 @@ public class CustomSession implements ISession {
     }
 
     @Override
-    public final String getCorpNo() {
+    public String getCorpNo() {
         return (String) this.getProperty(ISession.CORP_NO);
     }
 
     @Override
-    public final String getUserCode() {
+    public String getUserCode() {
         return (String) this.getProperty(ISession.USER_CODE);
     }
 
