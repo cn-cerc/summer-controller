@@ -59,7 +59,10 @@ public abstract class CustomService extends Handle implements IService {
         this.dataOut = dataOut;
 
         if (Utils.isEmpty(funcCode))
-            return dataOut.setMessage("haed[_function_] is null");
+            return dataOut.setMessage("function is null");
+
+        if ("execute".equals(funcCode))
+            return dataOut.setMessage("function is execute");
 
         Class<?> self = this.getClass();
         Method method = null;
