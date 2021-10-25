@@ -8,18 +8,18 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import cn.cerc.core.DataRow;
 import cn.cerc.core.Datetime;
 import cn.cerc.core.ISession;
-import cn.cerc.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.redis.Redis;
 import cn.cerc.mis.core.ISystemTable;
 import cn.cerc.mis.core.IUserMessage;
-import cn.cerc.mis.core.SystemBufferType;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.message.MessageRecord;
+import cn.cerc.mis.other.MemoryBuffer;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -86,8 +86,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         cdsMsg.post();
 
         // 清除缓存
-        String buffKey = String.format("%d.%s.%s.%s", SystemBufferType.getObject.ordinal(), MessageRecord.class, corpNo,
-                userCode);
+        String buffKey = MemoryBuffer.buildObjectKey(MessageRecord.class, corpNo + "." + userCode);
         Redis.delete(buffKey);
 
         // 返回消息的编号
@@ -135,8 +134,8 @@ public class UserMessageDefault implements IHandle, IUserMessage {
 
         if (process == MessageProcess.ok) {
             // 清除缓存
-            String buffKey = String.format("%d.%s.%s.%s", SystemBufferType.getObject.ordinal(), MessageRecord.class,
-                    cdsMsg.getString("CorpNo_"), cdsMsg.getString("UserCode_"));
+            String buffKey = MemoryBuffer.buildObjectKey(MessageRecord.class,
+                    cdsMsg.getString("CorpNo_") + "." + cdsMsg.getString("UserCode_"));
             Redis.delete(buffKey);
         }
         return true;

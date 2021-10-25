@@ -33,12 +33,12 @@ public class SecurityPolice {
         String value = handle.getSession().getPermissions();
         String child = getPermission(clazz, handle);
         boolean result = checkValue(value, child);
-        if ("1310010010".equals(handle.getUserCode())) {
-            if (!result) {
-                log.warn("checkClass, {}:{}", value, child);
-                log.warn("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
-            }
-        }
+//        if ("1310010010".equals(handle.getUserCode())) {
+//            if (!result) {
+//                log.warn("checkClass, {}:{}", value, child);
+//                log.warn("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
+//            }
+//        }
         log.debug("{}, check class:{}", clazz.getName(), result ? "pass" : "stop");
         return result;
     }
