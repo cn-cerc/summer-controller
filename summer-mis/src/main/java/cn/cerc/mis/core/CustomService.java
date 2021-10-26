@@ -61,15 +61,27 @@ public abstract class CustomService extends Handle implements IService {
         if (Utils.isEmpty(funcCode))
             return dataOut.setMessage("function is null");
 
-        if ("execute".equals(funcCode))
-            return dataOut.setMessage("function is execute");
-
         Class<?> self = this.getClass();
-        Method method = null;
-        for (Method item : self.getMethods()) {
-            if (item.getName().equals(funcCode)) {
-                method = item;
-                break;
+        Method method;
+        try {
+            method = self.getMethod(funcCode);
+        } catch (NoSuchMethodException | SecurityException e1) {
+            method = null;
+        }
+        if (method == null) {
+            try {
+                method = self.getMethod(funcCode, IHandle.class, DataSet.class);
+                if ("execute".equals(funcCode))
+                    return dataOut.setMessage("function is execute");
+            } catch (NoSuchMethodException | SecurityException e1) {
+                method = null;
+            }
+        }
+        if (method == null) {
+            try {
+                method = self.getMethod(funcCode, DataSet.class, DataSet.class);
+            } catch (NoSuchMethodException | SecurityException e1) {
+                method = null;
             }
         }
 
