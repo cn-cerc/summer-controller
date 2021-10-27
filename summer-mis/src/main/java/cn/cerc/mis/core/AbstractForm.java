@@ -90,7 +90,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     }
 
     @Deprecated
-    public final void setCaption(String name) {
+    public void setCaption(String name) {
         setName(name);
     }
 
