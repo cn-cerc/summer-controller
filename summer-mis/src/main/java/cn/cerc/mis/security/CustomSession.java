@@ -36,8 +36,8 @@ public class CustomSession implements ISession {
     protected String permissions = null;
     private HttpServletRequest request;
     private HttpServletResponse response;
-
-//    private static int currentSize = 0;
+    private static int currentSize = 0;
+    private boolean active = true;
 
     public CustomSession() {
         super();
@@ -50,11 +50,12 @@ public class CustomSession implements ISession {
         params.put(Application.SessionId, "");
         params.put(Application.ProxyUsers, "");
 
-        log.debug("new Session");
-//        synchronized (this.getClass()) {
-//            ++currentSize;
-//            log.info("current size: {}", currentSize);
-//        }
+        if (log.isDebugEnabled()) {
+            synchronized (this.getClass()) {
+                ++currentSize;
+                log.debug("current size: {}", currentSize);
+            }
+        }
     }
 
     @Override
@@ -150,10 +151,17 @@ public class CustomSession implements ISession {
             }
         }
         connections.clear();
-//        synchronized (this.getClass()) {
-//            --currentSize;
-//            log.info("current size: {}", currentSize);
-//        }
+        if (log.isDebugEnabled()) {
+            if (this.active) {
+                this.active = false;
+                synchronized (this.getClass()) {
+                    --currentSize;
+                    log.debug("current size: {}", currentSize);
+                }
+            } else {
+                log.warn("重复执行 session.close");
+            }
+        }
     }
 
     @Override
@@ -191,7 +199,7 @@ public class CustomSession implements ISession {
                 this.permissions = value;
             }
         }
-        log.debug(this.permissions);
+        log.debug("{}.{}[permissions]", this.getCorpNo(), this.getUserCode(), this.permissions);
     }
 
     @Override
