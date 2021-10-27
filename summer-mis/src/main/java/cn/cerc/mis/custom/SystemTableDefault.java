@@ -1,10 +1,7 @@
 package cn.cerc.mis.custom;
 
-import org.springframework.stereotype.Component;
-
 import cn.cerc.mis.core.ISystemTable;
 
-@Component
 public class SystemTableDefault implements ISystemTable {
 
     @Override

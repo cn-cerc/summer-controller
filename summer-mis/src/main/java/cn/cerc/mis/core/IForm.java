@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import cn.cerc.db.core.IHandle;
 
-public interface IForm extends IHandle, IRequestOwner, IResponseOwner, IPermission, SupportBeanName {
+public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBeanName {
 
     // 页面代码
     void setId(String formId);
@@ -15,9 +15,7 @@ public interface IForm extends IHandle, IRequestOwner, IResponseOwner, IPermissi
     String getName();
 
     // 取得访问设备讯息
-    IClient getClient();
-
-    void setClient(IClient client);
+    AppClient getClient();
 
     // 设置参数
     void setParam(String key, String value);
@@ -29,7 +27,7 @@ public interface IForm extends IHandle, IRequestOwner, IResponseOwner, IPermissi
     IPage execute() throws Exception;
 
     // 执行指定函数，并返回jsp文件名，若自行处理输出则直接返回null
-    String getView(String funcId) throws Exception;
+    String call(String funcId) throws Exception;
 
     void setPathVariables(String[] pathVariables);
 
@@ -44,9 +42,6 @@ public interface IForm extends IHandle, IRequestOwner, IResponseOwner, IPermissi
         getSession().setProperty(key, value);
     }
 
-    @Override
-    default HttpServletRequest getRequest() {
-        return IHandle.super.getRequest();
-    }
+    HttpServletRequest getRequest();
 
 }

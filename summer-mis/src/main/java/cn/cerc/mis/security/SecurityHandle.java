@@ -11,8 +11,6 @@ import cn.cerc.core.Utils;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BasicHandle;
 
-@Component
-@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class SecurityHandle extends BasicHandle {
 
     public SecurityHandle(HttpServletRequest request) {

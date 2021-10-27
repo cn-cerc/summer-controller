@@ -3,11 +3,11 @@ package cn.cerc.mis.security;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
@@ -26,13 +26,17 @@ import redis.clients.jedis.Jedis;
 
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
 //@Scope(WebApplicationContext.SCOPE_SESSION)
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//@Component
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class CustomSession implements ISession {
     private static final Logger log = LoggerFactory.getLogger(CustomSession.class);
     protected Map<String, Object> connections = new HashMap<>();
     private Map<String, Object> params = new HashMap<>();
     protected String permissions = null;
+    private HttpServletRequest request;
+    private HttpServletResponse response;
+
 //    private static int currentSize = 0;
 
     public CustomSession() {
@@ -193,6 +197,26 @@ public class CustomSession implements ISession {
     @Override
     public final String getPermissions() {
         return this.permissions;
+    }
+
+    @Override
+    public HttpServletRequest getRequest() {
+        return this.request;
+    }
+
+    @Override
+    public void setRequest(HttpServletRequest request) {
+        this.request = request;
+    }
+
+    @Override
+    public HttpServletResponse getResponse() {
+        return this.response;
+    }
+
+    @Override
+    public void setResponse(HttpServletResponse response) {
+        this.response = response;
     }
 
 }

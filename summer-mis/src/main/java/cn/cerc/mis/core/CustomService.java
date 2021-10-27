@@ -15,6 +15,8 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.SecurityStopException;
 
+//@Component
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public abstract class CustomService extends Handle implements IService {
     private static final Logger log = LoggerFactory.getLogger(CustomService.class);
 
@@ -36,7 +38,7 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     @Override
-    public DataSet call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {
+    public DataSet _call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {
         if (function == null || Utils.isEmpty(function.asString()))
             return new DataSet().setMessage("function is null");
         if ("call".equals(function.asString()))

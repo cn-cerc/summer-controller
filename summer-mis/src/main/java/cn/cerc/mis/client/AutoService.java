@@ -35,7 +35,7 @@ public class AutoService extends CustomServiceProxy {
             ((IHandle) object).setSession(handle.getSession());
         }
 
-        setDataOut(((IService) object).call(handle, getDataIn(), function));
+        setDataOut(((IService) object)._call(handle, getDataIn(), function));
         return getDataOut().getState() > 0;
     }
 

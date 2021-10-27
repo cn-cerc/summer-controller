@@ -9,6 +9,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface WebMethod {
 
+    /**
+     * 
+     * @return 函数功能描述
+     */
     String value();
 
 }

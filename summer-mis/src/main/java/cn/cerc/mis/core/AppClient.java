@@ -19,7 +19,8 @@ import redis.clients.jedis.Jedis;
 
 @Component
 @Scope(WebApplicationContext.SCOPE_REQUEST)
-public class AppClient implements IClient, Serializable {
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class AppClient implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(AppClient.class);
     private static final long serialVersionUID = -3593077761901636920L;
 
@@ -69,7 +70,6 @@ public class AppClient implements IClient, Serializable {
         return result;
     }
 
-    @Override
     public String getId() {
         return this.deviceId == null ? Application.WebClient : this.deviceId;
     }
@@ -94,12 +94,10 @@ public class AppClient implements IClient, Serializable {
      *
      * @return device
      */
-    @Override
     public String getDevice() {
         return this.device == null ? pc : device;
     }
 
-    @Override
     public void setDevice(String device) {
         if (device == null || "".equals(device)) {
             return;
@@ -121,7 +119,6 @@ public class AppClient implements IClient, Serializable {
         return;
     }
 
-    @Override
     public String getLanguage() {
         return languageId == null ? LanguageResource.appLanguage : languageId;
     }
@@ -135,7 +132,7 @@ public class AppClient implements IClient, Serializable {
      * <p>
      * TODO: 2019/12/7 考虑要不要加上缓存一起清空
      */
-    public void clear() {
+    public  void clear() {
         if (!Utils.isEmpty(token)) {
             try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Token.DeviceInfo, token)) {
                 buff.clear();
@@ -156,7 +153,6 @@ public class AppClient implements IClient, Serializable {
         return buffer.toString();
     }
 
-    @Override
     public boolean isPhone() {
         return phone.equals(getDevice()) || android.equals(getDevice()) || iphone.equals(getDevice())
                 || wechat.equals(getDevice());
@@ -166,11 +162,9 @@ public class AppClient implements IClient, Serializable {
         return this.request;
     }
 
-    @Override
     public void setRequest(HttpServletRequest request) {
-        this.request = request;
-
         // 保存设备类型
+        this.request = request;
         this.device = request.getParameter(DEVICE);
         if (this.device == null || "".equals(this.device)) {
             this.device = (String) request.getSession().getAttribute(DEVICE);

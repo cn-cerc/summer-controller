@@ -68,7 +68,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             if (object instanceof IHandle)
                 ((IHandle) object).setSession(this.getSession());
             if (ServerConfig.isServerMaster()) {
-                setDataOut(((IService) object).call(this, getDataIn(), function));
+                setDataOut(((IService) object)._call(this, getDataIn(), function));
                 return getDataOut().getState() > 0;
             }
 
@@ -86,7 +86,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             }
 
             // 没有缓存时，直接读取并存入缓存
-            setDataOut(((IService) object).call(this, getDataIn(), function));
+            setDataOut(((IService) object)._call(this, getDataIn(), function));
             if (bufferWrite) {
                 log.debug("write to buffer: " + this.getService());
                 try (Jedis jedis = JedisFactory.getJedis()) {

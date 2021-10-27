@@ -6,6 +6,4 @@ public interface IRequestOwner {
 
     HttpServletRequest getRequest();
 
-    void setRequest(HttpServletRequest request);
-
 }

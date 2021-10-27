@@ -6,6 +6,4 @@ public interface IResponseOwner {
 
     HttpServletResponse getResponse();
 
-    void setResponse(HttpServletResponse response);
-
 }

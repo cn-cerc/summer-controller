@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -124,6 +126,30 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                 @Override
                 public void loadToken(String token) {
                     throw new RuntimeException("not support loadToken");
+                }
+
+                @Override
+                public HttpServletRequest getRequest() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public void setRequest(HttpServletRequest request) {
+                    // TODO Auto-generated method stub
+                    
+                }
+
+                @Override
+                public HttpServletResponse getResponse() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+
+                @Override
+                public void setResponse(HttpServletResponse response) {
+                    // TODO Auto-generated method stub
+                    
                 }
             }) {
                 this.setSession(session);

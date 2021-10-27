@@ -164,7 +164,7 @@ public class SecurityPolice {
         String value = getValue(handle, bean, permission, operators);
 
         if (allowGuestUser(value))
-            return bean.call(handle, dataIn, function);
+            return bean._call(handle, dataIn, function);
 
         ISession session = handle.getSession();
         if ((session == null) || (!session.logon()))
@@ -176,7 +176,7 @@ public class SecurityPolice {
             return new DataSet().setMessage(SecurityStopException.getAccessDisabled())
                     .setState(ServiceState.ACCESS_DISABLED);
 
-        return bean.call(handle, dataIn, function);
+        return bean._call(handle, dataIn, function);
     }
 
     private static boolean allowGuestUser(String permission) {

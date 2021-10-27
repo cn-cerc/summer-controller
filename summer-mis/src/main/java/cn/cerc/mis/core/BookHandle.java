@@ -3,6 +3,9 @@ package cn.cerc.mis.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import cn.cerc.core.ISession;
 import cn.cerc.db.core.IHandle;
 
@@ -46,6 +49,30 @@ public class BookHandle implements IHandle {
             @Override
             public void loadToken(String token) {
                 throw new RuntimeException("not support loadToken");
+            }
+
+            @Override
+            public HttpServletRequest getRequest() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void setRequest(HttpServletRequest request) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public HttpServletResponse getResponse() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void setResponse(HttpServletResponse response) {
+                // TODO Auto-generated method stub
+                
             }
         };
 

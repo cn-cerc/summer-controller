@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 
 import cn.cerc.core.ClassResource;
 import cn.cerc.core.ISession;
+import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.other.PageNotFoundException;
-import cn.cerc.mis.security.SecurityStopException;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -33,7 +33,7 @@ public class FormFactory implements ApplicationContextAware {
         Application.setContext(applicationContext);
     }
 
-    public String getFormView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId,
+    public String getView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId,
             String funcCode, String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
@@ -45,15 +45,20 @@ public class FormFactory implements ApplicationContextAware {
             session.setProperty(Application.SessionId, req.getSession().getId());
             session.setProperty(ISession.REQUEST, req);
 
-            IForm form = getForm(req, resp, formId);
+            IForm form = null;
+            String beanId = formId;
+            if (!Utils.isEmpty(beanId) && !"service".equals(beanId)) {
+                if (!context.containsBean(beanId)) {
+                    if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
+                        beanId = beanId.substring(0, 1).toLowerCase() + beanId.substring(1);
+                }
+                if (context.containsBean(beanId))
+                    form = context.getBean(beanId, IForm.class);
+            }
             if (form == null)
                 throw new PageNotFoundException(req.getServletPath());
 
             form.setSession(session);
-            // 设备讯息，此操作需要在获取token前执行，因为setRequest方法中，会把req中的sid，存到session中，否则req.getSession()会取不到token
-            // 防止.net客户端调用时，req已经变成一个新的对象
-            AppClient client = new AppClient();
-            client.setRequest(req);
 
             String token = (String) req.getSession().getAttribute(ISession.TOKEN);
             session.loadToken(token);
@@ -62,18 +67,14 @@ public class FormFactory implements ApplicationContextAware {
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
             req.getSession().setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
-            req.setAttribute("_showMenu_", !AppClient.ee.equals(client.getDevice()));
-
-            form.setClient(client);
+            req.setAttribute("_showMenu_", !AppClient.ee.equals(form.getClient().getDevice()));
             form.setId(formId);
-
             // 传递路径变量
             form.setPathVariables(pathVariables);
 
             // 匿名访问
-            if (form.allowGuestUser()) {
-                return form.getView(funcCode);
-            }
+            if (form.allowGuestUser())
+                return form.call(funcCode);
 
             // 是否登录
             if (!session.logon()) {
@@ -90,14 +91,14 @@ public class FormFactory implements ApplicationContextAware {
 
             // 设备检查
             if (form.isSecurityDevice()) {
-                return form.getView(funcCode);
+                return form.call(funcCode);
             }
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
             switch (deviceCheck.pass(form)) {
             case PASS:
                 log.debug("{}.{}", formId, funcCode);
-                return form.getView(funcCode);
+                return form.call(funcCode);
             case CHECK:
                 return "redirect:" + Application.getConfig().getVerifyDevicePage();
             case LOGIN:
@@ -112,11 +113,13 @@ public class FormFactory implements ApplicationContextAware {
                 }
             default:
                 resp.setContentType("text/html;charset=UTF-8");
-                outputErrorPage(req, resp, new RuntimeException(res.getString(2, "对不起，当前设备被禁止使用！")));
+                IErrorPage error = context.getBean(IErrorPage.class);
+                error.output(req, resp, new RuntimeException(res.getString(2, "对不起，当前设备被禁止使用！")));
                 return null;
             }
         } catch (Exception e) {
-            outputErrorPage(req, resp, e);
+            IErrorPage error = context.getBean(IErrorPage.class);
+            error.output(req, resp, e);
             return null;
         }
     }
@@ -136,61 +139,6 @@ public class FormFactory implements ApplicationContextAware {
         // 输出jsp文件
         String jspFile = String.format("/WEB-INF/%s/%s", Application.getConfig().getFormsPath(), url);
         request.getServletContext().getRequestDispatcher(jspFile).forward(request, response);
-    }
-
-    public void outputErrorPage(HttpServletRequest request, HttpServletResponse response, Throwable e) {
-        if (e instanceof PageNotFoundException)
-            log.warn("client ip {}, page not found: {}", AppClient.getClientIP(request), e.getMessage());
-        else if (e instanceof SecurityStopException)
-            log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
-        else
-            log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
-        Throwable err = e.getCause();
-        if (err == null) {
-            err = e;
-        }
-        IAppErrorPage errorPage = Application.getBean(IAppErrorPage.class);
-        if (errorPage != null) {
-            String result = errorPage.getErrorPage(request, response, err);
-            if (result != null) {
-                String url = String.format("/WEB-INF/%s/%s", Application.getConfig().getFormsPath(), result);
-                try {
-                    request.getServletContext().getRequestDispatcher(url).forward(request, response);
-                } catch (ServletException | IOException e1) {
-                    log.error(e1.getMessage());
-                    e1.printStackTrace();
-                }
-            }
-        } else {
-            log.warn("not define bean: errorPage");
-            log.error(err.getMessage());
-            err.printStackTrace();
-        }
-    }
-
-    private IForm getForm(HttpServletRequest req, HttpServletResponse resp, String formId) {
-        if (formId == null || "".equals(formId) || "service".equals(formId)) {
-            return null;
-        }
-
-        String beanId = formId;
-        if (!context.containsBean(formId)) {
-            if (!formId.substring(0, 2).toUpperCase().equals(formId.substring(0, 2))) {
-                beanId = formId.substring(0, 1).toLowerCase() + formId.substring(1);
-            }
-        }
-
-        if (!context.containsBean(beanId)) {
-            return null;
-        }
-
-        IForm form = context.getBean(beanId, IForm.class);
-        if (form != null) {
-            form.setRequest(req);
-            form.setResponse(resp);
-        }
-
-        return form;
     }
 
 }

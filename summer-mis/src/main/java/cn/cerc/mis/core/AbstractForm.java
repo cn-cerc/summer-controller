@@ -12,24 +12,31 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 
-import cn.cerc.db.core.Handle;
+import cn.cerc.core.ISession;
+import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.SecurityStopException;
+import cn.cerc.mis.security.Webform;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public abstract class AbstractForm extends Handle implements IForm {
+public abstract class AbstractForm implements IForm, InitializingBean {
     private static final Logger log = LoggerFactory.getLogger(AbstractForm.class);
 //    private static final ClassResource res = new ClassResource(AbstractForm.class, SummerMIS.ID);
 //    private static final ClassConfig config = new ClassConfig(AbstractForm.class, SummerMIS.ID);
 
     private String id;
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-    private IClient client;
+    @Autowired
+    private AppClient client;
+
+    @Autowired
+    private ISession session;
+
     private Map<String, String> params = new HashMap<>();
     private String name;
     private String parent;
@@ -46,31 +53,19 @@ public abstract class AbstractForm extends Handle implements IForm {
         this.params = params;
     }
 
-    public void init(AbstractForm owner) {
-        this.setSession(owner.getSession());
-        this.setClient(owner.getClient());
-        this.setRequest(owner.getRequest());
-        this.setResponse(owner.getResponse());
-    }
-
     @Override
     public HttpServletRequest getRequest() {
-        return this.request;
-    }
-
-    @Override
-    public void setRequest(HttpServletRequest request) {
-        this.request = request;
+        return this.getSession().getRequest();
     }
 
     @Override
     public HttpServletResponse getResponse() {
-        return response;
+        return this.getSession().getResponse();
     }
 
     @Override
-    public void setResponse(HttpServletResponse response) {
-        this.response = response;
+    public AppClient getClient() {
+        return this.client;
     }
 
     @Override
@@ -97,20 +92,6 @@ public abstract class AbstractForm extends Handle implements IForm {
     @Deprecated
     public final void setCaption(String name) {
         setName(name);
-    }
-
-    @Override
-    public IClient getClient() {
-        if (client == null) {
-            client = new AppClient();
-            client.setRequest(request);
-        }
-        return client;
-    }
-
-    @Override
-    public void setClient(IClient client) {
-        this.client = client;
     }
 
     @Override
@@ -150,10 +131,9 @@ public abstract class AbstractForm extends Handle implements IForm {
 
     // 执行指定函数，并返回jsp文件名，若自行处理输出则直接返回null
     @Override
-    public String getView(String funcCode) throws NoSuchMethodException, SecurityException, IllegalAccessException,
+    public String call(String funcCode) throws NoSuchMethodException, SecurityException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException, ServletException, IOException {
-        HttpServletResponse response = this.getResponse();
-        HttpServletRequest request = this.getRequest();
+        HttpServletResponse response = getResponse();
         if ("excel".equals(funcCode)) {
             response.setContentType("application/vnd.ms-excel; charset=UTF-8");
             response.addHeader("Content-Disposition", "attachment; filename=excel.csv");
@@ -161,6 +141,7 @@ public abstract class AbstractForm extends Handle implements IForm {
             response.setContentType("text/html;charset=UTF-8");
         }
 
+        HttpServletRequest request = this.getRequest();
         String CLIENTVER = request.getParameter("CLIENTVER");
         if (CLIENTVER != null)
             request.getSession().setAttribute("CLIENTVER", CLIENTVER);
@@ -298,4 +279,25 @@ public abstract class AbstractForm extends Handle implements IForm {
         this.beanName = beanName;
     }
 
+    @Override
+    public ISession getSession() {
+        return this.session;
+    }
+
+    public void setSession(ISession session) {
+        this.session = session;
+    }
+
+    public void afterPropertiesSet() throws Exception {
+        Webform obj = this.getClass().getAnnotation(Webform.class);
+        if (obj != null) {
+            this.name = obj.name();
+            this.module = obj.module();
+            this.parent = obj.parent();
+        }
+        Permission ps = this.getClass().getAnnotation(Permission.class);
+        if (ps != null) {
+            this.permission = ps.value();
+        }
+    }
 }

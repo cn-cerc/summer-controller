@@ -6,11 +6,14 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
 
 import cn.cerc.mis.core.IAppErrorPage;
 
 @Component
+@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class AppErrorPageDefault implements IAppErrorPage {
 
     @Override

@@ -87,10 +87,10 @@ public class Application implements ApplicationContextAware {
     public static ApplicationContext initOnlyFramework() {
         if (context == null) {
             // FIXME: 自定义作用域，临时解决 request, session 问题
-            RequestScope scope = new RequestScope();
 
             AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
                     SummerSpringConfiguration.class);
+            RequestScope scope = new RequestScope();
             context.getBeanFactory().registerScope(RequestScope.REQUEST_SCOPE, scope);
             context.getBeanFactory().registerScope(RequestScope.SESSION_SCOPE, scope);
 
@@ -118,9 +118,19 @@ public class Application implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> requiredType) {
-        if (context.getBeanNamesForType(requiredType).length == 0)
+        String[] beans = context.getBeanNamesForType(requiredType);
+        if (beans.length == 0)
             return null;
-        return context.getBean(requiredType);
+        else if (beans.length == 1)
+            return context.getBean(requiredType);
+        else {
+            String[] path = requiredType.getName().split("\\.");
+            String beanId = path[path.length - 1];
+            if (context.containsBean(beanId)) // 优先XML中注册的：id一般与类名相同
+                return context.getBean(beanId, requiredType);
+            else
+                return context.getBean(beans[0], requiredType);
+        }
     }
 
     public static Object getBean(String beanId) {
