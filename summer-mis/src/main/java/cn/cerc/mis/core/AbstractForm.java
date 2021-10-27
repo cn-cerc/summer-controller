@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.Gson;
-
 import cn.cerc.core.ISession;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
@@ -148,7 +146,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 
         Object result;
         Method method = null;
-        long startTime = System.currentTimeMillis();
         try {
             // 支持路径参数调用，最多3个字符串参数
             switch (this.pathVariables.length) {
@@ -231,22 +228,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         } catch (PageException e) {
             this.setParam("message", e.getMessage());
             return e.getViewFile();
-        } finally {
-            if (method != null)
-                checkTimeout(this, funcCode, startTime);
-        }
-    }
-
-    private void checkTimeout(IForm form, String funcCode, long startTime) {
-        long totalTime = System.currentTimeMillis() - startTime;
-        if (totalTime > 3000) {
-            String[] tmp = form.getClass().getName().split("\\.");
-            String pageCode = tmp[tmp.length - 1] + "." + funcCode;
-            String dataIn = new Gson().toJson(form.getRequest().getParameterMap());
-            if (dataIn.length() > 200) {
-                dataIn = dataIn.substring(0, 200);
-            }
-            log.info("{}, tickCount: {}, dataIn: {}", pageCode, totalTime, dataIn);
         }
     }
 
