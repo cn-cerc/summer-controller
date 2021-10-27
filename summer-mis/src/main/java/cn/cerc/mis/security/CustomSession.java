@@ -199,7 +199,7 @@ public class CustomSession implements ISession {
                 this.permissions = value;
             }
         }
-        log.debug("{}.{}[permissions]", this.getCorpNo(), this.getUserCode(), this.permissions);
+        log.debug("{}.{}[permissions]={}", this.getCorpNo(), this.getUserCode(), this.permissions);
     }
 
     @Override
