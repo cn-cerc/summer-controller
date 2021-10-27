@@ -41,7 +41,9 @@ public abstract class CustomService extends Handle implements IService {
     public DataSet _call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {
         if (function == null || Utils.isEmpty(function.asString()))
             return new DataSet().setMessage("function is null");
-        if ("call".equals(function.asString()))
+        if ("_list".equals(function.asString()))
+            return this._list();
+        if ("_call".equals(function.asString()))
             return new DataSet().setMessage("function is call");
         if (Utils.isEmpty(this.funcCode))
             this.setFuncCode(function.asString());

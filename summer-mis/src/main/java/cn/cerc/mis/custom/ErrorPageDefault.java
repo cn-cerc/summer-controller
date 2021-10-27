@@ -23,18 +23,18 @@ import cn.cerc.mis.security.SecurityStopException;
 @Scope(WebApplicationContext.SCOPE_REQUEST)
 public class ErrorPageDefault implements IErrorPage {
     private static final Logger log = LoggerFactory.getLogger(ErrorPageDefault.class);
-    
+
     @Override
-    public void output( HttpServletRequest request, HttpServletResponse response, Throwable e) {
+    public void output(HttpServletRequest request, HttpServletResponse response, Throwable e) {
+        Throwable err = e.getCause();
         if (e instanceof PageNotFoundException)
             log.warn("client ip {}, page not found: {}", AppClient.getClientIP(request), e.getMessage());
         else if (e instanceof SecurityStopException)
             log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
-        else
-            log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage(), e);
-        Throwable err = e.getCause();
-        if (err == null) {
-            err = e;
+        else {
+            if (err == null) 
+                err = e;
+            log.warn("client ip {}, {}", AppClient.getClientIP(request), err.getMessage(), err);
         }
         IAppErrorPage errorPage = Application.getBean(IAppErrorPage.class);
         if (errorPage != null) {
@@ -50,8 +50,6 @@ public class ErrorPageDefault implements IErrorPage {
             }
         } else {
             log.warn("not define bean: errorPage");
-            log.error(err.getMessage());
-            err.printStackTrace();
         }
     }
 

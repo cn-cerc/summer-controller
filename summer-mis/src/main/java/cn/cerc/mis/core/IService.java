@@ -42,7 +42,7 @@ public interface IService {
                     dataOut.setValue("permission", ps2.value());
             }
         }
-        return dataOut;
+        return dataOut.setState(ServiceState.OK);
     }
 
     default DataSet _call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {

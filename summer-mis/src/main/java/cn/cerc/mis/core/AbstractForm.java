@@ -284,10 +284,12 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         return this.session;
     }
 
+    @Override
     public void setSession(ISession session) {
         this.session = session;
     }
 
+    @Override
     public void afterPropertiesSet() throws Exception {
         Webform obj = this.getClass().getAnnotation(Webform.class);
         if (obj != null) {

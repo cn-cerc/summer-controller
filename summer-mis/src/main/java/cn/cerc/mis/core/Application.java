@@ -128,8 +128,16 @@ public class Application implements ApplicationContextAware {
             String beanId = path[path.length - 1];
             if (context.containsBean(beanId)) // 优先XML中注册的：id一般与类名相同
                 return context.getBean(beanId, requiredType);
-            else
-                return context.getBean(beans[0], requiredType);
+            else {
+                beanId = null;
+                for (String item : beans) {
+                    if (!item.endsWith("Default"))
+                        beanId = item;
+                }
+                if (beanId == null)
+                    beanId = beans[0];
+                return context.getBean(beanId, requiredType);
+            }
         }
     }
 
