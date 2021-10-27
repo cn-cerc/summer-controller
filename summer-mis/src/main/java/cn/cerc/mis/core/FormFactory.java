@@ -74,7 +74,7 @@ public class FormFactory implements ApplicationContextAware {
 
             // 匿名访问
             if (form.allowGuestUser())
-                return form.call(funcCode);
+                return form._call(funcCode);
 
             // 是否登录
             if (!session.logon()) {
@@ -91,14 +91,14 @@ public class FormFactory implements ApplicationContextAware {
 
             // 设备检查
             if (form.isSecurityDevice()) {
-                return form.call(funcCode);
+                return form._call(funcCode);
             }
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
             switch (deviceCheck.pass(form)) {
             case PASS:
                 log.debug("{}.{}", formId, funcCode);
-                return form.call(funcCode);
+                return form._call(funcCode);
             case CHECK:
                 return "redirect:" + Application.getConfig().getVerifyDevicePage();
             case LOGIN:

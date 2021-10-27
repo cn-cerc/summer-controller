@@ -27,7 +27,7 @@ public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBean
     IPage execute() throws Exception;
 
     // 执行指定函数，并返回jsp文件名，若自行处理输出则直接返回null
-    String call(String funcId) throws Exception;
+    String _call(String funcId) throws Exception;
 
     void setPathVariables(String[] pathVariables);
 
@@ -42,6 +42,7 @@ public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBean
         getSession().setProperty(key, value);
     }
 
+    @Override
     HttpServletRequest getRequest();
 
 }
