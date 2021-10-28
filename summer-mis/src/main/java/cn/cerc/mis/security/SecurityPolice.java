@@ -7,16 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.ISession;
 import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IForm;
-import cn.cerc.mis.core.IService;
-import cn.cerc.mis.core.ServiceException;
-import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.core.SupportBeanName;
 
 @Component
@@ -30,8 +25,8 @@ public class SecurityPolice {
     public static boolean check(IHandle handle, Class<?> clazz, Object bean) {
         String[] path = clazz.getName().split("\\.");
 
-        Permission permission = findPermission(clazz.getDeclaredAnnotations());
-        Operators operators = findOperators(clazz.getDeclaredAnnotations());
+        Permission permission = findPermission(clazz.getAnnotations());
+        Operators operators = findOperators(clazz.getAnnotations());
 
         String value = getValue(handle, bean, permission, operators);
         boolean result = validate(handle.getSession().getPermissions(), value);
@@ -47,8 +42,8 @@ public class SecurityPolice {
 
     public static boolean check(IHandle handle, Method method, Object bean) {
         Class<?> clazz = method.getDeclaringClass();
-        Permission permission = findPermission(method.getDeclaredAnnotations(), clazz.getDeclaredAnnotations());
-        Operators operators = findOperators(method.getDeclaredAnnotations(), clazz.getDeclaredAnnotations());
+        Permission permission = findPermission(method.getAnnotations(), clazz.getAnnotations());
+        Operators operators = findOperators(method.getAnnotations(), clazz.getAnnotations());
         String value = getValue(handle, bean, permission, operators);
 
         boolean result = validate(handle.getSession().getPermissions(), value);
@@ -84,23 +79,28 @@ public class SecurityPolice {
     }
 
     public static boolean validate(String permissions, String value) {
-//        log.debug("validate:{} in {}", value, permissions);
-        if (permissions == null)
+        if (value == null || "".equals(value))
             return true;
-        if (value == null)
+        if (value.length() >= Permission.GUEST.length() && value.startsWith(Permission.GUEST))
             return true;
+
         String values = permissions;
-        int site = permissions.indexOf("#");
+        if (Utils.isEmpty(values))
+            values = Permission.GUEST;
+
+        log.debug("validate:{} in {}", value, values);
+        int site = values.indexOf("#");
         if (site > -1)
-            values = permissions.substring(0, site);
+            values = values.substring(0, site);
         String text = value;
         int point = value.indexOf("#");
         if (point > -1)
             text = value.substring(0, point);
+        
         // 支持版本号比对
         if (site > -1 && point > -1) {
             // 取出当前版本标识, 值如：1
-            String version = permissions.substring(site + 1, permissions.length()).trim();
+            String version = values.substring(site + 1, values.length()).trim();
             // 取出授权版本列表，值如：1,3,
             String versions = value.substring(point + 1, value.length()).trim();
             if (version.length() > 0 && versions.length() > 0) {
@@ -153,37 +153,6 @@ public class SecurityPolice {
         }
 
         return false;
-    }
-
-    public static DataSet call(IHandle handle, IService bean, DataSet dataIn, KeyValue function)
-            throws ServiceException {
-        Class<?> clazz = bean.getClass();
-        Permission permission = findPermission(clazz.getDeclaredAnnotations());
-        Operators operators = findOperators(clazz.getDeclaredAnnotations());
-
-        String value = getValue(handle, bean, permission, operators);
-
-        if (allowGuestUser(value))
-            return bean._call(handle, dataIn, function);
-
-        ISession session = handle.getSession();
-        if ((session == null) || (!session.logon()))
-            return new DataSet().setMessage(SecurityStopException.getPleaseLogin())
-                    .setState(ServiceState.ACCESS_DISABLED);
-
-        // 检查权限代码是否匹配
-        if (!validate(handle.getSession().getPermissions(), value))
-            return new DataSet().setMessage(SecurityStopException.getAccessDisabled())
-                    .setState(ServiceState.ACCESS_DISABLED);
-
-        return bean._call(handle, dataIn, function);
-    }
-
-    private static boolean allowGuestUser(String permission) {
-        if (Permission.GUEST.length() > permission.length())
-            return false;
-
-        return permission.startsWith(Permission.GUEST);
     }
 
     private static boolean compareMaster(String master, String request) {

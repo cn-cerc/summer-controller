@@ -3,25 +3,12 @@ package cn.cerc.mis.core;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
 
 public class PermissionTest {
-    private SecurityPolice police;
-
-    @Before
-    public void setUp() throws Exception {
-        police = new SecurityPolice();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        police = null;
-    }
 
     @Test
     public void testCheck_empty() {
