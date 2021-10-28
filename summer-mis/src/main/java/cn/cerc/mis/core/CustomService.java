@@ -128,10 +128,10 @@ public abstract class CustomService extends Handle implements IService {
             Throwable err = e.getCause() != null ? e.getCause() : e;
             String msg = err.getMessage() == null ? "error is null" : err.getMessage();
             if ((err instanceof ServiceException)) {
-                return new DataSet().setState(ServiceState.ERROR).setMessage(msg);
+                return dataOut.setState(ServiceState.ERROR).setMessage(msg);
             } else {
                 log.error(msg, err);
-                return new DataSet().setState(ServiceState.ERROR).setMessage(msg);
+                return dataOut.setState(ServiceState.ERROR).setMessage(msg);
             }
         }
     }

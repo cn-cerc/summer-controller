@@ -72,6 +72,8 @@ public class CustomSession implements ISession {
             }
             return;
         }
+        if (ISession.REQUEST.equals(key))
+            this.request = (HttpServletRequest) value;
         params.put(key, value);
     }
 
