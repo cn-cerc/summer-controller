@@ -15,9 +15,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import cn.cerc.core.ClassConfig;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
-import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mssql.MssqlServer;
@@ -150,6 +150,11 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                 public void setResponse(HttpServletResponse response) {
                     // TODO Auto-generated method stub
                     
+                }
+
+                @Override
+                public String getPermissions() {
+                    return null;
                 }
             }) {
                 this.setSession(session);

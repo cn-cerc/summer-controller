@@ -53,26 +53,27 @@ public class BookHandle implements IHandle {
 
             @Override
             public HttpServletRequest getRequest() {
-                // TODO Auto-generated method stub
-                return null;
+                return owner.getRequest();
             }
 
             @Override
             public void setRequest(HttpServletRequest request) {
-                // TODO Auto-generated method stub
                 
             }
 
             @Override
             public HttpServletResponse getResponse() {
-                // TODO Auto-generated method stub
-                return null;
+                return owner.getResponse();
             }
 
             @Override
             public void setResponse(HttpServletResponse response) {
-                // TODO Auto-generated method stub
                 
+            }
+
+            @Override
+            public String getPermissions() {
+                return owner.getPermissions();
             }
         };
 

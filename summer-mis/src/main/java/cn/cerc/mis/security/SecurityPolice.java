@@ -44,8 +44,11 @@ public class SecurityPolice {
         Class<?> clazz = method.getDeclaringClass();
         Permission permission = findPermission(method.getAnnotations(), clazz.getAnnotations());
         Operators operators = findOperators(method.getAnnotations(), clazz.getAnnotations());
+        if (log.isDebugEnabled()) {
+            log.debug("{}.{}[permissions]={}", handle.getCorpNo(), handle.getUserCode(),
+                    handle.getSession().getPermissions());
+        }
         String value = getValue(handle, bean, permission, operators);
-
         boolean result = validate(handle.getSession().getPermissions(), value);
         if (log.isDebugEnabled()) {
             String[] path = clazz.getName().split("\\.");
@@ -89,18 +92,21 @@ public class SecurityPolice {
             values = Permission.GUEST;
 
         log.debug("validate:{} in {}", value, values);
+        String version = null;
         int site = values.indexOf("#");
-        if (site > -1)
-            values = values.substring(0, site);
+        if (site > -1) {
+            String tmp = values;
+            values = tmp.substring(0, site);
+            // 取出当前版本标识, 值如：1
+            version = tmp.substring(site + 1, tmp.length()).trim();
+        }
         String text = value;
         int point = value.indexOf("#");
         if (point > -1)
             text = value.substring(0, point);
-        
+
         // 支持版本号比对
         if (site > -1 && point > -1) {
-            // 取出当前版本标识, 值如：1
-            String version = values.substring(site + 1, values.length()).trim();
             // 取出授权版本列表，值如：1,3,
             String versions = value.substring(point + 1, value.length()).trim();
             if (version.length() > 0 && versions.length() > 0) {
