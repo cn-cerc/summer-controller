@@ -17,13 +17,13 @@ public interface IErrorPage {
 
     default void output(HttpServletRequest request, HttpServletResponse response, Throwable e) {
         Throwable err = e.getCause();
+        if (err == null)
+            err = e;
         if (e instanceof PageNotFoundException)
             _log.warn("client ip {}, page not found: {}", AppClient.getClientIP(request), e.getMessage());
         else if (e instanceof SecurityStopException)
             _log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         else {
-            if (err == null)
-                err = e;
             _log.warn("client ip {}, {}", AppClient.getClientIP(request), err.getMessage(), err);
         }
         String result = this.getErrorPage(request, response, err);
