@@ -3,6 +3,7 @@ package cn.cerc.mis.core;
 import javax.servlet.http.HttpServletRequest;
 
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.security.Permission;
 
 public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBeanName {
 
@@ -44,5 +45,10 @@ public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBean
 
     @Override
     HttpServletRequest getRequest();
+
+    default boolean _isAllowGuest() {
+        Permission ps = this.getClass().getAnnotation(Permission.class);
+        return ps != null && Permission.GUEST.equals(ps.value());
+    }
 
 }

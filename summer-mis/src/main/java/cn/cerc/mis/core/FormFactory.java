@@ -19,7 +19,6 @@ import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.other.PageNotFoundException;
-import cn.cerc.mis.security.Permission;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -74,8 +73,7 @@ public class FormFactory implements ApplicationContextAware {
             form.setPathVariables(pathVariables);
 //
 //            // 匿名访问
-            Permission ps = form.getClass().getAnnotation(Permission.class);
-            if (ps != null && Permission.GUEST.equals(ps.value()))
+            if (form._isAllowGuest())
                 return form._call(funcCode);
 
             // 是否登录
