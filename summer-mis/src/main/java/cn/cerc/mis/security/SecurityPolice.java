@@ -18,10 +18,6 @@ import cn.cerc.mis.core.SupportBeanName;
 public class SecurityPolice {
     private static final Logger log = LoggerFactory.getLogger(SecurityPolice.class);
 
-    public static boolean check(IHandle handle, Class<?> clazz) {
-        return check(handle, clazz, null);
-    }
-
     public static boolean check(IHandle handle, Class<?> clazz, Object bean) {
         String[] path = clazz.getName().split("\\.");
 
