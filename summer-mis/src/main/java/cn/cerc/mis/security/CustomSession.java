@@ -108,8 +108,8 @@ public class CustomSession implements ISession {
         }
 
         if (MssqlServer.SessionId.equals(key)) {
-            MysqlServerMaster obj = new MysqlServerMaster();
-            connections.put(MysqlServerMaster.SessionId, obj);
+            MssqlServer obj = new MssqlServer();
+            connections.put(MssqlServer.SessionId, obj);
             return connections.get(key);
         }
 
