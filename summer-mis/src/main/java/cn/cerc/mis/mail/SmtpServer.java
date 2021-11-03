@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ClassConfig;
-import cn.cerc.core.Datetime;
 import cn.cerc.core.Utils;
 
 public class SmtpServer {
@@ -126,34 +125,4 @@ public class SmtpServer {
         return mail;
     }
 
-    public static void main(String[] args) {
-        sendAliyun();
-//        sendQQ();
-    }
-
-    private static void sendAliyun() {
-        Properties prop = new Properties();
-        prop.setProperty(MAIL_SMTP_HOST, "smtp.mxhichina.com");
-        prop.setProperty(MAIL_ACCOUNT, "support@diteng.site");
-//        prop.setProperty(MAIL_ALIAS, "地藤管家");
-//        prop.setProperty(MAIL_PASSWORD, "");
-//        prop.setProperty(MAIL_SMTP_DEBUG, "true");
-
-        Mail mail = new SmtpServer(prop).createMail("l1091462907@qq.com", "itjun");
-//        mail.addFile("d:\\a.txt");
-//        mail.addFile("d:\\b.txt");
-        mail.send("test mail " + new Datetime().toString(), "1");
-    }
-
-    private static void sendQQ() {
-        Properties prop = new Properties();
-        prop.setProperty(MAIL_SMTP_HOST, "smtp.exmail.qq.com");
-        prop.setProperty(MAIL_ACCOUNT, "develop@mimrc.com");
-        prop.setProperty(MAIL_PASSWORD, "Mimrc2011");
-        prop.setProperty(MAIL_ALIAS, "地藤管家");
-        prop.setProperty(MAIL_SMTP_DEBUG, "true");
-
-        Mail aliyunMail = new SmtpServer(prop).createMail("l1091462907@qq.com", "itjun");
-        aliyunMail.send("test mail " + new Datetime().toString(), "1");
-    }
 }
