@@ -28,10 +28,10 @@ public class SegmentQuery extends Handle {
     }
 
     public boolean enable(String fromField, String toField) {
-        return enable(fromField, toField, DateType.Month);
+        return enable(fromField, toField, 30);// 默认以一个月30天区间分段查询
     }
 
-    public boolean enable(String fromField, String toField, DateType dateType) {
+    public boolean enable(String fromField, String toField, int offset) {
         DataRow headIn = dataIn.getHead();
         if (!headIn.getBoolean("segmentQuery"))
             return false;
@@ -46,10 +46,10 @@ public class SegmentQuery extends Handle {
                 buff.setValue("curBegin", headIn.getDatetime(fromField));
                 buff.setValue("curEnd", headIn.getDatetime(fromField).toDayEnd());
                 headIn.setValue(fromField, buff.getDatetime("beginDate"));
-                headIn.setValue(toField, headIn.getDatetime(fromField).inc(dateType, 1).toDayEnd());
+                headIn.setValue(toField, headIn.getDatetime(fromField).inc(DateType.Day, offset).toDayEnd());
             } else {
                 headIn.setValue(fromField, buff.getDatetime("curEnd").inc(DateType.Day, 1).toDayStart());
-                headIn.setValue(toField, buff.getDatetime("curEnd").inc(dateType, 1).toDayEnd());
+                headIn.setValue(toField, buff.getDatetime("curEnd").inc(DateType.Day, offset).toDayEnd());
             }
 
             if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) > 0) {
