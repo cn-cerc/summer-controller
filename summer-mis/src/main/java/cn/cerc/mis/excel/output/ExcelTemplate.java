@@ -35,7 +35,7 @@ public class ExcelTemplate {
     private final DateFormat df1 = new DateFormat("yyyy-MM-dd");
     private final DateFormat df2 = new DateFormat("yyyy-MM-dd HH:mm:ss");
     private int row = 0;
-    private DecimalFormat decimalformat = new DecimalFormat(ApplicationConfig.getPattern());
+    private final DecimalFormat decimalformat = new DecimalFormat(ApplicationConfig.getPattern());
 
     public String getFileName() {
         return fileName;

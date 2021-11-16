@@ -9,6 +9,7 @@ import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class BatchFormTemplate extends FormTemplate {
                     row++;
                     Object val = footer.getItems().get(field);
                     sheet1.addCell(new Label(0, row, field));
-                    sheet1.addCell(new Label(1, row, df.format(val)));
+                    sheet1.addCell(new Label(1, row, df.format(new BigDecimal(Double.toString((Double) val)))));
                 }
             });
 

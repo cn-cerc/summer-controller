@@ -2,22 +2,22 @@ package cn.cerc.mis.excel.input;
 
 import cn.cerc.core.Utils;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
 
 public class ImportNumberColumn extends ImportColumn {
+
     @Override
     public Object getValue() {
-        return Utils.strToDoubleDef(new DecimalFormat("0.######").format(getRecord().getDouble(getCode())), 0);
+        double value = getRecord().getDouble(getCode());
+        return Utils.formatFloat("0.######", new BigDecimal(Double.toString(value)).doubleValue());
     }
 
     @Override
     public boolean validate(int row, int col, String value) {
-        String result = "";
+        String text = "0";
         if (!"".equals(value)) {
-            result = String.valueOf(Math.abs(Double.parseDouble(value)));
-        } else {
-            result = "0";
+            text = String.valueOf(Math.abs(Double.parseDouble(value)));
         }
-        return Utils.isNumeric(Utils.formatFloat("0.######", Double.parseDouble(result)));
+        return Utils.isNumeric(Utils.formatFloat("0.######", new BigDecimal(text).doubleValue()));
     }
 }
