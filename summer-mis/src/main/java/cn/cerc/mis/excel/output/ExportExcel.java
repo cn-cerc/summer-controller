@@ -67,10 +67,10 @@ public class ExportExcel implements IHandle {
 
         // 创建工作薄
         WritableWorkbook workbook;
-        OutputStream os = null;
+        OutputStream output = null;
         if (!saveLocal) {
             // 取得输出流
-            os = response.getOutputStream();
+            output = response.getOutputStream();
             response.reset();// 清空输出流
 
             // 下面是对中文文件名的处理
@@ -78,7 +78,7 @@ public class ExportExcel implements IHandle {
             String fname = URLEncoder.encode(template.getFileName(), "UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + fname + ".xls");
             response.setContentType("application/msexcel");// 定义输出类型
-            workbook = Workbook.createWorkbook(os);
+            workbook = Workbook.createWorkbook(output);
         } else {
             String path = LocalPath + "\\" + template.getFileName() + ".xls";
             workbook = Workbook.createWorkbook(new File(path));
@@ -91,8 +91,8 @@ public class ExportExcel implements IHandle {
         // 把创建的内容写入到输出流中，并关闭输出流
         workbook.write();
         workbook.close();
-        if (os != null) {
-            os.close();
+        if (output != null) {
+            output.close();
         }
     }
 
