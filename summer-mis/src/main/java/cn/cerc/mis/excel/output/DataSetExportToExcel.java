@@ -15,11 +15,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
 
+/**
+ * 将DataSet数据转换成Excel文件流
+ */
 public class DataSetExportToExcel {
 
-    public int row = 0;
-
-    public void output(DataSet dataSet, OutputStream outputstream) throws IOException, WriteException {
+    public static void output(DataSet dataSet, OutputStream outputstream) throws IOException, WriteException {
+        int row = 0;
         // 创建工作簿
         WritableWorkbook workbook = Workbook.createWorkbook(outputstream);
 
@@ -40,14 +42,14 @@ public class DataSetExportToExcel {
         while (dataSet.fetch()) {
             row++;
             DataRow dataRow = dataSet.getCurrent();
-            build(sheet, dataRow, metas);
+            build(sheet, dataRow, metas, row);
         }
 
         workbook.write();
         workbook.close();
     }
 
-    private void build(WritableSheet sheet, DataRow dataRow, HashSet<FieldMeta> metas) throws WriteException {
+    private static void build(WritableSheet sheet, DataRow dataRow, HashSet<FieldMeta> metas, int row) throws WriteException {
         int i = 0;
         for (FieldMeta meta : metas) {
             String type = meta.getType();

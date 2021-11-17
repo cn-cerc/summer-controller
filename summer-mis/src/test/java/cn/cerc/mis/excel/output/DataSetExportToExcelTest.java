@@ -19,8 +19,7 @@ public class DataSetExportToExcelTest {
         try {
             File file = new File("test.xls");
             FileOutputStream outputStream = new FileOutputStream(file);
-            DataSetExportToExcel excel = new DataSetExportToExcel();
-            excel.output(dataSet, outputStream);
+            DataSetExportToExcel.output(dataSet, outputStream);
             outputStream.close();
         } catch (IOException | WriteException e) {
             e.printStackTrace();
