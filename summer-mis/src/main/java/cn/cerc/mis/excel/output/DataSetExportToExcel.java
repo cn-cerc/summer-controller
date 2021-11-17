@@ -21,6 +21,9 @@ import java.util.HashSet;
 public class DataSetExportToExcel {
 
     public static void output(DataSet dataSet, OutputStream outputstream) throws IOException, WriteException {
+        dataSet.setMetaInfo(true);
+        dataSet.buildMeta();
+
         int row = 0;
         // 创建工作簿
         WritableWorkbook workbook = Workbook.createWorkbook(outputstream);
