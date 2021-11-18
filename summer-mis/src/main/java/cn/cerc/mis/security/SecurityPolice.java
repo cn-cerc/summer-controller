@@ -247,7 +247,11 @@ public class SecurityPolice {
         } else if (handle != null) {
             if (bean != null && bean instanceof IForm) {
                 IForm form = (IForm) bean;
-                result = form.getPermission() + "#" + form.getParam("verlist", "");
+                String verlist = form.getParam("verlist", "");
+                result = form.getPermission();
+                if (!Utils.isEmpty(verlist)) {
+                    result = result + "#" + form.getParam("verlist", "");
+                }
             }
             if ("".equals(result)) {
                 String[] path = bean.getClass().getName().split("\\.");
