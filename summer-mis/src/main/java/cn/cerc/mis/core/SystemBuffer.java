@@ -151,4 +151,26 @@ public class SystemBuffer {
 
     }
 
+    /**
+     * key = corpNo + machineCode
+     */
+    public enum PrintService implements IBufferKey {
+        MachineCode;
+
+        @Override
+        public int getStartingPoint() {
+            return 60;
+        }
+
+        @Override
+        public int getMinimumNumber() {
+            return 1;
+        }
+
+        @Override
+        public int getMaximumNumber() {
+            return 2;
+        }
+
+    }
 }
