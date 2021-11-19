@@ -250,7 +250,7 @@ public class SecurityPolice {
                 String verlist = form.getParam("verlist", "");
                 result = form.getPermission();
                 if (!Utils.isEmpty(verlist)) {
-                    result = result + "#" + form.getParam("verlist", "");
+                    result = result + "#" + verlist;
                 }
             }
             if ("".equals(result)) {
