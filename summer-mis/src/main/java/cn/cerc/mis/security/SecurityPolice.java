@@ -29,7 +29,7 @@ public class SecurityPolice {
 
         if (log.isDebugEnabled()) {
             String beanId = path[path.length - 1];
-            if (bean != null && bean instanceof SupportBeanName)
+            if (bean instanceof SupportBeanName)
                 beanId = ((SupportBeanName) bean).getBeanName();
             log.debug("check Class:{} ${}={}", beanId, value, result ? "pass" : "stop");
         }
@@ -49,7 +49,7 @@ public class SecurityPolice {
         if (log.isDebugEnabled()) {
             String[] path = clazz.getName().split("\\.");
             String beanId = path[path.length - 1];
-            if (bean != null && bean instanceof SupportBeanName)
+            if (bean instanceof SupportBeanName)
                 beanId = ((SupportBeanName) bean).getBeanName();
             log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
@@ -80,7 +80,7 @@ public class SecurityPolice {
     public static boolean validate(String permissions, String value) {
         if (value == null || "".equals(value))
             return true;
-        if (value.length() >= Permission.GUEST.length() && value.startsWith(Permission.GUEST))
+        if (value.startsWith(Permission.GUEST))
             return true;
 
         String values = permissions;
@@ -94,7 +94,7 @@ public class SecurityPolice {
             String tmp = values;
             values = tmp.substring(0, site);
             // 取出当前版本标识, 值如：1
-            version = tmp.substring(site + 1, tmp.length()).trim();
+            version = tmp.substring(site + 1).trim();
         }
         String text = value;
         int point = value.indexOf("#");
@@ -104,7 +104,7 @@ public class SecurityPolice {
         // 支持版本号比对
         if (site > -1 && point > -1) {
             // 取出授权版本列表，值如：1,3,
-            String versions = value.substring(point + 1, value.length()).trim();
+            String versions = value.substring(point + 1).trim();
             if (version.length() > 0 && versions.length() > 0) {
                 boolean pass = false;
                 for (String item : versions.split("\\,")) {
@@ -231,7 +231,7 @@ public class SecurityPolice {
             result = permission.value();
             if (!"".equals(result)) {
                 if (operators != null) {
-                    StringBuffer sb = new StringBuffer(result);
+                    StringBuilder sb = new StringBuilder(result);
                     sb.append("[");
                     int count = 0;
                     for (String detail : operators.value()) {
@@ -245,18 +245,17 @@ public class SecurityPolice {
                 }
             }
         } else if (handle != null) {
-            if (bean != null && bean instanceof IForm) {
+            if (bean instanceof IForm) {
                 IForm form = (IForm) bean;
-                String verlist = form.getParam("verlist", "");
+                String verlist = form.getParam("verlist", "");// TODO: 2021/11/19 增加独立方法获取，扫描注解、xml、mysql 
                 result = form.getPermission();
                 if (!Utils.isEmpty(verlist)) {
                     result = result + "#" + verlist;
                 }
             }
             if ("".equals(result)) {
-                String[] path = bean.getClass().getName().split("\\.");
-                String beanId = path[path.length - 1];
-                if (bean != null && bean instanceof SupportBeanName) {
+                String beanId;
+                if (bean instanceof SupportBeanName) {
                     beanId = ((SupportBeanName) bean).getBeanName();
                     defaultValue = Permission.ADMIN;
                     SecurityService security = Application.getBean(SecurityService.class);

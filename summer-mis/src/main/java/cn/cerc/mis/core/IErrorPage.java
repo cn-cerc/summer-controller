@@ -13,7 +13,7 @@ import cn.cerc.mis.other.PageNotFoundException;
 import cn.cerc.mis.security.SecurityStopException;
 
 public interface IErrorPage {
-    static final Logger _log = LoggerFactory.getLogger(IErrorPage.class);
+    Logger _log = LoggerFactory.getLogger(IErrorPage.class);
 
     default void output(HttpServletRequest request, HttpServletResponse response, Throwable e) {
         Throwable err = e.getCause();
@@ -24,7 +24,7 @@ public interface IErrorPage {
         else if (e instanceof SecurityStopException)
             _log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         else {
-            _log.warn("client ip {}, {}", AppClient.getClientIP(request), err.getMessage(), err);
+            _log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         }
         String result = this.getErrorPage(request, response, err);
         if (result != null) {
@@ -37,6 +37,6 @@ public interface IErrorPage {
             }
         }
     }
-    
+
     String getErrorPage(HttpServletRequest req, HttpServletResponse resp, Throwable error);
 }
