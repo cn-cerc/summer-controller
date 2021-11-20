@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ISession;
 import cn.cerc.core.LanguageResource;
-import cn.cerc.db.jiguang.JiguangConnection;
 import cn.cerc.db.mongo.MongoDB;
 import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlServerMaster;
@@ -130,13 +129,6 @@ public class CustomSession implements ISession {
             connections.put(MongoDB.SessionId, obj);
             return connections.get(key);
         }
-
-        if (JiguangConnection.sessionId.equals(key)) {
-            JiguangConnection obj = new JiguangConnection();
-            connections.put(JiguangConnection.sessionId, obj);
-            return connections.get(key);
-        }
-
         return null;
     }
 
