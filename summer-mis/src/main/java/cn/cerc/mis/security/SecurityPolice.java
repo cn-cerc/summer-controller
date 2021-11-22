@@ -72,7 +72,7 @@ public class SecurityPolice {
             StackTraceElement el = stackTrace[2];
             String[] path = el.getClassName().split("\\.");
             String beanId = path[path.length - 1];
-            log.debug("checkValue:{}.{} ${}={}", beanId, el.getMethodName(), data.toString(), result ? "pass" : "stop");
+            log.debug("checkValue:{}.{} ${}={}", beanId, el.getMethodName(), data, result ? "pass" : "stop");
         }
         return result;
     }
@@ -168,9 +168,7 @@ public class SecurityPolice {
         if (master.endsWith(".*")) {
             String flag = master.substring(0, master.length() - 2);
             if (request.length() >= flag.length()) {
-                if (request.substring(0, flag.length()).equals(flag)) {
-                    return true;
-                }
+                return request.startsWith(flag);
             }
         }
         return false;
@@ -210,8 +208,7 @@ public class SecurityPolice {
                     break;
                 }
             }
-            if (pass)
-                return true;
+            return pass;
         }
         return false;
     }
