@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import cn.cerc.core.LanguageResource;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
@@ -112,12 +113,13 @@ public class ExportChinese {
         // FIXME: 此处应该进一步抽象处理
         ISystemTable systemTable = Application.getSystemTable();
         MysqlQuery ds = new MysqlQuery(handle);
-        ds.add("select * from %s", systemTable.getLangDict());
+        ds.add("select * from %s", systemTable.getLanguage());
         ds.open();
         for (String text : this.getItems()) {
-            if (!ds.locate("cn_", text)) {
+            if (!ds.locate("Key_", text)) {
                 ds.append();
-                ds.setValue("cn_", text);
+                ds.setValue("Key_", text);
+                ds.setValue("Lang_", LanguageResource.LANGUAGE_CN);
                 ds.post();
             }
         }

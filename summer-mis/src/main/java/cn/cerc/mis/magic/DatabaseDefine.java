@@ -14,7 +14,7 @@ import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.security.SessionDefault;
+import cn.cerc.mis.security.CustomSession;
 
 public class DatabaseDefine implements Iterable<TableDefine> {
     private static final Logger log = LoggerFactory.getLogger(DatabaseDefine.class);
@@ -27,7 +27,7 @@ public class DatabaseDefine implements Iterable<TableDefine> {
 
     static {
         if (tables.size() == 0) {
-            ISession session = new SessionDefault();
+            ISession session = new CustomSession();
             ClassConfig config = new ClassConfig(DatabaseDefine.class, SummerMIS.ID);
 
             String dbName = config.getString("rds.database", null);
