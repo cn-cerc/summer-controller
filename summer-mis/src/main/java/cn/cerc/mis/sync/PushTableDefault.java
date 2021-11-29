@@ -42,7 +42,7 @@ public class PushTableDefault implements IPushProcesser {
             return false;
         query.getOperator().setUpdateKey("");
         query.append();
-        query.copyRecord(record, query.getFieldDefs());
+        query.copyRecord(record, query.fields());
         query.post();
         return true;
     }
@@ -80,7 +80,7 @@ public class PushTableDefault implements IPushProcesser {
             return false;
 
         query.edit();
-        query.copyRecord(record, query.getFieldDefs());
+        query.copyRecord(record, query.fields());
         query.post();
         return true;
     }
@@ -97,13 +97,13 @@ public class PushTableDefault implements IPushProcesser {
                 return false;
             query.getOperator().setUpdateKey("");
             query.append();
-            query.copyRecord(record, query.getFieldDefs());
+            query.copyRecord(record, query.fields());
             query.post();
         } else {
             if (!this.onUpdate(query.current(), record))
                 return false;
             query.edit();
-            query.copyRecord(record, query.getFieldDefs());
+            query.copyRecord(record, query.fields());
             query.post();
         }
         return true;

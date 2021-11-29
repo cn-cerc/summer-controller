@@ -45,7 +45,7 @@ public abstract class ExcelHelper implements AutoCloseable {
             // 输出列头
             int row = 0;
             int col = 0;
-            for (FieldMeta meta : dataSet.getFieldDefs()) {
+            for (FieldMeta meta : dataSet.fields()) {
                 String value = meta.getName() != null ? meta.getName() : meta.getCode();
                 Label item = new Label(col++, row, value);
                 sheet.addCell(item);
@@ -55,7 +55,7 @@ public abstract class ExcelHelper implements AutoCloseable {
             while (dataSet.fetch()) {
                 row++;
                 col = 0;
-                for (FieldMeta meta : dataSet.getFieldDefs()) {
+                for (FieldMeta meta : dataSet.fields()) {
                     String value = dataSet.getString(meta.getCode());
                     Label item = new Label(col++, row, value);
                     sheet.addCell(item);
