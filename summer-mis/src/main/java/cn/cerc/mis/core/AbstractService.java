@@ -18,7 +18,7 @@ public abstract class AbstractService extends Handle implements IService {
         IStatus status = execute(dataIn, dataOut);
         if (dataOut.state() == ServiceState.ERROR)
             dataOut.setState(status.getState());
-        if (dataOut.getMessage() == null)
+        if (dataOut.message() == null)
             dataOut.setMessage(status.getMessage());
         // 防止调用者修改并回写到数据库
         dataOut.disableStorage();

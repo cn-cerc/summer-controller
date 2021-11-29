@@ -113,7 +113,7 @@ public abstract class CustomService extends Handle implements IService {
                     IStatus result = (IStatus) method.invoke(this, dataIn, dataOut);
                     if (dataOut.state() == ServiceState.ERROR)
                         dataOut.setState(result.getState());
-                    if (dataOut.getMessage() == null)
+                    if (dataOut.message() == null)
                         dataOut.setMessage(result.getMessage());
                 } else {
                     dataOut = (DataSet) method.invoke(this, handle, dataIn);
@@ -154,7 +154,7 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     public String getMessage() {
-        return getDataOut().getMessage();
+        return getDataOut().message();
     }
 
     public void setMessage(String message) {

@@ -103,7 +103,7 @@ public class RemoteService extends Handle implements IServiceProxy {
 
     @Override
     public final String getMessage() {
-        return getDataOut().getMessage();
+        return getDataOut().message();
     }
 
     public final void setMessage(String message) {

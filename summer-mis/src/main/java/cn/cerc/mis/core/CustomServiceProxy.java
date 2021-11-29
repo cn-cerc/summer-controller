@@ -42,8 +42,8 @@ public abstract class CustomServiceProxy extends Handle {
     }
 
     public final String getMessage() {
-        if (dataOut != null && dataOut.getMessage() != null) {
-            return dataOut.getMessage().replaceAll("'", "\"");
+        if (dataOut != null && dataOut.message() != null) {
+            return dataOut.message().replaceAll("'", "\"");
         } else {
             return null;
         }
