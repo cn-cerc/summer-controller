@@ -1,15 +1,17 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.Datetime;
-import cn.cerc.core.FieldMeta;
-import com.google.gson.Gson;
-import jxl.write.WriteException;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import org.junit.Test;
+
+import com.google.gson.Gson;
+
+import cn.cerc.core.DataSet;
+import cn.cerc.core.Datetime;
+import cn.cerc.core.FieldMeta;
+import jxl.write.WriteException;
 
 public class DataSetExportToExcelTest {
 
@@ -50,7 +52,7 @@ public class DataSetExportToExcelTest {
 
         dataSet.buildMeta();
         dataSet.setMetaInfo(true);
-        System.out.println(dataSet.toJson());
+        System.out.println(dataSet.json());
         for (FieldMeta meta : dataSet.fields()) {
             System.out.println(new Gson().toJson(meta));
         }

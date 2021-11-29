@@ -166,10 +166,10 @@ public class AsyncService implements IServiceProxy {
 
         content.put("service", this.service);
         if (this.dataIn != null) {
-            content.put("dataIn", dataIn.toJson());
+            content.put("dataIn", dataIn.json());
         }
         if (this.dataOut != null) {
-            content.put("dataOut", dataOut.toJson());
+            content.put("dataOut", dataOut.json());
         }
         content.put("timer", this.timer);
         content.put("process", this.process.ordinal());

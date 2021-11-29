@@ -39,7 +39,7 @@ public class SegmentQuery extends Handle {
         HttpServletRequest request = (HttpServletRequest) this.getSession().getProperty(ISession.REQUEST);
         String sessionId = request.getSession().getId();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, this.getClass().getName(), sessionId,
-                MD5.get(dataIn.toJson()))) {
+                MD5.get(dataIn.json()))) {
             if (buff.isNull()) {
                 buff.setValue("beginDate", headIn.getDatetime(fromField));
                 buff.setValue("endDate", headIn.getDatetime(toField).toDayEnd());

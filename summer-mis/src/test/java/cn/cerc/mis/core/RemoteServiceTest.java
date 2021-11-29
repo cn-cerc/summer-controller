@@ -53,7 +53,7 @@ public class RemoteServiceTest {
         DataSet dataIn = new DataSet();
         dataIn.head().setValue("CusCorpNo_", "155174");
         dataIn.head().setValue("MaxRecord_", "3");
-        System.out.println(dataIn.toJson());
+        System.out.println(dataIn.json());
     }
 
 }
