@@ -58,7 +58,7 @@ public class PushTableDefault implements IPushProcesser {
             return false;
         }
 
-        if (!this.onDelete(query.getCurrent()))
+        if (!this.onDelete(query.current()))
             return false;
 
         query.delete();
@@ -76,7 +76,7 @@ public class PushTableDefault implements IPushProcesser {
             return false;
         }
 
-        if (!this.onUpdate(query.getCurrent(), record))
+        if (!this.onUpdate(query.current(), record))
             return false;
 
         query.edit();
@@ -100,7 +100,7 @@ public class PushTableDefault implements IPushProcesser {
             query.copyRecord(record, query.getFieldDefs());
             query.post();
         } else {
-            if (!this.onUpdate(query.getCurrent(), record))
+            if (!this.onUpdate(query.current(), record))
                 return false;
             query.edit();
             query.copyRecord(record, query.getFieldDefs());

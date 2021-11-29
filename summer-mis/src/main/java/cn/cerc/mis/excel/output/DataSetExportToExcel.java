@@ -44,7 +44,7 @@ public class DataSetExportToExcel {
         dataSet.first();
         while (dataSet.fetch()) {
             row++;
-            DataRow dataRow = dataSet.getCurrent();
+            DataRow dataRow = dataSet.current();
             build(sheet, dataRow, metas, row);
         }
 

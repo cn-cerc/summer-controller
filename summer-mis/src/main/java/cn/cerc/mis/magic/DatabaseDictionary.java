@@ -298,7 +298,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
             DataSet dataIn = items.get(keyName);
             if (dataIn == null && !Utils.isEmpty(keyName)) {
                 dataIn = new DataSet();
-                dataIn.getHead().copyValues(ds.getCurrent(), "Non_unique", "Key_name");
+                dataIn.getHead().copyValues(ds.current(), "Non_unique", "Key_name");
                 items.put(keyName, dataIn);
                 oldKeyName = keyName;
             } else {

@@ -116,7 +116,7 @@ public class PrintTemplate extends Handle {
         // 表格内容行数的填充
         dataSet.first();
         while (dataSet.fetch()) {
-            DataRow record = dataSet.getCurrent();
+            DataRow record = dataSet.current();
             for (Column column : this.getColumns()) {
                 String field = column.getCode();
                 pdfTableContentCell.setPhrase(new Paragraph(record.getString(field), f8));
