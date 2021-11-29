@@ -36,19 +36,19 @@ public class ProcessQueueDefault extends AbstractTask {
         log.warn("ProcessQueueDefault {}", query.toJson());
 
         // 建立服务执行环境
-        String corpNo = query.getHead().getString("_corpNo_");
+        String corpNo = query.head().getString("_corpNo_");
         if ("".equals(corpNo)) {
             log.error("_corpNo_ is null");
             return;
         }
 
-        String userCode = query.getHead().getString("_userCode_");
+        String userCode = query.head().getString("_userCode_");
         if ("".equals(userCode)) {
             log.error("_userCode_ is null");
             return;
         }
 
-        String service = query.getHead().getString("_service_");
+        String service = query.head().getString("_service_");
         if ("".equals(service)) {
             log.error("_service_ is null");
             return;
@@ -62,10 +62,10 @@ public class ProcessQueueDefault extends AbstractTask {
         svr.setService(service);
         svr.getDataIn().appendDataSet(query, true);
 
-        String msgId = query.getHead().getString("_queueId_");
+        String msgId = query.head().getString("_queueId_");
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode content = mapper.readTree(query.getHead().getString("_content_"));
+        JsonNode content = mapper.readTree(query.head().getString("_content_"));
 
         // 更新消息状态
         BatchScript bs = new BatchScript(this);

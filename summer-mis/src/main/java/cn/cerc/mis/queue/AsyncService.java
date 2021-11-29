@@ -105,7 +105,7 @@ public class AsyncService implements IServiceProxy {
 
     @Override
     public boolean exec(Object... args) {
-        DataRow headIn = getDataIn().getHead();
+        DataRow headIn = getDataIn().head();
         if (args.length > 0) {
             if (args.length % 2 != 0) {
                 throw new RuntimeException(res.getString(6, "传入的参数数量必须为偶数！"));
@@ -122,7 +122,7 @@ public class AsyncService implements IServiceProxy {
         }
         this.send(); // 发送到队列服务器
 
-        getDataOut().getHead().setValue("_msgId_", msgId);
+        getDataOut().head().setValue("_msgId_", msgId);
         if (this.process == MessageProcess.working) {
             // 返回消息的编号插入到阿里云消息队列
             QueueQuery ds = new QueueQuery(handle);
@@ -130,11 +130,11 @@ public class AsyncService implements IServiceProxy {
             ds.add("select * from %s", QueueDB.SUMMER);
             ds.open();
             ds.appendDataSet(this.getDataIn(), true);
-            ds.getHead().setValue("_queueId_", msgId);
-            ds.getHead().setValue("_service_", this.service);
-            ds.getHead().setValue("_corpNo_", this.corpNo);
-            ds.getHead().setValue("_userCode_", this.userCode);
-            ds.getHead().setValue("_content_", this.toString());
+            ds.head().setValue("_queueId_", msgId);
+            ds.head().setValue("_service_", this.service);
+            ds.head().setValue("_corpNo_", this.corpNo);
+            ds.head().setValue("_userCode_", this.userCode);
+            ds.head().setValue("_content_", this.toString());
             ds.save();
         }
         return !"".equals(msgId);
@@ -259,10 +259,10 @@ public class AsyncService implements IServiceProxy {
         if (dataOut == null) {
             return null;
         }
-        if (!dataOut.getHead().exists(_message_)) {
+        if (!dataOut.head().exists(_message_)) {
             return null;
         }
-        return dataOut.getHead().getString(_message_);
+        return dataOut.head().getString(_message_);
     }
 
     public MessageLevel getMessageLevel() {
@@ -274,15 +274,15 @@ public class AsyncService implements IServiceProxy {
     }
 
     public String getSubject() {
-        return getDataIn().getHead().getString("_subject_");
+        return getDataIn().head().getString("_subject_");
     }
 
     public void setSubject(String subject) {
-        getDataIn().getHead().setValue("_subject_", subject);
+        getDataIn().head().setValue("_subject_", subject);
     }
 
     public void setSubject(String format, Object... args) {
-        getDataIn().getHead().setValue("_subject_", String.format(format, args));
+        getDataIn().head().setValue("_subject_", String.format(format, args));
     }
 
     public String getMsgId() {

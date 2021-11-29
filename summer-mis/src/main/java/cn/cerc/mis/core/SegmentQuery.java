@@ -32,7 +32,7 @@ public class SegmentQuery extends Handle {
     }
 
     public boolean enable(String fromField, String toField, int offset) {
-        DataRow headIn = dataIn.getHead();
+        DataRow headIn = dataIn.head();
         if (!headIn.getBoolean("segmentQuery"))
             return false;
 
@@ -59,7 +59,7 @@ public class SegmentQuery extends Handle {
                 buff.setValue("curBegin", headIn.getDatetime(fromField));
                 buff.setValue("curEnd", headIn.getDatetime(toField));
                 buff.post();
-                dataOut.getHead().setValue("_has_next_", true);
+                dataOut.head().setValue("_has_next_", true);
             }
         }
         return true;

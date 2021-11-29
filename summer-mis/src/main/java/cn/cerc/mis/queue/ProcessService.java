@@ -72,12 +72,12 @@ public class ProcessService extends AbstractTask {
                 async.getDataOut().appendDataSet(auto.getDataOut(), true);
                 async.setProcess(MessageProcess.error);
             }
-            async.getDataOut().getHead().setValue("_message_", auto.getMessage());
+            async.getDataOut().head().setValue("_message_", auto.getMessage());
             updateTaskprocess(async, taskId, subject);
         } catch (Throwable e) {
             e.printStackTrace();
             async.setProcess(MessageProcess.error);
-            async.getDataOut().getHead().setValue("_message_", e.getMessage());
+            async.getDataOut().head().setValue("_message_", e.getMessage());
             updateTaskprocess(async, taskId, subject);
         }
     }

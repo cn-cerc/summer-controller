@@ -27,10 +27,10 @@ public interface IService {
         Class<?> clazz = this.getClass();
         WebService el1 = clazz.getAnnotation(WebService.class);
         if (el1 != null)
-            dataOut.getHead().setValue("describe", el1.describe());
+            dataOut.head().setValue("describe", el1.describe());
         Permission ps1 = clazz.getAnnotation(Permission.class);
         if (ps1 != null)
-            dataOut.getHead().setValue("permission", ps1.value());
+            dataOut.head().setValue("permission", ps1.value());
         for (Method method : clazz.getMethods()) {
             WebMethod el2 = method.getAnnotation(WebMethod.class);
             if (el2 != null) {
@@ -71,7 +71,7 @@ public interface IService {
                 method = clazz.getMethod(funcCode, IHandle.class, DataRow.class);
                 args = new Object[2];
                 args[0] = handle;
-                args[1] = dataIn.getHead();
+                args[1] = dataIn.head();
             } catch (NoSuchMethodException | SecurityException e1) {
                 method = null;
             }

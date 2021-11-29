@@ -54,7 +54,7 @@ public class PrintQueue {
         }
 
         // 设置参数
-        DataRow headIn = query.getHead();
+        DataRow headIn = query.head();
         headIn.setJSON(reportParams);
         headIn.setValue("_printerId_", printerId);
         headIn.setValue("_reportId_", reportId);

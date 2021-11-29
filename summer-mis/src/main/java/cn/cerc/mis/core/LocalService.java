@@ -47,7 +47,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
-            DataRow headIn = getDataIn().getHead();
+            DataRow headIn = getDataIn().head();
             if (args.length % 2 != 0) {
                 // TODO 此处应该使用 ClassResource
                 throw new RuntimeException("传入的参数数量必须为偶数！");

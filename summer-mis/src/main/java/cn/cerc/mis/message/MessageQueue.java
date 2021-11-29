@@ -63,7 +63,7 @@ public class MessageQueue {
         query.add("select * from %s", QueueDB.MESSAGE);
         query.open();
 
-        DataRow headIn = query.getHead();
+        DataRow headIn = query.head();
         headIn.setValue("CorpNo_", sendCorpNo);
         headIn.setValue("UserCode_", userCode);
         headIn.setValue("Level_", level.ordinal());

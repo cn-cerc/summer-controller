@@ -31,12 +31,12 @@ public class HtmlGrid extends HtmlControl {
         HtmlGrid head = new HtmlGrid(null);
         // 加入单头
         row = head.addRow();
-        for (String field : ds.getHead().getFieldDefs().getFields()) {
+        for (String field : ds.head().getFieldDefs().getFields()) {
             row.addCol(field);
         }
         row = head.addRow();
-        for (String field : ds.getHead().getFieldDefs().getFields()) {
-            row.addCol(ds.getHead().getValue(field));
+        for (String field : ds.head().getFieldDefs().getFields()) {
+            row.addCol(ds.head().getValue(field));
         }
 
         // 加入单身

@@ -298,7 +298,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
             DataSet dataIn = items.get(keyName);
             if (dataIn == null && !Utils.isEmpty(keyName)) {
                 dataIn = new DataSet();
-                dataIn.getHead().copyValues(ds.current(), "Non_unique", "Key_name");
+                dataIn.head().copyValues(ds.current(), "Non_unique", "Key_name");
                 items.put(keyName, dataIn);
                 oldKeyName = keyName;
             } else {
@@ -310,7 +310,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
         }
         for (String key : items.keySet()) {
             DataSet dataIn = items.get(key);
-            DataRow record = dataIn.getHead();
+            DataRow record = dataIn.head();
             int non_unique = record.getInt("Non_unique");
             String keyName = record.getString("Key_name");
             StringBuilder builder3 = new StringBuilder();

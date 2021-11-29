@@ -53,7 +53,7 @@ public abstract class CustomService extends Handle implements IService {
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         this.dataIn = dataIn;
-        String funcCode = dataIn.getHead().getString("_function_");
+        String funcCode = dataIn.head().getString("_function_");
         if (Utils.isEmpty(funcCode))
             funcCode = this.funcCode;
         else

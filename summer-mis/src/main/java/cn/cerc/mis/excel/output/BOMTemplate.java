@@ -35,7 +35,7 @@ public class BOMTemplate extends ExcelTemplate {
     @Override
     public void output(WritableSheet sheet) throws WriteException {
         // 输出列头
-        DataRow head = this.getDataSet().getHead();
+        DataRow head = this.getDataSet().head();
         if (heads != null) {
             for (int lineNo = 0; lineNo < heads.size(); lineNo++) {
                 Column column = heads.get(lineNo);
