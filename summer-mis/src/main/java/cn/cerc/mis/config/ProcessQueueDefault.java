@@ -60,7 +60,7 @@ public class ProcessQueueDefault extends AbstractTask {
 
         LocalService svr = new LocalService(bh);
         svr.setService(service);
-        svr.getDataIn().appendDataSet(query, true);
+        svr.dataIn().appendDataSet(query, true);
 
         String msgId = query.head().getString("_queueId_");
 

@@ -64,20 +64,20 @@ public class ProcessService extends AbstractTask {
         try {
             // 执行指定的数据服务
             AutoService auto = new AutoService(this, corpNo, userCode, async.getService());
-            auto.getDataIn().appendDataSet(async.getDataIn(), true);
+            auto.dataIn().appendDataSet(async.dataIn(), true);
             if (auto.exec()) {
-                async.getDataOut().appendDataSet(auto.getDataOut(), true);
+                async.dataOut().appendDataSet(auto.dataOut(), true);
                 async.setProcess(MessageProcess.ok);
             } else {
-                async.getDataOut().appendDataSet(auto.getDataOut(), true);
+                async.dataOut().appendDataSet(auto.dataOut(), true);
                 async.setProcess(MessageProcess.error);
             }
-            async.getDataOut().head().setValue("_message_", auto.getMessage());
+            async.dataOut().head().setValue("_message_", auto.message());
             updateTaskprocess(async, taskId, subject);
         } catch (Throwable e) {
             e.printStackTrace();
             async.setProcess(MessageProcess.error);
-            async.getDataOut().head().setValue("_message_", e.getMessage());
+            async.dataOut().head().setValue("_message_", e.getMessage());
             updateTaskprocess(async, taskId, subject);
         }
     }

@@ -16,18 +16,18 @@ public abstract class CustomServiceProxy extends Handle {
 
     protected final Object getServiceObject(KeyValue function) {
         if (getSession() == null) {
-            getDataOut().setMessage("session is null.");
+            dataOut().setMessage("session is null.");
             return null;
         }
         if (getService() == null) {
-            getDataOut().setMessage("service is null.");
+            dataOut().setMessage("service is null.");
             return null;
         }
 
         try {
             return Application.getService(this, getService(), function);
         } catch (ClassNotFoundException e) {
-            getDataOut().setMessage(e.getMessage());
+            dataOut().setMessage(e.getMessage());
             return null;
         }
     }

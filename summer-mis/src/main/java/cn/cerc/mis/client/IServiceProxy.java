@@ -12,13 +12,13 @@ public interface IServiceProxy {
     Object setService(String service);
 
     // 传入数据
-    DataSet getDataIn();
+    DataSet dataIn();
 
     // 返回数据
-    DataSet getDataOut();
+    DataSet dataOut();
 
     // 提示讯息
-    String getMessage();
+    String message();
 
     // 执行
     boolean exec(Object... args);

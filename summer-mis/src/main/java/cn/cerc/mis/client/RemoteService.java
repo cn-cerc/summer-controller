@@ -34,7 +34,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
-            DataRow headIn = getDataIn().head();
+            DataRow headIn = dataIn().head();
             if (args.length % 2 != 0) {
                 throw new RuntimeException(res.getString(1, "传入的参数数量必须为偶数！"));
             }
@@ -47,10 +47,10 @@ public class RemoteService extends Handle implements IServiceProxy {
         if (this.server == null || this.server.getRequestUrl(this, service) == null) {
             LocalService svr = new LocalService(this);
             svr.setService(this.getService());
-            svr.setDataIn(getDataIn());
+            svr.setDataIn(dataIn());
             svr.exec();
-            this.setDataOut(svr.getDataOut());
-            return getDataOut().state() > ServiceState.ERROR;
+            this.setDataOut(svr.dataOut());
+            return dataOut().state() > ServiceState.ERROR;
         }
 
         log.debug(this.service);
@@ -62,7 +62,7 @@ public class RemoteService extends Handle implements IServiceProxy {
         String url = server.getRequestUrl(this, this.getService());
         try {
             Curl curl = new Curl();
-            curl.put("dataIn", getDataIn().json());
+            curl.put("dataIn", dataIn().json());
             if (this.server != null && server.getToken(this) != null)
                 curl.put(ISession.TOKEN, this.server.getToken(this));
             log.debug("request: {}", url);
@@ -73,12 +73,12 @@ public class RemoteService extends Handle implements IServiceProxy {
                 response = curl.doPost(url);
                 log.debug("response: {}", response);
             } catch (IOException e) {
-                getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
+                dataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
                 return false;
             }
-            this.getDataOut().setJson(response);
+            this.dataOut().setJson(response);
 
-            return getDataOut().state() > ServiceState.ERROR;
+            return dataOut().state() > ServiceState.ERROR;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if (e.getCause() != null) {
@@ -102,16 +102,16 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     @Override
-    public final String getMessage() {
-        return getDataOut().message();
+    public final String message() {
+        return dataOut().message();
     }
 
     public final void setMessage(String message) {
-        getDataOut().setMessage(message);
+        dataOut().setMessage(message);
     }
 
     @Override
-    public final DataSet getDataOut() {
+    public final DataSet dataOut() {
         if (dataOut == null)
             dataOut = new DataSet();
         return dataOut;
@@ -122,7 +122,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     @Override
-    public final DataSet getDataIn() {
+    public final DataSet dataIn() {
         if (dataIn == null)
             dataIn = new DataSet();
         return dataIn;
@@ -136,7 +136,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
-            buff.setValue("data", this.getDataIn().toJson());
+            buff.setValue("data", this.dataIn().toJson());
         }
         return tmp;
     }

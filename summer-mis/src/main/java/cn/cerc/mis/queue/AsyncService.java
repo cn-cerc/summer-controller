@@ -86,10 +86,10 @@ public class AsyncService implements IServiceProxy {
         JsonNode json = mapper.readTree(jsonString);
         this.setService(json.get("service").asText());
         if (json.has("dataOut")) {
-            this.getDataOut().setJson(json.get("dataOut").asText());
+            this.dataOut().setJson(json.get("dataOut").asText());
         }
         if (json.has("dataIn")) {
-            this.getDataIn().setJson(json.get("dataIn").asText());
+            this.dataIn().setJson(json.get("dataIn").asText());
         }
         if (json.has("process")) {
             this.setProcess(MessageProcess.values()[json.get("process").asInt()]);
@@ -105,7 +105,7 @@ public class AsyncService implements IServiceProxy {
 
     @Override
     public boolean exec(Object... args) {
-        DataRow headIn = getDataIn().head();
+        DataRow headIn = dataIn().head();
         if (args.length > 0) {
             if (args.length % 2 != 0) {
                 throw new RuntimeException(res.getString(6, "传入的参数数量必须为偶数！"));
@@ -122,14 +122,14 @@ public class AsyncService implements IServiceProxy {
         }
         this.send(); // 发送到队列服务器
 
-        getDataOut().head().setValue("_msgId_", msgId);
+        dataOut().head().setValue("_msgId_", msgId);
         if (this.process == MessageProcess.working) {
             // 返回消息的编号插入到阿里云消息队列
             QueueQuery ds = new QueueQuery(handle);
             ds.setQueueMode(QueueMode.append);
             ds.add("select * from %s", QueueDB.SUMMER);
             ds.open();
-            ds.appendDataSet(this.getDataIn(), true);
+            ds.appendDataSet(this.dataIn(), true);
             ds.head().setValue("_queueId_", msgId);
             ds.head().setValue("_service_", this.service);
             ds.head().setValue("_corpNo_", this.corpNo);
@@ -191,7 +191,7 @@ public class AsyncService implements IServiceProxy {
     }
 
     @Override
-    public DataSet getDataIn() {
+    public DataSet dataIn() {
         if (dataIn == null) {
             dataIn = new DataSet();
         }
@@ -203,7 +203,7 @@ public class AsyncService implements IServiceProxy {
     }
 
     @Override
-    public DataSet getDataOut() {
+    public DataSet dataOut() {
         if (dataOut == null) {
             dataOut = new DataSet();
         }
@@ -255,7 +255,7 @@ public class AsyncService implements IServiceProxy {
     }
 
     @Override
-    public String getMessage() {
+    public String message() {
         if (dataOut == null) {
             return null;
         }
@@ -274,15 +274,15 @@ public class AsyncService implements IServiceProxy {
     }
 
     public String getSubject() {
-        return getDataIn().head().getString("_subject_");
+        return dataIn().head().getString("_subject_");
     }
 
     public void setSubject(String subject) {
-        getDataIn().head().setValue("_subject_", subject);
+        dataIn().head().setValue("_subject_", subject);
     }
 
     public void setSubject(String format, Object... args) {
-        getDataIn().head().setValue("_subject_", String.format(format, args));
+        dataIn().head().setValue("_subject_", String.format(format, args));
     }
 
     public String getMsgId() {
