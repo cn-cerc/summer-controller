@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataSet;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.QueueDB;
 import cn.cerc.db.queue.QueueMode;
@@ -86,10 +86,10 @@ public class AsyncService implements IServiceProxy {
         JsonNode json = mapper.readTree(jsonString);
         this.setService(json.get("service").asText());
         if (json.has("dataOut")) {
-            this.getDataOut().fromJson(json.get("dataOut").asText());
+            this.getDataOut().setJson(json.get("dataOut").asText());
         }
         if (json.has("dataIn")) {
-            this.getDataIn().fromJson(json.get("dataIn").asText());
+            this.getDataIn().setJson(json.get("dataIn").asText());
         }
         if (json.has("process")) {
             this.setProcess(MessageProcess.values()[json.get("process").asInt()]);

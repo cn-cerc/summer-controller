@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.ClassResource;
+import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.ISession;
-import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.Handle;
@@ -76,7 +76,7 @@ public class RemoteService extends Handle implements IServiceProxy {
                 getDataOut().setState(ServiceState.CALL_TIMEOUT).setMessage(res.getString(5, "远程服务异常"));
                 return false;
             }
-            this.getDataOut().fromJson(response);
+            this.getDataOut().setJson(response);
 
             return getDataOut().state() > ServiceState.ERROR;
         } catch (Exception e) {

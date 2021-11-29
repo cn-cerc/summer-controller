@@ -40,7 +40,7 @@ public class RemoteServiceTest {
         String dataJson = json.get("dataOut").asText();
         DataSet dataOut = new DataSet();
         if (dataJson != null) {
-            dataOut.fromJson(dataJson);
+            dataOut.setJson(dataJson);
         }
         log.info("{}", dataOut.size());
 

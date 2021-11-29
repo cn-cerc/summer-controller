@@ -80,7 +80,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
                 if (buffValue != null) {
                     log.debug("read from buffer: " + this.getService());
                     DataSet dataOut = getDataOut();
-                    dataOut.fromJson(buffValue);
+                    dataOut.setJson(buffValue);
                     return dataOut.state() > 0;
                 }
             }
