@@ -32,8 +32,13 @@ public abstract class CustomServiceProxy extends Handle {
         }
     }
 
-    public final String getService() {
+    public String service() {
         return service;
+    }
+
+    @Deprecated
+    public final String getService() {
+        return service();
     }
 
     public final CustomServiceProxy setService(String service) {
@@ -41,7 +46,7 @@ public abstract class CustomServiceProxy extends Handle {
         return this;
     }
 
-    public final String getMessage() {
+    public final String message() {
         if (dataOut != null && dataOut.message() != null) {
             return dataOut.message().replaceAll("'", "\"");
         } else {
@@ -49,24 +54,39 @@ public abstract class CustomServiceProxy extends Handle {
         }
     }
 
-    public final DataSet getDataIn() {
+    @Deprecated
+    public String getMessage() {
+        return message();
+    }
+
+    public DataSet dataIn() {
         if (dataIn == null)
             dataIn = new DataSet();
         return dataIn;
+    }
+
+    @Deprecated
+    public final DataSet getDataIn() {
+        return dataIn();
     }
 
     public void setDataIn(DataSet dataIn) {
         this.dataIn = dataIn;
     }
 
-    protected void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
-    }
-
-    public final DataSet getDataOut() {
+    public DataSet dataOut() {
         if (dataOut == null)
             dataOut = new DataSet();
         return dataOut;
+    }
+
+    @Deprecated
+    public final DataSet getDataOut() {
+        return dataOut();
+    }
+
+    public void setDataOut(DataSet dataOut) {
+        this.dataOut = dataOut;
     }
 
 }
