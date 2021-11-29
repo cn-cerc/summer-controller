@@ -36,7 +36,7 @@ public class AutoService extends CustomServiceProxy {
         }
 
         setDataOut(((IService) object)._call(handle, getDataIn(), function));
-        return getDataOut().getState() > 0;
+        return getDataOut().state() > 0;
     }
 
     @Override

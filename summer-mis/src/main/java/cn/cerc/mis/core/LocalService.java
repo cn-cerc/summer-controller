@@ -69,7 +69,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
                 ((IHandle) object).setSession(this.getSession());
             if (ServerConfig.isServerMaster()) {
                 setDataOut(((IService) object)._call(this, getDataIn(), function));
-                return getDataOut().getState() > 0;
+                return getDataOut().state() > 0;
             }
 
             // 制作临时缓存Key
@@ -81,7 +81,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
                     log.debug("read from buffer: " + this.getService());
                     DataSet dataOut = getDataOut();
                     dataOut.fromJson(buffValue);
-                    return dataOut.getState() > 0;
+                    return dataOut.state() > 0;
                 }
             }
 
@@ -96,7 +96,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
                     }
                 }
             }
-            return getDataOut().getState() > 0;
+            return getDataOut().state() > 0;
         } catch (Exception e) {
             Throwable err = e;
             if (e.getCause() != null)

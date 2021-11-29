@@ -16,7 +16,7 @@ public abstract class AbstractService extends Handle implements IService {
         this.setSession(handle.getSession());
         DataSet dataOut = new DataSet();
         IStatus status = execute(dataIn, dataOut);
-        if (dataOut.getState() == ServiceState.ERROR)
+        if (dataOut.state() == ServiceState.ERROR)
             dataOut.setState(status.getState());
         if (dataOut.getMessage() == null)
             dataOut.setMessage(status.getMessage());

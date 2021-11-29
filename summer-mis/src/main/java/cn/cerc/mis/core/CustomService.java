@@ -111,7 +111,7 @@ public abstract class CustomService extends Handle implements IService {
             } else {
                 if (method.getReturnType().equals(IStatus.class)) {
                     IStatus result = (IStatus) method.invoke(this, dataIn, dataOut);
-                    if (dataOut.getState() == ServiceState.ERROR)
+                    if (dataOut.state() == ServiceState.ERROR)
                         dataOut.setState(result.getState());
                     if (dataOut.getMessage() == null)
                         dataOut.setMessage(result.getMessage());

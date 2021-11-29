@@ -50,7 +50,7 @@ public class RemoteService extends Handle implements IServiceProxy {
             svr.setDataIn(getDataIn());
             svr.exec();
             this.setDataOut(svr.getDataOut());
-            return getDataOut().getState() > ServiceState.ERROR;
+            return getDataOut().state() > ServiceState.ERROR;
         }
 
         log.debug(this.service);
@@ -78,7 +78,7 @@ public class RemoteService extends Handle implements IServiceProxy {
             }
             this.getDataOut().fromJson(response);
 
-            return getDataOut().getState() > ServiceState.ERROR;
+            return getDataOut().state() > ServiceState.ERROR;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if (e.getCause() != null) {
