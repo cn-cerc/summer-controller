@@ -12,8 +12,8 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.other.MemoryBuffer;
 
 public class SegmentQuery extends Handle {
-    private DataSet dataIn;
-    private DataSet dataOut;
+    private final DataSet dataIn;
+    private final DataSet dataOut;
 
     public SegmentQuery(CustomService owner) {
         super(owner);
