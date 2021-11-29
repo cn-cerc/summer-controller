@@ -85,7 +85,7 @@ public class SyncServerRedis implements ISyncServer {
                 }
 
                 DataRow record = new DataRow();
-                record.setJSON(data);
+                record.setJson(data);
                 try {
                     popProcesser.popRecord(session, record, false);
                 } catch (Exception e) {
