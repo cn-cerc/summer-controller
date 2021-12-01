@@ -33,7 +33,7 @@ public class ProcessQueueDefault extends AbstractTask {
         if (!query.getActive()) {
             return;
         }
-        log.warn("ProcessQueueDefault {}", query.toJson());
+        log.warn("ProcessQueueDefault {}", query.json());
 
         // 建立服务执行环境
         String corpNo = query.head().getString("_corpNo_");

@@ -200,7 +200,7 @@ public class ExcelTemplate {
     }
 
     @Deprecated
-    public DataSet getDataSet() {
+    public final DataSet getDataSet() {
         return dataSet();
     }
 

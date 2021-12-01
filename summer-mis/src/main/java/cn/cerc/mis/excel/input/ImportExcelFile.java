@@ -76,7 +76,7 @@ public class ImportExcelFile {
     }
 
     @Deprecated
-    public DataSet getDataSet() {
+    public final DataSet getDataSet() {
         return dataSet();
     }
 
