@@ -1,16 +1,18 @@
 package cn.cerc.mis.excel.input;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.DataRow;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 
 public class ImportExcelFile {
     private HttpServletRequest request;
@@ -69,8 +71,13 @@ public class ImportExcelFile {
         return this;
     }
 
-    public DataSet getDataSet() {
+    public DataSet dataSet() {
         return dataSet;
+    }
+
+    @Deprecated
+    public DataSet getDataSet() {
+        return dataSet();
     }
 
     public void setDataSet(DataSet dataSet) {

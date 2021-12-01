@@ -19,8 +19,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataSet;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 import cn.cerc.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import jxl.Cell;
@@ -52,7 +52,7 @@ public class ImportExcel extends ImportExcelFile {
     }
 
     public void exportTemplate() throws IOException, WriteException {
-        DataSet dataOut = getDataSet();
+        DataSet dataOut = dataSet();
         this.setResponse(response);
         OutputStream os = response.getOutputStream();// 取得输出流
         response.reset();// 清空输出流
@@ -269,7 +269,7 @@ public class ImportExcel extends ImportExcelFile {
 
     public void readRecords(ImportRecord readHandle) throws Exception {
         this.setReadHandle(readHandle);
-        DataSet ds = getDataSet();
+        DataSet ds = dataSet();
         while (ds.fetch()) {
             readFileData(ds.current());
         }

@@ -195,8 +195,13 @@ public class ExcelTemplate {
         this.row = row;
     }
 
-    public DataSet getDataSet() {
+    public DataSet dataSet() {
         return dataSet;
+    }
+
+    @Deprecated
+    public DataSet getDataSet() {
+        return dataSet();
     }
 
     public void setDataSet(DataSet dataSet) {

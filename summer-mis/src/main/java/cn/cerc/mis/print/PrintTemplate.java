@@ -16,8 +16,8 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataSet;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.mis.excel.output.Column;
 
@@ -71,8 +71,13 @@ public class PrintTemplate extends Handle {
         this.header = header;
     }
 
-    public DataSet getDataSet() {
+    public DataSet dataSet() {
         return dataSet;
+    }
+
+    @Deprecated
+    public DataSet getDataSet() {
+        return dataSet();
     }
 
     public void setDataSet(DataSet dataSet) {
