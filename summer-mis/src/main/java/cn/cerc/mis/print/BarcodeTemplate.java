@@ -1,6 +1,7 @@
 package cn.cerc.mis.print;
 
-import cn.cerc.core.DataSet;
+import java.io.IOException;
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
@@ -10,7 +11,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import java.io.IOException;
+import cn.cerc.core.DataSet;
 
 public class BarcodeTemplate extends PrintTemplate {
 
@@ -45,7 +46,7 @@ public class BarcodeTemplate extends PrintTemplate {
         BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
         // 设置中文字体和字体样式
         Font f8 = new Font(bfChinese, fontSize, Font.NORMAL);
-        DataSet dataSet = this.getDataSet();
+        DataSet dataSet = this.dataSet();
         dataSet.first();
         while (dataSet.fetch()) {
             // 商品名称
@@ -62,7 +63,7 @@ public class BarcodeTemplate extends PrintTemplate {
     }
 
     public BarcodeTemplate add(String barcode, String descspec) {
-        DataSet ds = this.getDataSet();
+        DataSet ds = this.dataSet();
         if (ds == null) {
             ds = new DataSet();
             this.setDataSet(ds);

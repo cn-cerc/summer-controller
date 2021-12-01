@@ -1,14 +1,14 @@
 package cn.cerc.mis.excel.output;
 
+import java.util.List;
+
 import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataSet;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 import cn.cerc.mis.SummerMIS;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
-
-import java.util.List;
 
 /**
  * 定义BOM导出模版
@@ -35,7 +35,7 @@ public class BOMTemplate extends ExcelTemplate {
     @Override
     public void output(WritableSheet sheet) throws WriteException {
         // 输出列头
-        DataRow head = this.getDataSet().head();
+        DataRow head = this.dataSet().head();
         if (heads != null) {
             for (int lineNo = 0; lineNo < heads.size(); lineNo++) {
                 Column column = heads.get(lineNo);
@@ -51,7 +51,7 @@ public class BOMTemplate extends ExcelTemplate {
         // 输出原来的表格
         super.output(sheet);
 
-        this.setRow(this.getHeads().size() + this.getDataSet().size() + 2);
+        this.setRow(this.getHeads().size() + this.dataSet().size() + 2);
         sheet.addCell(new Label(0, this.getRow(), res.getString(1, "材料清单：")));
         this.setRow(this.getRow() + 1);
         this.getColumns().clear();
