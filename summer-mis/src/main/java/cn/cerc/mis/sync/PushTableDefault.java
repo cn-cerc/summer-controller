@@ -3,8 +3,8 @@ package cn.cerc.mis.sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.cerc.core.ISession;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.ISession;
 import cn.cerc.db.mysql.MysqlQuery;
 
 public class PushTableDefault implements IPushProcesser {
@@ -40,7 +40,7 @@ public class PushTableDefault implements IPushProcesser {
         }
         if (!this.onAppend(record))
             return false;
-        query.getOperator().setUpdateKey("");
+        query.operator().setUpdateKey("");
         query.append();
         query.copyRecord(record, query.fields());
         query.post();
@@ -95,7 +95,7 @@ public class PushTableDefault implements IPushProcesser {
         if (query.eof()) {
             if (!this.onAppend(record))
                 return false;
-            query.getOperator().setUpdateKey("");
+            query.operator().setUpdateKey("");
             query.append();
             query.copyRecord(record, query.fields());
             query.post();
