@@ -136,31 +136,46 @@ public abstract class CustomService extends Handle implements IService {
         }
     }
 
-    public DataSet getDataIn() {
+    public DataSet dataIn() {
         if (this.dataIn == null)
             this.dataIn = new DataSet();
         return this.dataIn;
     }
 
-    public DataSet getDataOut() {
+    @Deprecated
+    public DataSet getDataIn() {
+        return dataIn();
+    }
+
+    public DataSet dataOut() {
         if (this.dataOut == null)
             this.dataOut = new DataSet();
         return this.dataOut;
     }
 
+    @Deprecated
+    public DataSet getDataOut() {
+        return dataOut();
+    }
+
     public boolean fail(String message) {
-        getDataOut().setMessage(message);
+        dataOut().setMessage(message);
         return false;
     }
 
+    public String message() {
+        return dataOut().message();
+    }
+
+    @Deprecated
     public String getMessage() {
-        return getDataOut().message();
+        return message();
     }
 
     public void setMessage(String message) {
         if (message == null || "".equals(message.trim()))
             return;
-        getDataOut().setMessage(message);
+        dataOut().setMessage(message);
     }
 
     public String getFuncCode() {

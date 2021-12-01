@@ -17,8 +17,8 @@ public class SegmentQuery extends Handle {
 
     public SegmentQuery(CustomService owner) {
         super(owner);
-        this.dataIn = owner.getDataIn();
-        this.dataOut = owner.getDataOut();
+        this.dataIn = owner.dataIn();
+        this.dataOut = owner.dataOut();
     }
 
     public SegmentQuery(IHandle handle, DataSet dataIn, DataSet dataOut) {
