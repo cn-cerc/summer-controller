@@ -1,9 +1,9 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.DataRow;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.cerc.core.DataRow;
 
 public class ComplexColumn extends Column {
     private List<String> fields = new ArrayList<>();
@@ -37,7 +37,7 @@ public class ComplexColumn extends Column {
         DataRow record = this.getRecord();
         StringBuffer buff = new StringBuffer();
         for (String field : fields) {
-            if (record.hasValue(field)) {
+            if (record.has(field)) {
                 if (buff.length() > 0) {
                     buff.append(",");
                 }
