@@ -62,10 +62,12 @@ public abstract class AdoTable implements IService {
     private SqlQuery createSqlQuery(IHandle handle) {
         if (this.getClass().getAnnotation(Mssql.class) != null)
             return new MssqlQuery(handle);
+        else if (this.getClass().getAnnotation(Mysql.class) != null)
+            return new MysqlQuery(handle);
         else if (this.getClass().getAnnotation(Sqlite.class) != null)
             return new SqliteQuery();
         else
-            return new MysqlQuery(handle);
+            throw new RuntimeException("unknow sql server type");
     }
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
