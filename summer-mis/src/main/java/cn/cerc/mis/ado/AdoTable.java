@@ -72,7 +72,6 @@ public abstract class AdoTable implements IService {
         query.add("select * from %s", this.table());
         query.add("where 1=1");
 
-        String sql = dataIn.head().getString("_sql_");
         dataIn.head().remove("_sql_");
 
         for (FieldMeta meta : dataIn.head().getFields()) {
