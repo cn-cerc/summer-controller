@@ -3,6 +3,7 @@ package cn.cerc.mis.ado;
 import java.lang.reflect.Field;
 
 import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -36,8 +37,12 @@ public abstract class AdoTable implements IService {
         if (dataIn.curd()) {
             query.setJson(dataIn.json());
             query.setStorage(true);
-            for (FieldMeta meta : query.fields()) {
+            for (FieldMeta meta : query.fields()) 
                 meta.setKind(FieldKind.Storage);
+            for (Field field : this.getClass().getDeclaredFields()) {
+                GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
+                if (generatedValue != null)
+                    query.fields().get(field.getName()).setAutoincrement(true);
             }
             // 保存对数据表的修改
             query.operator().setTableName(this.table());
