@@ -1,15 +1,17 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.Datetime;
-import cn.cerc.core.FieldMeta;
-import com.google.gson.Gson;
-import jxl.write.WriteException;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import org.junit.Test;
+
+import com.google.gson.Gson;
+
+import cn.cerc.core.DataSet;
+import cn.cerc.core.Datetime;
+import cn.cerc.core.FieldMeta;
+import jxl.write.WriteException;
 
 public class DataSetExportToExcelTest {
 
@@ -42,16 +44,16 @@ public class DataSetExportToExcelTest {
         dataSet.setValue("date_", new Datetime().getDate());
         dataSet.setValue("super_", true);
 
-        dataSet.getFieldDefs().get("code_").setName("帐套");
-        dataSet.getFieldDefs().get("name_").setName("公司");
-        dataSet.getFieldDefs().get("number_").setName("员工");
-        dataSet.getFieldDefs().get("date_").setName("时间");
-        dataSet.getFieldDefs().get("super_").setName("管理员");
+        dataSet.fields().get("code_").setName("帐套");
+        dataSet.fields().get("name_").setName("公司");
+        dataSet.fields().get("number_").setName("员工");
+        dataSet.fields().get("date_").setName("时间");
+        dataSet.fields().get("super_").setName("管理员");
 
         dataSet.buildMeta();
         dataSet.setMetaInfo(true);
-        System.out.println(dataSet.toJson());
-        for (FieldMeta meta : dataSet.getFieldDefs()) {
+        System.out.println(dataSet.json());
+        for (FieldMeta meta : dataSet.fields()) {
             System.out.println(new Gson().toJson(meta));
         }
         return dataSet;

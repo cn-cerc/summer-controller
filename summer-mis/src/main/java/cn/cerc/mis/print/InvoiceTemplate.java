@@ -81,7 +81,7 @@ public class InvoiceTemplate extends PrintTemplate {
         // 表格内容行数的填充
         dataSet.first();
         while (dataSet.fetch()) {
-            DataRow record = dataSet.getCurrent();
+            DataRow record = dataSet.current();
             for (Column column : this.getColumns()) {
                 pdfTableContentCell_1.setPhrase(new Phrase(column.getName(), f8));
                 pdfTable.addCell(pdfTableContentCell_1);

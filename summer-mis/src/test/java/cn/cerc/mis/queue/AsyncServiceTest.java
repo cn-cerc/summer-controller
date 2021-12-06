@@ -19,7 +19,7 @@ public class AsyncServiceTest {
         AsyncService app = new AsyncService(new Handle(session));
         app.setService("TAppCreditLine.calCusCreditLimit");
         // app.setTimer(new Datetime().getTime());
-        app.getDataIn().getHead().setValue("UserCode_", session.getUserCode());
+        app.dataIn().head().setValue("UserCode_", session.getUserCode());
         app.setSubject("回算信用额度");
         assertTrue("发送消息失败", app.exec());
     }

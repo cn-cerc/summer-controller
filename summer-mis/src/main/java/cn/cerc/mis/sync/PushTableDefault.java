@@ -3,8 +3,8 @@ package cn.cerc.mis.sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.cerc.core.ISession;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.ISession;
 import cn.cerc.db.mysql.MysqlQuery;
 
 public class PushTableDefault implements IPushProcesser {
@@ -40,9 +40,9 @@ public class PushTableDefault implements IPushProcesser {
         }
         if (!this.onAppend(record))
             return false;
-        query.getOperator().setUpdateKey("");
+        query.operator().setUpdateKey("");
         query.append();
-        query.copyRecord(record, query.getFieldDefs());
+        query.copyRecord(record, query.fields());
         query.post();
         return true;
     }
@@ -58,7 +58,7 @@ public class PushTableDefault implements IPushProcesser {
             return false;
         }
 
-        if (!this.onDelete(query.getCurrent()))
+        if (!this.onDelete(query.current()))
             return false;
 
         query.delete();
@@ -76,11 +76,11 @@ public class PushTableDefault implements IPushProcesser {
             return false;
         }
 
-        if (!this.onUpdate(query.getCurrent(), record))
+        if (!this.onUpdate(query.current(), record))
             return false;
 
         query.edit();
-        query.copyRecord(record, query.getFieldDefs());
+        query.copyRecord(record, query.fields());
         query.post();
         return true;
     }
@@ -95,15 +95,15 @@ public class PushTableDefault implements IPushProcesser {
         if (query.eof()) {
             if (!this.onAppend(record))
                 return false;
-            query.getOperator().setUpdateKey("");
+            query.operator().setUpdateKey("");
             query.append();
-            query.copyRecord(record, query.getFieldDefs());
+            query.copyRecord(record, query.fields());
             query.post();
         } else {
-            if (!this.onUpdate(query.getCurrent(), record))
+            if (!this.onUpdate(query.current(), record))
                 return false;
             query.edit();
-            query.copyRecord(record, query.getFieldDefs());
+            query.copyRecord(record, query.fields());
             query.post();
         }
         return true;

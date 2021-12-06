@@ -17,8 +17,8 @@ public class SegmentQuery extends Handle {
 
     public SegmentQuery(CustomService owner) {
         super(owner);
-        this.dataIn = owner.getDataIn();
-        this.dataOut = owner.getDataOut();
+        this.dataIn = owner.dataIn();
+        this.dataOut = owner.dataOut();
     }
 
     public SegmentQuery(IHandle handle, DataSet dataIn, DataSet dataOut) {
@@ -32,14 +32,14 @@ public class SegmentQuery extends Handle {
     }
 
     public boolean enable(String fromField, String toField, int offset) {
-        DataRow headIn = dataIn.getHead();
+        DataRow headIn = dataIn.head();
         if (!headIn.getBoolean("segmentQuery"))
             return false;
 
         HttpServletRequest request = (HttpServletRequest) this.getSession().getProperty(ISession.REQUEST);
         String sessionId = request.getSession().getId();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, this.getClass().getName(), sessionId,
-                MD5.get(dataIn.toJson()))) {
+                MD5.get(dataIn.json()))) {
             if (buff.isNull()) {
                 buff.setValue("beginDate", headIn.getDatetime(fromField));
                 buff.setValue("endDate", headIn.getDatetime(toField).toDayEnd());
@@ -59,7 +59,7 @@ public class SegmentQuery extends Handle {
                 buff.setValue("curBegin", headIn.getDatetime(fromField));
                 buff.setValue("curEnd", headIn.getDatetime(toField));
                 buff.post();
-                dataOut.getHead().setValue("_has_next_", true);
+                dataOut.head().setValue("_has_next_", true);
             }
         }
         return true;

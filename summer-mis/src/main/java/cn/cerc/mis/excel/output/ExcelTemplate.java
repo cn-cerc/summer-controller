@@ -102,7 +102,7 @@ public class ExcelTemplate {
                 row++;
                 for (int col = 0; col < columns.size(); col++) {
                     Column column = columns.get(col);
-                    column.setRecord(dataSet.getCurrent());
+                    column.setRecord(dataSet.current());
                     // 650像素大约每一行占2.5行
                     if (changeRowHeight) {
                         sheet.setRowView(row, 650, false);
@@ -195,8 +195,13 @@ public class ExcelTemplate {
         this.row = row;
     }
 
-    public DataSet getDataSet() {
+    public DataSet dataSet() {
         return dataSet;
+    }
+
+    @Deprecated
+    public final DataSet getDataSet() {
+        return dataSet();
     }
 
     public void setDataSet(DataSet dataSet) {

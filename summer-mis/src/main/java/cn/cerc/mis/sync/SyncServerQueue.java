@@ -80,7 +80,7 @@ public class SyncServerQueue implements ISyncServer {
             }
 
             DataRow record = new DataRow();
-            record.setJSON(body);
+            record.setJson(body);
             try {
                 if (!popProcesser.popRecord(session, record, true)) {
                     log.error("{} 处理失败，请检查数据源和帐套信息 {}", receiptHandle, body);

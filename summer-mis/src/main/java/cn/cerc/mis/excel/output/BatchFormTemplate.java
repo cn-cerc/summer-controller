@@ -34,9 +34,9 @@ public class BatchFormTemplate extends FormTemplate {
                     footer.setValue(res.getString(2, "合计金额"), footer.getDouble(res.getString(2, "合计金额")) + item.getDouble("OriAmount_"));
                 }
                 int row = template.getRow();
-                for (String field : footer.getItems().keySet()) {
+                for (String field : footer.items().keySet()) {
                     row++;
-                    Object val = footer.getItems().get(field);
+                    Object val = footer.items().get(field);
                     sheet1.addCell(new Label(0, row, field));
                     sheet1.addCell(new Label(1, row, df.format(new BigDecimal(Double.toString((Double) val)))));
                 }

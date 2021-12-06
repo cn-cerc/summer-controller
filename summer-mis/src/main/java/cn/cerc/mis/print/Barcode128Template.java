@@ -36,7 +36,7 @@ public class Barcode128Template extends PrintTemplate {
 
         // 设置中文字体和字体样式
         Font f8 = new Font(bfChinese, fontSize, Font.NORMAL);
-        DataSet dataSet = this.getDataSet();
+        DataSet dataSet = this.dataSet();
         dataSet.first();
         while (dataSet.fetch()) {
             // 条码信息
@@ -60,7 +60,7 @@ public class Barcode128Template extends PrintTemplate {
     }
 
     public Barcode128Template add(String barcode, String description) {
-        DataSet dataSet = this.getDataSet();
+        DataSet dataSet = this.dataSet();
         if (dataSet == null) {
             dataSet = new DataSet();
             this.setDataSet(dataSet);

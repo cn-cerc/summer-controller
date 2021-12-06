@@ -38,6 +38,6 @@ public class FieldUseCheck extends Handle {
         bq.add("select %s * ");
         bq.add("from %s ", tableCode);
         bq.open();
-        return !bq.getDataSet().eof();
+        return !bq.dataSet().eof();
     }
 }

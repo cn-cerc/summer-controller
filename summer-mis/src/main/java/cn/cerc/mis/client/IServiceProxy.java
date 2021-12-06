@@ -12,13 +12,28 @@ public interface IServiceProxy {
     Object setService(String service);
 
     // 传入数据
-    DataSet getDataIn();
+    DataSet dataIn();
+
+    @Deprecated
+    default DataSet getDataIn() {
+        return dataIn();
+    }
 
     // 返回数据
-    DataSet getDataOut();
+    DataSet dataOut();
+
+    @Deprecated
+    default DataSet getDataOut() {
+        return dataOut();
+    }
 
     // 提示讯息
-    String getMessage();
+    String message();
+
+    @Deprecated
+    default String getMessage() {
+        return message();
+    }
 
     // 执行
     boolean exec(Object... args);

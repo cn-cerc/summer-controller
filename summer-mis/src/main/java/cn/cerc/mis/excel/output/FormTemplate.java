@@ -1,11 +1,11 @@
 package cn.cerc.mis.excel.output;
 
+import java.util.List;
+
 import cn.cerc.core.DataRow;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
-
-import java.util.List;
 
 public class FormTemplate extends ExcelTemplate {
     private List<Column> heads;
@@ -22,7 +22,7 @@ public class FormTemplate extends ExcelTemplate {
     @Override
     public void output(WritableSheet sheet) throws WriteException {
         // 输出列头
-        DataRow head = this.getDataSet().getHead();
+        DataRow head = this.dataSet().head();
         if (heads != null) {
             for (int lineNo = 0; lineNo < heads.size(); lineNo++) {
                 Column column = heads.get(lineNo);

@@ -53,7 +53,7 @@ public abstract class CustomService extends Handle implements IService {
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         this.dataIn = dataIn;
-        String funcCode = dataIn.getHead().getString("_function_");
+        String funcCode = dataIn.head().getString("_function_");
         if (Utils.isEmpty(funcCode))
             funcCode = this.funcCode;
         else
@@ -111,9 +111,9 @@ public abstract class CustomService extends Handle implements IService {
             } else {
                 if (method.getReturnType().equals(IStatus.class)) {
                     IStatus result = (IStatus) method.invoke(this, dataIn, dataOut);
-                    if (dataOut.getState() == ServiceState.ERROR)
+                    if (dataOut.state() == ServiceState.ERROR)
                         dataOut.setState(result.getState());
-                    if (dataOut.getMessage() == null)
+                    if (dataOut.message() == null)
                         dataOut.setMessage(result.getMessage());
                 } else {
                     dataOut = (DataSet) method.invoke(this, handle, dataIn);
@@ -136,31 +136,46 @@ public abstract class CustomService extends Handle implements IService {
         }
     }
 
-    public DataSet getDataIn() {
+    public DataSet dataIn() {
         if (this.dataIn == null)
             this.dataIn = new DataSet();
         return this.dataIn;
     }
 
-    public DataSet getDataOut() {
+    @Deprecated
+    public DataSet getDataIn() {
+        return dataIn();
+    }
+
+    public DataSet dataOut() {
         if (this.dataOut == null)
             this.dataOut = new DataSet();
         return this.dataOut;
     }
 
+    @Deprecated
+    public DataSet getDataOut() {
+        return dataOut();
+    }
+
     public boolean fail(String message) {
-        getDataOut().setMessage(message);
+        dataOut().setMessage(message);
         return false;
     }
 
+    public String message() {
+        return dataOut().message();
+    }
+
+    @Deprecated
     public String getMessage() {
-        return getDataOut().getMessage();
+        return message();
     }
 
     public void setMessage(String message) {
         if (message == null || "".equals(message.trim()))
             return;
-        getDataOut().setMessage(message);
+        dataOut().setMessage(message);
     }
 
     public String getFuncCode() {

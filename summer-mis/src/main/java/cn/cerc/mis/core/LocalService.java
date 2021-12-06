@@ -47,7 +47,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
-            DataRow headIn = getDataIn().getHead();
+            DataRow headIn = dataIn().head();
             if (args.length % 2 != 0) {
                 // TODO 此处应该使用 ClassResource
                 throw new RuntimeException("传入的参数数量必须为偶数！");
@@ -57,52 +57,52 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             }
         }
 
-        KeyValue function = new KeyValue("execute").setKey(getService());
+        KeyValue function = new KeyValue("execute").setKey(service());
         Object object = getServiceObject(function);
         if (object == null)
             return false;
 
         try {
-            if (!"SvrSession.byUserCode".equals(this.getService()))
-                log.debug(this.getService());
+            if (!"SvrSession.byUserCode".equals(this.service()))
+                log.debug(this.service());
             if (object instanceof IHandle)
                 ((IHandle) object).setSession(this.getSession());
             if (ServerConfig.isServerMaster()) {
-                setDataOut(((IService) object)._call(this, getDataIn(), function));
-                return getDataOut().getState() > 0;
+                setDataOut(((IService) object)._call(this, dataIn(), function));
+                return dataOut().state() > 0;
             }
 
             // 制作临时缓存Key
-            String key = MD5.get(this.getUserCode() + this.getService() + getDataIn().toJson());
+            String key = MD5.get(this.getUserCode() + this.service() + dataIn().json());
 
             if (bufferRead) {
                 String buffValue = Redis.get(key);
                 if (buffValue != null) {
-                    log.debug("read from buffer: " + this.getService());
-                    DataSet dataOut = getDataOut();
-                    dataOut.fromJson(buffValue);
-                    return dataOut.getState() > 0;
+                    log.debug("read from buffer: " + this.service());
+                    DataSet dataOut = dataOut();
+                    dataOut.setJson(buffValue);
+                    return dataOut.state() > 0;
                 }
             }
 
             // 没有缓存时，直接读取并存入缓存
-            setDataOut(((IService) object)._call(this, getDataIn(), function));
+            setDataOut(((IService) object)._call(this, dataIn(), function));
             if (bufferWrite) {
-                log.debug("write to buffer: " + this.getService());
+                log.debug("write to buffer: " + this.service());
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     if (jedis != null) {
-                        jedis.set(key, getDataOut().toString());
+                        jedis.set(key, dataOut().toString());
                         jedis.expire(key, 3600);
                     }
                 }
             }
-            return getDataOut().getState() > 0;
+            return dataOut().state() > 0;
         } catch (Exception e) {
             Throwable err = e;
             if (e.getCause() != null)
                 err = e.getCause();
             log.error(err.getMessage(), err);
-            getDataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());
+            dataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());
             return false;
         }
     }
@@ -110,7 +110,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
-            buff.setValue("data", this.getDataIn().toJson());
+            buff.setValue("data", this.dataIn().json());
         }
         return tmp;
     }

@@ -1,16 +1,18 @@
 package cn.cerc.mis.excel.input;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.DataRow;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 
 public class ImportExcelFile {
     private HttpServletRequest request;
@@ -37,11 +39,11 @@ public class ImportExcelFile {
                 if (fileItem.isFormField()) {
                     // 普通数据
                     String val = new String(fileItem.getString().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                    dataSet.getHead().setValue(fileItem.getFieldName(), val);
+                    dataSet.head().setValue(fileItem.getFieldName(), val);
                 } else {
                     // 文件数据
                     if (fileItem.getSize() > 0) {
-                        DataRow rs = dataSet.append().getCurrent();
+                        DataRow rs = dataSet.append().current();
                         rs.setValue("_FieldNo", i);
                         rs.setValue("_FieldName", fileItem.getFieldName());
                         rs.setValue("_ContentType", fileItem.getContentType());
@@ -69,8 +71,13 @@ public class ImportExcelFile {
         return this;
     }
 
-    public DataSet getDataSet() {
+    public DataSet dataSet() {
         return dataSet;
+    }
+
+    @Deprecated
+    public final DataSet getDataSet() {
+        return dataSet();
     }
 
     public void setDataSet(DataSet dataSet) {

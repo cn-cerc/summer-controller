@@ -32,7 +32,7 @@ public class DataSetExportToExcel {
         WritableSheet sheet = workbook.createSheet("Sheet1", 0);
 
         // 输出列头
-        HashSet<FieldMeta> metas = dataSet.getFieldDefs().getItems();
+        HashSet<FieldMeta> metas = dataSet.fields().getItems();
         int col = 0;
         for (FieldMeta meta : metas) {
             Label item = new Label(col, row, meta.getName());
@@ -44,7 +44,7 @@ public class DataSetExportToExcel {
         dataSet.first();
         while (dataSet.fetch()) {
             row++;
-            DataRow dataRow = dataSet.getCurrent();
+            DataRow dataRow = dataSet.current();
             build(sheet, dataRow, metas, row);
         }
 

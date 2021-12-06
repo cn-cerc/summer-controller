@@ -37,7 +37,7 @@ public class SecurityPolice {
     }
 
     public static boolean check(IHandle handle, Method method, Object bean) {
-        Class<?> clazz = method.getDeclaringClass();
+        Class<?> clazz = bean.getClass();
         Permission permission = findPermission(method.getAnnotations(), clazz.getAnnotations());
         Operators operators = findOperators(method.getAnnotations(), clazz.getAnnotations());
         if (log.isDebugEnabled()) {
@@ -244,7 +244,7 @@ public class SecurityPolice {
         } else if (handle != null) {
             if (bean instanceof IForm) {
                 IForm form = (IForm) bean;
-                String verlist = form.getParam("verlist", "");// TODO: 2021/11/19 增加独立方法获取，扫描注解、xml、mysql 
+                String verlist = form.getParam("verlist", "");// TODO: 2021/11/19 增加独立方法获取，扫描注解、xml、mysql
                 result = form.getPermission();
                 if (!Utils.isEmpty(verlist)) {
                     result = result + "#" + verlist;

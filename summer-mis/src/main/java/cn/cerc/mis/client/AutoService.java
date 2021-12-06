@@ -19,11 +19,11 @@ public class AutoService extends CustomServiceProxy {
     }
 
     public boolean exec() throws ServiceException {
-        if (this.getService() == null) {
+        if (this.service() == null) {
             throw new RuntimeException("not specified service");
         }
 
-        KeyValue function = new KeyValue("execute").setKey(getService());
+        KeyValue function = new KeyValue("execute").setKey(service());
         Object object = getServiceObject(function);
         if (object == null) {
             return false;
@@ -35,8 +35,8 @@ public class AutoService extends CustomServiceProxy {
             ((IHandle) object).setSession(handle.getSession());
         }
 
-        setDataOut(((IService) object)._call(handle, getDataIn(), function));
-        return getDataOut().getState() > 0;
+        setDataOut(((IService) object)._call(handle, dataIn(), function));
+        return dataOut().state() > 0;
     }
 
     @Override

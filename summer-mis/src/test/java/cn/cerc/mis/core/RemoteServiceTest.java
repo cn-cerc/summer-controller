@@ -40,20 +40,20 @@ public class RemoteServiceTest {
         String dataJson = json.get("dataOut").asText();
         DataSet dataOut = new DataSet();
         if (dataJson != null) {
-            dataOut.fromJson(dataJson);
+            dataOut.setJson(dataJson);
         }
         log.info("{}", dataOut.size());
 
         while (dataOut.fetch()) {
-            log.info("{}", dataOut.getCurrent());
+            log.info("{}", dataOut.current());
         }
     }
 
     public static void main(String[] args) {
         DataSet dataIn = new DataSet();
-        dataIn.getHead().setValue("CusCorpNo_", "155174");
-        dataIn.getHead().setValue("MaxRecord_", "3");
-        System.out.println(dataIn.toJson());
+        dataIn.head().setValue("CusCorpNo_", "155174");
+        dataIn.head().setValue("MaxRecord_", "3");
+        System.out.println(dataIn.json());
     }
 
 }

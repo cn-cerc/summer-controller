@@ -16,24 +16,29 @@ public abstract class CustomServiceProxy extends Handle {
 
     protected final Object getServiceObject(KeyValue function) {
         if (getSession() == null) {
-            getDataOut().setMessage("session is null.");
+            dataOut().setMessage("session is null.");
             return null;
         }
         if (getService() == null) {
-            getDataOut().setMessage("service is null.");
+            dataOut().setMessage("service is null.");
             return null;
         }
 
         try {
             return Application.getService(this, getService(), function);
         } catch (ClassNotFoundException e) {
-            getDataOut().setMessage(e.getMessage());
+            dataOut().setMessage(e.getMessage());
             return null;
         }
     }
 
-    public final String getService() {
+    public String service() {
         return service;
+    }
+
+    @Deprecated
+    public final String getService() {
+        return service();
     }
 
     public final CustomServiceProxy setService(String service) {
@@ -41,32 +46,47 @@ public abstract class CustomServiceProxy extends Handle {
         return this;
     }
 
-    public final String getMessage() {
-        if (dataOut != null && dataOut.getMessage() != null) {
-            return dataOut.getMessage().replaceAll("'", "\"");
+    public final String message() {
+        if (dataOut != null && dataOut.message() != null) {
+            return dataOut.message().replaceAll("'", "\"");
         } else {
             return null;
         }
     }
 
-    public final DataSet getDataIn() {
+    @Deprecated
+    public String getMessage() {
+        return message();
+    }
+
+    public DataSet dataIn() {
         if (dataIn == null)
             dataIn = new DataSet();
         return dataIn;
+    }
+
+    @Deprecated
+    public final DataSet getDataIn() {
+        return dataIn();
     }
 
     public void setDataIn(DataSet dataIn) {
         this.dataIn = dataIn;
     }
 
-    protected void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
-    }
-
-    public final DataSet getDataOut() {
+    public DataSet dataOut() {
         if (dataOut == null)
             dataOut = new DataSet();
         return dataOut;
+    }
+
+    @Deprecated
+    public final DataSet getDataOut() {
+        return dataOut();
+    }
+
+    public void setDataOut(DataSet dataOut) {
+        this.dataOut = dataOut;
     }
 
 }
