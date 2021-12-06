@@ -1,8 +1,6 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -15,7 +13,6 @@ import cn.cerc.core.FieldMeta;
 import cn.cerc.core.FieldMeta.FieldKind;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.SqlInsertStatement;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.mssql.MssqlQuery;
 import cn.cerc.db.mysql.MysqlQuery;
@@ -135,13 +132,6 @@ public abstract class AdoTable implements IService {
                 if (column.nullable() && !row.has(field.getName()))
                     throw new RuntimeException(field.getName() + " can not be null");
             }
-        }
-    }
-
-    public final int saveInsert(Connection connection, DataRow row) throws SQLException {
-        try (SqlInsertStatement sis = new SqlInsertStatement(connection)) {
-            sis.init(row.fields(), table());
-            return sis.saveInsert(row);
         }
     }
 
