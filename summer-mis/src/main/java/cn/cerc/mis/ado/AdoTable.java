@@ -1,6 +1,8 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -37,7 +39,7 @@ public abstract class AdoTable implements IService {
         if (dataIn.curd()) {
             query.setJson(dataIn.json());
             query.setStorage(true);
-            for (FieldMeta meta : query.fields()) 
+            for (FieldMeta meta : query.fields())
                 meta.setKind(FieldKind.Storage);
             for (Field field : this.getClass().getDeclaredFields()) {
                 GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
@@ -106,8 +108,19 @@ public abstract class AdoTable implements IService {
         for (DataRow row : dataIn) {
             if (DataRowState.Update == row.state()) {
                 DataRow history = row.history();
-                if (!query.locate(uid, history.getString(uid)))
-                    throw new RuntimeException("update fail");
+
+                String[] names = uid.split(";");
+                if (names.length == 1) {
+                    if (!query.locate(uid, history.getValue(uid)))
+                        throw new RuntimeException("update fail");
+                } else {
+                    List<Object> values = new ArrayList<>();
+                    for (String name : names)
+                        values.add(history.getValue(name));
+                    if (!query.locate(uid, values.toArray()))
+                        throw new RuntimeException("update fail");
+                }
+
                 checkFieldsNull(row);
                 query.edit();
                 query.copyRecord(row);
@@ -133,7 +146,7 @@ public abstract class AdoTable implements IService {
         for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                if (column.nullable() && !row.has(field.getName()))
+                if (!column.nullable() && !row.has(field.getName()))
                     throw new RuntimeException(field.getName() + " can not be null");
             }
         }
@@ -155,10 +168,12 @@ public abstract class AdoTable implements IService {
         boolean has = false;
         for (Field field : this.getClass().getDeclaredFields()) {
             if (field.getDeclaredAnnotation(Id.class) != null) {
-                if (has)
-                    throw new RuntimeException("暂不支持多个主键");
-                uid = field.getName();
-                has = true;
+                if (has) {
+                    uid += ";" + field.getName();
+                } else {
+                    uid = field.getName();
+                    has = true;
+                }
             }
         }
         return uid;
