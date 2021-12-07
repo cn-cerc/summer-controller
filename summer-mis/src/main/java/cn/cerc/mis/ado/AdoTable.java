@@ -68,7 +68,7 @@ public abstract class AdoTable implements IService {
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
         DataRow headIn = dataIn.head();
-        query.add("select * from %s", Utils.findTable(this.getClass()));
+        query.add("select * from %s", this.table());
         query.add("where 1=1");
 
         dataIn.head().remove("_sql_");
@@ -134,6 +134,10 @@ public abstract class AdoTable implements IService {
                     throw new RuntimeException(field.getName() + " can not be null");
             }
         }
+    }
+
+    public final String table() {
+        return Utils.findTable(this.getClass());
     }
 
 }
