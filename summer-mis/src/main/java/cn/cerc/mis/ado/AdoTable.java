@@ -75,6 +75,9 @@ public abstract class AdoTable implements IService {
         dataIn.head().remove("_sql_");
 
         for (FieldMeta meta : dataIn.head().getFields()) {
+            if (!headIn.has(meta.getCode())) {
+                continue;
+            }
             String value = Utils.safeString(headIn.getString(meta.getCode())).trim();
             if (value.endsWith("*"))
                 query.add("and %s like '%s%%'", meta.getCode(), value.substring(0, value.length() - 1));
