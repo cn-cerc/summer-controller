@@ -131,7 +131,7 @@ public abstract class AdoTable implements IService {
         for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                if (column.nullable() && !row.has(field.getName()))
+                if (!column.nullable() && !row.has(field.getName()))
                     throw new RuntimeException(field.getName() + " can not be null");
             }
         }
