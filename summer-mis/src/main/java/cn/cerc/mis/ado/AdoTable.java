@@ -3,8 +3,6 @@ package cn.cerc.mis.ado;
 import java.lang.reflect.Field;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 import cn.cerc.core.DataRow;
 import cn.cerc.core.DataRowState;
@@ -15,6 +13,7 @@ import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.mssql.MssqlQuery;
+import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.sqlite.SqliteQuery;
 import cn.cerc.mis.core.IService;
@@ -40,8 +39,8 @@ public abstract class AdoTable implements IService {
                 meta.setKind(FieldKind.Storage);
             }
             // 保存对数据表的修改
-            query.operator().setTableName(this.table());
-            query.operator().setUpdateKey(this.uid());
+            query.operator().setTableName(Utils.findTable(this.getClass()));
+            query.operator().setUpdateKey(Utils.findUid(this.getClass(), MysqlDatabase.DefaultUID));
             // 先删除，再修改，最后增加，次序不要错
             saveDelete(dataIn, query);
             saveUpdate(dataIn, query);
@@ -69,7 +68,7 @@ public abstract class AdoTable implements IService {
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
         DataRow headIn = dataIn.head();
-        query.add("select * from %s", this.table());
+        query.add("select * from %s", Utils.findTable(this.getClass()));
         query.add("where 1=1");
 
         dataIn.head().remove("_sql_");
@@ -100,7 +99,7 @@ public abstract class AdoTable implements IService {
     }
 
     protected void saveUpdate(DataSet dataIn, SqlQuery query) {
-        String uid = this.uid();
+        String uid = Utils.findUid(this.getClass(), query.operator().getUpdateKey());
         for (DataRow row : dataIn) {
             if (DataRowState.Update == row.state()) {
                 DataRow history = row.history();
@@ -137,28 +136,4 @@ public abstract class AdoTable implements IService {
         }
     }
 
-    public final String table() {
-        String table = null;
-        // 取得表名
-        Table object = this.getClass().getDeclaredAnnotation(Table.class);
-        if (object != null)
-            table = object.name();
-        if (Utils.isEmpty(table))
-            table = this.getClass().getSimpleName();
-        return table;
-    }
-
-    public final String uid() {
-        String uid = "UID_";
-        boolean has = false;
-        for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.getDeclaredAnnotation(Id.class) != null) {
-                if (has)
-                    throw new RuntimeException("暂不支持多个主键");
-                uid = field.getName();
-                has = true;
-            }
-        }
-        return uid;
-    }
 }
