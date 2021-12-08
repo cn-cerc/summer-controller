@@ -35,9 +35,9 @@ public abstract class AdoTable implements IService {
         if (dataIn.crud()) {
             query.setJson(dataIn.json());
             query.setStorage(true);
-            for (FieldMeta meta : query.fields()) {
+            for (FieldMeta meta : dataIn.fields())
                 meta.setKind(FieldKind.Storage);
-            }
+
             // 保存对数据表的修改
             query.operator().setTableName(Utils.findTable(this.getClass()));
             query.operator().setUpdateKey(Utils.findUid(this.getClass(), MysqlDatabase.DefaultUID));
@@ -91,9 +91,11 @@ public abstract class AdoTable implements IService {
         for (DataRow row : dataIn) {
             if (DataRowState.Insert == row.state()) {
                 checkFieldsNull(row);
-                query.append();
-                query.copyRecord(row);
-                query.post();
+                try {
+                    query.insertStorage(row);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage());
+                }
             }
         }
     }
@@ -106,9 +108,11 @@ public abstract class AdoTable implements IService {
                 if (!query.locate(uid, history.getString(uid)))
                     throw new RuntimeException("update fail");
                 checkFieldsNull(row);
-                query.edit();
-                query.copyRecord(row);
-                query.post();
+                try {
+                    query.updateStorage(row);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage());
+                }
             }
         }
     }
