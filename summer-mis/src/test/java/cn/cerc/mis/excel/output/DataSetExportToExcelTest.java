@@ -51,7 +51,7 @@ public class DataSetExportToExcelTest {
         dataSet.fields().get("super_").setName("管理员");
 
         dataSet.buildMeta();
-        dataSet.setMetaInfo(true);
+        dataSet.setMeta(true);
         System.out.println(dataSet.json());
         for (FieldMeta meta : dataSet.fields()) {
             System.out.println(new Gson().toJson(meta));

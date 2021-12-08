@@ -1,5 +1,9 @@
 package cn.cerc.mis.excel.output;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashSet;
+
 import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.FieldMeta;
@@ -11,17 +15,13 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashSet;
-
 /**
  * 将DataSet数据转换成Excel文件流
  */
 public class DataSetExportToExcel {
 
     public static void output(DataSet dataSet, OutputStream outputstream) throws IOException, WriteException {
-        dataSet.setMetaInfo(true);
+        dataSet.setMeta(true);
         dataSet.buildMeta();
 
         int row = 0;

@@ -47,11 +47,11 @@ public class SClient extends DataSet {
     }
 
     public void save() {
-        this.setCurd(true);
+        this.setCrud(true);
         try {
             open();
         } finally {
-            this.setCurd(false);
+            this.setCrud(false);
         }
     }
 

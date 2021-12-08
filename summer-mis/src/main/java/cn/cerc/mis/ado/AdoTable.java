@@ -32,7 +32,7 @@ public abstract class AdoTable implements IService {
 
         // 打开数据表
         SqlQuery query = createSqlQuery(handle);
-        if (dataIn.curd()) {
+        if (dataIn.crud()) {
             query.setJson(dataIn.json());
             query.setStorage(true);
             for (FieldMeta meta : query.fields()) {
@@ -46,11 +46,11 @@ public abstract class AdoTable implements IService {
             saveUpdate(dataIn, query);
             saveInsert(dataIn, query);
         }
-        query.setCurd(false).records().clear();
+        query.setCrud(false).records().clear();
         open(dataIn, query);
         // 对外输出meta
         query.fields().readDefine(this.getClass());
-        query.setMetaInfo(true);
+        query.setMeta(true);
         return query.disableStorage().setState(ServiceState.OK);
 
     }
