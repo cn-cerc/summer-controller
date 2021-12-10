@@ -39,8 +39,8 @@ public abstract class AdoTable implements IService {
                 meta.setKind(FieldKind.Storage);
 
             // 保存对数据表的修改
-            query.operator().setTableName(Utils.findTable(this.getClass()));
-            query.operator().setUpdateKey(Utils.findUid(this.getClass(), MysqlDatabase.DefaultUID));
+            query.operator().setTable(Utils.findTable(this.getClass()));
+            query.operator().setOid(Utils.findOid(this.getClass(), MysqlDatabase.DefaultOID));
             // 先删除，再修改，最后增加，次序不要错
             saveDelete(dataIn, query);
             saveUpdate(dataIn, query);
@@ -74,14 +74,14 @@ public abstract class AdoTable implements IService {
         dataIn.head().remove("_sql_");
 
         for (FieldMeta meta : dataIn.head().getFields()) {
-            if (!headIn.has(meta.getCode())) {
+            if (!headIn.has(meta.code())) {
                 continue;
             }
-            String value = Utils.safeString(headIn.getString(meta.getCode())).trim();
+            String value = Utils.safeString(headIn.getString(meta.code())).trim();
             if (value.endsWith("*"))
-                query.add("and %s like '%s%%'", meta.getCode(), value.substring(0, value.length() - 1));
+                query.add("and %s like '%s%%'", meta.code(), value.substring(0, value.length() - 1));
             else if (!"*".equals(value))
-                query.add("and %s='%s'", meta.getCode(), value);
+                query.add("and %s='%s'", meta.code(), value);
         }
         query.open();
         return this;
@@ -101,7 +101,7 @@ public abstract class AdoTable implements IService {
     }
 
     protected void saveUpdate(DataSet dataIn, SqlQuery query) {
-        String uid = Utils.findUid(this.getClass(), query.operator().getUpdateKey());
+        String uid = Utils.findOid(this.getClass(), query.operator().oid());
         for (DataRow row : dataIn) {
             if (DataRowState.Update == row.state()) {
                 DataRow history = row.history();

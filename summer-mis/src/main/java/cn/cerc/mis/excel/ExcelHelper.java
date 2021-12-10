@@ -6,9 +6,9 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.FieldMeta;
-import cn.cerc.core.DataRow;
 import cn.cerc.core.Utils;
 import jxl.Cell;
 import jxl.CellType;
@@ -46,7 +46,7 @@ public abstract class ExcelHelper implements AutoCloseable {
             int row = 0;
             int col = 0;
             for (FieldMeta meta : dataSet.fields()) {
-                String value = meta.getName() != null ? meta.getName() : meta.getCode();
+                String value = meta.name() != null ? meta.name() : meta.code();
                 Label item = new Label(col++, row, value);
                 sheet.addCell(item);
             }
@@ -56,7 +56,7 @@ public abstract class ExcelHelper implements AutoCloseable {
                 row++;
                 col = 0;
                 for (FieldMeta meta : dataSet.fields()) {
-                    String value = dataSet.getString(meta.getCode());
+                    String value = dataSet.getString(meta.code());
                     Label item = new Label(col++, row, value);
                     sheet.addCell(item);
                 }

@@ -35,7 +35,7 @@ public class DataSetExportToExcel {
         HashSet<FieldMeta> metas = dataSet.fields().getItems();
         int col = 0;
         for (FieldMeta meta : metas) {
-            Label item = new Label(col, row, meta.getName());
+            Label item = new Label(col, row, meta.name());
             sheet.addCell(item);
             col++;
         }
@@ -55,7 +55,7 @@ public class DataSetExportToExcel {
     private static void build(WritableSheet sheet, DataRow dataRow, HashSet<FieldMeta> metas, int row) throws WriteException {
         int i = 0;
         for (FieldMeta meta : metas) {
-            String type = meta.getType();
+            String type = meta.typeValue();
             if (!Utils.isEmpty(type))
                 type = type.substring(0, 1);
             if (Utils.isEmpty(type))
@@ -63,14 +63,14 @@ public class DataSetExportToExcel {
             WritableCell item;
             switch (type) {
             case "n":
-                item = new jxl.write.Number(i, row, dataRow.getInt(meta.getCode()));
+                item = new jxl.write.Number(i, row, dataRow.getInt(meta.code()));
                 break;
             case "f":
-                item = new jxl.write.Number(i, row, dataRow.getDouble(meta.getCode()));
+                item = new jxl.write.Number(i, row, dataRow.getDouble(meta.code()));
                 break;
             case "s":
             default:
-                item = new Label(i, row, dataRow.getString(meta.getCode()));
+                item = new Label(i, row, dataRow.getString(meta.code()));
                 break;
             }
             sheet.addCell(item);

@@ -40,7 +40,7 @@ public class PushTableDefault implements IPushProcesser {
         }
         if (!this.onAppend(record))
             return false;
-        query.operator().setUpdateKey("");
+        query.operator().setOid("");
         query.append();
         query.copyRecord(record, query.fields());
         query.post();
@@ -95,7 +95,7 @@ public class PushTableDefault implements IPushProcesser {
         if (query.eof()) {
             if (!this.onAppend(record))
                 return false;
-            query.operator().setUpdateKey("");
+            query.operator().setOid("");
             query.append();
             query.copyRecord(record, query.fields());
             query.post();
