@@ -31,8 +31,8 @@ public abstract class CustomService extends Handle implements IService {
     public CustomService init(CustomService owner, boolean refData) {
         this.setSession(owner.getSession());
         if (refData) {
-            this.dataIn = owner.getDataIn();
-            this.dataOut = owner.getDataOut();
+            this.dataIn = owner.dataIn();
+            this.dataOut = owner.dataOut();
         }
         return this;
     }

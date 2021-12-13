@@ -9,6 +9,8 @@ import cn.cerc.core.DataRowState;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.FieldMeta;
 import cn.cerc.core.FieldMeta.FieldKind;
+import cn.cerc.core.SqlServer;
+import cn.cerc.core.SqlServerTypeException;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
@@ -56,13 +58,19 @@ public abstract class AdoTable implements IService {
     }
 
     private SqlQuery createSqlQuery(IHandle handle) {
-        if (this.getClass().getAnnotation(Mssql.class) != null)
-            return new MssqlQuery(handle);
-        else if (this.getClass().getAnnotation(Mysql.class) != null)
-            return new MysqlQuery(handle);
-        else if (this.getClass().getAnnotation(Sqlite.class) != null)
-            return new SqliteQuery();
-        else
+        SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
+        if (sqlServer != null) {
+            switch (sqlServer.type()) {
+            case Mysql:
+                return new MysqlQuery(handle);
+            case Mssql:
+                return new MssqlQuery(handle);
+            case Sqlite:
+                return new SqliteQuery();
+            default:
+                throw new SqlServerTypeException();
+            }
+        } else
             throw new RuntimeException("unknow sql server type");
     }
 
