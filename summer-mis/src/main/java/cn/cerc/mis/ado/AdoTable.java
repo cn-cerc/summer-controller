@@ -1,6 +1,7 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 
 import javax.persistence.Column;
 
@@ -96,44 +97,59 @@ public abstract class AdoTable implements IService {
     }
 
     protected void saveInsert(DataSet dataIn, SqlQuery query) {
-        for (DataRow row : dataIn) {
-            if (DataRowState.Insert == row.state()) {
-                checkFieldsNull(row);
-                try {
-                    query.insertStorage(row);
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+        Connection connection = query.openConnection();
+        try {
+            for (DataRow row : dataIn) {
+                if (DataRowState.Insert == row.state()) {
+                    checkFieldsNull(row);
+                    try {
+                        query.insertStorage(connection, row);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e.getMessage());
+                    }
                 }
             }
+        } finally {
+            query.closeConnection();
         }
     }
 
     protected void saveUpdate(DataSet dataIn, SqlQuery query) {
         String uid = Utils.findOid(this.getClass(), query.operator().oid());
-        for (DataRow row : dataIn) {
-            if (DataRowState.Update == row.state()) {
-                DataRow history = row.history();
-                if (!query.locate(uid, history.getString(uid)))
-                    throw new RuntimeException("update fail");
-                checkFieldsNull(row);
-                try {
-                    query.updateStorage(row);
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+        Connection connection = query.openConnection();
+        try {
+            for (DataRow row : dataIn) {
+                if (DataRowState.Update == row.state()) {
+                    DataRow history = row.history();
+                    if (!query.locate(uid, history.getString(uid)))
+                        throw new RuntimeException("update fail");
+                    checkFieldsNull(row);
+                    try {
+                        query.updateStorage(connection, row);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e.getMessage());
+                    }
                 }
             }
+        } finally {
+            query.closeConnection();
         }
     }
 
     protected void saveDelete(DataSet dataIn, SqlQuery query) {
-        for (DataRow row : dataIn.garbage()) {
-            try {
-                for (FieldMeta meta : row.fields())
-                    meta.setKind(FieldKind.Storage);
-                query.deleteStorage(row);
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
+        Connection connection = query.openConnection();
+        try {
+            for (DataRow row : dataIn.garbage()) {
+                try {
+                    for (FieldMeta meta : row.fields())
+                        meta.setKind(FieldKind.Storage);
+                    query.deleteStorage(connection, row);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage());
+                }
             }
+        } finally {
+            query.closeConnection();
         }
     }
 
