@@ -113,7 +113,7 @@ public class CustomSession implements ISession {
         }
 
         if (OssConnection.sessionId.equals(key)) {
-            OssConnection obj = new OssConnection();
+            OssConnection obj = Application.getBean(OssConnection.class);
             connections.put(OssConnection.sessionId, obj);
             return connections.get(key);
         }
