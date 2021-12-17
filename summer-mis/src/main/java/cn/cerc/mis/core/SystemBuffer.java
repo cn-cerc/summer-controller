@@ -173,4 +173,28 @@ public class SystemBuffer {
         }
 
     }
+
+    /**
+     * key = entity.class + [corpNo] + entity.values
+     */
+
+    public enum Entity implements IBufferKey {
+        Cache;
+
+        @Override
+        public int getStartingPoint() {
+            return 70;
+        }
+
+        @Override
+        public int getMinimumNumber() {
+            return 2;
+        }
+
+        @Override
+        public int getMaximumNumber() {
+            return 10;
+        }
+
+    }
 }
