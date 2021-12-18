@@ -22,8 +22,6 @@ import cn.cerc.db.mssql.MssqlDatabase;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.sqlite.SqliteDatabase;
-import cn.cerc.mis.core.SystemBuffer;
-import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 public class EntityQuery<T> extends SqlQuery implements IHandle {
@@ -86,8 +84,7 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                     for (DataRow row : this.records()) {
                         String[] keys = ec.buildKeys(row);
                         log.debug("set: {}", String.join(".", keys));
-                        String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
-                        jedis.setex(dataKey, entityKey.expire(), row.json());
+                        jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
                         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                             SessionCache.set(keys, row);
                     }
@@ -97,9 +94,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                 EntityCache<T> ec = EntityCache.Create(this, clazz);
                 String[] keys = ec.buildKeys(row);
                 log.debug("set: {}", String.join(".", keys));
-                String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
                 try (Jedis jedis = JedisFactory.getJedis()) {
-                    jedis.setex(dataKey, entityKey.expire(), row.json());
+                    jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(keys, row);
                 }
@@ -108,9 +104,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                 EntityCache<T> ec = EntityCache.Create(this, clazz);
                 String[] keys = ec.buildKeys(row);
                 log.debug("del: {}", String.join(".", keys));
-                String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
                 try (Jedis jedis = JedisFactory.getJedis()) {
-                    jedis.del(dataKey);
+                    jedis.del(EntityCache.buildKey(keys));
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.del(keys);
                 }
