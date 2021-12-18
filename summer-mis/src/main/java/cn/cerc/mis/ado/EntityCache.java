@@ -241,7 +241,7 @@ public class EntityCache<T> implements IHandle {
         }
     }
 
-    public static String buildKey(String[] keys) {
+    public static String buildKey(String... keys) {
         return MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
     }
 
