@@ -24,7 +24,7 @@ public interface IErrorPage {
         else if (e instanceof SecurityStopException)
             _log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         else {
-            _log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
+            _log.warn("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), err);
         }
         String result = this.getErrorPage(request, response, err);
         if (result != null) {
