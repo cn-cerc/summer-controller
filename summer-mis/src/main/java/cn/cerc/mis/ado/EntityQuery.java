@@ -78,37 +78,37 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
     public EntityQuery<T> open() {
         super.open();
         this.fields().readDefine(clazz);
-        EntityKey ekey = clazz.getDeclaredAnnotation(EntityKey.class);
-        if (ekey != null && ekey.cache() != CacheLevelEnum.Disabled) {
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        if (entityKey != null && entityKey.cache() != CacheLevelEnum.Disabled) {
             if (this.size() <= EntityCache.MaxRecord) {
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     for (DataRow row : this.records()) {
-                        String[] keys = buildRowKeys(ekey, row);
+                        String[] keys = buildRowKeys(entityKey, row);
                         log.debug("set: {}", String.join(".", keys));
                         String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
-                        jedis.setex(dataKey, EntityCache.Expire, row.json());
-                        if (ekey.cache() == CacheLevelEnum.RedisAndSession)
+                        jedis.setex(dataKey, entityKey.expire(), row.json());
+                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                             SessionCache.set(keys, row);
                     }
                 }
             }
             this.onAfterPost(row -> {
                 try (Jedis jedis = JedisFactory.getJedis()) {
-                    String[] keys = buildRowKeys(ekey, row);
+                    String[] keys = buildRowKeys(entityKey, row);
                     log.debug("set: {}", String.join(".", keys));
                     String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
-                    jedis.setex(dataKey, EntityCache.Expire, row.json());
-                    if (ekey.cache() == CacheLevelEnum.RedisAndSession)
+                    jedis.setex(dataKey, entityKey.expire(), row.json());
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(keys, row);
                 }
             });
             this.onAfterDelete(row -> {
                 try (Jedis jedis = JedisFactory.getJedis()) {
-                    String[] keys = buildRowKeys(ekey, row);
+                    String[] keys = buildRowKeys(entityKey, row);
                     log.debug("del: {}", String.join(".", keys));
                     String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
                     jedis.del(dataKey);
-                    if (ekey.cache() == CacheLevelEnum.RedisAndSession)
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.del(keys);
                 }
             });

@@ -20,7 +20,6 @@ import redis.clients.jedis.Jedis;
 
 public class EntityCache<T> implements IHandle {
     private static final Logger log = LoggerFactory.getLogger(EntityCache.class);
-    public static final int Expire = 3600;
     public static final int MaxRecord = 2000;
     private ISession session;
     private Class<T> clazz;
@@ -138,7 +137,7 @@ public class EntityCache<T> implements IHandle {
                     String[] keys3 = buildRowKeys(row);
                     String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys3);
                     try (Jedis jedis = JedisFactory.getJedis()) {
-                        jedis.setex(dataKey, Expire, row.json());
+                        jedis.setex(dataKey, entityKey.expire(), row.json());
                     }
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(keys2, row);
@@ -178,7 +177,7 @@ public class EntityCache<T> implements IHandle {
             String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys2);
             if (entityKey.cache() != CacheLevelEnum.Disabled) {
                 try (Jedis jedis = JedisFactory.getJedis()) {
-                    jedis.setex(dataKey, Expire, "");
+                    jedis.setex(dataKey, entityKey.expire(), "");
                 }
                 if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                     SessionCache.set(keys2, new DataRow());
