@@ -31,7 +31,7 @@ public class EntityCache<T> implements IHandle {
 
     public EntityCache(IHandle handle, Class<T> clazz) {
         super();
-        if(handle != null)
+        if (handle != null)
             this.session = handle.getSession();
         this.entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (this.entityKey == null)
@@ -68,22 +68,21 @@ public class EntityCache<T> implements IHandle {
      * @return 从Redis读取，若没有找到，则从数据库读取
      */
     public T getRedis(String... values) {
-        if (entityKey.cache() != CacheLevelEnum.Redis)
-            return getStorage(values);
-
-        log.debug("getRedis: {}.{}", clazz.getSimpleName(), String.join(".", values));
-        String[] keys = this.buildDataKeys(values);
-        String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
-        try (Jedis jedis = JedisFactory.getJedis()) {
-            String json = jedis.get(dataKey);
-            if (!Utils.isEmpty(json)) {
-                try {
-                    DataRow row = new DataRow().setJson(json);
-                    return row.asEntity(clazz);
-                } catch (Exception e) {
-                    log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
-                    e.printStackTrace();
-                    jedis.del(dataKey);
+        if (entityKey.cache() == CacheLevelEnum.Redis) {
+            log.debug("getRedis: {}.{}", clazz.getSimpleName(), String.join(".", values));
+            String[] keys = this.buildDataKeys(values);
+            String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
+            try (Jedis jedis = JedisFactory.getJedis()) {
+                String json = jedis.get(dataKey);
+                if (!Utils.isEmpty(json)) {
+                    try {
+                        DataRow row = new DataRow().setJson(json);
+                        return row.asEntity(clazz);
+                    } catch (Exception e) {
+                        log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
+                        e.printStackTrace();
+                        jedis.del(dataKey);
+                    }
                 }
             }
         }
@@ -162,7 +161,7 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
         if (entityKey.corpNo())
-            keys[offset-1] = this.getCorpNo();
+            keys[offset - 1] = this.getCorpNo();
         keys[offset] = "*";
         return keys;
     }
@@ -182,7 +181,7 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
         if (entityKey.corpNo())
-            keys[offset-1] = this.getCorpNo();
+            keys[offset - 1] = this.getCorpNo();
         for (int i = 0; i < values.length; i++)
             keys[offset + i] = values[i];
         return keys;
