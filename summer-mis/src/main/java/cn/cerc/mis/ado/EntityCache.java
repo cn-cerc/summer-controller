@@ -100,52 +100,22 @@ public class EntityCache<T> implements IHandle {
         log.debug("getStorage: {}.{}", clazz.getSimpleName(), String.join(".", values));
         T entity = null;
         if (entityKey.virtual()) {
-            entity = getVirtualEntity();
+            entity = getVirtualEntity(values);
         } else {
-            entity = getTableEntity();
+            entity = getTableEntity(values);
         }
-        if (entity == null)
-            setEmpty(values);
-        return entity;
-    }
-
-    private T getTableEntity(String... values) {
-        T entity = null;
-        int diff = entityKey.version() == 0 ? 1 : 2;
-        EntityQuery<T> query = EntityQuery.Create(this, clazz);
-        query.sql().clear();
-        query.add("select").add(String.join(",", EntityUtils.getFields(clazz).keySet()));
-        query.add("from %s", Utils.findTable(clazz));
-        // 如果缓存没有保存任何key则重新载入数据
-        String[] keys = this.buildKeys(values);
-        if (listKeys() != null) {
-            query.add("where %s='%s'", entityKey.fields()[0], this.getCorpNo());
-            query.open();
-            for (DataRow row : query.records()) {
-                boolean exists = true;
-                for (int i = 0; i < keys.length - diff; i++) {
-                    String value = keys[i + diff];
-                    if (!row.getString(entityKey.fields()[i]).equals(value))
-                        exists = false;
-                }
-                if (exists)
-                    entity = row.asEntity(clazz);
+        if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
+            String[] keys = this.buildKeys(values);
+            try (Jedis jedis = JedisFactory.getJedis()) {
+                jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
-        } else {
-            for (int i = 0; i < keys.length - diff; i++) {
-                query.add(i == 0 ? "where" : "and");
-                query.add("%s='%s'", entityKey.fields()[i], keys[i + diff]);
-            }
-            query.open();
-            if (query.size() == 1)
-                entity = query.currentEntity();
-            else if (query.size() > 1)
-                throw new RuntimeException("error: size > 1");
+            if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                SessionCache.set(keys, new DataRow());
         }
         return entity;
     }
 
-    private T getVirtualEntity(String... values) {
+    private T getVirtualEntity(String[] values) {
         int diff = entityKey.version() == 0 ? 1 : 2;
         String[] keys = this.buildKeys(values);
         T obj = newVirtualEntity();
@@ -195,6 +165,42 @@ public class EntityCache<T> implements IHandle {
                 return row.asEntity(clazz);
         }
         return null;
+    }
+
+    private T getTableEntity(String[] values) {
+        T entity = null;
+        int diff = entityKey.version() == 0 ? 1 : 2;
+        EntityQuery<T> query = EntityQuery.Create(this, clazz);
+        query.sql().clear();
+        query.add("select").add(String.join(",", EntityUtils.getFields(clazz).keySet()));
+        query.add("from %s", Utils.findTable(clazz));
+        // 如果缓存没有保存任何key则重新载入数据
+        String[] keys = this.buildKeys(values);
+        if (listKeys() != null) {
+            query.add("where %s='%s'", entityKey.fields()[0], this.getCorpNo());
+            query.open();
+            for (DataRow row : query.records()) {
+                boolean exists = true;
+                for (int i = 0; i < keys.length - diff; i++) {
+                    String value = keys[i + diff];
+                    if (!row.getString(entityKey.fields()[i]).equals(value))
+                        exists = false;
+                }
+                if (exists)
+                    entity = row.asEntity(clazz);
+            }
+        } else {
+            for (int i = 0; i < keys.length - diff; i++) {
+                query.add(i == 0 ? "where" : "and");
+                query.add("%s='%s'", entityKey.fields()[i], keys[i + diff]);
+            }
+            query.open();
+            if (query.size() == 1)
+                entity = query.currentEntity();
+            else if (query.size() > 1)
+                throw new RuntimeException("error: size > 1");
+        }
+        return entity;
     }
 
     public void del(String... values) {
@@ -285,7 +291,7 @@ public class EntityCache<T> implements IHandle {
         boolean fillItem(IHandle handle, Object entity, DataRow headIn);
 
         /**
-         * 先调用fillItem，在其返回false时，再调用此函数
+         * 先调用fillEntity，在其返回false时，再调用此函数
          * 
          * @param handle
          * @param values
@@ -304,17 +310,6 @@ public class EntityCache<T> implements IHandle {
         if (!(obj instanceof VirtualEntityImpl))
             throw new RuntimeException(clazz.getSimpleName() + " not support VirtualEntityImpl");
         return obj;
-    }
-
-    private void setEmpty(String... values) {
-        if (entityKey.cache() != CacheLevelEnum.Disabled) {
-            String[] keys = this.buildKeys(values);
-            try (Jedis jedis = JedisFactory.getJedis()) {
-                jedis.setex(buildKey(keys), entityKey.expire(), "");
-            }
-            if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                SessionCache.set(keys, new DataRow());
-        }
     }
 
     @Override
