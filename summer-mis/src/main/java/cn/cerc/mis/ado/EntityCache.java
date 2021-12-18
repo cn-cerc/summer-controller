@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.core.CacheLevelEnum;
 import cn.cerc.core.DataRow;
+import cn.cerc.core.DataSet;
 import cn.cerc.core.EntityKey;
 import cn.cerc.core.EntityUtils;
 import cn.cerc.core.ISession;
@@ -68,13 +69,15 @@ public class EntityCache<T> implements IHandle {
      * @return 从Redis读取，若没有找到，则从数据库读取
      */
     public T getRedis(String... values) {
-        if (entityKey.cache() == CacheLevelEnum.Redis) {
+        if (entityKey.cache() != CacheLevelEnum.Disabled) {
             log.debug("getRedis: {}.{}", clazz.getSimpleName(), String.join(".", values));
             String[] keys = this.buildDataKeys(values);
             String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 String json = jedis.get(dataKey);
-                if (!Utils.isEmpty(json)) {
+                if ("".equals(json))
+                    return null;
+                else if (json != null) {
                     try {
                         DataRow row = new DataRow().setJson(json);
                         return row.asEntity(clazz);
@@ -96,12 +99,11 @@ public class EntityCache<T> implements IHandle {
     public T getStorage(String... values) {
         log.debug("getStorage: {}.{}", clazz.getSimpleName(), String.join(".", values));
         T entity = null;
-        EntityQuery<T> query = EntityQuery.Create(this, clazz);
-        query.sql().clear();
-        query.add("select");
-        query.add(String.join(",", EntityUtils.getFields(clazz).keySet()));
-        query.add("from %s", Utils.findTable(clazz));
 
+        int diff = entityKey.version() == 0 ? 1 : 2;
+        String[] keys2 = this.buildDataKeys(values);
+
+        // 查找缓存中是否有同类key存在
         Set<String> prefixs = null;
         if (entityKey.cache() != CacheLevelEnum.Disabled) {
             String[] keys1 = buildFilterKeys();
@@ -111,30 +113,66 @@ public class EntityCache<T> implements IHandle {
             }
         }
 
-        // 如果缓存没有保存任何key则重新载入数据
-        int diff = entityKey.version() == 0 ? 1 : 2;
-        String[] keys2 = this.buildDataKeys(values);
-        if (prefixs != null && prefixs.size() == 0) {
-            query.add("where %s='%s'", entityKey.values()[0], this.getCorpNo());
-            query.open();
-            for (DataRow row : query.records()) {
+        if (entityKey.virtual()) {
+            T obj = null;
+            try {
+                obj = clazz.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (!(obj instanceof EntityCacheImpl))
+                throw new RuntimeException(clazz.getSimpleName() + " not implement EntityCacheImpl");
+
+            EntityCacheImpl impl = (EntityCacheImpl) obj;
+            for (DataRow row : impl.loadFromSource(this, prefixs, values)) {
                 boolean exists = true;
                 for (int i = 0; i < keys2.length - diff; i++) {
                     String value = keys2[i + diff];
-                    if (!row.getString(entityKey.values()[i]).equals(value))
+                    if (!row.getString(entityKey.fields()[i]).equals(value))
                         exists = false;
                 }
                 if (exists)
                     entity = row.asEntity(clazz);
+                // 存入缓存
+                if (entityKey.cache() != CacheLevelEnum.Disabled) {
+                    String[] keys3 = buildRowKeys(row);
+                    String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys3);
+                    try (Jedis jedis = JedisFactory.getJedis()) {
+                        jedis.setex(dataKey, Expire, row.json());
+                    }
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        SessionCache.set(keys2, row);
+                }
             }
         } else {
-            for (int i = 0; i < keys2.length - diff; i++) {
-                query.add(i == 0 ? "where" : "and");
-                query.add("%s='%s'", entityKey.values()[i], keys2[i + diff]);
+            EntityQuery<T> query = EntityQuery.Create(this, clazz);
+            query.sql().clear();
+            query.add("select");
+            query.add(String.join(",", EntityUtils.getFields(clazz).keySet()));
+            query.add("from %s", Utils.findTable(clazz));
+            // 如果缓存没有保存任何key则重新载入数据
+            if (prefixs != null && prefixs.size() == 0) {
+                query.add("where %s='%s'", entityKey.fields()[0], this.getCorpNo());
+                query.open();
+                for (DataRow row : query.records()) {
+                    boolean exists = true;
+                    for (int i = 0; i < keys2.length - diff; i++) {
+                        String value = keys2[i + diff];
+                        if (!row.getString(entityKey.fields()[i]).equals(value))
+                            exists = false;
+                    }
+                    if (exists)
+                        entity = row.asEntity(clazz);
+                }
+            } else {
+                for (int i = 0; i < keys2.length - diff; i++) {
+                    query.add(i == 0 ? "where" : "and");
+                    query.add("%s='%s'", entityKey.fields()[i], keys2[i + diff]);
+                }
+                query.open();
+                if (!query.eof())
+                    entity = query.currentEntity();
             }
-            query.open();
-            if (!query.eof())
-                entity = query.currentEntity();
         }
         if (entity == null) {
             String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys2);
@@ -147,6 +185,22 @@ public class EntityCache<T> implements IHandle {
             }
         }
         return entity;
+    }
+
+    public void del(String... values) {
+        if (entityKey.cache() == CacheLevelEnum.Disabled)
+            return;
+        String[] keys = this.buildDataKeys(values);
+        String dataKey = MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
+        try (Jedis jedis = JedisFactory.getJedis()) {
+            jedis.del(dataKey);
+        }
+        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+            SessionCache.del(keys);
+    }
+
+    public interface EntityCacheImpl {
+        DataSet loadFromSource(IHandle handle, Set<String> prefixs, String... values);
     }
 
     private String[] buildFilterKeys() {
@@ -167,7 +221,7 @@ public class EntityCache<T> implements IHandle {
     }
 
     private String[] buildDataKeys(String... values) {
-        if ((values.length + (entityKey.corpNo() ? 1 : 0)) != entityKey.values().length)
+        if ((values.length + (entityKey.corpNo() ? 1 : 0)) != entityKey.fields().length)
             throw new RuntimeException("params size is not match");
 
         int offset = 1;
@@ -184,6 +238,21 @@ public class EntityCache<T> implements IHandle {
             keys[offset - 1] = this.getCorpNo();
         for (int i = 0; i < values.length; i++)
             keys[offset + i] = values[i];
+        return keys;
+    }
+
+    private String[] buildRowKeys(DataRow row) {
+        int offset = 1;
+        if (entityKey.version() > 0)
+            offset++;
+
+        String[] keys = new String[offset + entityKey.fields().length];
+        keys[0] = clazz.getSimpleName();
+        if (entityKey.version() > 0)
+            keys[1] = "" + entityKey.version();
+
+        for (int i = 0; i < entityKey.fields().length; i++)
+            keys[offset + i] = row.getString(entityKey.fields()[i]);
         return keys;
     }
 

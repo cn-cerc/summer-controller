@@ -49,8 +49,11 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                 database = new SqliteDatabase(handle, clazz);
             else
                 throw new SqlServerTypeException();
-            if (ServerConfig.isServerDevelop())
-                database.createTable(false);
+            if (ServerConfig.isServerDevelop()) {
+                EntityKey ekey = clazz.getDeclaredAnnotation(EntityKey.class);
+                if (ekey == null || !ekey.virtual())
+                    database.createTable(false);
+            }
             buff.put(clazz, database);
         }
         return database;
@@ -118,13 +121,13 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
         if (entityKey.version() > 0)
             offset++;
 
-        String[] keys = new String[offset + entityKey.values().length];
+        String[] keys = new String[offset + entityKey.fields().length];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
-        
-        for (int i = 0; i < entityKey.values().length; i++)
-            keys[offset + i] = row.getString(entityKey.values()[i]);
+
+        for (int i = 0; i < entityKey.fields().length; i++)
+            keys[offset + i] = row.getString(entityKey.fields()[i]);
         return keys;
     }
 
