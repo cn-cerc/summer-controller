@@ -82,8 +82,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                 EntityCache<T> ec = EntityCache.Create(this, clazz);
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     for (DataRow row : this.records()) {
-                        String[] keys = ec.buildKeys(row);
-                        log.debug("set: {}", String.join(".", keys));
+                        Object[] keys = ec.buildKeys(row);
+                        log.debug("set: {}", EntityCache.joinToKey(keys));
                         jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
                         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                             SessionCache.set(keys, row);
@@ -92,8 +92,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
             }
             this.onAfterPost(row -> {
                 EntityCache<T> ec = EntityCache.Create(this, clazz);
-                String[] keys = ec.buildKeys(row);
-                log.debug("set: {}", String.join(".", keys));
+                Object[] keys = ec.buildKeys(row);
+                log.debug("set: {}", EntityCache.joinToKey(keys));
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
@@ -102,8 +102,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
             });
             this.onAfterDelete(row -> {
                 EntityCache<T> ec = EntityCache.Create(this, clazz);
-                String[] keys = ec.buildKeys(row);
-                log.debug("del: {}", String.join(".", keys));
+                Object[] keys = ec.buildKeys(row);
+                log.debug("del: {}", EntityCache.joinToKey(keys));
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.del(EntityCache.buildKey(keys));
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)

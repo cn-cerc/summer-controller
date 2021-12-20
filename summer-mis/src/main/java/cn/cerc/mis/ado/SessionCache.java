@@ -18,26 +18,29 @@ public class SessionCache {
     private static final Logger log = LoggerFactory.getLogger(SessionCache.class);
     public Map<String, DataRow> items = new ConcurrentHashMap<>();
 
-    public static void set(String[] keys, DataRow value) {
-        log.debug("set: {}", String.join(".", keys));
+    public static void set(Object[] keys, DataRow value) {
         assert keys.length > 0;
         assert value != null;
         SessionCache sc = Application.getBean(SessionCache.class);
-        sc.items.put(String.join(".", keys), value);
+        String cacheKey = EntityCache.joinToKey(keys);
+        log.debug("set: {}", cacheKey);
+        sc.items.put(cacheKey, value);
     }
 
-    public static DataRow get(String[] keys) {
-        log.debug("get: {}", String.join(".", keys));
+    public static DataRow get(Object[] keys) {
         assert keys.length > 0;
         SessionCache sc = Application.getBean(SessionCache.class);
-        return sc.items.get(String.join(".", keys));
+        String cacheKey = EntityCache.joinToKey(keys);
+        log.debug("get: {}", cacheKey);
+        return sc.items.get(cacheKey);
     }
-    
-    public static void del(String[] keys) {
-        log.debug("del: {}", String.join(".", keys));
+
+    public static void del(Object[] keys) {
         assert keys.length > 0;
         SessionCache sc = Application.getBean(SessionCache.class);
-        sc.items.remove(String.join(".", keys));    
+        String cacheKey = EntityCache.joinToKey(keys);
+        log.debug("del: {}", cacheKey);
+        sc.items.remove(cacheKey);
     }
-    
+
 }
