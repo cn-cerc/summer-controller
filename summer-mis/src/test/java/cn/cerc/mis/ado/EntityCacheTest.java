@@ -29,19 +29,21 @@ public class EntityCacheTest {
 
     @Test
     public void test_buildKeys() {
-        EntityCache<EntityTest1> ec = EntityCache.Create(null, EntityTest1.class);
-        assertEquals("EntityTest1.a.0", EntityCache.joinToKey(ec.buildKeys("a", false)));
-        assertEquals("EntityTest1.a.", EntityCache.joinToKey(ec.buildKeys("a", null)));
+        EntityCache<TableTest1Entity> ec = EntityCache.Create(null, TableTest1Entity.class);
+        String clazzName = TableTest1Entity.class.getSimpleName();
+        assertEquals(clazzName + ".a.0", EntityCache.joinToKey(ec.buildKeys("a", false)));
+        assertEquals(clazzName + ".a.", EntityCache.joinToKey(ec.buildKeys("a", null)));
         DataRow row = new DataRow();
         row.setValue("corpNo_", "a");
         row.setValue("enanble_", true);
-        assertEquals("EntityTest1.a.1", EntityCache.joinToKey(ec.buildKeys(row)));
+        assertEquals(clazzName + ".a.1", EntityCache.joinToKey(ec.buildKeys(row)));
     }
 
     @Test
     public void test_getVirtualEntity() {
-        EntityCache<EntityTest1> ec = EntityCache.Create(null, EntityTest1.class);
-        EntityTest1 entity = ec.getVirtualEntity("a", true);
+        EntityCache<TableTest1Entity> ec = EntityCache.Create(null, TableTest1Entity.class);
+        TableTest1Entity entity = ec.getVirtualEntity("a", true);
         assertTrue(entity == null);
     }
+
 }
