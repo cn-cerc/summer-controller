@@ -11,7 +11,7 @@ import cn.cerc.mis.ado.EntityCache.VirtualEntityImpl;
 
 @Entity
 @EntityKey(fields = { "corpNo_", "enanble_" })
-public class EntityTest1 implements VirtualEntityImpl {
+public class TableTest1Entity implements VirtualEntityImpl {
     @Column
     private String corpNo_;
     @Column

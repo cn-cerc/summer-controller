@@ -170,15 +170,11 @@ public class EntityCache<T> implements IHandle {
     private T getTableEntity(Object... values) {
         T entity = null;
         int diff = entityKey.version() == 0 ? 1 : 2;
-        EntityQuery<T> query = EntityQuery.Create(this, clazz);
-        query.sql().clear();
-        query.add("select").add(String.join(",", DataRow.getEntityFields(clazz).keySet()));
-        query.add("from %s", Utils.findTable(clazz));
         // 如果缓存没有保存任何key则重新载入数据
         Object[] keys = this.buildKeys(values);
-        if (listKeys() != null) {
-            query.add("where %s='%s'", entityKey.fields()[0], this.getCorpNo());
-            query.open();
+        if (listKeys() == null && entityKey.corpNo()) {
+            EntityQuery<T> query = EntityQuery.Create(this, clazz);
+            query.openByKeys(this.getCorpNo());
             for (DataRow row : query.records()) {
                 boolean exists = true;
                 for (int i = 0; i < keys.length - diff; i++) {
@@ -190,11 +186,8 @@ public class EntityCache<T> implements IHandle {
                     entity = row.asEntity(clazz);
             }
         } else {
-            for (int i = 0; i < keys.length - diff; i++) {
-                query.add(i == 0 ? "where" : "and");
-                query.add("%s='%s'", entityKey.fields()[i], keys[i + diff]);
-            }
-            query.open();
+            EntityQuery<T> query = EntityQuery.Create(this, clazz);
+            query.openByKeys(values);
             if (query.size() == 1)
                 entity = query.currentEntity();
             else if (query.size() > 1)

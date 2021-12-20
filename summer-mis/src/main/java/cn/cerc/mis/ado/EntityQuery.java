@@ -13,6 +13,7 @@ import cn.cerc.core.EntityKey;
 import cn.cerc.core.SqlServer;
 import cn.cerc.core.SqlServerType;
 import cn.cerc.core.SqlServerTypeException;
+import cn.cerc.core.SqlText;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISqlDatabase;
@@ -156,6 +157,42 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
         this.clear();
         if (!Utils.isEmpty(json))
             new DataSetGson<EntityQuery<T>>(this).decode(json);
+        return this;
+    }
+
+    public String table() {
+        return Utils.findTable(clazz);
+    }
+
+    @Override
+    @Deprecated
+    public int attach(String sqlText) {
+        return super.attach(sqlText);
+    }
+
+    public EntityQuery<T> openByKeys(Object... values) {
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        int offset = entityKey.corpNo() ? 1 : 0;
+        if ((values.length + offset) > entityKey.fields().length)
+            throw new RuntimeException("params size is not match");
+
+        this.clear();
+        SqlText sql = this.sql();
+        sql.add("select * from %s", Utils.findTable(clazz));
+        if (entityKey.corpNo())
+            sql.add("where %s='%s'", entityKey.fields()[0], this.getCorpNo());
+        for (int i = 0; i < values.length; i++) {
+            String field = entityKey.fields()[i + offset];
+            Object value = values[i];
+            sql.add((i + offset) == 0 ? "where" : "and");
+            if (value instanceof Boolean) {
+                sql.add("%s=%d", field, (Boolean) value ? 1 : 0);
+            } else if (value != null)
+                sql.add("%s='%s'", field, Utils.safeString(String.valueOf(value)));
+            else
+                sql.add("(%s is null)", field);
+        }
+        this.open();
         return this;
     }
 
