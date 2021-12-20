@@ -132,7 +132,7 @@ public class AppClient implements Serializable {
      * <p>
      * TODO: 2019/12/7 考虑要不要加上缓存一起清空
      */
-    public  void clear() {
+    public void clear() {
         if (!Utils.isEmpty(token)) {
             try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Token.DeviceInfo, token)) {
                 buff.clear();
@@ -209,6 +209,8 @@ public class AppClient implements Serializable {
 
     /**
      * 设置token的值到session
+     * 
+     * @param value token的值
      */
     public void setToken(String value) {
         String token = Utils.isEmpty(value) ? null : value;
@@ -235,6 +237,10 @@ public class AppClient implements Serializable {
 
     /**
      * 获取客户端的访问地址
+     * 
+     * @param request HttpServletRequest
+     * 
+     * @return ip 地址
      */
     public static String getClientIP(HttpServletRequest request) {
         if (request == null) {

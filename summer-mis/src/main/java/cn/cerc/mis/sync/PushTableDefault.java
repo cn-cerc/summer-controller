@@ -26,7 +26,6 @@ public class PushTableDefault implements IPushProcesser {
      * 5-不满足写入条件
      * <p>
      * 6-java异常
-     * <p>
      */
     @Override
     public boolean appendRecord(DataRow record) {

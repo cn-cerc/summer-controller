@@ -45,6 +45,8 @@ public class ExportChinese {
 
     /**
      * 扫描指定路径的java文件
+     * 
+     * @param srcPath 扫描路径
      */
     public void scanFile(String srcPath) {
         // 调用查找文件方法
@@ -108,6 +110,8 @@ public class ExportChinese {
 
     /**
      * 写入字典
+     * 
+     * @param handle IHandle
      */
     public void writeDict(IHandle handle) {
         // FIXME: 此处应该进一步抽象处理

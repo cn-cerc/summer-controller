@@ -66,6 +66,8 @@ public class Application implements ApplicationContextAware {
 
     /**
      * 根据 application.xml 初始化 spring context
+     * 
+     * @return ApplicationContext context
      */
     public static ApplicationContext init() {
         initFromXml("application.xml");
@@ -74,6 +76,10 @@ public class Application implements ApplicationContextAware {
 
     /**
      * 根据参数 springXmlFile 初始化 spring context
+     * 
+     * @param springXmlFile spring.xml文件
+     * 
+     * @return ApplicationContext context
      */
     public static ApplicationContext initFromXml(String springXmlFile) {
         if (context == null)
@@ -83,6 +89,8 @@ public class Application implements ApplicationContextAware {
 
     /**
      * 根据 SummerConfiguration.class 初始化 spring context
+     * 
+     * @return ApplicationContext context
      */
     public static ApplicationContext initOnlyFramework() {
         if (context == null) {
@@ -189,9 +197,11 @@ public class Application implements ApplicationContextAware {
     /**
      * 返回指定的service对象，若为空时会抛出 ClassNotFoundException
      * 
-     * @param handle
-     * @param serviceCode
-     * @throws ClassNotFoundException
+     * @param handle      IHandle
+     * @param serviceCode 服务代码
+     * @param function    KeyValue
+     * @return Service bean
+     * @throws ClassNotFoundException 类文件异常
      */
     public static IService getService(IHandle handle, String serviceCode, KeyValue function)
             throws ClassNotFoundException {
@@ -224,6 +234,8 @@ public class Application implements ApplicationContextAware {
 
     /**
      * 获取应用级的语言类型
+     * 
+     * @return languageId
      */
     public static String getLanguageId() {
         String lang = ServerConfig.getInstance().getProperty(ISession.LANGUAGE_ID);
