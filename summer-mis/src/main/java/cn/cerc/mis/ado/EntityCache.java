@@ -174,7 +174,7 @@ public class EntityCache<T> implements IHandle {
         Object[] keys = this.buildKeys(values);
         if (listKeys() == null && entityKey.corpNo()) {
             EntityQuery<T> query = EntityQuery.Create(this, clazz);
-            query.openByKeys(this.getCorpNo());
+            query.openByKeys();
             for (DataRow row : query.records()) {
                 boolean exists = true;
                 for (int i = 0; i < keys.length - diff; i++) {
