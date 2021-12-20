@@ -302,7 +302,7 @@ public class EntityCache<T> implements IHandle {
          * 先调用fillEntity，在其返回false时，再调用此函数
          * 
          * @param handle IHandle
-         * @param values EntityCache.values 标识字段的值
+         * @param headIn headIn 标识字段的值
          * @return 返回载入的数据，允许返回null
          */
         DataSet loadItems(IHandle handle, DataRow headIn);
