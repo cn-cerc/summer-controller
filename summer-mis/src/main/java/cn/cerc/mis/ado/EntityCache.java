@@ -9,13 +9,12 @@ import cn.cerc.core.CacheLevelEnum;
 import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.EntityKey;
-import cn.cerc.core.EntityUtils;
+import cn.cerc.core.FieldDefs;
 import cn.cerc.core.ISession;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
-import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 public class EntityCache<T> implements IHandle {
@@ -43,12 +42,12 @@ public class EntityCache<T> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 从Session缓存读取，若没有开通，则从Redis读取
      */
-    public T get(String... values) {
-        log.debug("getSession: {}.{}", clazz.getSimpleName(), String.join(".", values));
+    public T get(Object... values) {
+        log.debug("getSession: {}.{}", clazz.getSimpleName(), joinToKey(values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
         if (entityKey.cache() == CacheLevelEnum.RedisAndSession) {
-            String[] keys = this.buildKeys(values);
+            Object[] keys = this.buildKeys(values);
             DataRow row = SessionCache.get(keys);
             if (row != null && row.size() > 0) {
                 try {
@@ -67,10 +66,10 @@ public class EntityCache<T> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 从Redis读取，若没有找到，则从数据库读取
      */
-    public T getRedis(String... values) {
+    public T getRedis(Object... values) {
         if (entityKey.cache() != CacheLevelEnum.Disabled) {
-            log.debug("getRedis: {}.{}", clazz.getSimpleName(), String.join(".", values));
-            String[] keys = this.buildKeys(values);
+            log.debug("getRedis: {}.{}", clazz.getSimpleName(), joinToKey(values));
+            Object[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 String json = jedis.get(EntityCache.buildKey(keys));
                 if ("".equals(json))
@@ -96,8 +95,8 @@ public class EntityCache<T> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 强制从database中读取，并刷新session缓存与redis缓存
      */
-    public T getStorage(String... values) {
-        log.debug("getStorage: {}.{}", clazz.getSimpleName(), String.join(".", values));
+    public T getStorage(Object... values) {
+        log.debug("getStorage: {}.{}", clazz.getSimpleName(), joinToKey(values));
         T entity = null;
         if (entityKey.virtual()) {
             entity = getVirtualEntity(values);
@@ -105,7 +104,7 @@ public class EntityCache<T> implements IHandle {
             entity = getTableEntity(values);
         }
         if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
-            String[] keys = this.buildKeys(values);
+            Object[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
@@ -115,16 +114,17 @@ public class EntityCache<T> implements IHandle {
         return entity;
     }
 
-    private T getVirtualEntity(String[] values) {
+    protected T getVirtualEntity(Object... values) {
         int diff = entityKey.version() == 0 ? 1 : 2;
-        String[] keys = this.buildKeys(values);
-        T obj = newVirtualEntity();
-        VirtualEntityImpl impl = (VirtualEntityImpl) obj;
-
+        Object[] keys = this.buildKeys(values);
         // 尝试直接对entity进行填充
-        DataRow headIn = new DataRow();
+        DataRow headIn = new DataRow(new FieldDefs(clazz));
         for (int i = 0; i < keys.length - diff; i++)
             headIn.setValue(entityKey.fields()[i], keys[i + diff]);
+        //
+        T obj = newVirtualEntity();
+        VirtualEntityImpl impl = (VirtualEntityImpl) obj;
+        headIn.saveToEntity(obj);
         if (impl.fillItem(this, obj, headIn)) {
             DataRow row = new DataRow();
             Utils.objectAsRecord(row, obj);
@@ -137,7 +137,7 @@ public class EntityCache<T> implements IHandle {
         }
 
         // 载入全部的Entity
-        DataSet query = impl.loadItems(this, values);
+        DataSet query = impl.loadItems(this, headIn);
         if (query == null || query.size() == 0)
             return null;
 
@@ -145,7 +145,7 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.cache() != CacheLevelEnum.Disabled) {
             try (Jedis jedis = JedisFactory.getJedis()) {
                 for (DataRow row : query) {
-                    String[] rowKeys = buildKeys(row);
+                    Object[] rowKeys = buildKeys(row);
                     jedis.setex(buildKey(rowKeys), entityKey.expire(), row.json());
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(rowKeys, row);
@@ -157,8 +157,8 @@ public class EntityCache<T> implements IHandle {
         for (DataRow row : query) {
             boolean exists = true;
             for (int i = 0; i < keys.length - diff; i++) {
-                String value = keys[i + diff];
-                if (!row.getString(entityKey.fields()[i]).equals(value))
+                Object value = keys[i + diff];
+                if (!row.getValue(entityKey.fields()[i]).equals(value))
                     exists = false;
             }
             if (exists)
@@ -167,23 +167,23 @@ public class EntityCache<T> implements IHandle {
         return null;
     }
 
-    private T getTableEntity(String[] values) {
+    private T getTableEntity(Object... values) {
         T entity = null;
         int diff = entityKey.version() == 0 ? 1 : 2;
         EntityQuery<T> query = EntityQuery.Create(this, clazz);
         query.sql().clear();
-        query.add("select").add(String.join(",", EntityUtils.getFields(clazz).keySet()));
+        query.add("select").add(String.join(",", DataRow.getEntityFields(clazz).keySet()));
         query.add("from %s", Utils.findTable(clazz));
         // 如果缓存没有保存任何key则重新载入数据
-        String[] keys = this.buildKeys(values);
+        Object[] keys = this.buildKeys(values);
         if (listKeys() != null) {
             query.add("where %s='%s'", entityKey.fields()[0], this.getCorpNo());
             query.open();
             for (DataRow row : query.records()) {
                 boolean exists = true;
                 for (int i = 0; i < keys.length - diff; i++) {
-                    String value = keys[i + diff];
-                    if (!row.getString(entityKey.fields()[i]).equals(value))
+                    Object value = keys[i + diff];
+                    if (!value.equals(row.getValue(entityKey.fields()[i])))
                         exists = false;
                 }
                 if (exists)
@@ -203,10 +203,10 @@ public class EntityCache<T> implements IHandle {
         return entity;
     }
 
-    public void del(String... values) {
+    public void del(Object... values) {
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return;
-        String[] keys = this.buildKeys(values);
+        Object[] keys = this.buildKeys(values);
         try (Jedis jedis = JedisFactory.getJedis()) {
             jedis.del(buildKey(keys));
         }
@@ -227,7 +227,7 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.corpNo())
             offset++;
 
-        String[] keys = new String[offset + 1];
+        Object[] keys = new Object[offset + 1];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
@@ -241,11 +241,26 @@ public class EntityCache<T> implements IHandle {
         }
     }
 
-    public static String buildKey(String... keys) {
-        return MemoryBuffer.buildKey(SystemBuffer.Entity.Cache, keys);
+    public static String buildKey(Object... keys) {
+        int flag = SystemBuffer.Entity.Cache.getStartingPoint() + SystemBuffer.Entity.Cache.ordinal();
+        return flag + "." + joinToKey(keys);
     }
 
-    public String[] buildKeys(String... values) {
+    public static String joinToKey(Object... keys) {
+        StringBuffer sb = new StringBuffer();
+        int count = 0;
+        for (Object key : keys) {
+            if (++count > 1)
+                sb.append(".");
+            if (key instanceof Boolean)
+                sb.append((Boolean) key ? 1 : 0);
+            else if (key != null)
+                sb.append(key);
+        }
+        return sb.toString();
+    }
+
+    public Object[] buildKeys(Object... values) {
         if ((values.length + (entityKey.corpNo() ? 1 : 0)) != entityKey.fields().length)
             throw new RuntimeException("params size is not match");
 
@@ -255,7 +270,7 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.corpNo())
             offset++;
 
-        String[] keys = new String[offset + values.length];
+        Object[] keys = new Object[offset + values.length];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
@@ -266,18 +281,18 @@ public class EntityCache<T> implements IHandle {
         return keys;
     }
 
-    public String[] buildKeys(DataRow row) {
+    public Object[] buildKeys(DataRow row) {
         int offset = 1;
         if (entityKey.version() > 0)
             offset++;
 
-        String[] keys = new String[offset + entityKey.fields().length];
+        Object[] keys = new Object[offset + entityKey.fields().length];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
 
         for (int i = 0; i < entityKey.fields().length; i++)
-            keys[offset + i] = row.getString(entityKey.fields()[i]);
+            keys[offset + i] = row.getValue(entityKey.fields()[i]);
         return keys;
     }
 
@@ -297,7 +312,7 @@ public class EntityCache<T> implements IHandle {
          * @param values EntityCache.values 标识字段的值
          * @return 返回载入的数据，允许返回null
          */
-        DataSet loadItems(IHandle handle, String... values);
+        DataSet loadItems(IHandle handle, DataRow headIn);
     }
 
     private T newVirtualEntity() {
@@ -321,5 +336,4 @@ public class EntityCache<T> implements IHandle {
     public void setSession(ISession session) {
         this.session = session;
     }
-
 }
