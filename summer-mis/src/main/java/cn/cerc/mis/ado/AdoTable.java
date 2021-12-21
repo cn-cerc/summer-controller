@@ -10,14 +10,10 @@ import cn.cerc.core.DataSet;
 import cn.cerc.core.FieldMeta;
 import cn.cerc.core.FieldMeta.FieldKind;
 import cn.cerc.core.SqlServer;
-import cn.cerc.core.SqlServerTypeException;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
-import cn.cerc.db.mssql.MssqlQuery;
 import cn.cerc.db.mysql.MysqlDatabase;
-import cn.cerc.db.mysql.MysqlQuery;
-import cn.cerc.db.sqlite.SqliteQuery;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
 
@@ -54,24 +50,14 @@ public abstract class AdoTable implements IService {
         query.fields().readDefine(this.getClass());
         query.setMeta(true);
         return query.disableStorage().setState(ServiceState.OK);
-
     }
 
     private SqlQuery createSqlQuery(IHandle handle) {
         SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
         if (sqlServer != null) {
-            switch (sqlServer.type()) {
-            case Mysql:
-                return new MysqlQuery(handle);
-            case Mssql:
-                return new MssqlQuery(handle);
-            case Sqlite:
-                return new SqliteQuery();
-            default:
-                throw new SqlServerTypeException();
-            }
+            return EntityQuery.Create(handle, this.getClass());
         } else
-            throw new RuntimeException("unknow sql server type");
+            throw new RuntimeException("unknow sql server");
     }
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
