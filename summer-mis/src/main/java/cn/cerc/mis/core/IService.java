@@ -103,7 +103,7 @@ public interface IService {
                 String errorMsg = validate.message();
                 for (String fieldCode : validate.value()) {
                     if (!headIn.has(fieldCode)) {
-                        if (errorMsg.contains("{}"))
+                        if (errorMsg.contains("%s"))
                             throw new DataValidateException(String.format(errorMsg, fieldCode));
                         else
                             throw new DataValidateException(errorMsg);
