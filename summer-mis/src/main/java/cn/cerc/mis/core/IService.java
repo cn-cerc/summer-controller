@@ -97,6 +97,19 @@ public interface IService {
 
         // 执行具体的服务函数
         try {
+            DataValidate validate = method.getDeclaredAnnotation(DataValidate.class);
+            if (validate != null) {
+                DataRow headIn = dataIn.head();
+                String errorMsg = validate.message();
+                for (String fieldCode : validate.value()) {
+                    if (!headIn.has(fieldCode)) {
+                        if (errorMsg.contains("{}"))
+                            throw new DataValidateException(String.format(errorMsg, fieldCode));
+                        else
+                            throw new DataValidateException(errorMsg);
+                    }
+                }
+            }
             if (!SecurityPolice.check(handle, method, this)) {
                 DataSet dataOut = new DataSet();
                 dataOut.setMessage(SecurityStopException.getAccessDisabled());

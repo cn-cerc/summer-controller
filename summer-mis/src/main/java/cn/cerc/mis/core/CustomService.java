@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cn.cerc.core.DataRow;
 import cn.cerc.core.DataSet;
 import cn.cerc.core.KeyValue;
 import cn.cerc.core.Utils;
@@ -96,6 +97,19 @@ public abstract class CustomService extends Handle implements IService {
         }
 
         try {
+            DataValidate validate = method.getDeclaredAnnotation(DataValidate.class);
+            if (validate != null) {
+                DataRow headIn = dataIn.head();
+                String errorMsg = validate.message();
+                for (String fieldCode : validate.value()) {
+                    if (!headIn.has(fieldCode)) {
+                        if (errorMsg.contains("%s"))
+                            throw new DataValidateException(String.format(errorMsg, fieldCode));
+                        else
+                            throw new DataValidateException(errorMsg);
+                    }
+                }
+            }
             if (!SecurityPolice.check(this, method, this)) {
                 dataOut.setMessage(SecurityStopException.getAccessDisabled());
                 dataOut.setState(ServiceState.ACCESS_DISABLED);
