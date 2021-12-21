@@ -52,7 +52,7 @@ public class SegmentQuery extends Handle {
                 headIn.setValue(toField, buff.getDatetime("curEnd").inc(DateType.Day, offset).toDayEnd());
             }
 
-            if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) > 0) {
+            if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) >= 0) {
                 headIn.setValue(toField, buff.getDatetime("endDate"));
                 buff.clear();
             } else {
