@@ -6,7 +6,7 @@ import cn.cerc.core.IRecord;
 import cn.cerc.core.TDate;
 import cn.cerc.core.TDateTime;
 
-@SuppressWarnings("deprecation")
+@Deprecated
 public class RequestRecord implements IRecord {
     private HttpServletRequest req = null;
 
