@@ -79,21 +79,22 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
         this.fields().readDefine(clazz);
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (entityKey != null && entityKey.cache() != CacheLevelEnum.Disabled) {
-            if (this.size() <= EntityCache.MaxRecord) {
-                EntityCache<T> ec = EntityCache.Create(this, clazz);
-                try (Jedis jedis = JedisFactory.getJedis()) {
-                    for (DataRow row : this.records()) {
-                        Object[] keys = ec.buildKeys(row);
-                        log.debug("set: {}", EntityCache.joinToKey(keys));
-                        jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
-                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                            SessionCache.set(keys, row);
-                    }
+            EntityCache<T> ec1 = EntityCache.Create(this, clazz);
+            try (Jedis jedis = JedisFactory.getJedis()) {
+                int count = 0;
+                for (DataRow row : this.records()) {
+                    if (++count > EntityCache.MaxRecord)
+                        break;
+                    Object[] keys = ec1.buildKeys(row);
+                    log.debug("set: {}", EntityCache.joinToKey(keys));
+                    jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        SessionCache.set(keys, row);
                 }
             }
             this.onAfterPost(row -> {
-                EntityCache<T> ec = EntityCache.Create(this, clazz);
-                Object[] keys = ec.buildKeys(row);
+                EntityCache<T> ec2 = EntityCache.Create(this, clazz);
+                Object[] keys = ec2.buildKeys(row);
                 log.debug("set: {}", EntityCache.joinToKey(keys));
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
@@ -102,8 +103,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                 }
             });
             this.onAfterDelete(row -> {
-                EntityCache<T> ec = EntityCache.Create(this, clazz);
-                Object[] keys = ec.buildKeys(row);
+                EntityCache<T> ec3 = EntityCache.Create(this, clazz);
+                Object[] keys = ec3.buildKeys(row);
                 log.debug("del: {}", EntityCache.joinToKey(keys));
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.del(EntityCache.buildKey(keys));
