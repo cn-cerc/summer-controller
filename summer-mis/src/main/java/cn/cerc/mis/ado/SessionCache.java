@@ -16,7 +16,7 @@ import cn.cerc.mis.core.Application;
 @Scope(WebApplicationContext.SCOPE_SESSION)
 public class SessionCache {
     private static final Logger log = LoggerFactory.getLogger(SessionCache.class);
-    public Map<String, DataRow> items = new ConcurrentHashMap<>();
+    public final Map<String, DataRow> items = new ConcurrentHashMap<>();
 
     public static void set(Object[] keys, DataRow value) {
         assert keys.length > 0;
@@ -41,6 +41,18 @@ public class SessionCache {
         String cacheKey = EntityCache.joinToKey(keys);
         log.debug("del: {}", cacheKey);
         sc.items.remove(cacheKey);
+    }
+
+    public void setItem(Object[] keys, DataRow value) {
+        items.put(EntityCache.joinToKey(keys), value);
+    }
+
+    public DataRow getItem(Object[] keys) {
+        return items.get(EntityCache.joinToKey(keys));
+    }
+
+    public void delItem(Object[] keys) {
+        items.remove(EntityCache.joinToKey(keys));
     }
 
 }
