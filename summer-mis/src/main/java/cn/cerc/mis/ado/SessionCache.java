@@ -17,9 +17,12 @@ import cn.cerc.mis.core.Application;
 @Scope(WebApplicationContext.SCOPE_SESSION)
 public class SessionCache {
     private static final Logger log = LoggerFactory.getLogger(SessionCache.class);
+    private static boolean createError = false;
     public final Map<String, DataRow> items = new ConcurrentHashMap<>();
 
     public static void set(Object[] keys, DataRow value) {
+        if (createError)
+            return;
         assert keys.length > 0;
         assert value != null;
         try {
@@ -28,11 +31,15 @@ public class SessionCache {
             log.debug("set: {}", cacheKey);
             sc.items.put(cacheKey, value);
         } catch (BeanCreationException e) {
+            log.warn(e.getMessage());
+            createError = true;
             return;
         }
     }
 
     public static DataRow get(Object[] keys) {
+        if (createError)
+            return null;
         assert keys.length > 0;
         try {
             SessionCache sc = Application.getBean(SessionCache.class);
@@ -40,12 +47,16 @@ public class SessionCache {
             log.debug("get: {}", cacheKey);
             return sc.items.get(cacheKey);
         } catch (BeanCreationException e) {
+            log.warn(e.getMessage());
+            createError = true;
             return null;
         }
 
     }
 
     public static void del(Object[] keys) {
+        if (createError)
+            return;
         assert keys.length > 0;
         try {
             SessionCache sc = Application.getBean(SessionCache.class);
@@ -53,20 +64,10 @@ public class SessionCache {
             log.debug("del: {}", cacheKey);
             sc.items.remove(cacheKey);
         } catch (BeanCreationException e) {
+            log.warn(e.getMessage());
+            createError = true;
             return;
         }
-    }
-
-    public void setItem(Object[] keys, DataRow value) {
-        items.put(EntityCache.joinToKey(keys), value);
-    }
-
-    public DataRow getItem(Object[] keys) {
-        return items.get(EntityCache.joinToKey(keys));
-    }
-
-    public void delItem(Object[] keys) {
-        items.remove(EntityCache.joinToKey(keys));
     }
 
 }
