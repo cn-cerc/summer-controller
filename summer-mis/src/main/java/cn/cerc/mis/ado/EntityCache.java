@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 
 import cn.cerc.core.CacheLevelEnum;
 import cn.cerc.core.DataRow;
@@ -38,8 +39,13 @@ public class EntityCache<T> implements IHandle {
         if (this.entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
         this.clazz = clazz;
-        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-            this.sessionCache = Application.getBean(SessionCache.class);
+        if (entityKey.cache() == CacheLevelEnum.RedisAndSession) {
+            try {
+                this.sessionCache = Application.getBean(SessionCache.class);
+            } catch (BeanCreationException e) {
+                this.sessionCache = null;
+            }
+        }
     }
 
     /**
@@ -50,7 +56,7 @@ public class EntityCache<T> implements IHandle {
         log.debug("getSession: {}.{}", clazz.getSimpleName(), joinToKey(values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
-        if (entityKey.cache() == CacheLevelEnum.RedisAndSession) {
+        if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null) {
             Object[] keys = this.buildKeys(values);
             DataRow row = sessionCache.getItem(keys);
             if (row != null && row.size() > 0) {
@@ -81,14 +87,14 @@ public class EntityCache<T> implements IHandle {
                 else if (json != null) {
                     try {
                         DataRow row = new DataRow().setJson(json);
-                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null)
                             sessionCache.setItem(keys, row);
                         return row.asEntity(clazz);
                     } catch (Exception e) {
                         log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
                         e.printStackTrace();
                         jedis.del(EntityCache.buildKey(keys));
-                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null)
                             sessionCache.delItem(keys);
                     }
                 }
@@ -114,7 +120,7 @@ public class EntityCache<T> implements IHandle {
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
-            if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+            if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null)
                 sessionCache.setItem(keys, new DataRow());
         }
         return entity;
@@ -137,7 +143,7 @@ public class EntityCache<T> implements IHandle {
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), row.json());
             }
-            if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+            if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null)
                 sessionCache.setItem(keys, row);
             return obj;
         }
@@ -153,7 +159,7 @@ public class EntityCache<T> implements IHandle {
                 for (DataRow row : query) {
                     Object[] rowKeys = buildKeys(row);
                     jedis.setex(buildKey(rowKeys), entityKey.expire(), row.json());
-                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null)
                         sessionCache.setItem(rowKeys, row);
                 }
             }
@@ -209,7 +215,7 @@ public class EntityCache<T> implements IHandle {
         try (Jedis jedis = JedisFactory.getJedis()) {
             jedis.del(buildKey(keys));
         }
-        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+        if (entityKey.cache() == CacheLevelEnum.RedisAndSession && sessionCache != null)
             sessionCache.delItem(keys);
     }
 

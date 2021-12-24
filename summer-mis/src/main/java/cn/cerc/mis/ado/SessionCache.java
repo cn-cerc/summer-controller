@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
@@ -21,26 +22,39 @@ public class SessionCache {
     public static void set(Object[] keys, DataRow value) {
         assert keys.length > 0;
         assert value != null;
-        SessionCache sc = Application.getBean(SessionCache.class);
-        String cacheKey = EntityCache.joinToKey(keys);
-        log.debug("set: {}", cacheKey);
-        sc.items.put(cacheKey, value);
+        try {
+            SessionCache sc = Application.getBean(SessionCache.class);
+            String cacheKey = EntityCache.joinToKey(keys);
+            log.debug("set: {}", cacheKey);
+            sc.items.put(cacheKey, value);
+        } catch (BeanCreationException e) {
+            return;
+        }
     }
 
     public static DataRow get(Object[] keys) {
         assert keys.length > 0;
-        SessionCache sc = Application.getBean(SessionCache.class);
-        String cacheKey = EntityCache.joinToKey(keys);
-        log.debug("get: {}", cacheKey);
-        return sc.items.get(cacheKey);
+        try {
+            SessionCache sc = Application.getBean(SessionCache.class);
+            String cacheKey = EntityCache.joinToKey(keys);
+            log.debug("get: {}", cacheKey);
+            return sc.items.get(cacheKey);
+        } catch (BeanCreationException e) {
+            return null;
+        }
+
     }
 
     public static void del(Object[] keys) {
         assert keys.length > 0;
-        SessionCache sc = Application.getBean(SessionCache.class);
-        String cacheKey = EntityCache.joinToKey(keys);
-        log.debug("del: {}", cacheKey);
-        sc.items.remove(cacheKey);
+        try {
+            SessionCache sc = Application.getBean(SessionCache.class);
+            String cacheKey = EntityCache.joinToKey(keys);
+            log.debug("del: {}", cacheKey);
+            sc.items.remove(cacheKey);
+        } catch (BeanCreationException e) {
+            return;
+        }
     }
 
     public void setItem(Object[] keys, DataRow value) {
