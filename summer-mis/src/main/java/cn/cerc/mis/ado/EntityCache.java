@@ -14,7 +14,6 @@ import cn.cerc.core.ISession;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
 
@@ -24,7 +23,6 @@ public class EntityCache<T> implements IHandle {
     private ISession session;
     private Class<T> clazz;
     private EntityKey entityKey;
-    private SessionCache sessionCache;
 
     public static <U> EntityCache<U> Create(IHandle handle, Class<U> clazz) {
         return new EntityCache<U>(handle, clazz);
@@ -38,8 +36,6 @@ public class EntityCache<T> implements IHandle {
         if (this.entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
         this.clazz = clazz;
-        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-            this.sessionCache = Application.getBean(SessionCache.class);
     }
 
     /**
@@ -52,14 +48,14 @@ public class EntityCache<T> implements IHandle {
             return getStorage(values);
         if (entityKey.cache() == CacheLevelEnum.RedisAndSession) {
             Object[] keys = this.buildKeys(values);
-            DataRow row = sessionCache.getItem(keys);
+            DataRow row = SessionCache.get(keys);
             if (row != null && row.size() > 0) {
                 try {
                     return row.asEntity(clazz);
                 } catch (Exception e) {
                     log.error("asEntity {} error: {}", clazz.getSimpleName(), row.json());
                     e.printStackTrace();
-                    sessionCache.delItem(keys);
+                    SessionCache.del(keys);
                 }
             }
         }
@@ -82,14 +78,14 @@ public class EntityCache<T> implements IHandle {
                     try {
                         DataRow row = new DataRow().setJson(json);
                         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                            sessionCache.setItem(keys, row);
+                            SessionCache.set(keys, row);
                         return row.asEntity(clazz);
                     } catch (Exception e) {
                         log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
                         e.printStackTrace();
                         jedis.del(EntityCache.buildKey(keys));
                         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                            sessionCache.delItem(keys);
+                            SessionCache.del(keys);
                     }
                 }
             }
@@ -115,7 +111,7 @@ public class EntityCache<T> implements IHandle {
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
             if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                sessionCache.setItem(keys, new DataRow());
+                SessionCache.set(keys, new DataRow());
         }
         return entity;
     }
@@ -138,7 +134,7 @@ public class EntityCache<T> implements IHandle {
                 jedis.setex(buildKey(keys), entityKey.expire(), row.json());
             }
             if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                sessionCache.setItem(keys, row);
+                SessionCache.set(keys, row);
             return obj;
         }
 
@@ -154,7 +150,7 @@ public class EntityCache<T> implements IHandle {
                     Object[] rowKeys = buildKeys(row);
                     jedis.setex(buildKey(rowKeys), entityKey.expire(), row.json());
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                        sessionCache.setItem(rowKeys, row);
+                        SessionCache.set(rowKeys, row);
                 }
             }
         }
@@ -210,7 +206,7 @@ public class EntityCache<T> implements IHandle {
             jedis.del(buildKey(keys));
         }
         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-            sessionCache.delItem(keys);
+            SessionCache.del(keys);
     }
 
     /**
