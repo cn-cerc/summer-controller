@@ -29,8 +29,8 @@ public abstract class AdoTable implements IService {
         }
 
         // 打开数据表
-        SqlQuery query = createSqlQuery(handle);
         if (dataIn.crud()) {
+            SqlQuery query = createSqlQuery(handle);
             query.setJson(dataIn.json());
             query.setStorage(true);
             for (FieldMeta meta : dataIn.fields())
@@ -44,7 +44,7 @@ public abstract class AdoTable implements IService {
             saveUpdate(dataIn, query);
             saveInsert(dataIn, query);
         }
-        query.setCrud(false).records().clear();
+        SqlQuery query = createSqlQuery(handle);
         open(dataIn, query);
         // 对外输出meta
         query.fields().readDefine(this.getClass());
