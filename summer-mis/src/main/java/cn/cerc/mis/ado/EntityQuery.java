@@ -17,7 +17,6 @@ import cn.cerc.core.SqlText;
 import cn.cerc.core.Utils;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISqlDatabase;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.mssql.MssqlDatabase;
 import cn.cerc.db.mysql.MysqlDatabase;
@@ -48,11 +47,11 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
                 database = new SqliteDatabase(handle, clazz);
             else
                 throw new SqlServerTypeException();
-            if (ServerConfig.isServerDevelop()) {
-                EntityKey ekey = clazz.getDeclaredAnnotation(EntityKey.class);
-                if (ekey == null || !ekey.virtual())
-                    database.createTable(false);
-            }
+//            if (ServerConfig.isServerDevelop()) {
+//                EntityKey ekey = clazz.getDeclaredAnnotation(EntityKey.class);
+//                if (ekey == null || !ekey.virtual())
+//                    database.createTable(false);
+//            }
             buff.put(clazz, database);
         }
         return database;
