@@ -289,4 +289,8 @@ public class AsyncService implements IServiceProxy {
         return msgId;
     }
 
+    @Deprecated
+    public String getMessage() {
+        return this.message();
+    }
 }

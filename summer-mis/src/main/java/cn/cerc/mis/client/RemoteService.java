@@ -150,4 +150,9 @@ public class RemoteService extends Handle implements IServiceProxy {
         return this;
     }
 
+    @Deprecated
+    public String getMessage() {
+        return message();
+    }
+
 }

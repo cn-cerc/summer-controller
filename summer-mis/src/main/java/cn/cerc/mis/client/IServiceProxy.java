@@ -22,18 +22,8 @@ public interface IServiceProxy {
     // 返回数据
     DataSet dataOut();
 
-    @Deprecated
-    default DataSet getDataOut() {
-        return dataOut();
-    }
-
     // 提示讯息
     String message();
-
-    @Deprecated
-    default String getMessage() {
-        return message();
-    }
 
     // 执行
     boolean exec(Object... args);
