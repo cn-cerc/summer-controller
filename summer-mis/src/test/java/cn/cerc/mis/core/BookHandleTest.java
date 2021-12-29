@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
 
 public class BookHandleTest {
 

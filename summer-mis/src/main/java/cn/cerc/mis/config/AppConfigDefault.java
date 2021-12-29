@@ -2,7 +2,7 @@ package cn.cerc.mis.config;
 
 import org.springframework.stereotype.Component;
 
-import cn.cerc.core.ClassConfig;
+import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.mis.SummerMIS;
 

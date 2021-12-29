@@ -1,9 +1,9 @@
 package cn.cerc.mis.core;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.KeyValue;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.KeyValue;
 
 public abstract class CustomServiceProxy extends Handle {
     private String service;

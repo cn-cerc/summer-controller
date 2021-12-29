@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 
 public abstract class Column {
     public static final String LEFT = "left";

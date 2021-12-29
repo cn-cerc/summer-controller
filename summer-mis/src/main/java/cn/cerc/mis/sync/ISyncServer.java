@@ -1,7 +1,7 @@
 package cn.cerc.mis.sync;
 
-import cn.cerc.core.ISession;
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.ISession;
 
 public interface ISyncServer {
 

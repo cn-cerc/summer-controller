@@ -2,7 +2,7 @@ package cn.cerc.mis.excel.output;
 
 import java.util.List;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;

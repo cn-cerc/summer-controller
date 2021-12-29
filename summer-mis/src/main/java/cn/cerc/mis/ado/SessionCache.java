@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.mis.core.Application;
 
 @Component

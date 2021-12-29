@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.mis.core.IPage;
 
 public class ResponseData {

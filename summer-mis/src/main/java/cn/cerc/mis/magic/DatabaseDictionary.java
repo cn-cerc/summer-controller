@@ -14,12 +14,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import cn.cerc.core.ClassConfig;
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
-import cn.cerc.core.ISession;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.ClassConfig;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.mysql.MysqlServerMaster;

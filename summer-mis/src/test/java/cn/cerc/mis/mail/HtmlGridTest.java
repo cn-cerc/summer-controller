@@ -1,7 +1,8 @@
 package cn.cerc.mis.mail;
 
-import cn.cerc.core.DataSet;
 import org.junit.Test;
+
+import cn.cerc.db.core.DataSet;
 
 import static org.junit.Assert.assertTrue;
 

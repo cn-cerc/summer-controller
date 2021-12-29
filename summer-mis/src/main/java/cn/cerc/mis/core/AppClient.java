@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 
-import cn.cerc.core.ISession;
-import cn.cerc.core.LanguageResource;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.LanguageResource;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;

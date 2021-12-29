@@ -1,6 +1,6 @@
 package cn.cerc.mis.sync;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 
 public interface IPushProcesser extends IHandle {

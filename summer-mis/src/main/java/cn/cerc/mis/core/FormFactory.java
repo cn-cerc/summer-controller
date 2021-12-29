@@ -13,10 +13,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.ISession;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.other.PageNotFoundException;
 

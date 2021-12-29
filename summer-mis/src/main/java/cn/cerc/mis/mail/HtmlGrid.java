@@ -1,6 +1,6 @@
 package cn.cerc.mis.mail;
 
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.DataSet;
 
 public class HtmlGrid extends HtmlControl {
     private int border = 1;

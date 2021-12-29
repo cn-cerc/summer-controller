@@ -15,9 +15,9 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.mis.excel.output.Column;
 

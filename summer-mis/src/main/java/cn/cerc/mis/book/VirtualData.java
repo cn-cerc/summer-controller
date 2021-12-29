@@ -1,7 +1,7 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.core.Datetime;
-import cn.cerc.core.Datetime.DateType;
+import cn.cerc.db.core.Datetime;
+import cn.cerc.db.core.Datetime.DateType;
 
 public class VirtualData implements IBookData {
     private Datetime date;

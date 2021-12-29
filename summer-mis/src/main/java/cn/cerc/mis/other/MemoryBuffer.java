@@ -1,7 +1,7 @@
 package cn.cerc.mis.other;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.IBufferKey;

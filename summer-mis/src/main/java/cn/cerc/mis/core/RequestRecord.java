@@ -2,9 +2,9 @@ package cn.cerc.mis.core;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.cerc.core.IRecord;
-import cn.cerc.core.TDate;
-import cn.cerc.core.TDateTime;
+import cn.cerc.db.core.IRecord;
+import cn.cerc.db.core.TDate;
+import cn.cerc.db.core.TDateTime;
 
 @Deprecated
 public class RequestRecord implements IRecord {

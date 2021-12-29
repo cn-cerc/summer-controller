@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.cerc.core.ISession;
-import cn.cerc.core.LanguageResource;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.mongo.MongoDB;
 import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlServerMaster;

@@ -2,9 +2,9 @@ package cn.cerc.mis.excel.output;
 
 import java.util.List;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.mis.SummerMIS;
 import jxl.write.Label;
 import jxl.write.WritableSheet;

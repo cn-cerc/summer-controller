@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.ISession;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.SummerMIS;
 
 public class RequestData {

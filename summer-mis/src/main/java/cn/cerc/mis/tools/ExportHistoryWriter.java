@@ -1,6 +1,6 @@
 package cn.cerc.mis.tools;
 
-import cn.cerc.core.ClassResource;
+import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.excel.output.ExcelTemplate;

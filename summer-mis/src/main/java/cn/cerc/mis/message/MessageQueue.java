@@ -1,8 +1,8 @@
 package cn.cerc.mis.message;
 
-import cn.cerc.core.ClassResource;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.core.DataRow;
 import cn.cerc.db.queue.QueueDB;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;

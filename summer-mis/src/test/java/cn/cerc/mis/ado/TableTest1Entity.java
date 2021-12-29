@@ -3,9 +3,9 @@ package cn.cerc.mis.ado;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
-import cn.cerc.core.EntityKey;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.ado.EntityCache.VirtualEntityImpl;
 

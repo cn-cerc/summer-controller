@@ -6,8 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
+import cn.cerc.db.core.ISession;
 import cn.cerc.db.mysql.MysqlQuery;
 
 public class TableDefine implements Iterable<FieldDefine> {
@@ -82,7 +82,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         print("    public boolean append() throws DataValidateException {");
         print("        Record headIn = getDataIn().getHead();");
         for (FieldDefine field : this) {
-            print(String.format("        DataValidateException.stopRun(\"%s不允许为空！\", !headIn.hasValue(\"%s\"));",
+            print(String.format("        DataValidateException.stopRun(\"%s不允许为空！\", !headIn.has(\"%s\"));",
                     field.getName(), field.getCode()));
         }
         print("");
@@ -128,7 +128,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         print("    public boolean modify() throws DataValidateException {");
         print("        Record headIn = getDataIn().getHead();");
         for (FieldDefine field : this) {
-            print("        DataValidateException.stopRun(\"%s不允许为空！\", !headIn.hasValue(\"%s\"));", field.getName(),
+            print("        DataValidateException.stopRun(\"%s不允许为空！\", !headIn.has(\"%s\"));", field.getName(),
                     field.getCode());
         }
         print("");
@@ -160,7 +160,7 @@ public class TableDefine implements Iterable<FieldDefine> {
         print("    public boolean download() throws DataValidateException {");
         print("        Record headIn = getDataIn().getHead();");
         for (FieldDefine field : this) {
-            print("        DataValidateException.stopRun(\"%s不允许为空！\", !headIn.hasValue(\"%s\"));", field.getName(),
+            print("        DataValidateException.stopRun(\"%s不允许为空！\", !headIn.has(\"%s\"));", field.getName(),
                     field.getCode());
         }
         print("        String userCode = headIn.getString(\"user_code_\");");
@@ -188,12 +188,12 @@ public class TableDefine implements Iterable<FieldDefine> {
         print("");
 
         for (FieldDefine field : this) {
-            print("        if (headIn.hasValue(\"%s\")) {", field.getCode());
+            print("        if (headIn.has(\"%s\")) {", field.getCode());
             print("            f.byField(\"%s\", headIn.getString(\"%s\"));", field.getCode(), field.getCode());
             print("        }");
         }
 
-        print("        if (headIn.hasValue(\"searchText_\")) {");
+        print("        if (headIn.has(\"searchText_\")) {");
         print("            f.byLink(new String[] { \"%s\" }, headIn.getString(\"searchText_\"));",
                 this.getFields().get(0).getCode());
         print("        }");

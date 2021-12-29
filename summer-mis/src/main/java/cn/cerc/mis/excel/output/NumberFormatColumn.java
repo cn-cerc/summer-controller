@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.Utils;
 
 // TODO: 2021/3/11 与NumberColumn一样，仅用于区分 ExcelTemplate 导出时设置不同格式
 public class NumberFormatColumn extends Column {

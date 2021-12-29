@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import cn.cerc.core.ISession;
 import cn.cerc.db.core.Handle;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.Application;
 
 public class AsyncServiceTest {

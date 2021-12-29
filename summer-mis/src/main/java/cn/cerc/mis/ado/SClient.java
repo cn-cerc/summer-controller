@@ -1,9 +1,9 @@
 package cn.cerc.mis.ado;
 
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
-import cn.cerc.core.SqlText;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.SqlText;
 import cn.cerc.db.other.SqlFieldFilter;
 import cn.cerc.db.other.SqlTextDecode;
 import cn.cerc.mis.core.LocalService;

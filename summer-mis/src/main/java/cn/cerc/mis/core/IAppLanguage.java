@@ -1,6 +1,6 @@
 package cn.cerc.mis.core;
 
-import cn.cerc.core.ISession;
+import cn.cerc.db.core.ISession;
 
 public interface IAppLanguage {
     

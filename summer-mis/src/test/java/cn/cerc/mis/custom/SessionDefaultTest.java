@@ -7,7 +7,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import cn.cerc.core.ISession;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SummerSpringConfiguration;
 

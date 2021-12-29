@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import cn.cerc.core.ISession;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.SecurityStopException;

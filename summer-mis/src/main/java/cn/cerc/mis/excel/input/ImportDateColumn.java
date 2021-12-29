@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.input;
 
-import cn.cerc.core.Datetime;
+import cn.cerc.db.core.Datetime;
 
 public class ImportDateColumn extends ImportColumn {
 

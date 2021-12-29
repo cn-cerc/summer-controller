@@ -3,7 +3,7 @@ package cn.cerc.mis.excel.output;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 
 public class ComplexColumn extends Column {
     private List<String> fields = new ArrayList<>();

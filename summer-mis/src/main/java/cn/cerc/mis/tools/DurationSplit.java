@@ -4,8 +4,8 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Iterator;
 
-import cn.cerc.core.Datetime;
-import cn.cerc.core.Datetime.DateType;
+import cn.cerc.db.core.Datetime;
+import cn.cerc.db.core.Datetime.DateType;
 
 public class DurationSplit implements Iterable<DurationSection>, Iterator<DurationSection> {
     private Datetime beginDate;

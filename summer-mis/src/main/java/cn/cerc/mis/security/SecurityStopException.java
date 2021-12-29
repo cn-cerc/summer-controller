@@ -2,7 +2,7 @@ package cn.cerc.mis.security;
 
 import java.lang.reflect.Method;
 
-import cn.cerc.core.ClassResource;
+import cn.cerc.db.core.ClassResource;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.SupportBeanName;
 

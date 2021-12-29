@@ -1,8 +1,8 @@
 package cn.cerc.mis.security;
 
-import cn.cerc.core.ISession;
-import cn.cerc.core.KeyValue;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.KeyValue;
 import cn.cerc.mis.core.IService;
 
 public interface SecurityService extends IService {

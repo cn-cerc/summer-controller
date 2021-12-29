@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import cn.cerc.core.DataRow;
-import cn.cerc.core.FastDate;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.FastDate;
 
 public class EntityCacheTest {
 

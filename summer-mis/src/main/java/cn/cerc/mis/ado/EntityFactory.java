@@ -7,8 +7,8 @@ import javax.persistence.Entity;
 
 import org.springframework.context.ApplicationContext;
 
-import cn.cerc.core.SqlServer;
-import cn.cerc.core.SqlServerType;
+import cn.cerc.db.core.SqlServer;
+import cn.cerc.db.core.SqlServerType;
 import cn.cerc.mis.core.Application;
 
 public class EntityFactory {

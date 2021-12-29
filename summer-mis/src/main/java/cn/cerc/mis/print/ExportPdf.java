@@ -1,8 +1,8 @@
 package cn.cerc.mis.print;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.ISession;
+import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.SummerMIS;
 
 import com.itextpdf.text.Chunk;

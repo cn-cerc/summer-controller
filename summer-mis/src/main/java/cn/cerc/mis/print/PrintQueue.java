@@ -1,6 +1,6 @@
 package cn.cerc.mis.print;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;

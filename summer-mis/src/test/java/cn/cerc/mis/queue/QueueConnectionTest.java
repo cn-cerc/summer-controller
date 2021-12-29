@@ -8,7 +8,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import cn.cerc.core.Datetime;
+import cn.cerc.db.core.Datetime;
 
 public class QueueConnectionTest {
 

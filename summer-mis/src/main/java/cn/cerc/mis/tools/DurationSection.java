@@ -1,6 +1,6 @@
 package cn.cerc.mis.tools;
 
-import cn.cerc.core.Datetime;
+import cn.cerc.db.core.Datetime;
 
 public class DurationSection {
     private Datetime dateFrom;

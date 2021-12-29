@@ -13,6 +13,6 @@ public class DateColumn extends Column {
     @SuppressWarnings("deprecation")
     @Override
     public Object getValue() {
-        return getRecord().hasValue(getCode()) ? getRecord().getDate(getCode()) : "";
+        return getRecord().has(getCode()) ? getRecord().getDate(getCode()) : "";
     }
 }

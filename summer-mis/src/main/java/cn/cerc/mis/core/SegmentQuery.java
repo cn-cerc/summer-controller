@@ -2,13 +2,13 @@ package cn.cerc.mis.core;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
-import cn.cerc.core.Datetime.DateType;
-import cn.cerc.core.ISession;
-import cn.cerc.core.MD5;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.MD5;
+import cn.cerc.db.core.Datetime.DateType;
 import cn.cerc.mis.other.MemoryBuffer;
 
 public class SegmentQuery extends Handle {

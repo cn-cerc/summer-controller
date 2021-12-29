@@ -1,6 +1,6 @@
 package cn.cerc.mis.config;
 
-import cn.cerc.core.LanguageResource;
+import cn.cerc.db.core.LanguageResource;
 
 public class ApplicationConfig {
 

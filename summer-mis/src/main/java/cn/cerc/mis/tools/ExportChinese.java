@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cn.cerc.core.LanguageResource;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.ISystemTable;

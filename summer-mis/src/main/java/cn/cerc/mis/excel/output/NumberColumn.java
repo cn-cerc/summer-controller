@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.output;
 
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.Utils;
 
 public class NumberColumn extends Column {
 

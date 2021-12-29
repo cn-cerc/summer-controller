@@ -2,7 +2,7 @@ package cn.cerc.mis.core;
 
 import java.util.List;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 

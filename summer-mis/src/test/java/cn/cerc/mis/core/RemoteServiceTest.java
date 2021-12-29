@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.DataSet;
 
 public class RemoteServiceTest {
     private static final Logger log = LoggerFactory.getLogger(RemoteServiceTest.class);

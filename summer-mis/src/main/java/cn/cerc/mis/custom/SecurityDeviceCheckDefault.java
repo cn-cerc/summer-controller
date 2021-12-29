@@ -2,7 +2,7 @@ package cn.cerc.mis.custom;
 
 import org.springframework.stereotype.Component;
 
-import cn.cerc.core.ISession;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.IForm;
 import cn.cerc.mis.core.ISecurityDeviceCheck;
 import cn.cerc.mis.core.PassportResult;

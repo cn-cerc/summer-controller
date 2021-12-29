@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 
-import cn.cerc.core.DataSet;
-import cn.cerc.core.Datetime;
-import cn.cerc.core.FieldMeta;
+import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.Datetime;
+import cn.cerc.db.core.FieldMeta;
 import jxl.write.WriteException;
 
 public class DataSetExportToExcelTest {

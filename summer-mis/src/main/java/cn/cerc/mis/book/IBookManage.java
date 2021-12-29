@@ -1,7 +1,7 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.Datetime;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 

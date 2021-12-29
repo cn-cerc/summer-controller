@@ -1,6 +1,6 @@
 package cn.cerc.mis.cdn;
 
-import cn.cerc.core.ClassConfig;
+import cn.cerc.db.core.ClassConfig;
 import cn.cerc.mis.SummerMIS;
 
 public class CDN {

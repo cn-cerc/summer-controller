@@ -2,7 +2,7 @@ package cn.cerc.mis.mail;
 
 import java.util.Properties;
 
-import cn.cerc.core.Datetime;
+import cn.cerc.db.core.Datetime;
 
 public class SmtpServerTest {
 

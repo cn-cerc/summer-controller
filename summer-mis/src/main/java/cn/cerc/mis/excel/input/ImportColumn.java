@@ -1,6 +1,6 @@
 package cn.cerc.mis.excel.input;
 
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
 
 public abstract class ImportColumn {
     // 对应数据集字段名

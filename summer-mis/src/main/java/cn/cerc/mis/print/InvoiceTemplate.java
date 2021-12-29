@@ -1,7 +1,7 @@
 package cn.cerc.mis.print;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.excel.output.Column;
 

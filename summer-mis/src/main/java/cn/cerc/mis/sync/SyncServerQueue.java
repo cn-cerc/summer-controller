@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import com.aliyun.mns.client.CloudQueue;
 import com.aliyun.mns.model.Message;
 
-import cn.cerc.core.ISession;
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.ISession;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 

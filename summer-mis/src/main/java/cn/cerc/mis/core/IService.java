@@ -6,11 +6,11 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
-import cn.cerc.core.KeyValue;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.SecurityStopException;
@@ -144,7 +144,7 @@ public interface IService {
     // 仅用于 Delphi Client 调用
     @Deprecated
     default String getJSON(DataSet dataOut) {
-        return String.format("[%s]", dataOut.toJson());
+        return String.format("[%s]", dataOut.json());
     }
 
 }

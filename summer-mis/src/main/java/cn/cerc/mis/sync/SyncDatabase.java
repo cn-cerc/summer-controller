@@ -3,8 +3,8 @@ package cn.cerc.mis.sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.cerc.core.ISession;
-import cn.cerc.core.DataRow;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.Application;
 
 public class SyncDatabase implements IPopProcesser {

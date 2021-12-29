@@ -2,7 +2,7 @@ package cn.cerc.mis.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 

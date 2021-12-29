@@ -9,15 +9,15 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
-import cn.cerc.core.ClassConfig;
-import cn.cerc.core.ISession;
-import cn.cerc.core.KeyValue;
-import cn.cerc.core.LanguageResource;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.ServerConfig;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 
 @Component

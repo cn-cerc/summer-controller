@@ -1,6 +1,6 @@
 package cn.cerc.mis.client;
 
-import cn.cerc.core.DataSet;
+import cn.cerc.db.core.DataSet;
 
 public interface IServiceProxy {
     public static final String _message_ = "_message_";

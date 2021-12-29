@@ -5,14 +5,14 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.cerc.core.ClassResource;
-import cn.cerc.core.DataRow;
-import cn.cerc.core.DataSet;
-import cn.cerc.core.ISession;
-import cn.cerc.core.Utils;
+import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.Curl;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
@@ -136,7 +136,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     public String getExportKey() {
         String tmp = "" + System.currentTimeMillis();
         try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
-            buff.setValue("data", this.dataIn().toJson());
+            buff.setValue("data", this.dataIn().json());
         }
         return tmp;
     }
