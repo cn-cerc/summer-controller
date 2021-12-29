@@ -8,11 +8,11 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataRowState;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.FieldMeta;
+import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.Utils;
-import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
@@ -134,7 +134,7 @@ public abstract class AdoTable implements IService {
         }
     }
 
-    public final String table() {
+    public String table() {
         return Utils.findTable(this.getClass());
     }
 
