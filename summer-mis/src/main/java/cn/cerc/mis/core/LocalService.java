@@ -63,8 +63,6 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             return false;
 
         try {
-            if (!"SvrSession.byUserCode".equals(this.service()))
-                log.debug(this.service());
             if (object instanceof IHandle)
                 ((IHandle) object).setSession(this.getSession());
             if (ServerConfig.isServerMaster()) {
