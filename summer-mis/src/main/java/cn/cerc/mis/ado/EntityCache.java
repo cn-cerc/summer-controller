@@ -1,5 +1,6 @@
 package cn.cerc.mis.ado;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -330,5 +331,10 @@ public class EntityCache<T> implements IHandle {
     @Override
     public void setSession(ISession session) {
         this.session = session;
+    }
+
+    public static <T> Optional<T> find(IHandle handle, Class<T> clazz, Object... keys) {
+        EntityCache<T> cache = new EntityCache<T>(handle, clazz);
+        return Optional.ofNullable(cache.get(keys));
     }
 }
