@@ -24,9 +24,4 @@ public class Options {
         return cn.cerc.mis.core.Options.ON.equals(option.getValue(handle, ""));
     }
 
-    public static boolean isOff(IHandle handle, Class<? extends IOption> clazz) {
-        IOption option = Application.getContext().getBean(clazz);
-        return cn.cerc.mis.core.Options.OFF.equals(option.getValue(handle, ""));
-    }
-
 }
