@@ -43,7 +43,7 @@ public class EntityCache<T> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 从Session缓存读取，若没有开通，则从Redis读取
      */
-    public T get(Object... values) {
+    public Optional<T> get(Object... values) {
         log.debug("getSession: {}.{}", clazz.getSimpleName(), joinToKey(values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
@@ -52,7 +52,7 @@ public class EntityCache<T> implements IHandle {
             DataRow row = SessionCache.get(keys);
             if (row != null && row.size() > 0) {
                 try {
-                    return row.asEntity(clazz);
+                    return Optional.of(row.asEntity(clazz));
                 } catch (Exception e) {
                     log.error("asEntity {} error: {}", clazz.getSimpleName(), row.json());
                     e.printStackTrace();
@@ -67,20 +67,20 @@ public class EntityCache<T> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 从Redis读取，若没有找到，则从数据库读取
      */
-    public T getRedis(Object... values) {
+    public Optional<T> getRedis(Object... values) {
         if (entityKey.cache() != CacheLevelEnum.Disabled) {
             log.debug("getRedis: {}.{}", clazz.getSimpleName(), joinToKey(values));
             Object[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 String json = jedis.get(EntityCache.buildKey(keys));
                 if ("".equals(json))
-                    return null;
+                    return Optional.empty();
                 else if (json != null) {
                     try {
                         DataRow row = new DataRow().setJson(json);
                         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                             SessionCache.set(keys, row);
-                        return row.asEntity(clazz);
+                        return Optional.of(row.asEntity(clazz));
                     } catch (Exception e) {
                         log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
                         e.printStackTrace();
@@ -98,7 +98,7 @@ public class EntityCache<T> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 强制从database中读取，并刷新session缓存与redis缓存
      */
-    public T getStorage(Object... values) {
+    public Optional<T> getStorage(Object... values) {
         log.debug("getStorage: {}.{}", clazz.getSimpleName(), joinToKey(values));
         T entity = null;
         if (entityKey.virtual()) {
@@ -114,7 +114,7 @@ public class EntityCache<T> implements IHandle {
             if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                 SessionCache.set(keys, new DataRow());
         }
-        return entity;
+        return Optional.ofNullable(entity);
     }
 
     protected T getVirtualEntity(Object... values) {
@@ -335,6 +335,6 @@ public class EntityCache<T> implements IHandle {
 
     public static <T> Optional<T> find(IHandle handle, Class<T> clazz, Object... keys) {
         EntityCache<T> cache = new EntityCache<T>(handle, clazz);
-        return Optional.ofNullable(cache.get(keys));
+        return cache.get(keys);
     }
 }
