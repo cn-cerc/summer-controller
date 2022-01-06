@@ -133,7 +133,7 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
 
     public EntityQuery<T> insert(T entity) {
         this.append();
-        Utils.objectAsRecord(current(), entity);
+        current().loadFromEntity(entity);
         return this;
     }
 
@@ -143,7 +143,7 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
     }
 
     public EntityQuery<T> update(T entity) {
-        Utils.objectAsRecord(current(), entity);
+        current().loadFromEntity(entity);
         return this;
     }
 

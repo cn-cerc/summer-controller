@@ -13,7 +13,6 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.Utils;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
@@ -73,7 +72,7 @@ public class EntityCache<T> implements IHandle {
             Object[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 String json = jedis.get(EntityCache.buildKey(keys));
-                if ("".equals(json))
+                if ("".equals(json) || "{}".equals(json))
                     return Optional.empty();
                 else if (json != null) {
                     try {
@@ -130,7 +129,7 @@ public class EntityCache<T> implements IHandle {
         headIn.saveToEntity(obj);
         if (impl.fillItem(this, obj, headIn)) {
             DataRow row = new DataRow();
-            Utils.objectAsRecord(row, obj);
+            row.loadFromEntity(obj);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), row.json());
             }
