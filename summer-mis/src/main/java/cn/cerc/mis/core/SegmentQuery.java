@@ -14,6 +14,7 @@ import cn.cerc.mis.other.MemoryBuffer;
 public class SegmentQuery extends Handle {
     private final DataSet dataIn;
     private final DataSet dataOut;
+    private boolean firstTime = true;
 
     public SegmentQuery(CustomService owner) {
         super(owner);
@@ -47,9 +48,11 @@ public class SegmentQuery extends Handle {
                 buff.setValue("curEnd", headIn.getDatetime(fromField).toDayEnd());
                 headIn.setValue(fromField, buff.getDatetime("beginDate"));
                 headIn.setValue(toField, headIn.getDatetime(fromField).inc(DateType.Day, offset).toDayEnd());
+                this.firstTime = true;
             } else {
                 headIn.setValue(fromField, buff.getDatetime("curEnd").inc(DateType.Day, 1).toDayStart());
                 headIn.setValue(toField, buff.getDatetime("curEnd").inc(DateType.Day, offset).toDayEnd());
+                this.firstTime = false;
             }
 
             if (headIn.getDatetime(toField).compareTo(buff.getDatetime("endDate")) >= 0) {
@@ -63,5 +66,9 @@ public class SegmentQuery extends Handle {
             }
         }
         return true;
+    }
+
+    public boolean isFirstTime() {
+        return this.firstTime;
     }
 }
