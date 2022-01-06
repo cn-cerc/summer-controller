@@ -15,7 +15,7 @@ public class Options {
 
     public static boolean isOn(IHandle handle, Class<? extends IOption> clazz) {
         IOption option = Application.getContext().getBean(clazz);
-        return cn.cerc.mis.core.Options.ON.equals(option.getValue(handle));
+        return Options.ON.equals(option.getValue(handle));
     }
 
 }
