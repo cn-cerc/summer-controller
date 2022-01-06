@@ -5,9 +5,6 @@ import cn.cerc.db.core.IOption;
 
 public class Options {
 
-    public static final String ON = "on";
-    public static final String OFF = "off";
-
     @Deprecated
     public static String getString(IHandle handle, Class<? extends IOption> clazz) {
         IOption option = Application.getContext().getBean(clazz);
@@ -17,7 +14,7 @@ public class Options {
     @Deprecated
     public static boolean isOn(IHandle handle, Class<? extends IOption> clazz) {
         IOption option = Application.getContext().getBean(clazz);
-        return Options.ON.equals(option.getValue(handle));
+        return IOption.ON.equals(option.getValue(handle));
     }
 
 }
