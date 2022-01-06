@@ -1,6 +1,8 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -79,17 +81,25 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (entityKey != null && entityKey.cache() != CacheLevelEnum.Disabled) {
             EntityCache<T> ec1 = EntityCache.Create(this, clazz);
+            int count = 0;
+            List<String> batchKeys = new ArrayList<>();
+            List<String> batchValues = new ArrayList<>();
+            for (DataRow row : this.records()) {
+                if (++count > EntityCache.MaxRecord)
+                    break;
+                Object[] keys = ec1.buildKeys(row);
+                batchKeys.add(EntityCache.buildKey(keys));
+                batchValues.add(row.json());
+                batchValues.add("" + entityKey.expire());
+                log.debug("set: {}", EntityCache.joinToKey(keys));
+                if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                    SessionCache.set(keys, row);
+            }
+            final String LUA_SCRIPT_MSETEX = "local keysLen = table.getn(KEYS);" + "local argvLen = table.getn(ARGV);"
+                    + "local idx=1;" + "local argVIdx=1;" + "for idx=1,keysLen,1 do " + "argVIdx=(idx-1)*2+1; "
+                    + "redis.call('Set',KEYS[idx],ARGV[argVIdx],'EX',ARGV[argVIdx+1]);" + "end " + "return keysLen;";
             try (Jedis jedis = JedisFactory.getJedis()) {
-                int count = 0;
-                for (DataRow row : this.records()) {
-                    if (++count > EntityCache.MaxRecord)
-                        break;
-                    Object[] keys = ec1.buildKeys(row);
-                    log.debug("set: {}", EntityCache.joinToKey(keys));
-                    jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
-                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                        SessionCache.set(keys, row);
-                }
+                jedis.evalsha(jedis.scriptLoad(LUA_SCRIPT_MSETEX), batchKeys, batchValues);
             }
             this.onAfterPost(row -> {
                 EntityCache<T> ec2 = EntityCache.Create(this, clazz);
