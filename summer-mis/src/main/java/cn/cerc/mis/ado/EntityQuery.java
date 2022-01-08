@@ -206,4 +206,8 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
         return this;
     }
 
+    public static <T> EntityQueryHelper<T> find(IHandle handle, Class<T> clazz, Object... keys) {
+        return new EntityQueryHelper<T>(EntityQuery.Create(handle, clazz).openByKeys(keys));
+    }
+
 }
