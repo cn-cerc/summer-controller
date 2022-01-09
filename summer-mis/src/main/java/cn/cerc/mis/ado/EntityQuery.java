@@ -1,14 +1,21 @@
 package cn.cerc.mis.ado;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import javax.persistence.Id;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.CacheLevelEnum;
 import cn.cerc.db.core.DataRow;
@@ -29,6 +36,7 @@ import cn.cerc.db.sqlite.SqliteDatabase;
 import redis.clients.jedis.Jedis;
 
 public class EntityQuery<T> extends Handle {
+    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
     // 批量写入redis等缓存
     private static final String LUA_SCRIPT_MSETEX = "local keysLen = table.getn(KEYS);local argvLen = table.getn(ARGV);"
@@ -36,6 +44,9 @@ public class EntityQuery<T> extends Handle {
             + "redis.call('Set',KEYS[idx],ARGV[argVIdx],'EX',ARGV[argVIdx+1]);end return keysLen;";
     private final SqlQuery query;
     private final Class<T> clazz;
+    // 标识为Id的字段
+    private Field idFieldDefine = null;
+    private String idFieldCode = null;
 
     public static <T> EntityQuery<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
@@ -179,19 +190,22 @@ public class EntityQuery<T> extends Handle {
         query.post();
     }
 
+    public void save(T entity) {
+        if (isNewRecord(entity))
+            query.append();
+        else
+            query.edit();
+        if (entity instanceof AdoTable)
+            ((AdoTable) entity).updateTimestamp(query);
+        query.current().loadFromEntity(entity);
+        query.post();
+    }
+
     public boolean delete() {
         if (query.eof())
             return false;
         query.delete();
         return true;
-    }
-
-    public void update(T entity) {
-        query.edit();
-        if (entity instanceof AdoTable)
-            ((AdoTable) entity).updateTimestamp(query);
-        query.current().loadFromEntity(entity);
-        query.post();
     }
 
     public Optional<T> update(Consumer<T> action) {
@@ -201,7 +215,7 @@ public class EntityQuery<T> extends Handle {
             DataRow row = query.records().get(i);
             entity = row.asEntity(this.clazz);
             action.accept(entity);
-            update(entity);
+            save(entity);
         }
         return Optional.ofNullable(entity);
     }
@@ -213,7 +227,7 @@ public class EntityQuery<T> extends Handle {
             DataRow row = query.records().get(i);
             entity = row.asEntity(this.clazz);
             if (predicate.test(entity))
-                update(entity);
+                save(entity);
         }
         return Optional.ofNullable(entity);
     }
@@ -232,5 +246,51 @@ public class EntityQuery<T> extends Handle {
 
     public Stream<T> stream() {
         return query.records().stream().map(item -> item.asEntity(clazz));
+    }
+
+    /**
+     * 
+     * @param entity
+     * @return 判断传入的entity对象，在当前记录集中是不是新的
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     */
+    public boolean isNewRecord(T entity) {
+        DataRow row = query.current();
+        if (row == null)
+            return true;
+
+        if (idFieldDefine == null) {
+            Map<String, Field> items = DataRow.getEntityFields(clazz);
+            for (String fieldCode : items.keySet()) {
+                Field field = items.get(fieldCode);
+                Id id = field.getAnnotation(Id.class);
+                if (id != null) {
+                    idFieldDefine = field;
+                    idFieldCode = fieldCode;
+                    break;
+                }
+            }
+        }
+
+        if (idFieldDefine == null)
+            throw new IllegalArgumentException("id define not exists");
+
+        Object idValue = null;
+        try {
+            idValue = idFieldDefine.get(entity);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+        if (idValue == null)
+            return true;
+
+        if (row.getValue(idFieldCode).equals(idValue))
+            return false;
+        else {
+            log.warn("id 字段被变更，由修改记录变成了增加记录，请检查！");
+            return true;
+        }
     }
 }
