@@ -191,12 +191,15 @@ public class EntityQuery<T> extends Handle {
     }
 
     public void save(T entity) {
-        if (isNewRecord(entity))
+        if (isNewRecord(entity)) {
             query.append();
-        else
+            if (entity instanceof AdoTable)
+                ((AdoTable) entity).insertTimestamp(query);
+        } else {
             query.edit();
-        if (entity instanceof AdoTable)
-            ((AdoTable) entity).updateTimestamp(query);
+            if (entity instanceof AdoTable)
+                ((AdoTable) entity).updateTimestamp(query);
+        }
         query.current().loadFromEntity(entity);
         query.post();
     }
