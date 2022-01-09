@@ -13,6 +13,8 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.SqlText;
+import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
@@ -177,9 +179,11 @@ public class EntityCache<T> implements IHandle {
         // 如果缓存没有保存任何key则重新载入数据
         Object[] keys = this.buildKeys(values);
         if (listKeys() == null && entityKey.corpNo()) {
-            EntityQuery<T> query = EntityQuery.Create(this, clazz);
-            query.openByKeys();
-            for (DataRow row : query.records()) {
+            SqlText sql = SqlWhere.create(this, clazz).build();
+            EntityQuery<T> query = EntityQuery.create(this, clazz);
+            query.setSql(sql);
+            query.open();
+            for (DataRow row : query) {
                 boolean exists = true;
                 for (int i = 0; i < keys.length - diff; i++) {
                     Object value = keys[i + diff];
@@ -190,12 +194,11 @@ public class EntityCache<T> implements IHandle {
                     entity = row.asEntity(clazz);
             }
         } else {
-            EntityQuery<T> query = EntityQuery.Create(this, clazz);
-            query.openByKeys(values);
-            if (query.size() == 1)
-                entity = query.currentEntity();
-            else if (query.size() > 1)
-                throw new RuntimeException("error: size > 1");
+            SqlText sql = SqlWhere.create(this, clazz, values).build();
+            EntityManager<T> query = EntityManager.findAll(this, clazz, sql);
+            if (query.size() > 1)
+                throw new RuntimeException("There're too many records.");
+            entity = query.get().orElse(null);
         }
         return entity;
     }

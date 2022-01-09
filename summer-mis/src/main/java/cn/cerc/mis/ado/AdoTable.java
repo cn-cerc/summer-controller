@@ -55,7 +55,7 @@ public abstract class AdoTable implements IService {
     private SqlQuery createSqlQuery(IHandle handle) {
         SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
         if (sqlServer != null) {
-            return EntityQuery.Create(handle, this.getClass());
+            return EntityQuery.create(handle, this.getClass());
         } else
             throw new RuntimeException("unknow sql server");
     }
@@ -136,6 +136,20 @@ public abstract class AdoTable implements IService {
 
     public String table() {
         return Utils.findTable(this.getClass());
+    }
+
+    /**
+     * 插入新记录时自动更新时间戳
+     */
+    public void insertTimestamp(IHandle handle) {
+
+    }
+
+    /**
+     * 更新记录时自动更新时间戳
+     */
+    public void updateTimestamp(IHandle handle) {
+
     }
 
 }
