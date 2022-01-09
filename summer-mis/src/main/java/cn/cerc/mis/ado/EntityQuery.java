@@ -10,22 +10,20 @@ import cn.cerc.db.core.Utils;
 
 public class EntityQuery<T> extends SqlQuery implements IHandle {
     private static final long serialVersionUID = 8276125658457479833L;
-    private Class<T> clazz;
 
     public static <U> EntityQuery<U> create(IHandle handle, Class<U> clazz) {
         ISqlDatabase database = EntityManager.findDatabase(handle, clazz);
         SqlServer server = clazz.getAnnotation(SqlServer.class);
         SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
-        EntityQuery<U> query = new EntityQuery<U>(handle, clazz, sqlServerType, true);
+        EntityQuery<U> query = new EntityQuery<U>(handle, sqlServerType);
+        EntityManager.registerCacheListener(query, clazz, true);
         query.operator().setTable(database.table());
         query.operator().setOid(database.oid());
         return query;
     }
 
-    private EntityQuery(IHandle handle, Class<T> clazz, SqlServerType sqlServerType, boolean writeCacheAtOpen) {
+    private EntityQuery(IHandle handle, SqlServerType sqlServerType) {
         super(handle, sqlServerType);
-        this.clazz = clazz;
-        EntityManager.registerCacheListener(this, clazz, writeCacheAtOpen);
     }
 
     @Override
