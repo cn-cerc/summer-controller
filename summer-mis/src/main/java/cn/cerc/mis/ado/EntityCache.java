@@ -13,6 +13,7 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
@@ -180,7 +181,7 @@ public class EntityCache<T> implements IHandle {
         Object[] keys = this.buildKeys(values);
         if (listKeys() == null && entityKey.corpNo()) {
             SqlText sql = SqlWhere.create(this, clazz).build();
-            EntityQuery<T> query = EntityQuery.create(this, clazz);
+            SqlQuery query = EntityQuery.create(this, clazz);
             query.setSql(sql);
             query.open();
             for (DataRow row : query) {
@@ -195,7 +196,7 @@ public class EntityCache<T> implements IHandle {
             }
         } else {
             SqlText sql = SqlWhere.create(this, clazz, values).build();
-            EntityManager<T> query = EntityManager.findAll(this, clazz, sql);
+            EntityQuery<T> query = EntityQuery.findAll(this, clazz, sql);
             if (query.size() > 1)
                 throw new RuntimeException("There're too many records.");
             entity = query.get().orElse(null);
