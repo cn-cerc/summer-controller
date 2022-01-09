@@ -41,8 +41,4 @@ public class EntityQuery<T> extends SqlQuery implements IHandle {
         return this;
     }
 
-    public String table() {
-        return Utils.findTable(clazz);
-    }
-
 }
