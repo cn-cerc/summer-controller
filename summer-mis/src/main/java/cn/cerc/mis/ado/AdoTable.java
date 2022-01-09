@@ -55,7 +55,7 @@ public abstract class AdoTable implements IService {
     private SqlQuery createSqlQuery(IHandle handle) {
         SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
         if (sqlServer != null) {
-            return EntityQuery.create(handle, this.getClass());
+            return EntityQuery.buildQuery(handle, this.getClass());
         } else
             throw new RuntimeException("unknow sql server");
     }

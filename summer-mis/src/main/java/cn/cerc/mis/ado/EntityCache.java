@@ -181,7 +181,7 @@ public class EntityCache<T> implements IHandle {
         Object[] keys = this.buildKeys(values);
         if (listKeys() == null && entityKey.corpNo()) {
             SqlText sql = SqlWhere.create(this, clazz).build();
-            SqlQuery query = EntityQuery.create(this, clazz);
+            SqlQuery query = EntityQuery.buildQuery(this, clazz);
             query.setSql(sql);
             query.open();
             for (DataRow row : query) {

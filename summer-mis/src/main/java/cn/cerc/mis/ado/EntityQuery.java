@@ -57,7 +57,7 @@ public class EntityQuery<T> extends Handle {
         return new EntityQuery<T>(handle, clazz, true).open(sql);
     }
 
-    public static SqlQuery create(IHandle handle, Class<?> clazz) {
+    public static SqlQuery buildQuery(IHandle handle, Class<?> clazz) {
         ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
         SqlServer server = clazz.getAnnotation(SqlServer.class);
         SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
