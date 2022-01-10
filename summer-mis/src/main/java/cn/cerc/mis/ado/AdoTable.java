@@ -10,8 +10,10 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
+import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.mis.core.IService;
@@ -56,7 +58,16 @@ public abstract class AdoTable implements IService {
         SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
         if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
-        return EntityQuery.buildQuery(handle, this.getClass());
+        
+        Class<? extends AdoTable> clazz = this.getClass();
+        ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
+        SqlServer server = clazz.getAnnotation(SqlServer.class);
+        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
+        SqlQuery query = new SqlQuery(handle, sqlServerType);
+        EntityQuery.registerCacheListener(query, clazz, true);
+        query.operator().setTable(database.table());
+        query.operator().setOid(database.oid());
+        return query;
     }
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
