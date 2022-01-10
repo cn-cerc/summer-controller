@@ -1,7 +1,9 @@
 package cn.cerc.mis.ado;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,8 @@ import redis.clients.jedis.Jedis;
 
 public class EntityCache<T> implements IHandle {
     private static final Logger log = LoggerFactory.getLogger(EntityCache.class);
+    private static Predicate<Object> IsEmptyArrayString = text -> (text instanceof String)
+            && ((String) text).length() == 0;
     public static final int MaxRecord = 2000;
     private ISession session;
     private Class<T> clazz;
@@ -46,6 +50,9 @@ public class EntityCache<T> implements IHandle {
      * @return 从Session缓存读取，若没有开通，则从Redis读取
      */
     public Optional<T> get(Object... values) {
+        if (List.of(values).stream().allMatch(IsEmptyArrayString))
+            return Optional.empty();
+
         log.debug("getSession: {}.{}", clazz.getSimpleName(), joinToKey(values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
