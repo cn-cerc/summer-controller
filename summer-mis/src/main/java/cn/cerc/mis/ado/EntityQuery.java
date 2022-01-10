@@ -272,7 +272,7 @@ public class EntityQuery<T> extends Handle {
      * @param entity Entity实体对象
      * @return 判断传入的entity对象，在当前记录集中是不是新的
      */
-    public boolean isNewRecord(T entity) {
+    private boolean isNewRecord(T entity) {
         DataRow row = query.current();
         if (row == null)
             return true;
