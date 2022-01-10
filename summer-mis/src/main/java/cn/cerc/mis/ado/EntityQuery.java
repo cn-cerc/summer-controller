@@ -204,14 +204,31 @@ public class EntityQuery<T> extends Handle {
         query.post();
     }
 
-    public boolean delete() {
+    public boolean deleteAll() {
         if (query.eof())
             return false;
-        query.delete();
+        query.first();
+        while (!query.eof())
+            query.delete();
         return true;
     }
 
-    public Optional<T> update(Consumer<T> action) {
+    public boolean deleteIf(Predicate<T> predicate) {
+        Objects.nonNull(predicate);
+        if (query.eof())
+            return false;
+        query.first();
+        while (!query.eof()) {
+            T entity = this.query.current().asEntity(clazz);
+            if (predicate.test(entity))
+                query.delete();
+            else
+                query.next();
+        }
+        return true;
+    }
+
+    public Optional<T> updateAll(Consumer<T> action) {
         Objects.nonNull(action);
         T entity = null;
         for (int i = 0; i < query.size(); i++) {
