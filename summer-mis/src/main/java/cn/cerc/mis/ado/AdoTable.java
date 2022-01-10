@@ -30,7 +30,7 @@ public abstract class AdoTable implements IService {
 
         // 打开数据表
         if (dataIn.crud()) {
-            SqlQuery query = createSqlQuery(handle);
+            SqlQuery query = buildQuery(handle);
             query.setJson(dataIn.json());
             query.setStorage(true);
             for (FieldMeta meta : dataIn.fields())
@@ -44,7 +44,7 @@ public abstract class AdoTable implements IService {
             saveUpdate(dataIn, query);
             saveInsert(dataIn, query);
         }
-        SqlQuery query = createSqlQuery(handle);
+        SqlQuery query = buildQuery(handle);
         open(dataIn, query);
         // 对外输出meta
         query.fields().readDefine(this.getClass());
@@ -52,12 +52,11 @@ public abstract class AdoTable implements IService {
         return query.disableStorage().setState(ServiceState.OK);
     }
 
-    private SqlQuery createSqlQuery(IHandle handle) {
+    private SqlQuery buildQuery(IHandle handle) {
         SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
-        if (sqlServer != null) {
-            return EntityQuery.buildQuery(handle, this.getClass());
-        } else
+        if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
+        return EntityQuery.buildQuery(handle, this.getClass());
     }
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
