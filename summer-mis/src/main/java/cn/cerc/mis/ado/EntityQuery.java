@@ -269,8 +269,7 @@ public class EntityQuery<T> extends Handle {
     }
 
     /**
-     * 
-     * @param entity
+     * @param entity Entity实体对象
      * @return 判断传入的entity对象，在当前记录集中是不是新的
      * @throws IllegalArgumentException
      * @throws IllegalAccessException

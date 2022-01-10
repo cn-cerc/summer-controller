@@ -140,6 +140,8 @@ public abstract class AdoTable implements IService {
 
     /**
      * 插入新记录时自动更新时间戳
+     * 
+     * @param handle IHandle
      */
     public void insertTimestamp(IHandle handle) {
 
@@ -147,6 +149,8 @@ public abstract class AdoTable implements IService {
 
     /**
      * 更新记录时自动更新时间戳
+     * 
+     * @param handle IHandle
      */
     public void updateTimestamp(IHandle handle) {
 
