@@ -214,7 +214,7 @@ public class EntityQuery<T> extends Handle {
     }
 
     public boolean deleteIf(Predicate<T> predicate) {
-        Objects.nonNull(predicate);
+        Objects.requireNonNull(predicate);
         if (query.eof())
             return false;
         query.first();
@@ -229,7 +229,7 @@ public class EntityQuery<T> extends Handle {
     }
 
     public Optional<T> updateAll(Consumer<T> action) {
-        Objects.nonNull(action);
+        Objects.requireNonNull(action);
         T entity = null;
         for (int i = 0; i < query.size(); i++) {
             DataRow row = query.records().get(i);
@@ -241,7 +241,7 @@ public class EntityQuery<T> extends Handle {
     }
 
     public Optional<T> updateIf(Predicate<T> predicate) {
-        Objects.nonNull(predicate);
+        Objects.requireNonNull(predicate);
         T entity = null;
         for (int i = 0; i < query.size(); i++) {
             DataRow row = query.records().get(i);
