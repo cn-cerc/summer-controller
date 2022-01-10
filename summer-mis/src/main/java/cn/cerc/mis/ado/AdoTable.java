@@ -54,12 +54,12 @@ public abstract class AdoTable implements IService {
         return query.disableStorage().setState(ServiceState.OK);
     }
 
-    private SqlQuery buildQuery(IHandle handle) {
-        SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
+    public SqlQuery buildQuery(IHandle handle) {
+        Class<? extends AdoTable> clazz = this.getClass();
+        SqlServer sqlServer = clazz.getAnnotation(SqlServer.class);
         if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
-        
-        Class<? extends AdoTable> clazz = this.getClass();
+
         ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
         SqlServer server = clazz.getAnnotation(SqlServer.class);
         SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
