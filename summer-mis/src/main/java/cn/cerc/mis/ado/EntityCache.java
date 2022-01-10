@@ -1,6 +1,7 @@
 package cn.cerc.mis.ado;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -43,6 +44,19 @@ public class EntityCache<T> implements IHandle {
         if (this.entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
         this.clazz = clazz;
+    }
+
+    public Optional<T> locate(Map<String, Optional<T>> buffer, Object... values) {
+        StringBuffer sb = new StringBuffer();
+        for (Object value : values)
+            sb.append(value);
+        String key = sb.toString();
+        Optional<T> result = buffer.get(key);
+        if (result == null) {
+            result = get(values);
+            buffer.put(key, result);
+        }
+        return result;
     }
 
     /**
