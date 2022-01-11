@@ -64,8 +64,8 @@ public class EntityFactory {
         return result;
     }
 
-    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Object... values) {
-        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build());
+    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz) {
+        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz).build());
     }
 
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, SqlText sqlText) {
@@ -77,10 +77,6 @@ public class EntityFactory {
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
         return new EntityQuery<T>(handle, clazz, true).open(where.build());
-    }
-
-    public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, Object... values) {
-        return loadList(handle, clazz, values).dataSet();
     }
 
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
