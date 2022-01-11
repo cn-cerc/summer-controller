@@ -251,6 +251,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
             entity = row.asEntity(this.clazz);
             if (predicate.test(entity))
                 save(entity);
+            query.next();
         }
         return Optional.ofNullable(entity);
     }
