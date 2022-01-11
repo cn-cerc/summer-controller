@@ -35,7 +35,7 @@ import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.sqlite.SqliteDatabase;
 import redis.clients.jedis.Jedis;
 
-public class EntityQuery<T> extends Handle {
+public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQueryList<T> {
     private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
     // 批量写入redis等缓存
@@ -173,6 +173,7 @@ public class EntityQuery<T> extends Handle {
         return this;
     }
 
+    @Override
     public T newEntity() {
         try {
             return clazz.getDeclaredConstructor().newInstance();
@@ -182,6 +183,7 @@ public class EntityQuery<T> extends Handle {
         }
     }
 
+    @Override
     public void insert(T entity) {
         query.append();
         if (entity instanceof AdoTable)
@@ -204,30 +206,32 @@ public class EntityQuery<T> extends Handle {
         query.post();
     }
 
-    public boolean deleteAll() {
-        if (query.eof())
-            return false;
+    @Override
+    public void deleteAll() {
         query.first();
         while (!query.eof())
             query.delete();
-        return true;
     }
 
-    public boolean deleteIf(Predicate<T> predicate) {
+    @Override
+    public int deleteIf(Predicate<T> predicate) {
         Objects.requireNonNull(predicate);
         if (query.eof())
-            return false;
+            return 0;
+        int result = 0;
         query.first();
         while (!query.eof()) {
             T entity = this.query.current().asEntity(clazz);
-            if (predicate.test(entity))
+            if (predicate.test(entity)) {
                 query.delete();
-            else
+                result++;
+            } else
                 query.next();
         }
-        return true;
+        return result;
     }
 
+    @Override
     public Optional<T> updateAll(Consumer<T> action) {
         Objects.requireNonNull(action);
         T entity = null;
@@ -240,6 +244,7 @@ public class EntityQuery<T> extends Handle {
         return Optional.ofNullable(entity);
     }
 
+    @Override
     public Optional<T> updateIf(Predicate<T> predicate) {
         Objects.requireNonNull(predicate);
         T entity = null;
@@ -252,18 +257,27 @@ public class EntityQuery<T> extends Handle {
         return Optional.ofNullable(entity);
     }
 
+    @Override
     public int size() {
         return query.size();
     }
 
+    @Override
     public SqlQuery dataSet() {
         return query;
     }
 
+    @Override
+    public T get(int index) {
+        return query.records().get(index).asEntity(clazz);
+    }
+
+    @Override
     public Optional<T> get() {
         return this.stream().findFirst();
     }
 
+    @Override
     public Stream<T> stream() {
         return query.records().stream().map(item -> item.asEntity(clazz));
     }
@@ -310,4 +324,44 @@ public class EntityQuery<T> extends Handle {
             return true;
         }
     }
+
+    @Override
+    public boolean isEmpty() {
+        return query.size() == 0;
+    }
+
+    @Override
+    public boolean isPresent() {
+        return query.size() > 0;
+    }
+
+    @Override
+    public boolean delete() {
+        if (query.size() == 0)
+            return false;
+        this.deleteAll();
+        return true;
+    }
+
+    @Override
+    public Optional<T> update(Consumer<T> action) {
+        this.updateAll(action);
+        return this.get();
+    }
+
+    @Override
+    public EntityQueryOne<T> ifEmptyInsert(Consumer<T> action) {
+        if (this.size() == 0) {
+            T entity = this.newEntity();
+            action.accept(entity);
+            this.insert(entity);
+        }
+        return this;
+    }
+
+    @Override
+    public DataRow current() {
+        return query.current();
+    }
+
 }
