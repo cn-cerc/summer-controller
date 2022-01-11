@@ -150,9 +150,8 @@ public class EntityCache<T> implements IHandle {
         for (int i = 0; i < keys.length - diff; i++)
             headIn.setValue(entityKey.fields()[i], keys[i + diff]);
         //
-        T obj = newVirtualEntity();
+        T obj = headIn.asEntity(clazz);
         VirtualEntityImpl impl = (VirtualEntityImpl) obj;
-        headIn.saveToEntity(obj);
         if (impl.fillItem(this, obj, headIn)) {
             DataRow row = new DataRow();
             row.loadFromEntity(obj);
@@ -331,18 +330,6 @@ public class EntityCache<T> implements IHandle {
          * @return 返回载入的数据，允许返回null
          */
         DataSet loadItems(IHandle handle, DataRow headIn);
-    }
-
-    private T newVirtualEntity() {
-        T obj;
-        try {
-            obj = clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        if (!(obj instanceof VirtualEntityImpl))
-            throw new RuntimeException(clazz.getSimpleName() + " not support VirtualEntityImpl");
-        return obj;
     }
 
     @Override
