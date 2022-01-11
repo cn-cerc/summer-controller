@@ -139,6 +139,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     public EntityQuery<T> open(SqlText sql) {
         query.setSql(sql);
         query.open();
+        query.setReadonly(true);
         return this;
     }
 
@@ -154,40 +155,54 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
 
     @Override
     public void insert(T entity) {
-        query.append();
-        if (entity instanceof AdoTable)
-            ((AdoTable) entity).insertTimestamp(query);
-        query.current().loadFromEntity(entity);
-        query.post();
+        query.setReadonly(false);
+        try {
+            query.append();
+            if (entity instanceof AdoTable)
+                ((AdoTable) entity).insertTimestamp(query);
+            query.current().loadFromEntity(entity);
+            query.post();
+        } finally {
+            query.setReadonly(true);
+        }
     }
-
 
     @Override
     public void save(int index, T entity) {
         query.setRecNo(index);
         save(entity);
     }
-    
+
     @Override
     public void save(T entity) {
-        if (isNewRecord(entity)) {
-            query.append();
-            if (entity instanceof AdoTable)
-                ((AdoTable) entity).insertTimestamp(query);
-        } else {
-            query.edit();
-            if (entity instanceof AdoTable)
-                ((AdoTable) entity).updateTimestamp(query);
+        query.setReadonly(false);
+        try {
+            if (isNewRecord(entity)) {
+                query.append();
+                if (entity instanceof AdoTable)
+                    ((AdoTable) entity).insertTimestamp(query);
+            } else {
+                query.edit();
+                if (entity instanceof AdoTable)
+                    ((AdoTable) entity).updateTimestamp(query);
+            }
+            query.current().loadFromEntity(entity);
+            query.post();
+        } finally {
+            query.setReadonly(true);
         }
-        query.current().loadFromEntity(entity);
-        query.post();
     }
 
     @Override
     public void deleteAll() {
-        query.first();
-        while (!query.eof())
-            query.delete();
+        query.setReadonly(false);
+        try {
+            query.first();
+            while (!query.eof())
+                query.delete();
+        } finally {
+            query.setReadonly(true);
+        }
     }
 
     @Override
@@ -195,17 +210,22 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         Objects.requireNonNull(predicate);
         if (query.eof())
             return 0;
-        int result = 0;
-        query.first();
-        while (!query.eof()) {
-            T entity = this.query.current().asEntity(clazz);
-            if (predicate.test(entity)) {
-                query.delete();
-                result++;
-            } else
-                query.next();
+        query.setReadonly(false);
+        try {
+            int result = 0;
+            query.first();
+            while (!query.eof()) {
+                T entity = this.query.current().asEntity(clazz);
+                if (predicate.test(entity)) {
+                    query.delete();
+                    result++;
+                } else
+                    query.next();
+            }
+            return result;
+        } finally {
+            query.setReadonly(true);
         }
-        return result;
     }
 
     @Override
@@ -237,11 +257,6 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     @Override
     public int size() {
         return query.size();
-    }
-
-    @Override
-    public SqlQuery dataSet() {
-        return query;
     }
 
     @Override
@@ -316,14 +331,26 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     public boolean delete() {
         if (query.size() == 0)
             return false;
-        this.deleteAll();
+        query.setReadonly(false);
+        try {
+            query.delete();
+        } finally {
+            query.setReadonly(true);
+        }
         return true;
     }
 
     @Override
     public Optional<T> update(Consumer<T> action) {
-        this.updateAll(action);
-        return this.get();
+        Objects.requireNonNull(action);
+        T entity = null;
+        DataRow row = query.current();
+        if (row != null) {
+            entity = row.asEntity(this.clazz);
+            action.accept(entity);
+            save(entity);
+        }
+        return Optional.ofNullable(entity);
     }
 
     @Override
@@ -341,6 +368,11 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         if (query.size() == 0)
             throw exceptionSupplier.get();
         return this;
+    }
+
+    @Override
+    public SqlQuery dataSet() {
+        return query;
     }
 
     @Override
