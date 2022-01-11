@@ -1,7 +1,10 @@
 package cn.cerc.mis.ado;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +16,17 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.SqlQuery;
+import cn.cerc.db.core.SqlText;
+import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
 
 public class EntityCache<T> implements IHandle {
     private static final Logger log = LoggerFactory.getLogger(EntityCache.class);
+    private static Predicate<Object> IsEmptyArrayString = text -> (text instanceof String)
+            && ((String) text).length() == 0;
     public static final int MaxRecord = 2000;
     private ISession session;
     private Class<T> clazz;
@@ -38,11 +46,27 @@ public class EntityCache<T> implements IHandle {
         this.clazz = clazz;
     }
 
+    public Optional<T> locate(Map<String, Optional<T>> buffer, Object... values) {
+        StringBuffer sb = new StringBuffer();
+        for (Object value : values)
+            sb.append(value);
+        String key = sb.toString();
+        Optional<T> result = buffer.get(key);
+        if (result == null) {
+            result = get(values);
+            buffer.put(key, result);
+        }
+        return result;
+    }
+
     /**
      * @param values EntityCache.values 标识字段的值
      * @return 从Session缓存读取，若没有开通，则从Redis读取
      */
     public Optional<T> get(Object... values) {
+        if (List.of(values).stream().allMatch(IsEmptyArrayString))
+            return Optional.empty();
+
         log.debug("getSession: {}.{}", clazz.getSimpleName(), joinToKey(values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
@@ -126,9 +150,8 @@ public class EntityCache<T> implements IHandle {
         for (int i = 0; i < keys.length - diff; i++)
             headIn.setValue(entityKey.fields()[i], keys[i + diff]);
         //
-        T obj = newVirtualEntity();
+        T obj = headIn.asEntity(clazz);
         VirtualEntityImpl impl = (VirtualEntityImpl) obj;
-        headIn.saveToEntity(obj);
         if (impl.fillItem(this, obj, headIn)) {
             DataRow row = new DataRow();
             row.loadFromEntity(obj);
@@ -177,9 +200,11 @@ public class EntityCache<T> implements IHandle {
         // 如果缓存没有保存任何key则重新载入数据
         Object[] keys = this.buildKeys(values);
         if (listKeys() == null && entityKey.corpNo()) {
-            EntityQuery<T> query = EntityQuery.Create(this, clazz);
-            query.openByKeys();
-            for (DataRow row : query.records()) {
+            SqlText sql = SqlWhere.create(this, clazz).build();
+            SqlQuery query = EntityFactory.buildQuery(this, clazz);
+            query.setSql(sql);
+            query.open();
+            for (DataRow row : query) {
                 boolean exists = true;
                 for (int i = 0; i < keys.length - diff; i++) {
                     Object value = keys[i + diff];
@@ -190,12 +215,7 @@ public class EntityCache<T> implements IHandle {
                     entity = row.asEntity(clazz);
             }
         } else {
-            EntityQuery<T> query = EntityQuery.Create(this, clazz);
-            query.openByKeys(values);
-            if (query.size() == 1)
-                entity = query.currentEntity();
-            else if (query.size() > 1)
-                throw new RuntimeException("error: size > 1");
+            entity = EntityFactory.loadOne(this, clazz, values).get().orElse(null);
         }
         return entity;
     }
@@ -310,18 +330,6 @@ public class EntityCache<T> implements IHandle {
          * @return 返回载入的数据，允许返回null
          */
         DataSet loadItems(IHandle handle, DataRow headIn);
-    }
-
-    private T newVirtualEntity() {
-        T obj;
-        try {
-            obj = clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        if (!(obj instanceof VirtualEntityImpl))
-            throw new RuntimeException(clazz.getSimpleName() + " not support VirtualEntityImpl");
-        return obj;
     }
 
     @Override

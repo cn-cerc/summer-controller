@@ -10,8 +10,10 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
+import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.mis.core.IService;
@@ -30,7 +32,7 @@ public abstract class AdoTable implements IService {
 
         // 打开数据表
         if (dataIn.crud()) {
-            SqlQuery query = createSqlQuery(handle);
+            SqlQuery query = buildQuery(handle);
             query.setJson(dataIn.json());
             query.setStorage(true);
             for (FieldMeta meta : dataIn.fields())
@@ -44,7 +46,7 @@ public abstract class AdoTable implements IService {
             saveUpdate(dataIn, query);
             saveInsert(dataIn, query);
         }
-        SqlQuery query = createSqlQuery(handle);
+        SqlQuery query = buildQuery(handle);
         open(dataIn, query);
         // 对外输出meta
         query.fields().readDefine(this.getClass());
@@ -52,12 +54,20 @@ public abstract class AdoTable implements IService {
         return query.disableStorage().setState(ServiceState.OK);
     }
 
-    private SqlQuery createSqlQuery(IHandle handle) {
-        SqlServer sqlServer = this.getClass().getAnnotation(SqlServer.class);
-        if (sqlServer != null) {
-            return EntityQuery.Create(handle, this.getClass());
-        } else
+    public SqlQuery buildQuery(IHandle handle) {
+        Class<? extends AdoTable> clazz = this.getClass();
+        SqlServer sqlServer = clazz.getAnnotation(SqlServer.class);
+        if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
+
+        ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
+        SqlServer server = clazz.getAnnotation(SqlServer.class);
+        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
+        SqlQuery query = new SqlQuery(handle, sqlServerType);
+        EntityQuery.registerCacheListener(query, clazz, true);
+        query.operator().setTable(database.table());
+        query.operator().setOid(database.oid());
+        return query;
     }
 
     protected AdoTable open(DataSet dataIn, SqlQuery query) {
@@ -136,6 +146,24 @@ public abstract class AdoTable implements IService {
 
     public String table() {
         return Utils.findTable(this.getClass());
+    }
+
+    /**
+     * 插入新记录时自动更新时间戳
+     * 
+     * @param handle IHandle
+     */
+    public void insertTimestamp(IHandle handle) {
+
+    }
+
+    /**
+     * 更新记录时自动更新时间戳
+     * 
+     * @param handle IHandle
+     */
+    public void updateTimestamp(IHandle handle) {
+
     }
 
 }
