@@ -1,10 +1,12 @@
 package cn.cerc.mis.ado;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 
@@ -21,8 +23,12 @@ import cn.cerc.mis.core.Application;
 public class EntityFactory {
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
-    public static <T> Optional<T> find(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
         return EntityCache.find(handle, clazz, values);
+    }
+
+    public static <T> List<T> findList(IHandle handle, Class<T> clazz) {
+        return loadList(handle, clazz).stream().collect(Collectors.toList());
     }
 
     public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, Object... values) {
