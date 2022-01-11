@@ -48,7 +48,7 @@ public class EntityFactory {
     }
 
     public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        EntityQuery<T> result = EntityQuery.findAll(handle, clazz, sqlText);
+        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, true).open(sqlText);
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;
@@ -58,7 +58,7 @@ public class EntityFactory {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        EntityQuery<T> result = EntityQuery.findAll(handle, clazz, where.build());
+        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, true).open(where.build());
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;

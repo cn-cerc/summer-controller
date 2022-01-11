@@ -216,11 +216,7 @@ public class EntityCache<T> implements IHandle {
                     entity = row.asEntity(clazz);
             }
         } else {
-            SqlText sql = SqlWhere.create(this, clazz, values).build();
-            EntityQuery<T> query = EntityQuery.findAll(this, clazz, sql);
-            if (query.size() > 1)
-                throw new RuntimeException("There're too many records.");
-            entity = query.get().orElse(null);
+            entity = EntityFactory.loadOne(this, clazz, values).get().orElse(null);
         }
         return entity;
     }

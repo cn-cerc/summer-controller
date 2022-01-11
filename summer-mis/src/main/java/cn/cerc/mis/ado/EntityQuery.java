@@ -56,18 +56,6 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         return result;
     }
 
-    public static <T> EntityQuery<T> findUid(IHandle handle, Class<T> clazz, long uid) {
-        SqlText sql = SqlWhere.create(clazz).eq("UID_", uid).build();
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql);
-        if (result.size() > 1)
-            throw new RuntimeException("There're too many records.");
-        return result;
-    }
-
-    public static <T> EntityQuery<T> findAll(IHandle handle, Class<T> clazz, SqlText sql) {
-        return new EntityQuery<T>(handle, clazz, true).open(sql);
-    }
-
     public static SqlQuery buildQuery(IHandle handle, Class<?> clazz) {
         ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
         SqlServer server = clazz.getAnnotation(SqlServer.class);
