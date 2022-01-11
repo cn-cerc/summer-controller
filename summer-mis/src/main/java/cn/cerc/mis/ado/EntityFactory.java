@@ -69,6 +69,10 @@ public class EntityFactory {
         return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz).build());
     }
 
+    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Object... values) {
+        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build());
+    }
+
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, SqlText sqlText) {
         return new EntityQuery<T>(handle, clazz, true).open(sqlText);
     }
