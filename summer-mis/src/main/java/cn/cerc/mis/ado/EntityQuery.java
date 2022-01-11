@@ -161,6 +161,14 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         query.post();
     }
 
+
+    @Override
+    public void save(int index, T entity) {
+        query.setRecNo(index);
+        save(entity);
+    }
+    
+    @Override
     public void save(T entity) {
         if (isNewRecord(entity)) {
             query.append();

@@ -13,6 +13,8 @@ public interface EntityQueryOne<T> {
     boolean isPresent();
 
     Optional<T> get();
+    
+    void save(T entity);
 
     EntityQueryOne<T> ifEmptyInsert(Consumer<T> action);
 

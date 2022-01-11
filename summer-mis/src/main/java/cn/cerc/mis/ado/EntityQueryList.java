@@ -13,6 +13,8 @@ public interface EntityQueryList<T> {
 
     T get(int index);
 
+    void save(int index, T entity);
+
     // 增加
     T newEntity();
 
