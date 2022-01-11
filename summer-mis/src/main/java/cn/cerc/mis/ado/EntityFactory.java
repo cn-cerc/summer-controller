@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import org.springframework.context.ApplicationContext;
 
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
@@ -77,6 +78,17 @@ public class EntityFactory {
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
         return new EntityQuery<T>(handle, clazz, true).open(where.build());
+    }
+
+    public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
+        ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
+        SqlServer server = clazz.getAnnotation(SqlServer.class);
+        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
+        SqlQuery query = new SqlQuery(handle, sqlServerType);
+        EntityQuery.registerCacheListener(query, clazz, true);
+        query.operator().setTable(database.table());
+        query.operator().setOid(database.oid());
+        return query;
     }
 
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {

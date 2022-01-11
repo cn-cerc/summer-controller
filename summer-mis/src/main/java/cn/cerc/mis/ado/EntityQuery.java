@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.persistence.Id;
@@ -28,7 +29,6 @@ import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.SqlServerTypeException;
 import cn.cerc.db.core.SqlText;
-import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.mssql.MssqlDatabase;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.redis.JedisFactory;
@@ -47,25 +47,6 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     // 标识为Id的字段
     private Field idFieldDefine = null;
     private String idFieldCode = null;
-
-    public static <T> EntityQuery<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
-        SqlText sql = SqlWhere.create(handle, clazz, values).build();
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql);
-        if (result.size() > 1)
-            throw new RuntimeException("There're too many records.");
-        return result;
-    }
-
-    public static SqlQuery buildQuery(IHandle handle, Class<?> clazz) {
-        ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
-        SqlServer server = clazz.getAnnotation(SqlServer.class);
-        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
-        SqlQuery query = new SqlQuery(handle, sqlServerType);
-        EntityQuery.registerCacheListener(query, clazz, true);
-        query.operator().setTable(database.table());
-        query.operator().setOid(database.oid());
-        return query;
-    }
 
     public static ISqlDatabase findDatabase(IHandle handle, Class<?> clazz) {
         ISqlDatabase database = buff.get(clazz);
@@ -344,6 +325,13 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
             action.accept(entity);
             this.insert(entity);
         }
+        return this;
+    }
+
+    @Override
+    public <X extends Throwable> EntityQueryOne<T> ifEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() == 0)
+            throw exceptionSupplier.get();
         return this;
     }
 
