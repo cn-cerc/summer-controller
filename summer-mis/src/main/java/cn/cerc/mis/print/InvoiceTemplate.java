@@ -1,9 +1,6 @@
 package cn.cerc.mis.print;
 
-import cn.cerc.db.core.ClassResource;
-import cn.cerc.db.core.DataRow;
-import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.excel.output.Column;
+import java.io.IOException;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
@@ -17,7 +14,10 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import java.io.IOException;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.DataRow;
+import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.excel.output.Column;
 
 public class InvoiceTemplate extends PrintTemplate {
     private static final ClassResource res = new ClassResource(InvoiceTemplate.class, SummerMIS.ID);

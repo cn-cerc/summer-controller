@@ -1,6 +1,6 @@
 package cn.cerc.mis.tools;
 
-import cn.cerc.mis.core.ServiceException;
+import cn.cerc.db.core.ServiceException;
 
 public class DataUpdateException extends ServiceException {
     private static final long serialVersionUID = -8184184817999373005L;

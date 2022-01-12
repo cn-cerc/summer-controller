@@ -1,11 +1,11 @@
 package cn.cerc.mis.client;
 
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.CustomServiceProxy;
 import cn.cerc.mis.core.IService;
-import cn.cerc.mis.core.ServiceException;
 
 public class AutoService extends CustomServiceProxy {
     private String corpNo;

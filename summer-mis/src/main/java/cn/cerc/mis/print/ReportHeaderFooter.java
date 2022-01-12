@@ -1,5 +1,7 @@
 package cn.cerc.mis.print;
 
+import java.io.IOException;
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -15,8 +17,6 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import cn.cerc.db.core.ClassResource;
-
-import java.io.IOException;
 
 public class ReportHeaderFooter extends PdfPageEventHelper {
     private static final ClassResource res = new ClassResource(ReportHeaderFooter.class,"summer-mvc");

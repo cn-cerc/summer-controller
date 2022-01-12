@@ -1,6 +1,6 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.mis.core.ServiceException;
+import cn.cerc.db.core.ServiceException;
 
 public interface IBook extends IBookEnroll {
     // 初始化（仅调用一次）
