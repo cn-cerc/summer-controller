@@ -236,7 +236,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
             DataRow row = query.records().get(i);
             entity = row.asEntity(this.clazz);
             action.accept(entity);
-            save(entity);
+            save(i, entity);
         }
         return Optional.ofNullable(entity);
     }
@@ -249,7 +249,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
             DataRow row = query.records().get(i);
             entity = row.asEntity(this.clazz);
             if (predicate.test(entity))
-                save(entity);
+                save(i, entity);
         }
         return Optional.ofNullable(entity);
     }
