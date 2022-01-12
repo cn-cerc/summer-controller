@@ -268,8 +268,17 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     }
 
     @Override
-    public Optional<T> get() {
-        return this.stream().findFirst();
+    public T get() {
+        if (query.size() == 0)
+            return null;
+        return query.records().get(0).asEntity(clazz);
+    }
+
+    @Override
+    public <X extends Throwable> T getElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() == 0)
+            throw exceptionSupplier.get();
+        return query.records().get(0).asEntity(clazz);
     }
 
     @Override
@@ -328,8 +337,22 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     }
 
     @Override
+    public <X extends Throwable> EntityQueryOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() == 0)
+            throw exceptionSupplier.get();
+        return this;
+    }
+
+    @Override
     public boolean isPresent() {
         return query.size() > 0;
+    }
+
+    @Override
+    public <X extends Throwable> EntityQueryOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() > 0)
+            throw exceptionSupplier.get();
+        return this;
     }
 
     @Override
@@ -367,13 +390,6 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
             action.accept(entity);
             this.insert(entity);
         }
-        return this;
-    }
-
-    @Override
-    public <X extends Throwable> EntityQueryOne<T> orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
-        if (query.size() == 0)
-            throw exceptionSupplier.get();
         return this;
     }
 
