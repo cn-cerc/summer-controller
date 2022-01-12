@@ -124,7 +124,13 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.virtual()) {
             entity = getVirtualEntity(values);
         } else {
-            entity = EntityFactory.loadOne(this, clazz, values).get().orElse(null);
+            if (values.length == 0)
+                throw new RuntimeException("The param values cat not be empty.");
+            EntityQueryList<T> query = EntityFactory.loadList(this, clazz, values);
+            if (query.size() > 1)
+                throw new RuntimeException("There're too many records.");
+            if (query.size() > 0)
+                entity = query.get(0);
         }
         if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
             Object[] keys = this.buildKeys(values);
