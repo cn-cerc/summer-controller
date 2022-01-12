@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.FastDate;
 import cn.cerc.db.core.FastTime;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 
 /**
  * 此类主要配合DataRow.setValueNotNull使用
@@ -42,47 +42,47 @@ public class RequestValue {
     }
 
     public String getString(String field) {
-        return has(field) ? new KeyValue(request.getParameter(field)).asString() : null;
+        return has(field) ? new Variant(request.getParameter(field)).getString() : null;
     }
 
     public Boolean getBoolean(String field) {
-        return has(field) ? new KeyValue(request.getParameter(field)).asBoolean() : null;
+        return has(field) ? new Variant(request.getParameter(field)).getBoolean() : null;
     }
 
     public Integer getInteger(String field) {
-        return has(field) ? new KeyValue(request.getParameter(field)).asInt() : null;
+        return has(field) ? new Variant(request.getParameter(field)).getInt() : null;
     }
 
     public Long getLong(String field) {
-        return has(field) ? new KeyValue(request.getParameter(field)).asLong() : null;
+        return has(field) ? new Variant(request.getParameter(field)).getLong() : null;
     }
 
     public Float getFloat(String field) {
-        return has(field) ? new KeyValue(request.getParameter(field)).asFloat() : null;
+        return has(field) ? new Variant(request.getParameter(field)).getFloat() : null;
     }
 
     public Double getDouble(String field) {
-        return has(field) ? new KeyValue(request.getParameter(field)).asDouble() : null;
+        return has(field) ? new Variant(request.getParameter(field)).getDouble() : null;
     }
 
     public Datetime getDatetime(String field) {
         if (!has(field))
             return null;
-        Datetime value = new KeyValue(request.getParameter(field)).asDatetime();
+        Datetime value = new Variant(request.getParameter(field)).getDatetime();
         return value.isEmpty() ? null : value;
     }
 
     public FastDate getFastDate(String field) {
         if (!has(field))
             return null;
-        FastDate value = new KeyValue(request.getParameter(field)).asFastDate();
+        FastDate value = new Variant(request.getParameter(field)).getFastDate();
         return value.isEmpty() ? null : value;
     }
 
     public FastTime getFastTime(String field) {
         if (!has(field))
             return null;
-        FastTime value = new KeyValue(request.getParameter(field)).asFastTime();
+        FastTime value = new Variant(request.getParameter(field)).getFastTime();
         return value.isEmpty() ? null : value;
     }
 }

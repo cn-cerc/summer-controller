@@ -3,7 +3,7 @@ package cn.cerc.mis.core;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 
 public abstract class CustomServiceProxy extends Handle {
     private String service;
@@ -14,7 +14,7 @@ public abstract class CustomServiceProxy extends Handle {
         super(handle);
     }
 
-    protected final Object getServiceObject(KeyValue function) {
+    protected final Object getServiceObject(Variant function) {
         if (getSession() == null) {
             dataOut().setMessage("session is null.");
             return null;

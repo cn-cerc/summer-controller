@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.core.MD5;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.redis.JedisFactory;
@@ -57,7 +57,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             }
         }
 
-        KeyValue function = new KeyValue("execute").setKey(service());
+        Variant function = new Variant("execute").setTag(service());
         Object object = getServiceObject(function);
         if (object == null)
             return false;

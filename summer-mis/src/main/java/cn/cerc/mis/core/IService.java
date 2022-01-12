@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
@@ -45,16 +45,16 @@ public interface IService {
         return dataOut.setState(ServiceState.OK);
     }
 
-    default DataSet _call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {
-        if (function == null || Utils.isEmpty(function.asString()))
+    default DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws ServiceException {
+        if (function == null || Utils.isEmpty(function.getString()))
             return new DataSet().setMessage("function is null");
-        if ("_call".equals(function.asString()))
+        if ("_call".equals(function.getString()))
             return new DataSet().setMessage("function is call");
-        if ("_list".equals(function.asString())) {
+        if ("_list".equals(function.getString())) {
             return _list();
         }
 
-        String funcCode = function.asString();
+        String funcCode = function.getString();
         Class<?> clazz = this.getClass();
         Method method;
         Object[] args = null;

@@ -11,7 +11,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.SecurityStopException;
@@ -39,15 +39,15 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     @Override
-    public DataSet _call(IHandle handle, DataSet dataIn, KeyValue function) throws ServiceException {
-        if (function == null || Utils.isEmpty(function.asString()))
+    public DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws ServiceException {
+        if (function == null || Utils.isEmpty(function.getString()))
             return new DataSet().setMessage("function is null");
-        if ("_list".equals(function.asString()))
+        if ("_list".equals(function.getString()))
             return this._list();
-        if ("_call".equals(function.asString()))
+        if ("_call".equals(function.getString()))
             return new DataSet().setMessage("function is call");
         if (Utils.isEmpty(this.funcCode))
-            this.setFuncCode(function.asString());
+            this.setFuncCode(function.getString());
         return this.execute(handle, dataIn);
     }
 
