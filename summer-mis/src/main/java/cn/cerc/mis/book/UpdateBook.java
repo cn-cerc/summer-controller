@@ -1,6 +1,6 @@
 package cn.cerc.mis.book;
 
-import cn.cerc.mis.tools.DataUpdateException;
+import cn.cerc.db.core.ServiceException;
 
 public interface UpdateBook extends IBook {
 
@@ -8,5 +8,5 @@ public interface UpdateBook extends IBook {
     boolean isKnowMonth();
 
     // 对登记到帐本的的数据进行更新
-    void update() throws DataUpdateException;
+    void update() throws ServiceException;
 }
