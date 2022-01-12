@@ -132,8 +132,6 @@ public class EntityCache<T> implements IHandle {
         if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
             Object[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
-                if (this.clazz.getSimpleName().equals("PartinfoEntity"))
-                    throw new RuntimeException("找不到商品料号: " + values[0]);
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
             if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
