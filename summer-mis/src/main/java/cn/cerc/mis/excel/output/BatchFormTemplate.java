@@ -1,5 +1,8 @@
 package cn.cerc.mis.excel.output;
 
+import java.text.DecimalFormat;
+import java.util.List;
+
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
@@ -8,10 +11,6 @@ import cn.cerc.mis.config.ApplicationConfig;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
-
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.List;
 
 /**
  * 批次导出单据明细
@@ -34,11 +33,10 @@ public class BatchFormTemplate extends FormTemplate {
                     footer.setValue(res.getString(2, "合计金额"), footer.getDouble(res.getString(2, "合计金额")) + item.getDouble("OriAmount_"));
                 }
                 int row = template.getRow();
-                for (String field : footer.items().keySet()) {
+                for (String field : footer.fields().names()) {
                     row++;
-                    Object val = footer.items().get(field);
                     sheet1.addCell(new Label(0, row, field));
-                    sheet1.addCell(new Label(1, row, df.format(new BigDecimal(Double.toString((Double) val)))));
+                    sheet1.addCell(new Label(1, row, df.format(footer.getString(field))));
                 }
             });
 
