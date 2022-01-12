@@ -309,10 +309,12 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         if (idValue == null)
             return true;
 
-        if (row.getValue(idFieldCode).equals(idValue))
+        if (row.getString(idFieldCode).equals(String.valueOf(idValue)))
             return false;
         else {
-            log.warn("id 字段被变更，由修改记录变成了增加记录，请检查！");
+            Object value = row.getValue(idFieldCode);
+            log.warn("id={} {} {} {} 字段被变更，由修改记录变成了增加记录，请检查！", idValue, idValue.getClass().getName(), value,
+                    value.getClass().getName());
             return true;
         }
     }
