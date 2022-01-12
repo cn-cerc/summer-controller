@@ -18,7 +18,7 @@ public interface EntityQueryOne<T> {
 
     EntityQueryOne<T> ifEmptyInsert(Consumer<T> action);
 
-    <X extends Throwable> EntityQueryOne<T> ifEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X;
+    <X extends Throwable> EntityQueryOne<T> orElseThrow(Supplier<? extends X> exceptionSupplier) throws X;
 
     Optional<T> update(Consumer<T> action);
 

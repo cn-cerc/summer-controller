@@ -366,7 +366,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     }
 
     @Override
-    public <X extends Throwable> EntityQueryOne<T> ifEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    public <X extends Throwable> EntityQueryOne<T> orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (query.size() == 0)
             throw exceptionSupplier.get();
         return this;
