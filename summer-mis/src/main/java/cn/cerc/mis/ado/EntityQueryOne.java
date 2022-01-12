@@ -16,13 +16,13 @@ public interface EntityQueryOne<T> {
     
     void save(T entity);
 
-    EntityQueryOne<T> ifEmptyInsert(Consumer<T> action);
+    EntityQueryOne<T> orElseInsert(Consumer<T> action);
 
     <X extends Throwable> EntityQueryOne<T> orElseThrow(Supplier<? extends X> exceptionSupplier) throws X;
 
-    Optional<T> update(Consumer<T> action);
+    EntityQueryOne<T> update(Consumer<T> action);
 
-    boolean delete();
+    EntityQueryOne<T> delete();
 
     DataRow current();
 }

@@ -330,20 +330,20 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     }
 
     @Override
-    public boolean delete() {
+    public EntityQueryOne<T> delete() {
         if (query.size() == 0)
-            return false;
+            return this;
         query.setReadonly(false);
         try {
             query.delete();
         } finally {
             query.setReadonly(true);
         }
-        return true;
+        return this;
     }
 
     @Override
-    public Optional<T> update(Consumer<T> action) {
+    public EntityQueryOne<T> update(Consumer<T> action) {
         Objects.requireNonNull(action);
         T entity = null;
         DataRow row = query.current();
@@ -352,11 +352,11 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
             action.accept(entity);
             save(entity);
         }
-        return Optional.ofNullable(entity);
+        return this;
     }
 
     @Override
-    public EntityQueryOne<T> ifEmptyInsert(Consumer<T> action) {
+    public EntityQueryOne<T> orElseInsert(Consumer<T> action) {
         if (this.size() == 0) {
             T entity = this.newEntity();
             action.accept(entity);
