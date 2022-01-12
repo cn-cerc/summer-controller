@@ -16,6 +16,7 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
@@ -126,7 +127,8 @@ public class EntityCache<T> implements IHandle {
         } else {
             if (values.length == 0)
                 throw new RuntimeException("The param values cat not be empty.");
-            EntityQueryList<T> query = EntityFactory.loadList(this, clazz, values);
+            EntityQueryList<T> query = new EntityQuery<T>(this, clazz, true)
+                    .open(SqlWhere.create(this, clazz, values).build(), true);
             if (query.size() > 1)
                 throw new RuntimeException("There're too many records.");
             if (query.size() > 0)

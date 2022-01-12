@@ -136,9 +136,12 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         registerCacheListener(query, clazz, writeCacheAtOpen);
     }
 
-    public EntityQuery<T> open(SqlText sql) {
+    public EntityQuery<T> open(SqlText sql, boolean useSlaveServer) {
         query.setSql(sql);
-        query.open();
+        if (useSlaveServer)
+            query.openReadonly();
+        else
+            query.open();
         query.setReadonly(true);
         return this;
     }
@@ -330,16 +333,18 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     }
 
     @Override
-    public EntityQueryOne<T> delete() {
+    public Optional<T> delete() {
         if (query.size() == 0)
-            return this;
+            return Optional.empty();
         query.setReadonly(false);
+        T entity = null;
         try {
+            entity = query.current().asEntity(clazz);
             query.delete();
         } finally {
             query.setReadonly(true);
         }
-        return this;
+        return Optional.of(entity);
     }
 
     @Override

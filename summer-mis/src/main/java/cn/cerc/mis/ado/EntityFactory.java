@@ -28,13 +28,25 @@ public class EntityFactory {
         return EntityCache.find(handle, clazz, values);
     }
 
-    public static <T> List<T> findList(IHandle handle, Class<T> clazz) {
-        return loadList(handle, clazz).stream().collect(Collectors.toList());
+    public static <T> List<T> findList(IHandle handle, Class<T> clazz, Object... values) {
+        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build(), true)
+                .stream().collect(Collectors.toList());
+    }
+
+    public static <T> List<T> findList(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityQuery<T>(handle, clazz, true).open(sqlText, true).stream().collect(Collectors.toList());
+    }
+
+    public static <T> List<T> findList(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+        Objects.requireNonNull(consumer);
+        SqlWhere where = SqlWhere.create(handle, clazz);
+        consumer.accept(where);
+        return new EntityQuery<T>(handle, clazz, true).open(where.build(), true).stream().collect(Collectors.toList());
     }
 
     public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, Object... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql);
+        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql, false);
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;
@@ -42,14 +54,14 @@ public class EntityFactory {
 
     public static <T> EntityQueryOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
         SqlText sql = SqlWhere.create(clazz).eq("UID_", uid).build();
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql);
+        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql, false);
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;
     }
 
     public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sqlText);
+        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sqlText, false);
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;
@@ -59,29 +71,25 @@ public class EntityFactory {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(where.build());
+        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(where.build(), false);
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;
     }
 
-    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz) {
-        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz).build());
-    }
-
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Object... values) {
-        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build());
+        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build(), false);
     }
 
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityQuery<T>(handle, clazz, true).open(sqlText);
+        return new EntityQuery<T>(handle, clazz, true).open(sqlText, false);
     }
 
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityQuery<T>(handle, clazz, true).open(where.build());
+        return new EntityQuery<T>(handle, clazz, true).open(where.build(), false);
     }
 
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
