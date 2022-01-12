@@ -127,7 +127,7 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.virtual()) {
             entity = getVirtualEntity(values);
         } else {
-            entity = getTableEntity(values);
+            entity = EntityFactory.loadOne(this, clazz, values).get().orElse(null);
         }
         if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
             Object[] keys = this.buildKeys(values);
