@@ -169,7 +169,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
 
     @Override
     public void save(int index, T entity) {
-        query.setRecNo(index);
+        query.setRecNo(index + 1);
         save(entity);
     }
 
