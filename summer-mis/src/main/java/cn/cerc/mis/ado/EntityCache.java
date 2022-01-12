@@ -16,9 +16,6 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.SqlQuery;
-import cn.cerc.db.core.SqlText;
-import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
@@ -127,13 +124,17 @@ public class EntityCache<T> implements IHandle {
         if (entityKey.virtual()) {
             entity = getVirtualEntity(values);
         } else {
-            entity = getTableEntity(values);
+            if (values.length == 0)
+                throw new RuntimeException("The param values cat not be empty.");
+            EntityQueryList<T> query = EntityFactory.loadList(this, clazz, values);
+            if (query.size() > 1)
+                throw new RuntimeException("There're too many records.");
+            if (query.size() > 0)
+                entity = query.get(0);
         }
         if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
             Object[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
-                if (this.clazz.getSimpleName().equals("PartinfoEntity"))
-                    throw new RuntimeException("找不到商品料号: " + values[0]);
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
             if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
@@ -192,32 +193,6 @@ public class EntityCache<T> implements IHandle {
                 return row.asEntity(clazz);
         }
         return null;
-    }
-
-    private T getTableEntity(Object... values) {
-        T entity = null;
-        int diff = entityKey.version() == 0 ? 1 : 2;
-        // 如果缓存没有保存任何key则重新载入数据
-        Object[] keys = this.buildKeys(values);
-        if (listKeys() == null && entityKey.corpNo()) {
-            SqlText sql = SqlWhere.create(this, clazz).build();
-            SqlQuery query = EntityFactory.buildQuery(this, clazz);
-            query.setSql(sql);
-            query.open();
-            for (DataRow row : query) {
-                boolean exists = true;
-                for (int i = 0; i < keys.length - diff; i++) {
-                    Object value = keys[i + diff];
-                    if (!value.equals(row.getValue(entityKey.fields()[i])))
-                        exists = false;
-                }
-                if (exists)
-                    entity = row.asEntity(clazz);
-            }
-        } else {
-            entity = EntityFactory.loadOne(this, clazz, values).get().orElse(null);
-        }
-        return entity;
     }
 
     public void del(Object... values) {
