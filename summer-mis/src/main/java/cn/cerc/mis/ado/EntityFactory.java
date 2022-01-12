@@ -69,6 +69,10 @@ public class EntityFactory {
         return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz).build());
     }
 
+    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Object... values) {
+        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build());
+    }
+
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, SqlText sqlText) {
         return new EntityQuery<T>(handle, clazz, true).open(sqlText);
     }
@@ -92,11 +96,15 @@ public class EntityFactory {
     }
 
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return loadList(handle, clazz, sqlText).dataSet();
+        SqlQuery query = loadList(handle, clazz, sqlText).dataSet();
+        query.setReadonly(false);
+        return query;
     }
 
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
-        return loadList(handle, clazz, consumer).dataSet();
+        SqlQuery query = loadList(handle, clazz, consumer).dataSet();
+        query.setReadonly(false);
+        return query;
     }
 
     public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {

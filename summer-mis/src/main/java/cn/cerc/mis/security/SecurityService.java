@@ -2,7 +2,7 @@ package cn.cerc.mis.security;
 
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.IService;
 
 public interface SecurityService extends IService {
@@ -30,5 +30,5 @@ public interface SecurityService extends IService {
      * @param handle      执行环境
      * @param outParam: key = object id, value = 默认授权码
      */
-    void loadPermission(IHandle handle, KeyValue outParam);
+    void loadPermission(IHandle handle, Variant outParam);
 }

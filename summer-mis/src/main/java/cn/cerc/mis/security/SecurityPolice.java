@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IForm;
@@ -257,9 +257,9 @@ public class SecurityPolice {
                     defaultValue = Permission.ADMIN;
                     SecurityService security = Application.getBean(SecurityService.class);
                     if (security != null) {
-                        KeyValue outParam = new KeyValue().setKey(beanId);
+                        Variant outParam = new Variant().setTag(beanId);
                         security.loadPermission(handle, outParam);
-                        result = outParam.asString();
+                        result = outParam.getString();
                     }
                 }
             }

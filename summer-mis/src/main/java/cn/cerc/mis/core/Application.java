@@ -14,7 +14,7 @@ import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.KeyValue;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
@@ -203,7 +203,7 @@ public class Application implements ApplicationContextAware {
      * @return Service bean
      * @throws ClassNotFoundException 类文件异常
      */
-    public static IService getService(IHandle handle, String serviceCode, KeyValue function)
+    public static IService getService(IHandle handle, String serviceCode, Variant function)
             throws ClassNotFoundException {
         if (Utils.isEmpty(serviceCode))
             throw new ClassNotFoundException("serviceCode is null.");
@@ -217,7 +217,7 @@ public class Application implements ApplicationContextAware {
             String[] params = serviceCode.split("\\.");
             // 支持指定执行函数
             if (params.length > 1)
-                function.setValue(params[1]);
+                function.setData(params[1]);
 
             String beanId = params[0];
             if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
