@@ -1,5 +1,6 @@
 package cn.cerc.mis.excel.output;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class BatchFormTemplate extends FormTemplate {
                 for (String field : footer.fields().names()) {
                     row++;
                     sheet1.addCell(new Label(0, row, field));
-                    sheet1.addCell(new Label(1, row, df.format(footer.getString(field))));
+                    sheet1.addCell(new Label(1, row, df.format(new BigDecimal(footer.getString(field)))));
                 }
             });
 
