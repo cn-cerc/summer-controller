@@ -43,11 +43,16 @@ public class EntityFactory {
     }
 
     public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
-        return findOneBatch(handle, clazz, (values) -> findOne(handle, clazz, values));
-    }
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        if (entityKey == null)
+            throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
 
-    public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz,
-            FindOneSupplier<Optional<T>> supplier) {
+        FindOneSupplier<Optional<T>> supplier;
+        if (entityKey.smallTable())
+            supplier = (values) -> findOneForSmallTable(handle, clazz, null, values);
+        else
+            supplier = (values) -> findOne(handle, clazz, values);
+
         return new FindOneBatch<T>() {
             private Map<String, Optional<T>> buff = new HashMap<>();
 
