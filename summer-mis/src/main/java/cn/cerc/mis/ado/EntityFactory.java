@@ -122,13 +122,12 @@ public class EntityFactory {
     }
 
     /**
-     * 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      * 
-     * @param <T>
-     * @param handle
-     * @param clazz
-     * @param values
-     * @return
+     * @param <T>    entity 类型
+     * @param handle IHandle
+     * @param clazz  entity.class
+     * @param values 查找参数
+     * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
     public static <T> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz, Object... values) {
         return findOneForSmallTable(handle, clazz, null, values);
@@ -136,12 +135,12 @@ public class EntityFactory {
 
     /**
      * 
-     * @param <T>
-     * @param handle
-     * @param clazz
-     * @param actionInsert
-     * @param values
-     * @return
+     * @param <T>          entity 类型
+     * @param handle       IHandle
+     * @param clazz        entity.class
+     * @param actionInsert 在找不到时，是否要插入一笔，可为null
+     * @param values       查找参数
+     * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
     public static <T> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz, Consumer<T> actionInsert,
             Object... values) {
