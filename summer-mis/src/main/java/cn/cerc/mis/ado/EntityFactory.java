@@ -207,6 +207,7 @@ public class EntityFactory {
         return new EntityQuery<T>(handle, clazz, true).open(where.build(), false);
     }
 
+    @Deprecated
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
         ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
         SqlServer server = clazz.getAnnotation(SqlServer.class);
@@ -218,14 +219,9 @@ public class EntityFactory {
         return query;
     }
 
+    @Deprecated
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
         SqlQuery query = loadList(handle, clazz, sqlText).dataSet();
-        query.setReadonly(false);
-        return query;
-    }
-
-    public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
-        SqlQuery query = loadList(handle, clazz, consumer).dataSet();
         query.setReadonly(false);
         return query;
     }
