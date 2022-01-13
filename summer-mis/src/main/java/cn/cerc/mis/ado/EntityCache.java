@@ -44,6 +44,8 @@ public class EntityCache<T> implements IHandle {
         this.clazz = clazz;
     }
 
+    // 请改使用EntityFactory.findOneBatch
+    @Deprecated
     public Optional<T> locate(Map<String, Optional<T>> buffer, Object... values) {
         StringBuffer sb = new StringBuffer();
         for (Object value : values)
@@ -319,8 +321,9 @@ public class EntityCache<T> implements IHandle {
         this.session = session;
     }
 
+    // 请改使用EntityFactory.findOne
+    @Deprecated
     public static <T> Optional<T> find(IHandle handle, Class<T> clazz, Object... keys) {
-        EntityCache<T> cache = new EntityCache<T>(handle, clazz);
-        return cache.get(keys);
+        return new EntityCache<T>(handle, clazz).get(keys);
     }
 }
