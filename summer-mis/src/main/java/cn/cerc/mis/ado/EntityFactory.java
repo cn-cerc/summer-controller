@@ -25,7 +25,7 @@ public class EntityFactory {
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
     public static <T> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
-        return EntityCache.find(handle, clazz, values);
+        return new EntityCache<T>(handle, clazz).get(values);
     }
 
     public static <T> List<T> findList(IHandle handle, Class<T> clazz, Object... values) {
