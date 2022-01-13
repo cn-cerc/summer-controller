@@ -14,6 +14,8 @@ import javax.persistence.Entity;
 
 import org.springframework.context.ApplicationContext;
 
+import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
@@ -21,7 +23,9 @@ import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
+import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.Application;
+import redis.clients.jedis.Jedis;
 
 public class EntityFactory {
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
@@ -34,9 +38,17 @@ public class EntityFactory {
         Optional<T> get(Object... values);
     }
 
+    public interface FindOneSupplier<T> {
+        T get(Object... values);
+    }
+
     public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
+        return findOneBatch(handle, clazz, (values) -> findOne(handle, clazz, values));
+    }
+
+    public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz,
+            FindOneSupplier<Optional<T>> supplier) {
         return new FindOneBatch<T>() {
-            private EntityCache<T> cache = new EntityCache<T>(handle, clazz);
             private Map<String, Optional<T>> buff = new HashMap<>();
 
             @Override
@@ -47,7 +59,7 @@ public class EntityFactory {
                 String key = sb.toString();
                 Optional<T> result = buff.get(key);
                 if (result == null) {
-                    result = cache.get(values);
+                    result = supplier.get(values);
                     buff.put(key, result);
                 }
                 return result;
@@ -102,6 +114,78 @@ public class EntityFactory {
         if (result.size() > 1)
             throw new RuntimeException("There're too many records.");
         return result;
+    }
+
+    /**
+     * 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
+     * 
+     * @param <T>
+     * @param handle
+     * @param clazz
+     * @param values
+     * @return
+     */
+    public static <T> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz, Object... values) {
+        return findOneForSmallTable(handle, clazz, null, values);
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param handle
+     * @param clazz
+     * @param actionInsert
+     * @param values
+     * @return
+     */
+    public static <T> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz, Consumer<T> actionInsert,
+            Object... values) {
+        EntityCache<T> cache = new EntityCache<>(handle, clazz);
+        String key = EntityCache.buildKey(cache.buildKeys(values));
+        try (Jedis jedis = JedisFactory.getJedis()) {
+            String json = jedis.get(key);
+            if ("".equals(json) || "{}".equals(json))
+                return Optional.empty();
+            else if (json != null) {
+                try {
+                    DataRow row = new DataRow().setJson(json);
+                    return Optional.of(row.asEntity(clazz));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    jedis.del(key);
+                }
+            }
+        }
+
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        if (entityKey == null)
+            throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
+        int offset = entityKey.corpNo() ? 1 : 0;
+        if (entityKey.fields().length != values.length + offset)
+            throw new IllegalArgumentException("values size error");
+
+        Object[] params = new Object[values.length - 1];
+        for (int i = 0; i < values.length - 1; i++)
+            params[i] = values[i];
+
+        SqlQuery query = EntityFactory.loadList(handle, clazz, params).dataSet();
+        for (DataRow row : query) {
+            boolean find = offset == 0 ? true : row.getString(entityKey.fields()[0]).equals(handle.getCorpNo());
+            for (int i = offset; i < entityKey.fields().length; i++) {
+                String field = entityKey.fields()[i];
+                if (!row.getString(field).equals(String.valueOf(values[i - offset])))
+                    find = false;
+            }
+            if (find)
+                return Optional.of(row.asEntity(clazz));
+        }
+
+        EntityQueryOne<T> loadOne = EntityFactory.loadOne(handle, clazz, values);
+        if (loadOne.isPresent())
+            return Optional.of(loadOne.get());
+        if (actionInsert != null)
+            loadOne.orElseInsert(actionInsert);
+        return Optional.empty();
     }
 
     public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Object... values) {
