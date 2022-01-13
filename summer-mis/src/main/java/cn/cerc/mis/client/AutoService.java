@@ -43,7 +43,7 @@ public class AutoService extends CustomServiceProxy {
     public String getCorpNo() {
         return corpNo;
     }
-    
+
     public void setCorpNo(String corpNo) {
         this.corpNo = corpNo;
     }
@@ -52,9 +52,14 @@ public class AutoService extends CustomServiceProxy {
     public String getUserCode() {
         return userCode;
     }
-    
+
     public void setUserCode(String userCode) {
         this.userCode = userCode;
     }
 
+    @Override
+    public AutoService setService(String service) {
+        super.setService(service);
+        return this;
+    }
 }
