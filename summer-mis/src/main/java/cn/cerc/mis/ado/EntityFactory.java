@@ -1,6 +1,8 @@
 package cn.cerc.mis.ado;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +28,31 @@ public class EntityFactory {
 
     public static <T> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
         return new EntityCache<T>(handle, clazz).get(values);
+    }
+
+    public interface FindOneBatch<T> {
+        Optional<T> get(Object... values);
+    }
+
+    public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
+        return new FindOneBatch<T>() {
+            private EntityCache<T> cache = new EntityCache<T>(handle, clazz);
+            private Map<String, Optional<T>> buff = new HashMap<>();
+
+            @Override
+            public Optional<T> get(Object... values) {
+                StringBuffer sb = new StringBuffer();
+                for (Object value : values)
+                    sb.append(value);
+                String key = sb.toString();
+                Optional<T> result = buff.get(key);
+                if (result == null) {
+                    result = cache.get(values);
+                    buff.put(key, result);
+                }
+                return result;
+            }
+        };
     }
 
     public static <T> List<T> findList(IHandle handle, Class<T> clazz, Object... values) {
