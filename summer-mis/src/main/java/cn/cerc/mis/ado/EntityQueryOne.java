@@ -16,6 +16,7 @@ public interface EntityQueryOne<T> {
     boolean isPresent();
 
     // loadOne.isPresentThrow: 载入一条数据，若不为空就抛出异常
+    // isPresentThrow.update: 更新entity，若为空无法更新就抛出异常
     <X extends Throwable> EntityQueryOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X;
 
     T get();
@@ -26,7 +27,6 @@ public interface EntityQueryOne<T> {
     void save(T entity);
 
     // update.orElseInsert: 更新entity，若为空无法更新就执行插入
-    // update.isPresentThrow: 更新entity，若为空无法更新就抛出异常
     EntityQueryOne<T> update(Consumer<T> action);
 
     // loadOne.orElseInsert: 载入一条数据，若为空就执行插入
