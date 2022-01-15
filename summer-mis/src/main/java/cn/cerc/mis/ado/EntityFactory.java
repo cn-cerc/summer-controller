@@ -1,8 +1,6 @@
 package cn.cerc.mis.ado;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,15 +29,13 @@ public class EntityFactory {
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
     public static <T> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
-        return new EntityCache<T>(handle, clazz).get(values);
-    }
-
-    public interface FindOneBatch<T> {
-        Optional<T> get(Object... values);
-    }
-
-    public interface FindOneSupplier<T> {
-        T get(Object... values);
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        if (entityKey == null)
+            throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
+        if (entityKey.smallTable())
+            return findOneForSmallTable(handle, clazz, null, values);
+        else
+            return new EntityCache<T>(handle, clazz).get(values);
     }
 
     public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
@@ -53,23 +49,7 @@ public class EntityFactory {
         else
             supplier = (values) -> findOne(handle, clazz, values);
 
-        return new FindOneBatch<T>() {
-            private Map<String, Optional<T>> buff = new HashMap<>();
-
-            @Override
-            public Optional<T> get(Object... values) {
-                StringBuffer sb = new StringBuffer();
-                for (Object value : values)
-                    sb.append(value);
-                String key = sb.toString();
-                Optional<T> result = buff.get(key);
-                if (result == null) {
-                    result = supplier.get(values);
-                    buff.put(key, result);
-                }
-                return result;
-            }
-        };
+        return new FindOneBatch<T>(handle, supplier);
     }
 
     /**
@@ -111,7 +91,7 @@ public class EntityFactory {
         for (int i = 0; i < values.length - 1; i++)
             params[i] = values[i];
 
-        SqlQuery query = EntityFactory.loadList(handle, clazz, params).dataSet();
+        SqlQuery query = EntityFactory.loadAll(handle, clazz, params).dataSet();
         for (DataRow row : query) {
             boolean find = offset == 0 ? true : row.getString(entityKey.fields()[0]).equals(handle.getCorpNo());
             for (int i = offset; i < entityKey.fields().length; i++) {
@@ -131,16 +111,16 @@ public class EntityFactory {
         return Optional.empty();
     }
 
-    public static <T> List<T> findList(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T> List<T> findAll(IHandle handle, Class<T> clazz, Object... values) {
         return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build(), true)
                 .stream().collect(Collectors.toList());
     }
 
-    public static <T> List<T> findList(IHandle handle, Class<T> clazz, SqlText sqlText) {
+    public static <T> List<T> findAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
         return new EntityQuery<T>(handle, clazz, true).open(sqlText, true).stream().collect(Collectors.toList());
     }
 
-    public static <T> List<T> findList(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T> List<T> findAll(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
@@ -180,27 +160,15 @@ public class EntityFactory {
         return result;
     }
 
-    /**
-     * 
-     * @param <T>    entity 类型
-     * @param handle IHandle
-     * @param clazz  entity.class
-     * @param values 查找参数
-     * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
-     */
-    public static <T> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz, Object... values) {
-        return findOneForSmallTable(handle, clazz, null, values);
-    }
-
-    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T> EntityQueryList<T> loadAll(IHandle handle, Class<T> clazz, Object... values) {
         return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build(), false);
     }
 
-    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, SqlText sqlText) {
+    public static <T> EntityQueryList<T> loadAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
         return new EntityQuery<T>(handle, clazz, true).open(sqlText, false);
     }
 
-    public static <T> EntityQueryList<T> loadList(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T> EntityQueryList<T> loadAll(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
@@ -221,7 +189,7 @@ public class EntityFactory {
 
     @Deprecated
     public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        SqlQuery query = loadList(handle, clazz, sqlText).dataSet();
+        SqlQuery query = loadAll(handle, clazz, sqlText).dataSet();
         query.setReadonly(false);
         return query;
     }
