@@ -162,10 +162,11 @@ public abstract class AdoTable implements IService {
         try {
             for (Field field : items.values()) {
                 Column column = field.getAnnotation(Column.class);
-                if ((column != null) && (!column.nullable()) && (field.get(this) == null)) {
+                if ((column != null && field.get(this) == null)) {
                     Describe describe = field.getAnnotation(Describe.class);
-                    Object def = describe != null ? describe.def() : null;
-                    variant.setData(def).writeToEntity(this, field);
+                    String def = describe != null ? describe.def() : null;
+                    if (!column.nullable() || !Utils.isEmpty(def))
+                        variant.setData(def).writeToEntity(this, field);
                 }
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
