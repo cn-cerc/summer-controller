@@ -1,12 +1,14 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import javax.persistence.Column;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataRowState;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.Describe;
 import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.core.IHandle;
@@ -15,6 +17,7 @@ import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
@@ -149,12 +152,26 @@ public abstract class AdoTable implements IService {
     }
 
     /**
-     * 插入新记录时自动更新时间戳
+     * 插入新记录时，判断字段是否允许为空，若不允许为空，则设置默值
      * 
      * @param handle IHandle
      */
     public void insertTimestamp(IHandle handle) {
-
+        Map<String, Field> items = DataRow.getEntityFields(this.getClass());
+        Variant variant = new Variant();
+        try {
+            for (Field field : items.values()) {
+                Column column = field.getAnnotation(Column.class);
+                if ((column != null) && (!column.nullable()) && (field.get(this) == null)) {
+                    Describe describe = field.getAnnotation(Describe.class);
+                    Object def = describe != null ? describe.def() : null;
+                    variant.setData(def).writeToEntity(this, field);
+                }
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     /**
