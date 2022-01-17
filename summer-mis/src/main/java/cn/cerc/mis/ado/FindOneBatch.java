@@ -40,10 +40,7 @@ public class FindOneBatch<T> implements IHandle {
         return keys;
     }
 
-    /**
-     * 
-     * @return 在满足转化条件的情况下，将List<Object[]>转为List<String>
-     */
+    // 在满足转化条件的情况下，将List<Object[]>转为List<String>
     public List<String> keyList() {
         List<String> items = new ArrayList<>();
         if (keys != null && keys.size() > 0) {
