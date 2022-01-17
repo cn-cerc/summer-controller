@@ -1,25 +1,18 @@
 package cn.cerc.mis.ado;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import javax.persistence.Id;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.CacheLevelEnum;
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.EntityHelper;
+import cn.cerc.db.core.EntityHomeImpl;
+import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
@@ -35,20 +28,18 @@ import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.sqlite.SqliteDatabase;
 import redis.clients.jedis.Jedis;
 
-public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQueryList<T> {
-    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
+public abstract class EntityQuery<T extends EntityImpl> extends Handle implements EntityHomeImpl {
+//    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
     // 批量写入redis等缓存
     private static final String LUA_SCRIPT_MSETEX = "local keysLen = table.getn(KEYS);local argvLen = table.getn(ARGV);"
             + "local idx=1;local argVIdx=1;for idx=1,keysLen,1 do argVIdx=(idx-1)*2+1; "
             + "redis.call('Set',KEYS[idx],ARGV[argVIdx],'EX',ARGV[argVIdx+1]);end return keysLen;";
-    private final SqlQuery query;
-    private final Class<T> clazz;
-    // 标识为Id的字段
-    private Field idFieldDefine = null;
-    private String idFieldCode = null;
+    protected final SqlQuery query;
+    protected final Class<T> clazz;
+    protected EntityHelper<T> helper;
 
-    public static ISqlDatabase findDatabase(IHandle handle, Class<?> clazz) {
+    public static ISqlDatabase findDatabase(IHandle handle, Class<? extends EntityImpl> clazz) {
         ISqlDatabase database = buff.get(clazz);
         if (database == null) {
             SqlServer server = clazz.getAnnotation(SqlServer.class);
@@ -72,7 +63,8 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
     }
 
     // 注册与写入缓存相关的事件
-    public static <T> void registerCacheListener(SqlQuery target, Class<T> clazz, boolean writeCacheAtOpen) {
+    public static <T extends EntityImpl> void registerCacheListener(SqlQuery target, Class<T> clazz,
+            boolean writeCacheAtOpen) {
         // 在open时，读入字段定义
         target.onAfterOpen(self -> self.fields().readDefine(clazz));
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
@@ -83,7 +75,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         if (writeCacheAtOpen) {
             target.onAfterOpen(query -> {
                 int count = 0;
-                EntityCache<T> ec1 = EntityCache.Create(query, clazz);
+                EntityCache<T> ec1 = new EntityCache<T>(query, clazz);
                 List<String> batchKeys = new ArrayList<>();
                 List<String> batchValues = new ArrayList<>();
                 for (DataRow row : query.records()) {
@@ -104,7 +96,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
 
         // 在post(insert、update)时，写入redis等缓存
         target.onAfterPost(row -> {
-            EntityCache<T> ec2 = EntityCache.Create(target, clazz);
+            EntityCache<T> ec2 = new EntityCache<T>(target, clazz);
             Object[] keys = ec2.buildKeys(row);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
@@ -115,7 +107,7 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
 
         // 在delete时，清除redis等缓存
         target.onAfterDelete(row -> {
-            EntityCache<T> ec3 = EntityCache.Create(target, clazz);
+            EntityCache<T> ec3 = new EntityCache<T>(target, clazz);
             Object[] keys = ec3.buildKeys(row);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.del(EntityCache.buildKey(keys));
@@ -125,90 +117,93 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
         });
     }
 
-    public EntityQuery(IHandle handle, Class<T> clazz, boolean writeCacheAtOpen) {
+    public EntityQuery(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle);
         this.clazz = clazz;
-        ISqlDatabase database = findDatabase(handle, clazz);
-        SqlServer server = clazz.getAnnotation(SqlServer.class);
-        query = new SqlQuery(this, server != null ? server.type() : SqlServerType.Mysql);
-        query.operator().setTable(database.table());
-        query.operator().setOid(database.oid());
+        this.helper = EntityHelper.create(clazz);
+        query = new SqlQuery(this, helper.sqlServerType());
+        query.operator().setTable(helper.table());
+        query.operator().setOid(helper.idFieldCode());
+        query.operator().setVersionField(helper.versionFieldCode());
         registerCacheListener(query, clazz, writeCacheAtOpen);
+        if (sql != null) {
+            query.setSql(sql);
+            if (useSlaveServer)
+                query.openReadonly();
+            else
+                query.open();
+        }
+        query.setReadonly(true);
     }
 
-    public EntityQuery<T> open(SqlText sql, boolean useSlaveServer) {
-        query.setSql(sql);
-        if (useSlaveServer)
-            query.openReadonly();
-        else
-            query.open();
-        query.setReadonly(true);
+    public boolean isEmpty() {
+        return query.size() == 0;
+    }
+
+    public boolean isPresent() {
+        return query.size() > 0;
+    }
+
+    // load.isPresentThrow: 载入一条数据，若不为空就抛出异常
+    // isPresentThrow.update: 更新entity，若为空无法更新就抛出异常
+    protected <X extends Throwable> EntityQuery<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() > 0)
+            throw exceptionSupplier.get();
         return this;
     }
 
-    @Override
-    public T newEntity() {
-        try {
-            return clazz.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e);
-        }
+    // load.isEmptyThrow: 载入一条数据，若为空就抛出异常
+    protected <X extends Throwable> EntityQuery<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() == 0)
+            throw exceptionSupplier.get();
+        return this;
     }
 
-    @Override
-    public void insert(T entity) {
+    protected T insert(Consumer<T> action) {
+        T entity = helper.newEntity();
+        action.accept(entity);
+        this.insert(entity);
+        return entity;
+    }
+
+    protected void insert(T entity) {
         query.setReadonly(false);
         try {
+            entity.onInsertPost(query);
             query.append();
-            if (entity instanceof AdoTable)
-                ((AdoTable) entity).insertTimestamp(query);
             query.current().loadFromEntity(entity);
             query.post();
+            query.current().saveToEntity(entity);
+            entity.setEntityHome(this);
         } finally {
             query.setReadonly(true);
         }
     }
 
     @Override
-    public void save(int index, T entity) {
-        query.setRecNo(index + 1);
-        save(entity);
+    public void post(EntityImpl entity) {
+        @SuppressWarnings("unchecked")
+        T obj = (T) entity;
+        int recNo = this.findRecNo(entity);
+        if (recNo == 0)
+            throw new RuntimeException("not support for new entity");
+        save(recNo - 1, obj);
+        query.current().saveToEntity(entity);
     }
 
-    @Override
-    public void save(T entity) {
-        query.setReadonly(false);
-        try {
-            if (isNewRecord(entity)) {
-                query.append();
-                if (entity instanceof AdoTable)
-                    ((AdoTable) entity).insertTimestamp(query);
-            } else {
-                query.edit();
-                if (entity instanceof AdoTable)
-                    ((AdoTable) entity).updateTimestamp(query);
-            }
-            query.current().loadFromEntity(entity);
-            query.post();
-        } finally {
-            query.setReadonly(true);
+    protected EntityQuery<T> update(Consumer<T> action) {
+        Objects.requireNonNull(action);
+        T entity = null;
+        for (int i = 0; i < query.size(); i++) {
+            DataRow row = query.records().get(i);
+            entity = row.asEntity(this.clazz);
+            entity.setEntityHome(this);
+            action.accept(entity);
+            save(i, entity);
         }
+        return this;
     }
 
-    @Override
-    public void deleteAll() {
-        query.setReadonly(false);
-        try {
-            query.first();
-            while (!query.eof())
-                query.delete();
-        } finally {
-            query.setReadonly(true);
-        }
-    }
-
-    @Override
     public int deleteIf(Predicate<T> predicate) {
         Objects.requireNonNull(predicate);
         if (query.eof())
@@ -225,182 +220,88 @@ public class EntityQuery<T> extends Handle implements EntityQueryOne<T>, EntityQ
                 } else
                     query.next();
             }
+            query.first();
             return result;
         } finally {
             query.setReadonly(true);
         }
     }
 
+    /**
+     * 返回entity在query中的序号，从1开始，若有找到则变更并返回recNo，否则返回0
+     */
     @Override
-    public Optional<T> updateAll(Consumer<T> action) {
-        Objects.requireNonNull(action);
-        T entity = null;
+    public int findRecNo(EntityImpl entity) {
+        if (helper.idField().isEmpty())
+            throw new IllegalArgumentException("id define not exists");
+        Object idValue = helper.readIdValue(entity);
+        if (idValue == null)
+            return 0;
+
+        String value = String.valueOf(idValue);
+
+        // 优先判断是否为当前行
+        DataRow current = query.current();
+        if (current != null) {
+            if (current.getString(helper.idFieldCode()).equals(value))
+                return query.recNo();
+            // 如果只有一条记录，就不要再找了
+            if (query.size() == 1)
+                return 1;
+        }
+
+        // 再全部记录均查找一次
         for (int i = 0; i < query.size(); i++) {
             DataRow row = query.records().get(i);
-            entity = row.asEntity(this.clazz);
-            action.accept(entity);
-            save(i, entity);
+            if (row.getString(helper.idFieldCode()).equals(value)) {
+                query.setRecNo(i + 1);
+                return i + 1;
+            }
         }
-        return Optional.ofNullable(entity);
+        return 0;
     }
 
-    @Override
-    public Optional<T> updateIf(Predicate<T> predicate) {
-        Objects.requireNonNull(predicate);
-        T entity = null;
-        for (int i = 0; i < query.size(); i++) {
-            DataRow row = query.records().get(i);
-            entity = row.asEntity(this.clazz);
-            if (predicate.test(entity))
-                save(i, entity);
+    protected EntityQuery<T> save(int index, T entity) {
+        query.setRecNo(index + 1);
+        if (!isCurrentRow(entity))
+            throw new RuntimeException("recNo error, refuse update");
+        query.setReadonly(false);
+        try {
+            entity.onUpdatePost(query);
+            query.edit();
+            query.current().loadFromEntity(entity);
+            query.post();
+        } finally {
+            query.setReadonly(true);
         }
-        return Optional.ofNullable(entity);
-    }
-
-    @Override
-    public int size() {
-        return query.size();
-    }
-
-    @Override
-    public T get(int index) {
-        return query.records().get(index).asEntity(clazz);
-    }
-
-    @Override
-    public T get() {
-        if (query.size() == 0)
-            return null;
-        return query.records().get(0).asEntity(clazz);
-    }
-
-    @Override
-    public <X extends Throwable> T getElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
-        if (query.size() == 0)
-            throw exceptionSupplier.get();
-        return query.records().get(0).asEntity(clazz);
-    }
-
-    @Override
-    public Stream<T> stream() {
-        return query.records().stream().map(item -> item.asEntity(clazz));
+        return this;
     }
 
     /**
      * @param entity Entity实体对象
-     * @return 判断传入的entity对象，在当前记录集中是不是新的
+     * @return 判断传入的entity对象，是不是当前记录
      */
-    private boolean isNewRecord(T entity) {
+    protected boolean isCurrentRow(T entity) {
         DataRow row = query.current();
         if (row == null)
-            return true;
+            return false;
 
-        if (idFieldDefine == null) {
-            Map<String, Field> items = DataRow.getEntityFields(clazz);
-            for (String fieldCode : items.keySet()) {
-                Field field = items.get(fieldCode);
-                Id id = field.getAnnotation(Id.class);
-                if (id != null) {
-                    idFieldDefine = field;
-                    idFieldCode = fieldCode;
-                    break;
-                }
-            }
-        }
-
-        if (idFieldDefine == null)
+        if (helper.idField().isEmpty())
             throw new IllegalArgumentException("id define not exists");
 
-        Object idValue = null;
-        try {
-            idValue = idFieldDefine.get(entity);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
+        Object idValue = helper.readIdValue(entity);
         if (idValue == null)
-            return true;
-
-        if (row.getString(idFieldCode).equals(String.valueOf(idValue)))
             return false;
-        else {
-            Object value = row.getValue(idFieldCode);
-            log.warn("id={} {} {} {} 字段被变更，由修改记录变成了增加记录，请检查！", idValue, idValue.getClass().getName(), value,
-                    value.getClass().getName());
-            return true;
-        }
+
+        return row.getString(helper.idFieldCode()).equals(String.valueOf(idValue));
     }
 
     @Override
-    public boolean isEmpty() {
-        return query.size() == 0;
-    }
-
-    @Override
-    public <X extends Throwable> EntityQueryOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
-        if (query.size() == 0)
-            throw exceptionSupplier.get();
-        return this;
-    }
-
-    @Override
-    public boolean isPresent() {
-        return query.size() > 0;
-    }
-
-    @Override
-    public <X extends Throwable> EntityQueryOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
-        if (query.size() > 0)
-            throw exceptionSupplier.get();
-        return this;
-    }
-
-    @Override
-    public Optional<T> delete() {
-        if (query.size() == 0)
-            return Optional.empty();
-        query.setReadonly(false);
-        T entity = null;
-        try {
-            entity = query.current().asEntity(clazz);
-            query.delete();
-        } finally {
-            query.setReadonly(true);
-        }
-        return Optional.of(entity);
-    }
-
-    @Override
-    public EntityQueryOne<T> update(Consumer<T> action) {
-        Objects.requireNonNull(action);
-        T entity = null;
-        DataRow row = query.current();
-        if (row != null) {
-            entity = row.asEntity(this.clazz);
-            action.accept(entity);
-            save(entity);
-        }
-        return this;
-    }
-
-    @Override
-    public EntityQueryOne<T> orElseInsert(Consumer<T> action) {
-        if (this.size() == 0) {
-            T entity = this.newEntity();
-            action.accept(entity);
-            this.insert(entity);
-        }
-        return this;
-    }
-
-    @Override
-    public SqlQuery dataSet() {
-        return query;
-    }
-
-    @Override
-    public DataRow current() {
-        return query.current();
+    public void refresh(EntityImpl entity) {
+        int recNo = this.findRecNo(entity);
+        if (recNo == 0)
+            throw new RuntimeException("refresh error, not find in query");
+        query.current().saveToEntity(entity);
     }
 
 }

@@ -13,9 +13,10 @@ import javax.persistence.Entity;
 import org.springframework.context.ApplicationContext;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.EntityHelper;
+import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
@@ -28,7 +29,7 @@ import redis.clients.jedis.Jedis;
 public class EntityFactory {
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
-    public static <T> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
@@ -38,12 +39,12 @@ public class EntityFactory {
             return new EntityCache<T>(handle, clazz).get(values);
     }
 
-    public static <T> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
+    public static <T extends EntityImpl> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
 
-        FindOneSupplier<Optional<T>> supplier;
+        FindOneSupplierImpl<Optional<T>> supplier;
         if (entityKey.smallTable())
             supplier = (values) -> findOneForSmallTable(handle, clazz, null, values);
         else
@@ -61,8 +62,8 @@ public class EntityFactory {
      * @param values       查找参数
      * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
-    public static <T> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz, Consumer<T> actionInsert,
-            Object... values) {
+    public static <T extends EntityImpl> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz,
+            Consumer<T> actionInsert, Object... values) {
         EntityCache<T> cache = new EntityCache<>(handle, clazz);
         String key = EntityCache.buildKey(cache.buildKeys(values));
         try (Jedis jedis = JedisFactory.getJedis()) {
@@ -111,84 +112,75 @@ public class EntityFactory {
         return Optional.empty();
     }
 
-    public static <T> List<T> findAll(IHandle handle, Class<T> clazz, Object... values) {
-        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build(), true)
+    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, Object... values) {
+        return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true)
                 .stream().collect(Collectors.toList());
     }
 
-    public static <T> List<T> findAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityQuery<T>(handle, clazz, true).open(sqlText, true).stream().collect(Collectors.toList());
+    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityQueryAll<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toList());
     }
 
-    public static <T> List<T> findAll(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityQuery<T>(handle, clazz, true).open(where.build(), true).stream().collect(Collectors.toList());
+        return new EntityQueryAll<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toList());
     }
 
-    public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, Object... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql, false);
-        if (result.size() > 1)
-            throw new RuntimeException("There're too many records.");
-        return result;
+        return new EntityQueryOne<T>(handle, clazz, sql, false, false);
     }
 
-    public static <T> EntityQueryOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
+    public static <T extends EntityImpl> EntityQueryOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
         SqlText sql = SqlWhere.create(clazz).eq("UID_", uid).build();
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sql, false);
-        if (result.size() > 1)
-            throw new RuntimeException("There're too many records.");
-        return result;
+        return new EntityQueryOne<T>(handle, clazz, sql, false, false);
     }
 
-    public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(sqlText, false);
-        if (result.size() > 1)
-            throw new RuntimeException("There're too many records.");
-        return result;
+    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityQueryOne<T>(handle, clazz, sqlText, false, false);
     }
 
-    public static <T> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz,
+            Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        EntityQuery<T> result = new EntityQuery<T>(handle, clazz, false).open(where.build(), false);
-        if (result.size() > 1)
-            throw new RuntimeException("There're too many records.");
-        return result;
+        return new EntityQueryOne<T>(handle, clazz, where.build(), false, false);
     }
 
-    public static <T> EntityQueryList<T> loadAll(IHandle handle, Class<T> clazz, Object... values) {
-        return new EntityQuery<T>(handle, clazz, true).open(SqlWhere.create(handle, clazz, values).build(), false);
+    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz, Object... values) {
+        return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);
     }
 
-    public static <T> EntityQueryList<T> loadAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityQuery<T>(handle, clazz, true).open(sqlText, false);
+    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityQueryAll<T>(handle, clazz, sqlText, false, true);
     }
 
-    public static <T> EntityQueryList<T> loadAll(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz,
+            Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityQuery<T>(handle, clazz, true).open(where.build(), false);
+        return new EntityQueryAll<T>(handle, clazz, where.build(), false, true);
     }
 
     @Deprecated
-    public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
-        ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
+    public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
+        EntityHelper<T> helper = EntityHelper.create(clazz);
         SqlServer server = clazz.getAnnotation(SqlServer.class);
         SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
         SqlQuery query = new SqlQuery(handle, sqlServerType);
+        query.operator().setTable(helper.table());
+        query.operator().setOid(helper.idFieldCode());
+        query.operator().setVersionField(helper.versionFieldCode());
         EntityQuery.registerCacheListener(query, clazz, true);
-        query.operator().setTable(database.table());
-        query.operator().setOid(database.oid());
         return query;
     }
 
     @Deprecated
-    public static <T> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
+    public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
         SqlQuery query = loadAll(handle, clazz, sqlText).dataSet();
         query.setReadonly(false);
         return query;

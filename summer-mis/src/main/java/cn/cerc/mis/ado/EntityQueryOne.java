@@ -1,40 +1,80 @@
 package cn.cerc.mis.ado;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.EntityImpl;
+import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.SqlText;
 
-public interface EntityQueryOne<T> {
+public class EntityQueryOne<T extends EntityImpl> extends EntityQuery<T> {
 
-    boolean isEmpty();
+    public EntityQueryOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
+            boolean writeCacheAtOpen) {
+        super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
+        if (query.size() > 1)
+            throw new RuntimeException("There're too many records.");
+    }
 
-    // loadOne.isEmptyThrow: 载入一条数据，若为空就抛出异常
-    <X extends Throwable> EntityQueryOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X;
+    @Override
+    public <X extends Throwable> EntityQueryOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        super.isEmptyThrow(exceptionSupplier);
+        return this;
+    }
 
-    boolean isPresent();
+    @Override
+    public <X extends Throwable> EntityQueryOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        super.isPresentThrow(exceptionSupplier);
+        return this;
+    }
 
-    // loadOne.isPresentThrow: 载入一条数据，若不为空就抛出异常
-    // isPresentThrow.update: 更新entity，若为空无法更新就抛出异常
-    <X extends Throwable> EntityQueryOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X;
-
-    T get();
+    public T get() {
+        if (query.size() == 0)
+            return null;
+        T entity = query.records().get(0).asEntity(clazz);
+        entity.setEntityHome(this);
+        return entity;
+    }
 
     // 取得entity，若取不到就抛出异常
-    <X extends Throwable> T getElseThrow(Supplier<? extends X> exceptionSupplier) throws X;
-
-    void save(T entity);
+    public <X extends Throwable> T getElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        if (query.size() == 0)
+            throw exceptionSupplier.get();
+        return query.records().get(0).asEntity(clazz);
+    }
 
     // update.orElseInsert: 更新entity，若为空无法更新就执行插入
-    EntityQueryOne<T> update(Consumer<T> action);
+    @Override
+    public EntityQueryOne<T> update(Consumer<T> action) {
+        super.update(action);
+        return this;
+    }
 
     // loadOne.orElseInsert: 载入一条数据，若为空就执行插入
-    EntityQueryOne<T> orElseInsert(Consumer<T> action);
+    public T orElseInsert(Consumer<T> action) {
+        if (this.isEmpty())
+            return super.insert(action);
+        else
+            return this.get();
+    }
 
-    // delete.orElseThrow: 删除entity，若为空无法删除就抛出异常
-    Optional<T> delete();
+    public T delete() {
+        if (query.size() == 0)
+            return null;
+        query.setReadonly(false);
+        T entity = null;
+        try {
+            entity = query.current().asEntity(clazz);
+            query.delete();
+        } finally {
+            query.setReadonly(true);
+        }
+        return entity;
+    }
 
-    DataRow current();
+    public DataRow current() {
+        return query.current();
+    }
 
 }

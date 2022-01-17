@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.CacheLevelEnum;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
 import cn.cerc.db.core.IHandle;
@@ -21,7 +22,7 @@ import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.SystemBuffer;
 import redis.clients.jedis.Jedis;
 
-public class EntityCache<T> implements IHandle {
+public class EntityCache<T extends EntityImpl> implements IHandle {
     private static final Logger log = LoggerFactory.getLogger(EntityCache.class);
     private static Predicate<Object> IsEmptyArrayString = text -> (text instanceof String)
             && ((String) text).length() == 0;
@@ -29,10 +30,6 @@ public class EntityCache<T> implements IHandle {
     private ISession session;
     private Class<T> clazz;
     private EntityKey entityKey;
-
-    public static <U> EntityCache<U> Create(IHandle handle, Class<U> clazz) {
-        return new EntityCache<U>(handle, clazz);
-    }
 
     public EntityCache(IHandle handle, Class<T> clazz) {
         super();
@@ -129,8 +126,8 @@ public class EntityCache<T> implements IHandle {
         } else {
             if (values.length == 0)
                 throw new RuntimeException("The param values cat not be empty.");
-            EntityQueryList<T> query = new EntityQuery<T>(this, clazz, true)
-                    .open(SqlWhere.create(this, clazz, values).build(), true);
+            EntityQueryAll<T> query = new EntityQueryAll<T>(this, clazz, SqlWhere.create(this, clazz, values).build(),
+                    true, true);
             if (query.size() > 1)
                 throw new RuntimeException("There're too many records.");
             if (query.size() > 0)
@@ -321,9 +318,4 @@ public class EntityCache<T> implements IHandle {
         this.session = session;
     }
 
-    // 请改使用EntityFactory.findOne
-    @Deprecated
-    public static <T> Optional<T> find(IHandle handle, Class<T> clazz, Object... keys) {
-        return new EntityCache<T>(handle, clazz).get(keys);
-    }
 }
