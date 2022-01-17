@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
@@ -66,6 +67,11 @@ public class FindOneBatch<T> implements IHandle {
             buffer.put(key, result);
         }
         return result;
+    }
+
+    public String getOrDefault(Function<? super T, String> mapper, String key) {
+        Optional<T> entity = get(key);
+        return entity.isEmpty() ? key : mapper.apply(entity.get());
     }
 
     private void init() {
