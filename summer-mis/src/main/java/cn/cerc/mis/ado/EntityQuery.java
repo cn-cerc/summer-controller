@@ -81,7 +81,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
                 for (DataRow row : query.records()) {
                     if (++count > EntityCache.MaxRecord)
                         break;
-                    Object[] keys = ec1.buildKeys(row);
+                    String[] keys = ec1.buildKeys(row);
                     batchKeys.add(EntityCache.buildKey(keys));
                     batchValues.add(row.json());
                     batchValues.add("" + entityKey.expire());
@@ -97,7 +97,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
         // 在post(insert、update)时，写入redis等缓存
         target.onAfterPost(row -> {
             EntityCache<T> ec2 = new EntityCache<T>(target, clazz);
-            Object[] keys = ec2.buildKeys(row);
+            String[] keys = ec2.buildKeys(row);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
                 if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
@@ -108,7 +108,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
         // 在delete时，清除redis等缓存
         target.onAfterDelete(row -> {
             EntityCache<T> ec3 = new EntityCache<T>(target, clazz);
-            Object[] keys = ec3.buildKeys(row);
+            String[] keys = ec3.buildKeys(row);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.del(EntityCache.buildKey(keys));
                 if (entityKey.cache() == CacheLevelEnum.RedisAndSession)

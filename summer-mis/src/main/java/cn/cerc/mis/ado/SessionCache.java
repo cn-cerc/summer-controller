@@ -20,14 +20,14 @@ public class SessionCache {
     private static boolean createError = false;
     public final Map<String, DataRow> items = new ConcurrentHashMap<>();
 
-    public static void set(Object[] keys, DataRow value) {
+    public static void set(String[] keys, DataRow value) {
         if (createError)
             return;
         assert keys.length > 0;
         assert value != null;
         try {
             SessionCache sc = Application.getBean(SessionCache.class);
-            String cacheKey = EntityCache.joinToKey(keys);
+            String cacheKey = String.join(".", keys);
             log.debug("set: {}", cacheKey);
             sc.items.put(cacheKey, value);
         } catch (BeanCreationException e) {
@@ -37,13 +37,13 @@ public class SessionCache {
         }
     }
 
-    public static DataRow get(Object[] keys) {
+    public static DataRow get(String[] keys) {
         if (createError)
             return null;
         assert keys.length > 0;
         try {
             SessionCache sc = Application.getBean(SessionCache.class);
-            String cacheKey = EntityCache.joinToKey(keys);
+            String cacheKey = String.join(".", keys);
             log.debug("get: {}", cacheKey);
             return sc.items.get(cacheKey);
         } catch (BeanCreationException e) {
@@ -54,13 +54,13 @@ public class SessionCache {
 
     }
 
-    public static void del(Object[] keys) {
+    public static void del(String[] keys) {
         if (createError)
             return;
         assert keys.length > 0;
         try {
             SessionCache sc = Application.getBean(SessionCache.class);
-            String cacheKey = EntityCache.joinToKey(keys);
+            String cacheKey = String.join(".", keys);
             log.debug("del: {}", cacheKey);
             sc.items.remove(cacheKey);
         } catch (BeanCreationException e) {

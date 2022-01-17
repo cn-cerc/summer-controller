@@ -12,37 +12,38 @@ public class EntityCacheTest {
 
     @Test
     public void test_buildKey() {
-        Object[] keys = new Object[2];
+        String[] keys = new String[2];
         keys[0] = "a";
-        keys[1] = 2;
+        keys[1] = "2";
         assertEquals("70.a.2", EntityCache.buildKey(keys));
     }
 
     @Test
     public void test_joinString() {
-        assertEquals("a.2", EntityCache.joinToKey("a", 2));
-        assertEquals("a.1", EntityCache.joinToKey("a", true));
-        assertEquals("a.2.0", EntityCache.joinToKey("a", 2, false));
-        assertEquals("a.2.0.", EntityCache.joinToKey("a", 2, false, null));
-        assertEquals("a.2.0..2021-01-01", EntityCache.joinToKey("a", 2, false, null, new FastDate("2021-01-01")));
+        assertEquals("a.2", String.join(".", "a", "2"));
+        assertEquals("a.1", String.join(".", "a", "1"));
+        assertEquals("a.2.0", String.join(".", "a", "2", "0"));
+        assertEquals("a.2.0.null", String.join(".", "a", "2", "0", null));
+        assertEquals("a.2.0..2021-01-01",
+                String.join(".", "a", "2", "0", "", new FastDate("2021-01-01").toString()));
     }
 
     @Test
     public void test_buildKeys() {
         EntityCache<SampleEntity> ec = new EntityCache<SampleEntity>(null, SampleEntity.class);
         String clazzName = SampleEntity.class.getSimpleName();
-        assertEquals(clazzName + ".a.0", EntityCache.joinToKey(ec.buildKeys("a", false)));
-        assertEquals(clazzName + ".a.", EntityCache.joinToKey(ec.buildKeys("a", null)));
+        assertEquals(clazzName + ".a.0", String.join(".", ec.buildKeys("a", "0")));
+        assertEquals(clazzName + ".a.null", String.join(".", ec.buildKeys("a", null)));
         DataRow row = new DataRow();
         row.setValue("corpNo_", "a");
         row.setValue("enanble_", true);
-        assertEquals(clazzName + ".a.1", EntityCache.joinToKey(ec.buildKeys(row)));
+        assertEquals(clazzName + ".a.true", String.join(".", ec.buildKeys(row)));
     }
 
     @Test
     public void test_getVirtualEntity() {
         EntityCache<SampleEntity> ec = new EntityCache<SampleEntity>(null, SampleEntity.class);
-        SampleEntity entity = ec.getVirtualEntity("a", true);
+        SampleEntity entity = ec.getVirtualEntity("a", "1");
         assertTrue(entity == null);
     }
 

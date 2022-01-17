@@ -29,7 +29,7 @@ import redis.clients.jedis.Jedis;
 public class EntityFactory {
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
-    public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
@@ -63,7 +63,7 @@ public class EntityFactory {
      * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
     public static <T extends EntityImpl> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz,
-            Consumer<T> actionInsert, Object... values) {
+            Consumer<T> actionInsert, String... values) {
         EntityCache<T> cache = new EntityCache<>(handle, clazz);
         String key = EntityCache.buildKey(cache.buildKeys(values));
         try (Jedis jedis = JedisFactory.getJedis()) {
@@ -88,7 +88,7 @@ public class EntityFactory {
         if (entityKey.fields().length != values.length + offset)
             throw new IllegalArgumentException("values size error");
 
-        Object[] params = new Object[values.length - 1];
+        String[] params = new String[values.length - 1];
         for (int i = 0; i < values.length - 1; i++)
             params[i] = values[i];
 
@@ -112,7 +112,7 @@ public class EntityFactory {
         return Optional.empty();
     }
 
-    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, String... values) {
         return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true)
                 .stream().collect(Collectors.toList());
     }
@@ -128,7 +128,7 @@ public class EntityFactory {
         return new EntityQueryAll<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toList());
     }
 
-    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
         return new EntityQueryOne<T>(handle, clazz, sql, false, false);
     }
@@ -150,7 +150,7 @@ public class EntityFactory {
         return new EntityQueryOne<T>(handle, clazz, where.build(), false, false);
     }
 
-    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz, Object... values) {
+    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz, String... values) {
         return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);
     }
 

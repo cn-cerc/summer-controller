@@ -53,13 +53,13 @@ public class FindOneBatch<T> implements IHandle {
         return items;
     }
 
-    public void put(Optional<T> value, Object... keys) {
-        buffer.put(createId(keys), value);
+    public void put(Optional<T> value, String... keys) {
+        buffer.put(String.join(".", keys), value);
     }
 
-    public Optional<T> get(Object... keys) {
+    public Optional<T> get(String... keys) {
         init();
-        String key = createId(keys);
+        String key = String.join(".", keys);
         Optional<T> result = buffer.get(key);
         if (result == null) {
             result = findOne.get(keys);
@@ -90,10 +90,4 @@ public class FindOneBatch<T> implements IHandle {
         this.session = session;
     }
 
-    public String createId(Object... values) {
-        StringBuffer sb = new StringBuffer();
-        for (Object value : values)
-            sb.append(value);
-        return sb.toString();
-    }
 }

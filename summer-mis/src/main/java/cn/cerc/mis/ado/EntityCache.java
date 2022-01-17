@@ -43,7 +43,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
 
     // 请改使用EntityFactory.findOneBatch
     @Deprecated
-    public Optional<T> locate(Map<String, Optional<T>> buffer, Object... values) {
+    public Optional<T> locate(Map<String, Optional<T>> buffer, String... values) {
         StringBuffer sb = new StringBuffer();
         for (Object value : values)
             sb.append(value);
@@ -60,15 +60,15 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 从Session缓存读取，若没有开通，则从Redis读取
      */
-    public Optional<T> get(Object... values) {
+    public Optional<T> get(String... values) {
         if (List.of(values).stream().allMatch(IsEmptyArrayString))
             return Optional.empty();
 
-        log.debug("getSession: {}.{}", clazz.getSimpleName(), joinToKey(values));
+        log.debug("getSession: {}.{}", clazz.getSimpleName(), String.join(".", values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
         if (entityKey.cache() == CacheLevelEnum.RedisAndSession) {
-            Object[] keys = this.buildKeys(values);
+            String[] keys = this.buildKeys(values);
             DataRow row = SessionCache.get(keys);
             if (row != null && row.size() > 0) {
                 try {
@@ -87,10 +87,10 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 从Redis读取，若没有找到，则从数据库读取
      */
-    public Optional<T> getRedis(Object... values) {
+    public Optional<T> getRedis(String... values) {
         if (entityKey.cache() != CacheLevelEnum.Disabled) {
-            log.debug("getRedis: {}.{}", clazz.getSimpleName(), joinToKey(values));
-            Object[] keys = this.buildKeys(values);
+            log.debug("getRedis: {}.{}", clazz.getSimpleName(), String.join(".", values));
+            String[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 String json = jedis.get(EntityCache.buildKey(keys));
                 if ("".equals(json) || "{}".equals(json))
@@ -118,8 +118,8 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
      * @param values EntityCache.values 标识字段的值
      * @return 强制从database中读取，并刷新session缓存与redis缓存
      */
-    public Optional<T> getStorage(Object... values) {
-        log.debug("getStorage: {}.{}", clazz.getSimpleName(), joinToKey(values));
+    public Optional<T> getStorage(String... values) {
+        log.debug("getStorage: {}.{}", clazz.getSimpleName(), String.join(".", values));
         T entity = null;
         if (entityKey.virtual()) {
             entity = getVirtualEntity(values);
@@ -134,7 +134,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
                 entity = query.get(0);
         }
         if (entity == null && entityKey.cache() != CacheLevelEnum.Disabled) {
-            Object[] keys = this.buildKeys(values);
+            String[] keys = this.buildKeys(values);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
@@ -144,9 +144,9 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         return Optional.ofNullable(entity);
     }
 
-    protected T getVirtualEntity(Object... values) {
+    protected T getVirtualEntity(String... values) {
         int diff = entityKey.version() == 0 ? 1 : 2;
-        Object[] keys = this.buildKeys(values);
+        String[] keys = this.buildKeys(values);
         // 尝试直接对entity进行填充
         DataRow headIn = new DataRow(new FieldDefs(clazz));
         for (int i = 0; i < keys.length - diff; i++)
@@ -174,7 +174,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         if (entityKey.cache() != CacheLevelEnum.Disabled) {
             try (Jedis jedis = JedisFactory.getJedis()) {
                 for (DataRow row : query) {
-                    Object[] rowKeys = buildKeys(row);
+                    String[] rowKeys = buildKeys(row);
                     jedis.setex(buildKey(rowKeys), entityKey.expire(), row.json());
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(rowKeys, row);
@@ -196,10 +196,10 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         return null;
     }
 
-    public void del(Object... values) {
+    public void del(String... values) {
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return;
-        Object[] keys = this.buildKeys(values);
+        String[] keys = this.buildKeys(values);
         try (Jedis jedis = JedisFactory.getJedis()) {
             jedis.del(buildKey(keys));
         }
@@ -220,7 +220,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         if (entityKey.corpNo())
             offset++;
 
-        Object[] keys = new Object[offset + 1];
+        String[] keys = new String[offset + 1];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
@@ -234,26 +234,12 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         }
     }
 
-    public static String buildKey(Object... keys) {
+    public static String buildKey(String... keys) {
         int flag = SystemBuffer.Entity.Cache.getStartingPoint() + SystemBuffer.Entity.Cache.ordinal();
-        return flag + "." + joinToKey(keys);
+        return flag + "." + String.join(".", keys);
     }
 
-    public static String joinToKey(Object... keys) {
-        StringBuffer sb = new StringBuffer();
-        int count = 0;
-        for (Object key : keys) {
-            if (++count > 1)
-                sb.append(".");
-            if (key instanceof Boolean)
-                sb.append((Boolean) key ? 1 : 0);
-            else if (key != null)
-                sb.append(key);
-        }
-        return sb.toString();
-    }
-
-    public Object[] buildKeys(Object... values) {
+    public String[] buildKeys(String... values) {
         if ((values.length + (entityKey.corpNo() ? 1 : 0)) != entityKey.fields().length)
             throw new RuntimeException("params size is not match");
 
@@ -263,7 +249,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         if (entityKey.corpNo())
             offset++;
 
-        Object[] keys = new Object[offset + values.length];
+        String[] keys = new String[offset + values.length];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
@@ -274,18 +260,18 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         return keys;
     }
 
-    public Object[] buildKeys(DataRow row) {
+    public String[] buildKeys(DataRow row) {
         int offset = 1;
         if (entityKey.version() > 0)
             offset++;
 
-        Object[] keys = new Object[offset + entityKey.fields().length];
+        String[] keys = new String[offset + entityKey.fields().length];
         keys[0] = clazz.getSimpleName();
         if (entityKey.version() > 0)
             keys[1] = "" + entityKey.version();
 
         for (int i = 0; i < entityKey.fields().length; i++)
-            keys[offset + i] = row.getValue(entityKey.fields()[i]);
+            keys[offset + i] = row.getString(entityKey.fields()[i]);
         return keys;
     }
 
