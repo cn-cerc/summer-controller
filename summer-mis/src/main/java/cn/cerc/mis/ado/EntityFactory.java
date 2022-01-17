@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import cn.cerc.db.core.DataRow;
@@ -27,6 +29,7 @@ import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
 
 public class EntityFactory {
+    private static final Logger log = LoggerFactory.getLogger(EntityFactory.class);
     private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
     public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
@@ -93,6 +96,8 @@ public class EntityFactory {
             params[i] = values[i];
 
         SqlQuery query = EntityFactory.loadAll(handle, clazz, params).dataSet();
+        if (query.size() > 1000)
+            log.warn("corpNo{}, entity {}, size larger than 1000.", handle.getCorpNo(), clazz);
         for (DataRow row : query) {
             boolean find = offset == 0 ? true : row.getString(entityKey.fields()[0]).equals(handle.getCorpNo());
             for (int i = offset; i < entityKey.fields().length; i++) {
@@ -113,8 +118,8 @@ public class EntityFactory {
     }
 
     public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true)
-                .stream().collect(Collectors.toList());
+        return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
+                .collect(Collectors.toList());
     }
 
     public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
