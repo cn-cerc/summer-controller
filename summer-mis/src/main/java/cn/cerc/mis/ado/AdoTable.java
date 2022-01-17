@@ -1,6 +1,7 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 import javax.persistence.Column;
 
