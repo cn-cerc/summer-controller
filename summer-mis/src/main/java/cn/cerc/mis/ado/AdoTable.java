@@ -1,7 +1,6 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 import javax.persistence.Column;
 
@@ -14,12 +13,9 @@ import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlServer;
-import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
-import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
 
@@ -43,9 +39,11 @@ public abstract class AdoTable implements EntityImpl, IService {
             for (FieldMeta meta : dataIn.fields())
                 meta.setKind(FieldKind.Storage);
 
+            EntityHelper<? extends AdoTable> helper = EntityHelper.create(this.getClass());
             // 保存对数据表的修改
-            query.operator().setTable(Utils.findTable(this.getClass()));
-            query.operator().setOid(Utils.findOid(this.getClass(), MysqlDatabase.DefaultOID));
+            query.operator().setTable(helper.table());
+            query.operator().setOid(helper.idFieldCode());
+            query.operator().setVersionField(helper.versionFieldCode());
             // 先删除，再修改，最后增加，次序不要错
             saveDelete(dataIn, query);
             saveUpdate(dataIn, query);
@@ -65,13 +63,12 @@ public abstract class AdoTable implements EntityImpl, IService {
         if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
 
-        ISqlDatabase database = EntityQuery.findDatabase(handle, clazz);
-        SqlServer server = clazz.getAnnotation(SqlServer.class);
-        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
-        SqlQuery query = new SqlQuery(handle, sqlServerType);
+        EntityHelper<? extends AdoTable> helper = EntityHelper.create(clazz);
+        SqlQuery query = new SqlQuery(handle, helper.sqlServerType());
+        query.operator().setTable(helper.table());
+        query.operator().setOid(helper.idFieldCode());
+        query.operator().setVersionField(helper.versionFieldCode());
         EntityQuery.registerCacheListener(query, clazz, true);
-        query.operator().setTable(Utils.findTable(clazz));
-        query.operator().setOid(database.oid());
         return query;
     }
 
@@ -110,7 +107,7 @@ public abstract class AdoTable implements EntityImpl, IService {
     }
 
     protected void saveUpdate(DataSet dataIn, SqlQuery query) {
-        String uid = Utils.findOid(this.getClass(), query.operator().oid());
+        String uid = EntityHelper.create(this.getClass()).idFieldCode();
         for (DataRow row : dataIn) {
             if (DataRowState.Update == row.state()) {
                 DataRow history = row.history();
@@ -150,7 +147,7 @@ public abstract class AdoTable implements EntityImpl, IService {
     }
 
     public String table() {
-        return Utils.findTable(this.getClass());
+        return EntityHelper.create(this.getClass()).table();
     }
 
     /**
@@ -181,6 +178,11 @@ public abstract class AdoTable implements EntityImpl, IService {
     @Override
     public void setEntityHome(EntityHomeImpl entityHome) {
         this.entityHome = entityHome;
+    }
+
+    @Override
+    public EntityHomeImpl getEntityHome() {
+        return entityHome;
     }
 
     /**
