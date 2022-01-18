@@ -1,7 +1,6 @@
 package cn.cerc.mis.ado;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
 
 import javax.persistence.Column;
 
@@ -9,7 +8,6 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataRowState;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityHelper;
-import cn.cerc.db.core.EntityHomeImpl;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.FieldMeta.FieldKind;
@@ -21,7 +19,6 @@ import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
 
 public abstract class AdoTable implements EntityImpl, IService {
-    private transient EntityHomeImpl entityHome;
 
     public DataSet execute(IHandle handle, DataSet dataIn) {
         // 检查必备的查询参数
@@ -151,46 +148,4 @@ public abstract class AdoTable implements EntityImpl, IService {
         return EntityHelper.create(this.getClass()).table();
     }
 
-    /**
-     * 设置EntityQuery
-     * 
-     * @param entityHome EntityQuery
-     */
-    @Override
-    public void setEntityHome(EntityHomeImpl entityHome) {
-        this.entityHome = entityHome;
-    }
-
-    @Override
-    public EntityHomeImpl getEntityHome() {
-        return entityHome;
-    }
-
-    /**
-     * 注意：若EntityQuery不存在，则返回-1
-     * 
-     * @return 返回自身在 EntityQuery 中的序号，从1开始，若没有找到，则返回0
-     */
-    @Override
-    public int findRecNo() {
-        if (entityHome != null)
-            return entityHome.findRecNo(this);
-        else
-            return -1;
-    }
-
-    @Override
-    public void refresh() {
-        Objects.requireNonNull(entityHome, "entityHome is null");
-        entityHome.refresh(this);
-    }
-
-    /**
-     * 提交到 EntityQuery
-     */
-    @Override
-    public void post() {
-        Objects.requireNonNull(entityHome, "entityHome is null");
-        entityHome.post(this);
-    }
 }

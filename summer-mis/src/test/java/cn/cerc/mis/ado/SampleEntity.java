@@ -21,7 +21,7 @@ import cn.cerc.mis.ado.EntityCache.VirtualEntityImpl;
 
 @Entity
 @EntityKey(fields = { "corpNo_", "enanble_" })
-public class SampleEntity extends AdoTable implements VirtualEntityImpl {
+public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
     private static final Logger log = LoggerFactory.getLogger(SampleEntity.class);
     @Id
     private Long UID_;
