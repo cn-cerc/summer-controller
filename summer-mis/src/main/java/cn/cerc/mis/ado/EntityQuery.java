@@ -169,6 +169,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
     protected void insert(T entity) {
         query.setReadonly(false);
         try {
+            helper.onInsertPostDefault(entity);
             entity.onInsertPost(query);
             query.append();
             query.current().loadFromEntity(entity);
@@ -267,6 +268,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
+            helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();
             query.current().loadFromEntity(entity);

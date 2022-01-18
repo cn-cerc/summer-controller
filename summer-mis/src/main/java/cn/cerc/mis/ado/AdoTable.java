@@ -152,26 +152,6 @@ public abstract class AdoTable implements EntityImpl, IService {
     }
 
     /**
-     * 插入新记录时，判断字段是否允许为空，若不允许为空，则设置默值
-     * 
-     * @param handle IHandle
-     */
-    @Override
-    public void onInsertPost(IHandle handle) {
-        EntityHelper.create(this.getClass()).onInsertPostDefault(this);
-    }
-
-    /**
-     * 更新记录时自动更新时间戳
-     * 
-     * @param handle IHandle
-     */
-    @Override
-    public void onUpdatePost(IHandle handle) {
-        EntityHelper.create(this.getClass()).onUpdatePostDefault(this);
-    }
-
-    /**
      * 设置EntityQuery
      * 
      * @param entityHome EntityQuery
