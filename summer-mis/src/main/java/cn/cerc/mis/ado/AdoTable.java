@@ -8,7 +8,6 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataRowState;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityHelper;
-import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.FieldMeta.FieldKind;
 import cn.cerc.db.core.IHandle;
@@ -18,7 +17,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
 
-public abstract class AdoTable implements EntityImpl, IService {
+public abstract class AdoTable extends CustomEntity implements IService {
 
     public DataSet execute(IHandle handle, DataSet dataIn) {
         // 检查必备的查询参数
