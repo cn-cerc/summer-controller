@@ -1,5 +1,10 @@
 package cn.cerc.mis.core;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import javax.persistence.Entity;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -16,14 +21,19 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.ServerConfig;
+import cn.cerc.db.core.SqlServer;
+import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.ado.AdoTable;
+import cn.cerc.mis.ado.EntityFactory;
 
 @Component
 public class Application implements ApplicationContextAware {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     private static final ClassConfig config = new ClassConfig(Application.class, SummerMIS.ID);
+    private static ConcurrentMap<String, Class<? extends AdoTable>> entityItems = new ConcurrentHashMap<>();
 //    public static final String TOKEN = ISession.TOKEN;
 //    public static final String bookNo = ISession.CORP_NO;
 //    public static final String userCode = ISession.USER_CODE;
@@ -255,6 +265,33 @@ public class Application implements ApplicationContextAware {
     @Deprecated
     public static IHandle getHandle() {
         return new Handle(getSession());
+    }
+
+    public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {
+        ApplicationContext context = Application.getContext();
+        if (context == null)
+            return null;
+        if (entityItems != null)
+            return entityItems.get(table);
+
+        synchronized (EntityFactory.class) {
+            for (String beanId : context.getBeanNamesForType(AdoTable.class)) {
+                Object bean = context.getBean(beanId);
+                @SuppressWarnings("unchecked")
+                Class<? extends AdoTable> clazz = (Class<? extends AdoTable>) bean.getClass();
+                SqlServer server = clazz.getDeclaredAnnotation(SqlServer.class);
+                SqlServerType sst = server != null ? server.type() : SqlServerType.Mysql;
+                if (sst == sqlServerType) {
+                    Entity entity = clazz.getDeclaredAnnotation(Entity.class);
+                    if (entity != null && !"".equals(entity.name()))
+                        entityItems.put(entity.name(), clazz);
+                    else
+                        entityItems.put(clazz.getSimpleName(), clazz);
+                }
+            }
+        }
+
+        return entityItems.get(table);
     }
 
 }

@@ -2,6 +2,7 @@ package cn.cerc.mis.ado;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -11,11 +12,27 @@ import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlText;
+import cn.cerc.db.core.SqlWhere;
 
 public class EntityMany<T extends EntityImpl> extends EntityQuery<T> implements Iterable<T> {
 
-    public EntityMany(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
-            boolean writeCacheAtOpen) {
+    public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz, String... values) {
+        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);
+    }
+
+    public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityMany<T>(handle, clazz, sqlText, false, true);
+    }
+
+    public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz,
+            Consumer<SqlWhere> consumer) {
+        Objects.requireNonNull(consumer);
+        SqlWhere where = SqlWhere.create(handle, clazz);
+        consumer.accept(where);
+        return new EntityMany<T>(handle, clazz, where.build(), false, true);
+    }
+
+    public EntityMany(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
     }
 

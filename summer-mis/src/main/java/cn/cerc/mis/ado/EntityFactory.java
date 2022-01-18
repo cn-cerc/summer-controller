@@ -3,16 +3,11 @@ package cn.cerc.mis.ado;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.EntityHelper;
@@ -25,12 +20,10 @@ import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
 
 public class EntityFactory {
     private static final Logger log = LoggerFactory.getLogger(EntityFactory.class);
-    private static ConcurrentMap<String, Class<? extends AdoTable>> items = new ConcurrentHashMap<>();
 
     public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
@@ -134,41 +127,33 @@ public class EntityFactory {
     }
 
     public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
-        SqlText sql = SqlWhere.create(handle, clazz, values).build();
-        return new EntityOne<T>(handle, clazz, sql, false, false);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
-        SqlText sql = SqlWhere.create(clazz).eq("UID_", uid).build();
-        return new EntityOne<T>(handle, clazz, sql, false, false);
+        return EntityOne.open(handle, clazz, values);
     }
 
     public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityOne<T>(handle, clazz, sqlText, false, false);
+        return EntityOne.open(handle, clazz, sqlText);
     }
 
     public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz,
             Consumer<SqlWhere> consumer) {
-        Objects.requireNonNull(consumer);
-        SqlWhere where = SqlWhere.create(handle, clazz);
-        consumer.accept(where);
-        return new EntityOne<T>(handle, clazz, where.build(), false, false);
+        return EntityOne.open(handle, clazz, consumer);
+    }
+
+    public static <T extends EntityImpl> EntityOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
+        return EntityOne.open(handle, clazz, uid);
     }
 
     public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);
+        return EntityMany.open(handle, clazz, values);
     }
 
     public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityMany<T>(handle, clazz, sqlText, false, true);
+        return EntityMany.open(handle, clazz, sqlText);
     }
 
     public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz,
             Consumer<SqlWhere> consumer) {
-        Objects.requireNonNull(consumer);
-        SqlWhere where = SqlWhere.create(handle, clazz);
-        consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), false, true);
+        return EntityMany.open(handle, clazz, consumer);
     }
 
     @Deprecated
@@ -189,33 +174,6 @@ public class EntityFactory {
         SqlQuery query = loadMany(handle, clazz, sqlText).dataSet();
         query.setReadonly(false);
         return query;
-    }
-
-    public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {
-        ApplicationContext context = Application.getContext();
-        if (context == null)
-            return null;
-        if (items != null)
-            return items.get(table);
-
-        synchronized (EntityFactory.class) {
-            for (String beanId : context.getBeanNamesForType(AdoTable.class)) {
-                Object bean = context.getBean(beanId);
-                @SuppressWarnings("unchecked")
-                Class<? extends AdoTable> clazz = (Class<? extends AdoTable>) bean.getClass();
-                SqlServer server = clazz.getDeclaredAnnotation(SqlServer.class);
-                SqlServerType sst = server != null ? server.type() : SqlServerType.Mysql;
-                if (sst == sqlServerType) {
-                    Entity entity = clazz.getDeclaredAnnotation(Entity.class);
-                    if (entity != null && !"".equals(entity.name()))
-                        items.put(entity.name(), clazz);
-                    else
-                        items.put(clazz.getSimpleName(), clazz);
-                }
-            }
-        }
-
-        return items.get(table);
     }
 
 }
