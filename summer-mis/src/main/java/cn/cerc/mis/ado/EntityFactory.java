@@ -1,8 +1,8 @@
 package cn.cerc.mis.ado;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
@@ -117,20 +117,20 @@ public class EntityFactory {
         return Optional.empty();
     }
 
-    public static <T extends EntityImpl> List<T> findMany(IHandle handle, Class<T> clazz, String... values) {
+    public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
         return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
-    public static <T extends EntityImpl> List<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toList());
+    public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toSet());
     }
 
-    public static <T extends EntityImpl> List<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toList());
+        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toSet());
     }
 
     public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
