@@ -65,7 +65,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
         query.operator().setTable(helper.table());
         query.operator().setOid(helper.idFieldCode());
         query.operator().setVersionField(helper.versionFieldCode());
-        EntityQuery.registerCacheListener(query, clazz, true);
+        EntityHome.registerCacheListener(query, clazz, true);
         return query;
     }
 

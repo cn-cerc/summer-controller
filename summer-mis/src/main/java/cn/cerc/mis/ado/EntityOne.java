@@ -10,7 +10,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 
-public class EntityOne<T extends EntityImpl> extends EntityQuery<T> {
+public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
 
     public static <T extends EntityImpl> EntityOne<T> open(IHandle handle, Class<T> clazz, String... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();

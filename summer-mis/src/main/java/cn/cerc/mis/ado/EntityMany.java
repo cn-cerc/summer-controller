@@ -14,7 +14,7 @@ import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 
-public class EntityMany<T extends EntityImpl> extends EntityQuery<T> implements Iterable<T> {
+public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements Iterable<T> {
 
     public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz, String... values) {
         return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);

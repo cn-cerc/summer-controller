@@ -28,7 +28,7 @@ import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.sqlite.SqliteDatabase;
 import redis.clients.jedis.Jedis;
 
-public abstract class EntityQuery<T extends EntityImpl> extends Handle implements EntityHomeImpl {
+public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
 //    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
     // 批量写入redis等缓存
@@ -117,7 +117,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
         });
     }
 
-    public EntityQuery(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
+    public EntityHome(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle);
         this.clazz = clazz;
         this.helper = EntityHelper.create(clazz);
@@ -146,14 +146,14 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
 
     // load.isPresentThrow: 载入一条数据，若不为空就抛出异常
     // isPresentThrow.update: 更新entity，若为空无法更新就抛出异常
-    protected <X extends Throwable> EntityQuery<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    protected <X extends Throwable> EntityHome<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (query.size() > 0)
             throw exceptionSupplier.get();
         return this;
     }
 
     // load.isEmptyThrow: 载入一条数据，若为空就抛出异常
-    protected <X extends Throwable> EntityQuery<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    protected <X extends Throwable> EntityHome<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (query.size() == 0)
             throw exceptionSupplier.get();
         return this;
@@ -194,7 +194,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
         }
     }
 
-    protected EntityQuery<T> update(Consumer<T> action) {
+    protected EntityHome<T> update(Consumer<T> action) {
         Objects.requireNonNull(action);
         T entity = null;
         for (int i = 0; i < query.size(); i++) {
@@ -264,7 +264,7 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
         return 0;
     }
 
-    protected EntityQuery<T> save(int index, T entity) {
+    protected EntityHome<T> save(int index, T entity) {
         query.setRecNo(index + 1);
         if (!isCurrentRow(entity))
             throw new RuntimeException("recNo error, refuse update");
