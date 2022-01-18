@@ -187,9 +187,11 @@ public abstract class EntityQuery<T extends EntityImpl> extends Handle implement
         T obj = (T) entity;
         int recNo = this.findRecNo(entity);
         if (recNo == 0)
-            throw new RuntimeException("not support for new entity");
-        save(recNo - 1, obj);
-        query.current().saveToEntity(entity);
+            this.insert(obj);
+        else {
+            save(recNo - 1, obj);
+            query.current().saveToEntity(obj);
+        }
     }
 
     protected EntityQuery<T> update(Consumer<T> action) {

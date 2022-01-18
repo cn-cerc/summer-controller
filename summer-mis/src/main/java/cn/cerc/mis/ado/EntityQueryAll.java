@@ -41,7 +41,9 @@ public class EntityQueryAll<T extends EntityImpl> extends EntityQuery<T> impleme
     }
 
     public T newEntity() {
-        return helper.newEntity();
+        T entity = helper.newEntity();
+        entity.setEntityHome(this);
+        return entity;
     }
 
     public void insert(List<T> list) {
