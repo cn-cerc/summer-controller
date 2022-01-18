@@ -11,22 +11,22 @@ import com.google.gson.Gson;
 
 import cn.cerc.db.core.SqlText;
 
-public class EntityQueryOneTest {
+public class EntityOneTest {
     private Consumer<SampleEntity> doInsert = (item) -> {
         item.setUID_(1l);
         item.setCode_("a02");
     };
 
-    private EntityQueryOne<SampleEntity> findOne() {
+    private EntityOne<SampleEntity> findOne() {
         SqlText sql = null;
-        return new EntityQueryOne<SampleEntity>(null, SampleEntity.class, sql, false, false);
+        return new EntityOne<SampleEntity>(null, SampleEntity.class, sql, false, false);
     }
 
     @Test
     public void test_findRecNo() {
         SampleEntity entity = new SampleEntity();
         assertEquals(entity.findRecNo(), -1);
-        EntityQueryOne<SampleEntity> query = findOne();
+        EntityOne<SampleEntity> query = findOne();
         entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
         query.delete();
@@ -35,7 +35,7 @@ public class EntityQueryOneTest {
 
     @Test
     public void test_QueryOne() {
-        EntityQueryOne<SampleEntity> query = findOne();
+        EntityOne<SampleEntity> query = findOne();
         assertTrue(query.isEmpty());
         SampleEntity entity = query.orElseInsert(doInsert);
         assertEquals(entity.findRecNo(), 1);

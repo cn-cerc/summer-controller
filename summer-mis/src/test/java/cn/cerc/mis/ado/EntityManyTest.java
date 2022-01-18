@@ -13,22 +13,22 @@ import com.google.gson.Gson;
 
 import cn.cerc.db.core.SqlText;
 
-public class EntityQueryAllTest {
+public class EntityManyTest {
     private Consumer<SampleEntity> doInsert = (item) -> {
         item.setUID_(1l);
         item.setCode_("a02");
     };
 
-    private EntityQueryAll<SampleEntity> findAll() {
+    private EntityMany<SampleEntity> findAll() {
         SqlText sql = null;
-        return new EntityQueryAll<SampleEntity>(null, SampleEntity.class, sql, false, false);
+        return new EntityMany<SampleEntity>(null, SampleEntity.class, sql, false, false);
     }
 
     @Test
     public void test_findRecNo() {
         SampleEntity entity = new SampleEntity();
         assertEquals(entity.findRecNo(), -1);
-        EntityQueryAll<SampleEntity> query = findAll();
+        EntityMany<SampleEntity> query = findAll();
         entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
         query.deleteAll();
@@ -37,7 +37,7 @@ public class EntityQueryAllTest {
 
     @Test
     public void test_QueryAll() {
-        EntityQueryAll<SampleEntity> query = findAll();
+        EntityMany<SampleEntity> query = findAll();
         assertTrue(query.isEmpty());
         SampleEntity entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
@@ -56,7 +56,7 @@ public class EntityQueryAllTest {
 
     @Test
     public void test_insert() {
-        EntityQueryAll<SampleEntity> query = findAll();
+        EntityMany<SampleEntity> query = findAll();
         List<SampleEntity> list = new ArrayList<>();
         SampleEntity entity1 = new SampleEntity();
         entity1.setUID_(1l);

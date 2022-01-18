@@ -8,9 +8,9 @@ import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlText;
 
-public class EntityQueryOne<T extends EntityImpl> extends EntityQuery<T> {
+public class EntityOne<T extends EntityImpl> extends EntityQuery<T> {
 
-    public EntityQueryOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
+    public EntityOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
             boolean writeCacheAtOpen) {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
         if (query.size() > 1)
@@ -18,13 +18,13 @@ public class EntityQueryOne<T extends EntityImpl> extends EntityQuery<T> {
     }
 
     @Override
-    public <X extends Throwable> EntityQueryOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    public <X extends Throwable> EntityOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
         super.isEmptyThrow(exceptionSupplier);
         return this;
     }
 
     @Override
-    public <X extends Throwable> EntityQueryOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    public <X extends Throwable> EntityOne<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
         super.isPresentThrow(exceptionSupplier);
         return this;
     }
@@ -46,7 +46,7 @@ public class EntityQueryOne<T extends EntityImpl> extends EntityQuery<T> {
 
     // update.orElseInsert: 更新entity，若为空无法更新就执行插入
     @Override
-    public EntityQueryOne<T> update(Consumer<T> action) {
+    public EntityOne<T> update(Consumer<T> action) {
         super.update(action);
         return this;
     }

@@ -12,21 +12,21 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlText;
 
-public class EntityQueryAll<T extends EntityImpl> extends EntityQuery<T> implements Iterable<T> {
+public class EntityMany<T extends EntityImpl> extends EntityQuery<T> implements Iterable<T> {
 
-    public EntityQueryAll(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
+    public EntityMany(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
             boolean writeCacheAtOpen) {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
     }
 
     @Override
-    public <X extends Throwable> EntityQueryAll<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    public <X extends Throwable> EntityMany<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
         super.isEmptyThrow(exceptionSupplier);
         return this;
     }
 
     @Override
-    public <X extends Throwable> EntityQueryAll<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
+    public <X extends Throwable> EntityMany<T> isPresentThrow(Supplier<? extends X> exceptionSupplier) throws X {
         super.isPresentThrow(exceptionSupplier);
         return this;
     }
@@ -57,7 +57,7 @@ public class EntityQueryAll<T extends EntityImpl> extends EntityQuery<T> impleme
         return entity;
     }
 
-    public EntityQueryAll<T> updateAll(Consumer<T> action) {
+    public EntityMany<T> updateAll(Consumer<T> action) {
         super.update(action);
         return this;
     }

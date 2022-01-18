@@ -95,7 +95,7 @@ public class EntityFactory {
         for (int i = 0; i < values.length - 1; i++)
             params[i] = values[i];
 
-        SqlQuery query = EntityFactory.loadAll(handle, clazz, params).dataSet();
+        SqlQuery query = EntityFactory.loadMany(handle, clazz, params).dataSet();
         if (query.size() > 1000)
             log.warn("corpNo{}, entity {}, size larger than 1000.", handle.getCorpNo(), clazz);
         for (DataRow row : query) {
@@ -109,7 +109,7 @@ public class EntityFactory {
                 return Optional.of(row.asEntity(clazz));
         }
 
-        EntityQueryOne<T> loadOne = EntityFactory.loadOne(handle, clazz, values);
+        EntityOne<T> loadOne = EntityFactory.loadOne(handle, clazz, values);
         if (loadOne.isPresent())
             return Optional.of(loadOne.get());
         if (actionInsert != null)
@@ -117,58 +117,58 @@ public class EntityFactory {
         return Optional.empty();
     }
 
-    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
+    public static <T extends EntityImpl> List<T> findMany(IHandle handle, Class<T> clazz, String... values) {
+        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
                 .collect(Collectors.toList());
     }
 
-    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityQueryAll<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toList());
+    public static <T extends EntityImpl> List<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toList());
     }
 
-    public static <T extends EntityImpl> List<T> findAll(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
+    public static <T extends EntityImpl> List<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityQueryAll<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toList());
+        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toList());
     }
 
-    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
+    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
-        return new EntityQueryOne<T>(handle, clazz, sql, false, false);
+        return new EntityOne<T>(handle, clazz, sql, false, false);
     }
 
-    public static <T extends EntityImpl> EntityQueryOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
+    public static <T extends EntityImpl> EntityOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
         SqlText sql = SqlWhere.create(clazz).eq("UID_", uid).build();
-        return new EntityQueryOne<T>(handle, clazz, sql, false, false);
+        return new EntityOne<T>(handle, clazz, sql, false, false);
     }
 
-    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityQueryOne<T>(handle, clazz, sqlText, false, false);
+    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityOne<T>(handle, clazz, sqlText, false, false);
     }
 
-    public static <T extends EntityImpl> EntityQueryOne<T> loadOne(IHandle handle, Class<T> clazz,
+    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz,
             Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityQueryOne<T>(handle, clazz, where.build(), false, false);
+        return new EntityOne<T>(handle, clazz, where.build(), false, false);
     }
 
-    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityQueryAll<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);
+    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, String... values) {
+        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), false, true);
     }
 
-    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityQueryAll<T>(handle, clazz, sqlText, false, true);
+    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        return new EntityMany<T>(handle, clazz, sqlText, false, true);
     }
 
-    public static <T extends EntityImpl> EntityQueryAll<T> loadAll(IHandle handle, Class<T> clazz,
+    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz,
             Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityQueryAll<T>(handle, clazz, where.build(), false, true);
+        return new EntityMany<T>(handle, clazz, where.build(), false, true);
     }
 
     @Deprecated
@@ -186,7 +186,7 @@ public class EntityFactory {
 
     @Deprecated
     public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        SqlQuery query = loadAll(handle, clazz, sqlText).dataSet();
+        SqlQuery query = loadMany(handle, clazz, sqlText).dataSet();
         query.setReadonly(false);
         return query;
     }

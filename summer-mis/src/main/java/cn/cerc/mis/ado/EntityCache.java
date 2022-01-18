@@ -126,7 +126,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         } else {
             if (values.length == 0)
                 throw new RuntimeException("The param values cat not be empty.");
-            EntityQueryAll<T> query = new EntityQueryAll<T>(this, clazz, SqlWhere.create(this, clazz, values).build(),
+            EntityMany<T> query = new EntityMany<T>(this, clazz, SqlWhere.create(this, clazz, values).build(),
                     true, true);
             if (query.size() > 1)
                 throw new RuntimeException("There're too many records.");
