@@ -118,8 +118,8 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
         return this.stream().collect(Collectors.toList()).iterator();
     }
 
-    public LinkedHashMap<String, T> map(Function<T, String> mapper) {
-        LinkedHashMap<String, T> items = new LinkedHashMap<>();
+    public <K> LinkedHashMap<K, T> map(Function<T, K> mapper) {
+        LinkedHashMap<K, T> items = new LinkedHashMap<>();
         for (int i = 0; i < query.size(); i++) {
             T entity = this.get(i);
             items.put(mapper.apply(entity), entity);
