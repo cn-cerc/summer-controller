@@ -1,9 +1,11 @@
 package cn.cerc.mis.ado;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,18 +106,29 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     }
 
     public Stream<T> stream() {
-        return query.records().stream().map(item -> item.asEntity(clazz));
-    }
-
-    public SqlQuery dataSet() {
-        return query;
+        return query.records().stream().map(item -> {
+            T entity = item.asEntity(clazz);
+            entity.setEntityHome(this);
+            return entity;
+        });
     }
 
     @Override
     public Iterator<T> iterator() {
-        List<T> list = this.stream().collect(Collectors.toList());
-        list.forEach(item -> item.setEntityHome(this));
-        return list.iterator();
+        return this.stream().collect(Collectors.toList()).iterator();
+    }
+
+    public LinkedHashMap<String, T> map(Function<T, String> mapper) {
+        LinkedHashMap<String, T> items = new LinkedHashMap<>();
+        for (int i = 0; i < query.size(); i++) {
+            T entity = this.get(i);
+            items.put(mapper.apply(entity), entity);
+        }
+        return items;
+    }
+
+    public SqlQuery dataSet() {
+        return query;
     }
 
 }
