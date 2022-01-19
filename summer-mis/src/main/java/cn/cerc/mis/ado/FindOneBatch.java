@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Utils;
 
 public class FindOneBatch<T> implements IHandle {
     private Map<String, Optional<T>> buffer = new HashMap<>();
@@ -70,6 +71,8 @@ public class FindOneBatch<T> implements IHandle {
     }
 
     public String getOrDefault(Function<? super T, String> mapper, String key) {
+        if (Utils.isEmpty(key))
+            return "";
         Optional<T> entity = get(key);
         return entity.isEmpty() ? key : mapper.apply(entity.get());
     }
