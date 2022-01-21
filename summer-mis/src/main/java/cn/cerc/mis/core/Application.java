@@ -27,7 +27,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.ado.AdoTable;
-import cn.cerc.mis.ado.EntityFactory;
+import cn.cerc.mis.ado.EntityQuery;
 
 @Component
 public class Application implements ApplicationContextAware {
@@ -274,7 +274,7 @@ public class Application implements ApplicationContextAware {
         if (entityItems != null)
             return entityItems.get(table);
 
-        synchronized (EntityFactory.class) {
+        synchronized (EntityQuery.class) {
             for (String beanId : context.getBeanNamesForType(AdoTable.class)) {
                 Object bean = context.getBean(beanId);
                 @SuppressWarnings("unchecked")

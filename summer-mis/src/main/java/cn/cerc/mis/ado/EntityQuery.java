@@ -19,8 +19,8 @@ import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
 import redis.clients.jedis.Jedis;
 
-public class EntityFactory {
-    private static final Logger log = LoggerFactory.getLogger(EntityFactory.class);
+public class EntityQuery {
+    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
 
     public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
