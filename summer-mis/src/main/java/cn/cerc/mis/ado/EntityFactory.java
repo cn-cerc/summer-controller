@@ -123,34 +123,4 @@ public class EntityFactory {
         return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toSet());
     }
 
-    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
-        return EntityOne.open(handle, clazz, values);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return EntityOne.open(handle, clazz, sqlText);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz,
-            Consumer<SqlWhere> consumer) {
-        return EntityOne.open(handle, clazz, consumer);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
-        return EntityOne.open(handle, clazz, uid);
-    }
-
-    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, String... values) {
-        return EntityMany.open(handle, clazz, values);
-    }
-
-    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return EntityMany.open(handle, clazz, sqlText);
-    }
-
-    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz,
-            Consumer<SqlWhere> consumer) {
-        return EntityMany.open(handle, clazz, consumer);
-    }
-
 }
