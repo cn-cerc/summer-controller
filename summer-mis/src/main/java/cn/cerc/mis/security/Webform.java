@@ -20,6 +20,6 @@ public @interface Webform {
 
     String parent();
 
-    boolean appStore = false;
+    boolean appStore() default false;
 
 }
