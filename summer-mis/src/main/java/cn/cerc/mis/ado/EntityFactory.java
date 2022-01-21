@@ -85,7 +85,7 @@ public class EntityFactory {
         for (int i = 0; i < values.length - 1; i++)
             params[i] = values[i];
 
-        SqlQuery query = EntityFactory.loadMany(handle, clazz, params).dataSet();
+        SqlQuery query = EntityMany.open(handle, clazz, params).dataSet();
         if (query.size() > 1000)
             log.warn("corpNo{}, entity {}, size larger than 1000.", handle.getCorpNo(), clazz);
         for (DataRow row : query) {
@@ -99,7 +99,7 @@ public class EntityFactory {
                 return Optional.of(row.asEntity(clazz));
         }
 
-        EntityOne<T> loadOne = EntityFactory.loadOne(handle, clazz, values);
+        EntityOne<T> loadOne = EntityOne.open(handle, clazz, values);
         if (loadOne.isPresent())
             return Optional.of(loadOne.get());
         if (actionInsert != null)
