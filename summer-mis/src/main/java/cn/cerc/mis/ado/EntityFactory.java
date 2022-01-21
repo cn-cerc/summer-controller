@@ -10,13 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
-import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
-import cn.cerc.db.core.SqlServer;
-import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
@@ -154,26 +151,6 @@ public class EntityFactory {
     public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz,
             Consumer<SqlWhere> consumer) {
         return EntityMany.open(handle, clazz, consumer);
-    }
-
-    @Deprecated
-    public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
-        EntityHelper<T> helper = EntityHelper.create(clazz);
-        SqlServer server = clazz.getAnnotation(SqlServer.class);
-        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
-        SqlQuery query = new SqlQuery(handle, sqlServerType);
-        query.operator().setTable(helper.table());
-        query.operator().setOid(helper.idFieldCode());
-        query.operator().setVersionField(helper.versionFieldCode());
-        EntityHome.registerCacheListener(query, clazz, true);
-        return query;
-    }
-
-    @Deprecated
-    public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        SqlQuery query = loadMany(handle, clazz, sqlText).dataSet();
-        query.setReadonly(false);
-        return query;
     }
 
 }
