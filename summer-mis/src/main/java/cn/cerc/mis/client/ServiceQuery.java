@@ -32,6 +32,23 @@ public class ServiceQuery {
         return new ServiceQuery(handle, serviceCode, dataIn);
     }
 
+    public static ServiceQuery call(IHandle handle, String serviceCode, DataSet dataIn) {
+        return new ServiceQuery(handle, serviceCode, dataIn);
+    }
+
+    public static ServiceQuery call(IHandle handle, String serviceCode, DataRow headIn) {
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return new ServiceQuery(handle, serviceCode, dataIn);
+    }
+
+    public static ServiceQuery call(IHandle handle, String serviceCode, Map<String, Object> headIn) {
+        Objects.requireNonNull(headIn);
+        DataSet dataIn = new DataSet();
+        headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
+        return new ServiceQuery(handle, serviceCode, dataIn);
+    }
+
     private ServiceQuery(IHandle handle, String serviceCode, DataSet dataIn) {
         try {
             Variant function = new Variant("execute").setTag(serviceCode);
