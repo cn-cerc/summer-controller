@@ -74,7 +74,6 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     }
 
     @Override
-    @Deprecated
     public LocalService setService(String service) {
         super.setService(service);
         return this;
