@@ -96,6 +96,12 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     @Override
+    public final RemoteService setService(ServiceMeta service) {
+        this.service = service.id();
+        return this;
+    }
+
+    @Deprecated
     public final RemoteService setService(String service) {
         this.service = service;
         return this;

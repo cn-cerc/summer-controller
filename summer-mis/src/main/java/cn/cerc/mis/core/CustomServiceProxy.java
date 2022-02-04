@@ -36,7 +36,7 @@ public abstract class CustomServiceProxy extends Handle {
         return service;
     }
 
-    public CustomServiceProxy setService(String service) {
+    protected CustomServiceProxy setService(String service) {
         this.service = service;
         return this;
     }

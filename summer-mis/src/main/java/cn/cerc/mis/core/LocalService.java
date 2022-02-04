@@ -7,6 +7,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.client.IServiceProxy;
+import cn.cerc.mis.client.ServiceMeta;
 import cn.cerc.mis.other.MemoryBuffer;
 
 public class LocalService extends CustomServiceProxy implements IServiceProxy {
@@ -17,6 +18,11 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     }
 
     public LocalService(IHandle handle, String service) {
+        this(handle);
+        this.setService(service);
+    }
+
+    public LocalService(IHandle handle, ServiceMeta service) {
         this(handle);
         this.setService(service);
     }
@@ -68,8 +74,15 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
     }
 
     @Override
+    @Deprecated
     public LocalService setService(String service) {
         super.setService(service);
+        return this;
+    }
+    
+    @Override
+    public LocalService setService(ServiceMeta service) {
+        super.setService(service.id());
         return this;
     }
 
