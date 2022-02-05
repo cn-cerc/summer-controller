@@ -1,15 +1,15 @@
 package cn.cerc.mis.client;
 
-public final class ServiceMeta {
+public final class ServiceSign {
     private String id;
     private String site;
 
-    public ServiceMeta(String id) {
+    public ServiceSign(String id) {
         super();
         this.id = id;
     }
 
-    public ServiceMeta(String id, String site) {
+    public ServiceSign(String id, String site) {
         super();
         this.id = id;
         this.site = site;

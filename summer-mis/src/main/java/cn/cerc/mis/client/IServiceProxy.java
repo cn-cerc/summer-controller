@@ -9,7 +9,7 @@ public interface IServiceProxy {
     String getService();
 
     // 设置服务代码
-    Object setService(ServiceMeta service);
+    Object setService(ServiceSign service);
 
     // 传入数据
     DataSet dataIn();

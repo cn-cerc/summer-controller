@@ -96,7 +96,7 @@ public class RemoteService extends Handle implements IServiceProxy {
     }
 
     @Override
-    public final RemoteService setService(ServiceMeta service) {
+    public final RemoteService setService(ServiceSign service) {
         this.service = service.id();
         return this;
     }

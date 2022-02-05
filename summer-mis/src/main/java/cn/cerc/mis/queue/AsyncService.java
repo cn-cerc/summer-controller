@@ -20,7 +20,7 @@ import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.client.IServiceProxy;
-import cn.cerc.mis.client.ServiceMeta;
+import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.message.MessageRecord;
@@ -186,7 +186,7 @@ public class AsyncService implements IServiceProxy {
     }
 
     @Override
-    public AsyncService setService(ServiceMeta service) {
+    public AsyncService setService(ServiceSign service) {
         this.service = service.id();
         return this;
     }

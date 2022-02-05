@@ -25,43 +25,43 @@ public class ServiceQuery {
     private static final Logger log = LoggerFactory.getLogger(ServiceQuery.class);
     private static final ClassConfig config = new ClassConfig(ServiceQuery.class, SummerMIS.ID);
     private DataSet dataOut;
-    private ServiceMeta service;
+    private ServiceSign service;
 
-    public static ServiceQuery open(IHandle handle, ServiceMeta service, DataSet dataIn) {
+    public static ServiceQuery open(IHandle handle, ServiceSign service, DataSet dataIn) {
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    public static ServiceQuery open(IHandle handle, ServiceMeta service, DataRow headIn) {
+    public static ServiceQuery open(IHandle handle, ServiceSign service, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    public static ServiceQuery open(IHandle handle, ServiceMeta service, Map<String, Object> headIn) {
+    public static ServiceQuery open(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
         Objects.requireNonNull(headIn);
         DataSet dataIn = new DataSet();
         headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    public static ServiceQuery call(IHandle handle, ServiceMeta service, DataSet dataIn) {
+    public static ServiceQuery call(IHandle handle, ServiceSign service, DataSet dataIn) {
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    public static ServiceQuery call(IHandle handle, ServiceMeta service, DataRow headIn) {
+    public static ServiceQuery call(IHandle handle, ServiceSign service, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    public static ServiceQuery call(IHandle handle, ServiceMeta service, Map<String, Object> headIn) {
+    public static ServiceQuery call(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
         Objects.requireNonNull(headIn);
         DataSet dataIn = new DataSet();
         headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    private ServiceQuery(IHandle handle, ServiceMeta service, DataSet dataIn) {
+    private ServiceQuery(IHandle handle, ServiceSign service, DataSet dataIn) {
         this.service = service;
         dataOut = execute(handle, dataIn);
     }
