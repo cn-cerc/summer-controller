@@ -7,6 +7,7 @@ import java.util.List;
 import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.mis.core.IService;
+import cn.cerc.mis.core.IStatus;
 
 public final class ServiceSign {
     private String id;
@@ -51,6 +52,21 @@ public final class ServiceSign {
             for (String item : items)
                 System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
         }
+
+        items.clear();
+        for (Method method : clazz.getDeclaredMethods()) {
+            if (method.getModifiers() != ClassData.PUBLIC)
+                continue;
+            if (method.getReturnType() == IStatus.class && method.getParameterCount() == 2)
+                items.add(method.getName());
+        }
+        if (items.size() > 0) {
+            items.sort((t1, t2) -> t1.toLowerCase().compareTo(t2.toLowerCase()));
+            System.out.println("// version 2");
+            for (String item : items)
+                System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
+        }
+        
         items.clear();
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.getModifiers() != ClassData.PUBLIC)
@@ -60,7 +76,7 @@ public final class ServiceSign {
         }
         if (items.size() > 0) {
             items.sort((t1, t2) -> t1.toLowerCase().compareTo(t2.toLowerCase()));
-            System.out.println("// version 2");
+            System.out.println("// version 3");
             for (String item : items)
                 System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
         }
