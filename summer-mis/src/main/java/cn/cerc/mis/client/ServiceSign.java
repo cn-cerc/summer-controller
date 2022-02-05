@@ -11,25 +11,25 @@ import cn.cerc.mis.core.IStatus;
 
 public final class ServiceSign {
     private String id;
-    private String site;
+    private IServiceServer server;
 
     public ServiceSign(String id) {
         super();
         this.id = id;
     }
 
-    public ServiceSign(String id, String site) {
+    public ServiceSign(String id, IServiceServer server) {
         super();
         this.id = id;
-        this.site = site;
+        this.server = server;
     }
 
     public String id() {
         return id;
     }
 
-    public String site() {
-        return this.site;
+    public IServiceServer server() {
+        return this.server;
     }
 
     public static void buildSourceCode(Class<?> clazz) {
@@ -66,7 +66,7 @@ public final class ServiceSign {
             for (String item : items)
                 System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
         }
-        
+
         items.clear();
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.getModifiers() != ClassData.PUBLIC)
