@@ -6,6 +6,7 @@ import java.util.List;
 
 import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.mis.core.IService;
 
 public final class ServiceSign {
     private String id;
@@ -31,6 +32,10 @@ public final class ServiceSign {
     }
 
     public static void buildSourceCode(Class<?> clazz) {
+        if (!IService.class.isAssignableFrom(clazz)) {
+            System.out.println(String.format("// %s skip: it's not service", clazz.getSimpleName()));
+            return;
+        }
         final String fmt = "public static final ServiceSign %s = new ServiceSign(\"%s.%s\");";
         System.out.println(String.format("public static class %s {", clazz.getSimpleName()));
         List<String> items = new ArrayList<>();
