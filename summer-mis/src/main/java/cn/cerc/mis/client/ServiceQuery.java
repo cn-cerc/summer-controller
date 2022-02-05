@@ -104,4 +104,12 @@ public class ServiceQuery {
         return dataOut;
     }
 
+    public DataRow head() {
+        return dataOut.head();
+    }
+
+    public String message() {
+        return dataOut.message();
+    }
+
 }
