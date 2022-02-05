@@ -41,23 +41,6 @@ public class ServiceQuery {
         return new ServiceQuery(handle, service, dataIn);
     }
 
-    public static ServiceQuery call(IHandle handle, ServiceSign service, DataSet dataIn) {
-        return new ServiceQuery(handle, service, dataIn);
-    }
-
-    public static ServiceQuery call(IHandle handle, ServiceSign service, DataRow headIn) {
-        DataSet dataIn = new DataSet();
-        dataIn.head().copyValues(headIn);
-        return new ServiceQuery(handle, service, dataIn);
-    }
-
-    public static ServiceQuery call(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
-        Objects.requireNonNull(headIn);
-        DataSet dataIn = new DataSet();
-        headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
-        return new ServiceQuery(handle, service, dataIn);
-    }
-
     private ServiceQuery(IHandle handle, ServiceSign service, DataSet dataIn) {
         this.service = service;
         dataOut = execute(handle, dataIn);
