@@ -120,7 +120,7 @@ public class AsyncService extends ServiceQuery {
             ds.open();
             ds.appendDataSet(this.dataIn(), true);
             ds.head().setValue("_queueId_", msgId);
-            ds.head().setValue("_service_", this.service);
+            ds.head().setValue("_service_", this.serviceId());
             ds.head().setValue("_corpNo_", this.corpNo);
             ds.head().setValue("_userCode_", this.userCode);
             ds.head().setValue("_content_", this.toString());
@@ -150,7 +150,7 @@ public class AsyncService extends ServiceQuery {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode content = mapper.createObjectNode();
 
-        content.put("service", this.service.id());
+        content.put("service", this.serviceId());
         if (this.dataIn() != null) {
             content.put("dataIn", dataIn().json());
         }
@@ -166,7 +166,7 @@ public class AsyncService extends ServiceQuery {
     }
 
     public String getService() {
-        return service.id();
+        return serviceId();
     }
 
     @Override

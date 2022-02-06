@@ -44,7 +44,7 @@ public class LocalService extends ServiceQuery {
     }
 
     public final String service() {
-        return service.id();
+        return serviceId();
     }
 
     public String message() {
@@ -62,7 +62,7 @@ public class LocalService extends ServiceQuery {
 
     @Deprecated
     public String getService() {
-        return service.id();
+        return serviceId();
     }
 
     @Deprecated

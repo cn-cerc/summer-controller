@@ -26,7 +26,7 @@ public class RemoteService extends ServiceQuery {
     }
 
     public final String getService() {
-        return service.id();
+        return serviceId();
     }
 
     public final String message() {

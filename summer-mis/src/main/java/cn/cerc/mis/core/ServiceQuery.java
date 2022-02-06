@@ -12,7 +12,7 @@ import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.client.ServiceSign;
 
 public class ServiceQuery implements IHandle {
-    protected ServiceSign service;
+    private ServiceSign service;
     private DataSet dataIn;
     private DataSet dataOut;
     private ISession session;
@@ -93,6 +93,10 @@ public class ServiceQuery implements IHandle {
     @Override
     public void setSession(ISession session) {
         this.session = session;
+    }
+
+    public final String serviceId() {
+        return service.id();
     }
 
 }
