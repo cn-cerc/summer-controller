@@ -6,16 +6,19 @@ import java.util.List;
 
 import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.IStatus;
 
 public final class ServiceSign {
+    private static IServiceServer localServer = new LocalServer();
     private String id;
     private IServiceServer server;
 
     public ServiceSign(String id) {
         super();
         this.id = id;
+        this.server = localServer;
     }
 
     public ServiceSign(String id, IServiceServer server) {
@@ -30,6 +33,15 @@ public final class ServiceSign {
 
     public IServiceServer server() {
         return this.server;
+    }
+
+    public DataSet call(IHandle handle, DataSet dataIn) {
+        try {
+            return server._call(handle, dataIn, this.id);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return new DataSet().setMessage(e.getMessage());
+        }
     }
 
     public static void buildSourceCode(Class<?> clazz) {

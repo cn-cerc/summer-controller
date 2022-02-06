@@ -9,29 +9,25 @@ import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
-import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.LocalService;
+import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
 
-public class RemoteService extends Handle implements IServiceProxy {
+public class RemoteService extends ServiceQuery {
     private static final Logger log = LoggerFactory.getLogger(RemoteService.class);
     private static final ClassResource res = new ClassResource(RemoteService.class, SummerMIS.ID);
     private IServiceServer server;
-    private String service;
-    private DataSet dataIn;
-    private DataSet dataOut;
 
     public RemoteService(IHandle handle) {
         super(handle);
     }
 
-    @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
             DataRow headIn = dataIn().head();
@@ -44,7 +40,7 @@ public class RemoteService extends Handle implements IServiceProxy {
         }
 
         // 若未定义远程主机，则改为执行本地服务
-        if (this.server == null || this.server.getRequestUrl(this, service) == null) {
+        if (this.server == null || this.server.getRequestUrl(this, service.id()) == null) {
             LocalService svr = new LocalService(this);
             svr.setService(this.getService());
             svr.setDataIn(dataIn());
@@ -53,8 +49,8 @@ public class RemoteService extends Handle implements IServiceProxy {
             return dataOut().state() > ServiceState.ERROR;
         }
 
-        log.debug(this.service);
-        if (Utils.isEmpty(this.service)) {
+        log.debug(this.service.id());
+        if (Utils.isEmpty(this.service.id())) {
             this.setMessage(res.getString(2, "服务代码不允许为空"));
             return false;
         }
@@ -90,24 +86,22 @@ public class RemoteService extends Handle implements IServiceProxy {
         }
     }
 
-    @Override
     public final String getService() {
-        return service;
+        return service.id();
     }
 
     @Override
     public final RemoteService setService(ServiceSign service) {
-        this.service = service.id();
+        super.setService(service);
         return this;
     }
 
     @Deprecated
     public final RemoteService setService(String service) {
-        this.service = service;
+        super.setService(new ServiceSign(service));
         return this;
     }
 
-    @Override
     public final String message() {
         return dataOut().message();
     }
@@ -116,7 +110,6 @@ public class RemoteService extends Handle implements IServiceProxy {
         dataOut().setMessage(message);
     }
 
-    @Override
     public final DataSet dataOut() {
         if (dataOut == null)
             dataOut = new DataSet();
@@ -127,7 +120,6 @@ public class RemoteService extends Handle implements IServiceProxy {
         this.dataOut = dataOut;
     }
 
-    @Override
     public final DataSet dataIn() {
         if (dataIn == null)
             dataIn = new DataSet();

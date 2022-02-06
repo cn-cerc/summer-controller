@@ -11,7 +11,7 @@ import cn.cerc.mis.client.RemoteService;
  *
  */
 public class CenterService extends RemoteService {
-    private IServiceServer server = new CenterServer();
+    private static final IServiceServer server = new CenterServer();
 
     public CenterService(IHandle handle) {
         super(handle);

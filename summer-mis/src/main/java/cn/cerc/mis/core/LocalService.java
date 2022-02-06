@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Variant;
-import cn.cerc.mis.client.IServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.other.MemoryBuffer;
 
-public class LocalService extends CustomServiceProxy implements IServiceProxy {
+public class LocalService extends ServiceQuery {
     private static final Logger log = LoggerFactory.getLogger(LocalService.class);
 
     public LocalService(IHandle handle) {
@@ -22,13 +22,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
         this.setService(service);
     }
 
-    public LocalService(IHandle handle, ServiceSign service) {
-        this(handle);
-        this.setService(service);
-    }
-
     // 带缓存调用服务
-    @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
             DataRow headIn = dataIn().head();
@@ -44,10 +38,6 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
             return false;
 
         try {
-            if (object instanceof IHandle)
-                ((IHandle) object).setSession(this.getSession());
-
-            // 没有缓存时，直接读取并存入缓存
             setDataOut(((IService) object)._call(this, dataIn(), function));
             return dataOut().state() > 0;
         } catch (Exception e) {
@@ -73,16 +63,79 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
         // 此属性已被移除
     }
 
-    @Override
+    public String service() {
+        return service.id();
+    }
+
+    @Deprecated
+    public String getService() {
+        return service.id();
+    }
+
+    protected Object getServiceObject(Variant function) {
+        if (getSession() == null) {
+            dataOut().setMessage("session is null.");
+            return null;
+        }
+        if (service == null) {
+            dataOut().setMessage("service is null.");
+            return null;
+        }
+
+        try {
+            return Application.getService(this, service.id(), function);
+        } catch (ClassNotFoundException e) {
+            dataOut().setMessage(e.getMessage());
+            return null;
+        }
+    }
+
     public LocalService setService(String service) {
-        super.setService(service);
+        super.setService(new ServiceSign(service));
         return this;
     }
-    
-    @Override
-    public LocalService setService(ServiceSign service) {
-        super.setService(service.id());
-        return this;
+
+    public String message() {
+        if (dataOut != null && dataOut.message() != null) {
+            return dataOut.message().replaceAll("'", "\"");
+        } else {
+            return null;
+        }
+    }
+
+    public DataSet dataIn() {
+        if (dataIn == null)
+            dataIn = new DataSet();
+        return dataIn;
+    }
+
+    public void setDataIn(DataSet dataIn) {
+        this.dataIn = dataIn;
+    }
+
+    public DataSet dataOut() {
+        if (dataOut == null)
+            dataOut = new DataSet();
+        return dataOut;
+    }
+
+    protected void setDataOut(DataSet dataOut) {
+        this.dataOut = dataOut;
+    }
+
+    @Deprecated
+    public DataSet getDataIn() {
+        return dataIn();
+    }
+
+    @Deprecated
+    public DataSet getDataOut() {
+        return dataOut();
+    }
+
+    @Deprecated
+    public String getMessage() {
+        return message();
     }
 
 }
