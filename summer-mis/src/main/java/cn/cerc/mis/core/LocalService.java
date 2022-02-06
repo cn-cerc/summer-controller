@@ -14,6 +14,11 @@ public class LocalService extends ServiceQuery {
 
     public LocalService(IHandle handle, String service) {
         this(handle);
+        super.setService(new ServiceSign(service));
+    }
+
+    public LocalService(IHandle handle, ServiceSign service) {
+        this(handle);
         this.setService(service);
     }
 
