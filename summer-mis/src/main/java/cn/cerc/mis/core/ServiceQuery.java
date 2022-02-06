@@ -13,38 +13,9 @@ import cn.cerc.mis.client.ServiceSign;
 
 public class ServiceQuery implements IHandle {
     protected ServiceSign service;
-    protected DataSet dataIn;
-    protected DataSet dataOut;
+    private DataSet dataIn;
+    private DataSet dataOut;
     private ISession session;
-
-    public static ServiceQuery open(IHandle handle, ServiceSign service, DataSet dataIn) {
-        ServiceQuery svr = new ServiceQuery(handle, service);
-        svr.call(dataIn);
-        return svr;
-    }
-
-    public static ServiceQuery open(IHandle handle, ServiceSign service, DataRow headIn) {
-        DataSet dataIn = new DataSet();
-        dataIn.head().copyValues(headIn);
-        ServiceQuery svr = new ServiceQuery(handle, service);
-        svr.call(dataIn);
-        return svr;
-    }
-
-    public static ServiceQuery open(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
-        Objects.requireNonNull(headIn);
-        DataSet dataIn = new DataSet();
-        headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
-        ServiceQuery svr = new ServiceQuery(handle, service);
-        svr.call(dataIn);
-        return svr;
-    }
-
-    public ServiceQuery call(DataSet dataIn) {
-        this.dataIn = dataIn;
-        dataOut = this.service.call(this, dataIn);
-        return this;
-    }
 
     public ServiceQuery(IHandle handle) {
         this.setSession(handle.getSession());
@@ -55,30 +26,60 @@ public class ServiceQuery implements IHandle {
         this.service = service;
     }
 
+    public ServiceQuery call(DataSet dataIn) {
+        this.dataIn = dataIn;
+        this.dataOut = this.service.call(this, dataIn);
+        return this;
+    }
+
+    public ServiceQuery call(DataRow headIn) {
+        this.dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return this.call(dataIn);
+    }
+
+    public ServiceQuery call(Map<String, Object> headIn) {
+        this.dataIn = new DataSet();
+        headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
+        return this.call(dataIn);
+    }
+
     public ServiceQuery setService(ServiceSign service) {
         this.service = service;
         return this;
     }
 
     public boolean isOk() {
+        Objects.requireNonNull(dataOut);
         return dataOut.state() > 0;
     }
 
     public boolean isFail() {
+        Objects.requireNonNull(dataOut);
         return dataOut.state() <= 0;
     }
 
-    public DataSet get() {
+    public final DataSet dataIn() {
+        if (this.dataIn == null)
+            this.dataIn = new DataSet();
+        return dataIn;
+    }
+
+    public final DataSet dataOut() {
+        if (this.dataOut == null)
+            this.dataOut = new DataSet();
         return dataOut;
     }
 
-    public DataSet getElseThrow() throws ServiceExecuteException {
+    public DataSet getDataOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
         if (dataOut.state() <= 0)
             throw new ServiceExecuteException(dataOut.message());
         return dataOut;
     }
 
     public <X extends Throwable> DataSet getElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+        Objects.requireNonNull(dataOut);
         if (dataOut.state() <= 0)
             throw exceptionSupplier.get();
         return dataOut;

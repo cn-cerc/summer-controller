@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
-import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.QueueDB;
 import cn.cerc.db.queue.QueueMode;
@@ -152,11 +151,11 @@ public class AsyncService extends ServiceQuery {
         ObjectNode content = mapper.createObjectNode();
 
         content.put("service", this.service.id());
-        if (this.dataIn != null) {
-            content.put("dataIn", dataIn.json());
+        if (this.dataIn() != null) {
+            content.put("dataIn", dataIn().json());
         }
-        if (this.dataOut != null) {
-            content.put("dataOut", dataOut.json());
+        if (this.dataOut() != null) {
+            content.put("dataOut", dataOut().json());
         }
         content.put("timer", this.timer);
         content.put("process", this.process.ordinal());
@@ -180,28 +179,6 @@ public class AsyncService extends ServiceQuery {
     public AsyncService setService(String service) {
         super.setService(new ServiceSign(service));
         return this;
-    }
-
-    public DataSet dataIn() {
-        if (dataIn == null) {
-            dataIn = new DataSet();
-        }
-        return dataIn;
-    }
-
-    public void setDataIn(DataSet dataIn) {
-        this.dataIn = dataIn;
-    }
-
-    public DataSet dataOut() {
-        if (dataOut == null) {
-            dataOut = new DataSet();
-        }
-        return dataOut;
-    }
-
-    public void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
     }
 
     public MessageProcess getProcess() {
@@ -247,13 +224,11 @@ public class AsyncService extends ServiceQuery {
     }
 
     public String message() {
-        if (dataOut == null) {
+        if (super.dataOut() == null)
             return null;
-        }
-        if (!dataOut.head().exists(_message_)) {
+        if (!super.dataOut().head().exists(_message_))
             return null;
-        }
-        return dataOut.head().getString(_message_);
+        return super.dataOut().head().getString(_message_);
     }
 
     public MessageLevel getMessageLevel() {

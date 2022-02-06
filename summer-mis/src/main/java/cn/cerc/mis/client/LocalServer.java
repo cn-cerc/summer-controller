@@ -7,26 +7,15 @@ import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IService;
 
-public class LocalServer implements IServiceServer {
+public class LocalServer {
 
-    @Override
-    public String getRequestUrl(IHandle handle, String service) {
-        return null;
-    }
-
-    @Override
-    public String getToken(IHandle handle) {
-        return null;
-    }
-
-    @Override
-    public DataSet _call(IHandle handle, DataSet dataIn, String serviceId) {
+    public static DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         try {
-            Variant function = new Variant("execute").setTag(serviceId);
-            IService bean = Application.getService(handle, serviceId, function);
+            Variant function = new Variant("execute").setTag(service.id());
+            IService bean = Application.getService(handle, service.id(), function);
             return bean._call(handle, dataIn, function);
         } catch (ClassNotFoundException e) {
-            return new DataSet().setMessage("not find service: " + serviceId);
+            return new DataSet().setMessage("not find service: " + service.id());
         } catch (ServiceException e) {
             return new DataSet().setMessage(e.getMessage());
         }

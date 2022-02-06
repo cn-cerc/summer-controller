@@ -1,17 +1,12 @@
 package cn.cerc.mis.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.Variant;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.other.MemoryBuffer;
 
 public class LocalService extends ServiceQuery {
-    private static final Logger log = LoggerFactory.getLogger(LocalService.class);
 
     public LocalService(IHandle handle) {
         super(handle);
@@ -20,6 +15,11 @@ public class LocalService extends ServiceQuery {
     public LocalService(IHandle handle, String service) {
         this(handle);
         this.setService(service);
+    }
+
+    public LocalService setService(String service) {
+        super.setService(new ServiceSign(service));
+        return this;
     }
 
     // 带缓存调用服务
@@ -32,22 +32,7 @@ public class LocalService extends ServiceQuery {
                 headIn.setValue(args[i].toString(), args[i + 1]);
         }
 
-        Variant function = new Variant("execute").setTag(service());
-        Object object = getServiceObject(function);
-        if (object == null)
-            return false;
-
-        try {
-            setDataOut(((IService) object)._call(this, dataIn(), function));
-            return dataOut().state() > 0;
-        } catch (Exception e) {
-            Throwable err = e;
-            if (e.getCause() != null)
-                err = e.getCause();
-            log.error(err.getMessage(), err);
-            dataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());
-            return false;
-        }
+        return super.call(dataIn()).isOk();
     }
 
     public String getExportKey() {
@@ -58,69 +43,26 @@ public class LocalService extends ServiceQuery {
         return tmp;
     }
 
-    @Deprecated
-    public void setBufferRead(boolean value) {
-        // 此属性已被移除
-    }
-
-    public String service() {
+    public final String service() {
         return service.id();
-    }
-
-    @Deprecated
-    public String getService() {
-        return service.id();
-    }
-
-    protected Object getServiceObject(Variant function) {
-        if (getSession() == null) {
-            dataOut().setMessage("session is null.");
-            return null;
-        }
-        if (service == null) {
-            dataOut().setMessage("service is null.");
-            return null;
-        }
-
-        try {
-            return Application.getService(this, service.id(), function);
-        } catch (ClassNotFoundException e) {
-            dataOut().setMessage(e.getMessage());
-            return null;
-        }
-    }
-
-    public LocalService setService(String service) {
-        super.setService(new ServiceSign(service));
-        return this;
     }
 
     public String message() {
-        if (dataOut != null && dataOut.message() != null) {
-            return dataOut.message().replaceAll("'", "\"");
+        if (super.dataOut() != null && super.dataOut().message() != null) {
+            return super.dataOut().message().replaceAll("'", "\"");
         } else {
             return null;
         }
     }
 
-    public DataSet dataIn() {
-        if (dataIn == null)
-            dataIn = new DataSet();
-        return dataIn;
+    @Deprecated
+    public void setBufferRead(boolean value) {
+        // 此属性已被移除
     }
 
-    public void setDataIn(DataSet dataIn) {
-        this.dataIn = dataIn;
-    }
-
-    public DataSet dataOut() {
-        if (dataOut == null)
-            dataOut = new DataSet();
-        return dataOut;
-    }
-
-    protected void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
+    @Deprecated
+    public String getService() {
+        return service.id();
     }
 
     @Deprecated

@@ -11,17 +11,15 @@ import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.IStatus;
 
 public final class ServiceSign {
-    private static IServiceServer localServer = new LocalServer();
     private String id;
-    private IServiceServer server;
+    private ServiceServerImpl server;
 
     public ServiceSign(String id) {
         super();
         this.id = id;
-        this.server = localServer;
     }
 
-    public ServiceSign(String id, IServiceServer server) {
+    public ServiceSign(String id, ServiceServerImpl server) {
         super();
         this.id = id;
         this.server = server;
@@ -31,13 +29,16 @@ public final class ServiceSign {
         return id;
     }
 
-    public IServiceServer server() {
+    public ServiceServerImpl server() {
         return this.server;
     }
 
     public DataSet call(IHandle handle, DataSet dataIn) {
         try {
-            return server._call(handle, dataIn, this.id);
+            if (server == null)
+                return LocalServer.call(this, handle, dataIn);
+            else
+                return server.call(this, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             return new DataSet().setMessage(e.getMessage());

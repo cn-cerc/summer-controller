@@ -11,21 +11,24 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.ServiceState;
 
-public interface IServiceServer {
-    static final Logger log = LoggerFactory.getLogger(IServiceServer.class);
+public interface ServiceServerImpl {
+    static final Logger log = LoggerFactory.getLogger(ServiceServerImpl.class);
 
     String getRequestUrl(IHandle handle, String service);
 
     String getToken(IHandle handle);
 
-    default DataSet _call(IHandle handle, DataSet dataIn, String serviceId) {
+    default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
+        String url = this.getRequestUrl(handle, service.id());
+        if (url == null)
+            return LocalServer.call(service, handle, dataIn);
+
         try {
             Curl curl = new Curl();
             String token = this.getToken(handle);
             if (token != null)
                 curl.put(ISession.TOKEN, token);
             curl.put("dataIn", dataIn.json());
-            String url = this.getRequestUrl(handle, serviceId);
             log.debug("request url: {}", url);
             log.debug("request params: {}", curl.getParameters());
             String response = curl.doPost(url);
