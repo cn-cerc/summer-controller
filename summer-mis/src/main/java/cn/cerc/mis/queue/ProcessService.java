@@ -8,9 +8,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.ISession;
-import cn.cerc.mis.client.AutoService;
+import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.IUserMessage;
+import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.task.AbstractTask;
 
@@ -63,16 +65,15 @@ public class ProcessService extends AbstractTask {
         updateTaskprocess(async, taskId, subject);
         try {
             // 执行指定的数据服务
-            AutoService auto = new AutoService(this, corpNo, userCode, async.getService());
-            auto.dataIn().appendDataSet(async.dataIn(), true);
-            if (auto.exec()) {
-                async.dataOut().appendDataSet(auto.dataOut(), true);
+            BookHandle handle = new BookHandle(this, corpNo).setUserCode(userCode);
+            ServiceQuery auto = new ServiceQuery(handle, new ServiceSign(async.getService()));
+            if (auto.call(async.dataIn()).isOk()) {
                 async.setProcess(MessageProcess.ok);
             } else {
-                async.dataOut().appendDataSet(auto.dataOut(), true);
                 async.setProcess(MessageProcess.error);
             }
-            async.dataOut().head().setValue("_message_", auto.message());
+            async.dataOut().appendDataSet(auto.dataOut(), true);
+            async.dataOut().head().setValue("_message_", auto.dataOut().message());
             updateTaskprocess(async, taskId, subject);
         } catch (Throwable e) {
             e.printStackTrace();
