@@ -4,12 +4,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Description;
+
 import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.IStatus;
-import jdk.jfr.Description;
 
 public final class ServiceSign {
     private String id;
