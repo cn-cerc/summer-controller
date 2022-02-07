@@ -54,7 +54,7 @@ public final class ServiceSign {
         }
         Description description = clazz.getDeclaredAnnotation(Description.class);
         if (description != null)
-            System.out.println(String.format("@Description(\"%s\")", description.value()));
+            System.out.println(String.format("/** %s */", description.value()));
         System.out.println(String.format("public static class %s {", clazz.getSimpleName()));
         List<Method> items = new ArrayList<>();
         for (Method method : clazz.getDeclaredMethods()) {
@@ -94,7 +94,7 @@ public final class ServiceSign {
         for (Method item : items) {
             Description description = item.getDeclaredAnnotation(Description.class);
             if (description != null)
-                System.out.println(String.format("@Description(\"%s\")", description.value()));
+                System.out.println(String.format("/** %s */", description.value()));
             System.out.println(String.format(fmt, item.getName(), clazz.getSimpleName(), item.getName()));
         }
     }
