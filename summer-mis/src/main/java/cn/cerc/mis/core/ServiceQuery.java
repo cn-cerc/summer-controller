@@ -68,12 +68,6 @@ public class ServiceQuery implements IHandle {
         return dataOut.state() <= 0;
     }
 
-    public boolean isFailElseThrow() throws ServiceExecuteException {
-        if (!isFail())
-            throw new ServiceExecuteException(dataOut.message());
-        return true;
-    }
-
     public DataSet getDataOutElseThrow() throws ServiceExecuteException {
         Objects.requireNonNull(dataOut);
         if (dataOut.state() <= 0)
