@@ -9,6 +9,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.IStatus;
+import jdk.jfr.Description;
 
 public final class ServiceSign {
     private String id;
@@ -50,50 +51,57 @@ public final class ServiceSign {
             System.out.println(String.format("// %s skip: it's not service", clazz.getSimpleName()));
             return;
         }
-        final String fmt = "public static final ServiceSign %s = new ServiceSign(\"%s.%s\");";
+        Description description = clazz.getDeclaredAnnotation(Description.class);
+        if (description != null) {
+            System.out.println("/**");
+            System.out.println("* " + description.value());
+            System.out.println("*/");
+        }
         System.out.println(String.format("public static class %s {", clazz.getSimpleName()));
-        List<String> items = new ArrayList<>();
+        List<Method> items = new ArrayList<>();
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.getModifiers() != ClassData.PUBLIC)
                 continue;
             if (method.getReturnType() == boolean.class && method.getParameterCount() == 0)
-                items.add(method.getName());
+                items.add(method);
         }
-        if (items.size() > 0) {
-            items.sort((t1, t2) -> t1.toLowerCase().compareTo(t2.toLowerCase()));
-            System.out.println("// version 1");
-            for (String item : items)
-                System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
-        }
+        printList(clazz, items, 1);
 
         items.clear();
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.getModifiers() != ClassData.PUBLIC)
                 continue;
             if (method.getReturnType() == IStatus.class && method.getParameterCount() == 2)
-                items.add(method.getName());
+                items.add(method);
         }
-        if (items.size() > 0) {
-            items.sort((t1, t2) -> t1.toLowerCase().compareTo(t2.toLowerCase()));
-            System.out.println("// version 2");
-            for (String item : items)
-                System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
-        }
+        printList(clazz, items, 2);
 
         items.clear();
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.getModifiers() != ClassData.PUBLIC)
                 continue;
             if (method.getReturnType() == DataSet.class && method.getParameterCount() == 2)
-                items.add(method.getName());
+                items.add(method);
         }
-        if (items.size() > 0) {
-            items.sort((t1, t2) -> t1.toLowerCase().compareTo(t2.toLowerCase()));
-            System.out.println("// version 3");
-            for (String item : items)
-                System.out.println(String.format(fmt, item, clazz.getSimpleName(), item));
-        }
+        printList(clazz, items, 3);
         System.out.println("}");
+    }
+
+    private static void printList(Class<?> clazz, List<Method> items, int version) {
+        if (items.size() == 0)
+            return;
+        items.sort((t1, t2) -> t1.getName().toLowerCase().compareTo(t2.getName().toLowerCase()));
+        System.out.println("// version " + version);
+        final String fmt = "public static final ServiceSign %s = new ServiceSign(\"%s.%s\");";
+        for (Method item : items) {
+            Description description = item.getDeclaredAnnotation(Description.class);
+            if (description != null) {
+                System.out.println("/**");
+                System.out.println("* " + description.value());
+                System.out.println("*/");
+            }
+            System.out.println(String.format(fmt, item.getName(), clazz.getSimpleName(), item.getName()));
+        }
     }
 
 }
