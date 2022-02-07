@@ -2,7 +2,6 @@ package cn.cerc.mis.core;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
@@ -16,6 +15,22 @@ public class ServiceQuery implements IHandle {
     private DataSet dataIn;
     private DataSet dataOut;
     private ISession session;
+
+    public static ServiceQuery open(IHandle handle, ServiceSign service, DataSet dataIn) {
+        return new ServiceQuery(handle, service).call(dataIn);
+    }
+
+    public static ServiceQuery open(IHandle handle, ServiceSign service, DataRow headIn) {
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return new ServiceQuery(handle, service).call(dataIn);
+    }
+
+    public static ServiceQuery open(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
+        DataSet dataIn = new DataSet();
+        headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
+        return new ServiceQuery(handle, service).call(dataIn);
+    }
 
     public ServiceQuery(IHandle handle) {
         this.setSession(handle.getSession());
@@ -32,18 +47,6 @@ public class ServiceQuery implements IHandle {
         return this;
     }
 
-    public ServiceQuery call(DataRow headIn) {
-        this.dataIn = new DataSet();
-        dataIn.head().copyValues(headIn);
-        return this.call(dataIn);
-    }
-
-    public ServiceQuery call(Map<String, Object> headIn) {
-        this.dataIn = new DataSet();
-        headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
-        return this.call(dataIn);
-    }
-
     public ServiceQuery setService(ServiceSign service) {
         this.service = service;
         return this;
@@ -54,9 +57,35 @@ public class ServiceQuery implements IHandle {
         return dataOut.state() > 0;
     }
 
+    public boolean isOkElseThrow() throws ServiceExecuteException {
+        if (!isOk())
+            throw new ServiceExecuteException(dataOut.message());
+        return true;
+    }
+
     public boolean isFail() {
         Objects.requireNonNull(dataOut);
         return dataOut.state() <= 0;
+    }
+
+    public boolean isFailElseThrow() throws ServiceExecuteException {
+        if (!isFail())
+            throw new ServiceExecuteException(dataOut.message());
+        return true;
+    }
+
+    public DataSet getDataOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
+        if (dataOut.state() <= 0)
+            throw new ServiceExecuteException(dataOut.message());
+        return dataOut;
+    }
+
+    public DataRow getHeadOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
+        if (dataOut.state() <= 0)
+            throw new ServiceExecuteException(dataOut.message());
+        return dataOut.head();
     }
 
     public final DataSet dataIn() {
@@ -68,20 +97,6 @@ public class ServiceQuery implements IHandle {
     public final DataSet dataOut() {
         if (this.dataOut == null)
             this.dataOut = new DataSet();
-        return dataOut;
-    }
-
-    public DataSet getDataOutElseThrow() throws ServiceExecuteException {
-        Objects.requireNonNull(dataOut);
-        if (dataOut.state() <= 0)
-            throw new ServiceExecuteException(dataOut.message());
-        return dataOut;
-    }
-
-    public <X extends Throwable> DataSet getElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
-        Objects.requireNonNull(dataOut);
-        if (dataOut.state() <= 0)
-            throw exceptionSupplier.get();
         return dataOut;
     }
 
