@@ -7,17 +7,17 @@ import java.util.Set;
 
 import org.springframework.context.annotation.Description;
 
-import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
-import cn.cerc.mis.core.IStatus;
+import cn.cerc.mis.core.ServiceMethod;
 
 public final class ServiceSign {
     private String id;
-    private ServiceServerImpl server;
+    private int version;
     private Set<String> properties;
+    private ServiceServerImpl server;
 
     public ServiceSign(String id) {
         super();
@@ -36,6 +36,15 @@ public final class ServiceSign {
 
     public ServiceServerImpl server() {
         return this.server;
+    }
+
+    public int version() {
+        return version;
+    }
+
+    public ServiceSign setVersion(int version) {
+        this.version = version;
+        return this;
     }
 
     public Set<String> properties() {
@@ -68,58 +77,36 @@ public final class ServiceSign {
         if (description != null)
             System.out.println(String.format("/** %s */", description.value()));
         System.out.println(String.format("public static class %s {", clazz.getSimpleName()));
-        List<Method> items = new ArrayList<>();
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getModifiers() != ClassData.PUBLIC)
-                continue;
-            if (method.getReturnType() == boolean.class && method.getParameterCount() == 0)
-                items.add(method);
-        }
-        printList(clazz, items, 1);
 
-        items.clear();
+        List<ServiceMethod> items = new ArrayList<>();
         for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getModifiers() != ClassData.PUBLIC)
-                continue;
-            if (method.getReturnType() == IStatus.class && method.getParameterCount() == 2)
-                items.add(method);
+            ServiceMethod sm = ServiceMethod.build(clazz, method.getName());
+            if (sm != null)
+                items.add(sm);
         }
-        printList(clazz, items, 2);
-
-        items.clear();
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getModifiers() != ClassData.PUBLIC)
-                continue;
-            if (method.getReturnType() == DataSet.class && method.getParameterCount() == 2)
-                items.add(method);
-        }
-        printList(clazz, items, 3);
-        System.out.println("}");
-    }
-
-    private static void printList(Class<?> clazz, List<Method> items, int version) {
-        if (items.size() == 0)
-            return;
-        items.sort((t1, t2) -> t1.getName().toLowerCase().compareTo(t2.getName().toLowerCase()));
-        System.out.println("// version " + version);
-        for (Method item : items) {
-            Description description = item.getDeclaredAnnotation(Description.class);
+        items.sort((t1, t2) -> t1.method().getName().toLowerCase().compareTo(t2.method().getName().toLowerCase()));
+        for (ServiceMethod item : items) {
+            description = item.method().getDeclaredAnnotation(Description.class);
             if (description != null)
                 System.out.println(String.format("/** %s */", description.value()));
-            DataValidate dataValidate = item.getDeclaredAnnotation(DataValidate.class);
+            DataValidate dataValidate = item.method().getDeclaredAnnotation(DataValidate.class);
+            String funcCode = item.method().getName();
             if (dataValidate != null) {
                 StringBuffer sb = new StringBuffer();
                 for (int i = 0; i < dataValidate.value().length; i++)
                     sb.append("\"").append(dataValidate.value()[i]).append("\",");
-                sb.delete(sb.length()-1, sb.length());
+                sb.delete(sb.length() - 1, sb.length());
                 System.out.println(String.format(
-                        "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setProperties(Set.of(%s));",
-                        item.getName(), clazz.getSimpleName(), item.getName(), sb.toString()));
+                        "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d).setProperties(Set.of(%s));",
+                        funcCode, clazz.getSimpleName(), funcCode, item.version().ordinal(), sb.toString()));
             } else {
-                System.out.println(String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\");",
-                        item.getName(), clazz.getSimpleName(), item.getName()));
+                System.out.println(
+                        String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d);",
+                                funcCode, clazz.getSimpleName(), funcCode, item.version().ordinal()));
             }
         }
+
+        System.out.println("}");
     }
 
 }
