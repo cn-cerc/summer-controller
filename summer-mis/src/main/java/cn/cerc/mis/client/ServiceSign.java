@@ -96,13 +96,22 @@ public final class ServiceSign {
                 for (int i = 0; i < dataValidate.value().length; i++)
                     sb.append("\"").append(dataValidate.value()[i]).append("\",");
                 sb.delete(sb.length() - 1, sb.length());
-                System.out.println(String.format(
-                        "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d).setProperties(Set.of(%s));",
-                        funcCode, clazz.getSimpleName(), funcCode, item.version().ordinal(), sb.toString()));
+                if (item.version().ordinal() > 0)
+                    System.out.println(String.format(
+                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d).setProperties(Set.of(%s));",
+                            funcCode, clazz.getSimpleName(), funcCode, item.version().ordinal(), sb.toString()));
+                else
+                    System.out.println(String.format(
+                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setProperties(Set.of(%s));",
+                            funcCode, clazz.getSimpleName(), funcCode, sb.toString()));
             } else {
-                System.out.println(
-                        String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d);",
-                                funcCode, clazz.getSimpleName(), funcCode, item.version().ordinal()));
+                if (item.version().ordinal() > 0)
+                    System.out.println(String.format(
+                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d);", funcCode,
+                            clazz.getSimpleName(), funcCode, item.version().ordinal()));
+                else
+                    System.out.println(String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\");",
+                            funcCode, clazz.getSimpleName(), funcCode));
             }
         }
 
