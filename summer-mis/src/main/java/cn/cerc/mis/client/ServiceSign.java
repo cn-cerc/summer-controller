@@ -3,18 +3,21 @@ package cn.cerc.mis.client;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.context.annotation.Description;
 
 import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.IStatus;
 
 public final class ServiceSign {
     private String id;
     private ServiceServerImpl server;
+    private Set<String> properties;
 
     public ServiceSign(String id) {
         super();
@@ -33,6 +36,15 @@ public final class ServiceSign {
 
     public ServiceServerImpl server() {
         return this.server;
+    }
+
+    public Set<String> properties() {
+        return properties;
+    }
+
+    public ServiceSign setProperties(Set<String> properties) {
+        this.properties = properties;
+        return this;
     }
 
     public DataSet call(IHandle handle, DataSet dataIn) {
@@ -90,12 +102,23 @@ public final class ServiceSign {
             return;
         items.sort((t1, t2) -> t1.getName().toLowerCase().compareTo(t2.getName().toLowerCase()));
         System.out.println("// version " + version);
-        final String fmt = "public static final ServiceSign %s = new ServiceSign(\"%s.%s\");";
         for (Method item : items) {
             Description description = item.getDeclaredAnnotation(Description.class);
             if (description != null)
                 System.out.println(String.format("/** %s */", description.value()));
-            System.out.println(String.format(fmt, item.getName(), clazz.getSimpleName(), item.getName()));
+            DataValidate dataValidate = item.getDeclaredAnnotation(DataValidate.class);
+            if (dataValidate != null) {
+                StringBuffer sb = new StringBuffer();
+                for (int i = 0; i < dataValidate.value().length; i++)
+                    sb.append("\"").append(dataValidate.value()[i]).append("\",");
+                sb.delete(sb.length()-1, sb.length());
+                System.out.println(String.format(
+                        "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setProperties(Set.of(%s));",
+                        item.getName(), clazz.getSimpleName(), item.getName(), sb.toString()));
+            } else {
+                System.out.println(String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\");",
+                        item.getName(), clazz.getSimpleName(), item.getName()));
+            }
         }
     }
 
