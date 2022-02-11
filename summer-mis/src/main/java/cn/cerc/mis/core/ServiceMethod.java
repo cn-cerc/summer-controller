@@ -15,7 +15,8 @@ public final class ServiceMethod {
     private final ServiceMethodVersion version;
 
     public enum ServiceMethodVersion {
-        ResultBoolean, ResultStatus, ResultDataSet, ResultDataSetByHeadIn, ResultBooleanByHeadIn
+        ResultBoolean, ResultStatus, ResultDataSetByDataIn, ResultDataSetByHeadIn, ResultBooleanByDataIn,
+        ResultBooleanByHeadIn
     }
 
     public ServiceMethod(Method method, ServiceMethodVersion version) {
@@ -75,7 +76,7 @@ public final class ServiceMethod {
                 dataOut.setMessage(result.getMessage());
             break;
         }
-        case ResultDataSet: {
+        case ResultDataSetByDataIn: {
             dataOut = (DataSet) method.invoke(owner, handle, dataIn);
             break;
         }
@@ -83,8 +84,13 @@ public final class ServiceMethod {
             dataOut = (DataSet) method.invoke(owner, handle, dataIn.head());
             break;
         }
+        case ResultBooleanByDataIn: {
+            boolean result = (Boolean) method.invoke(owner, handle, dataIn);
+            dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
+            break;
+        }
         case ResultBooleanByHeadIn: {
-            boolean result = (Boolean) method.invoke(owner);
+            boolean result = (Boolean) method.invoke(owner, handle, dataIn.head());
             dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
         }
         default: {
@@ -127,10 +133,12 @@ public final class ServiceMethod {
             Method method = clazz.getMethod(funcCode, IHandle.class, DataSet.class);
             if (method.getModifiers() != ClassData.PUBLIC)
                 return null;
-            if (method.getReturnType() != DataSet.class)
-                return null;
+            if (method.getReturnType() == DataSet.class)
+                return new ServiceMethod(method, ServiceMethodVersion.ResultDataSetByDataIn);
+            else if (method.getReturnType() == boolean.class)
+                return new ServiceMethod(method, ServiceMethodVersion.ResultBooleanByDataIn);
             else
-                return new ServiceMethod(method, ServiceMethodVersion.ResultDataSet);
+                return null;
         } catch (NoSuchMethodException | SecurityException e1) {
 
         }
