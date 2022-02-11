@@ -139,26 +139,14 @@ public final class ServiceMethod {
             Method method = clazz.getMethod(funcCode, IHandle.class, DataRow.class);
             if (method.getModifiers() != ClassData.PUBLIC)
                 return null;
-            if (method.getReturnType() != DataSet.class)
-                return null;
-            else
+            if (method.getReturnType() == DataSet.class)
                 return new ServiceMethod(method, ServiceMethodVersion.ResultDataSetByHeadIn);
-        } catch (NoSuchMethodException | SecurityException e1) {
-
-        }
-        // 第5代版本：支持单例
-        try {
-            Method method = clazz.getMethod(funcCode, IHandle.class, DataRow.class);
-            if (method.getModifiers() != ClassData.PUBLIC)
-                return null;
-            if (method.getReturnType() != boolean.class)
-                return null;
-            else
+            else if (method.getReturnType() == boolean.class)
                 return new ServiceMethod(method, ServiceMethodVersion.ResultBooleanByHeadIn);
+            else
+                return null;
         } catch (NoSuchMethodException | SecurityException e1) {
-
         }
-
         // 没有找到指定的函数
         return null;
     }
