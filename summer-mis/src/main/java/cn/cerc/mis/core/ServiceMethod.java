@@ -15,7 +15,7 @@ public final class ServiceMethod {
     private final ServiceMethodVersion version;
 
     public enum ServiceMethodVersion {
-        ResultBoolean, ResultStatus, ResultDataSet, ResultDataSetByHeadIn
+        ResultBoolean, ResultStatus, ResultDataSet, ResultDataSetByHeadIn, ResultBooleanByHeadIn
     }
 
     public ServiceMethod(Method method, ServiceMethodVersion version) {
@@ -83,6 +83,10 @@ public final class ServiceMethod {
             dataOut = (DataSet) method.invoke(owner, handle, dataIn.head());
             break;
         }
+        case ResultBooleanByHeadIn: {
+            boolean result = (Boolean) method.invoke(owner);
+            dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
+        }
         default: {
             dataOut = new DataSet().setMessage("can't support " + this.version.name());
             break;
@@ -139,6 +143,18 @@ public final class ServiceMethod {
                 return null;
             else
                 return new ServiceMethod(method, ServiceMethodVersion.ResultDataSetByHeadIn);
+        } catch (NoSuchMethodException | SecurityException e1) {
+
+        }
+        // 第5代版本：支持单例
+        try {
+            Method method = clazz.getMethod(funcCode, IHandle.class, DataRow.class);
+            if (method.getModifiers() != ClassData.PUBLIC)
+                return null;
+            if (method.getReturnType() != boolean.class)
+                return null;
+            else
+                return new ServiceMethod(method, ServiceMethodVersion.ResultBooleanByHeadIn);
         } catch (NoSuchMethodException | SecurityException e1) {
 
         }
