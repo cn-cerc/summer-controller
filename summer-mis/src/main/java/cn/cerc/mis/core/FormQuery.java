@@ -1,8 +1,15 @@
 package cn.cerc.mis.core;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.servlet.ServletException;
+
 public class FormQuery {
-    
-    public static String call(AbstractForm owner, String id, String... pathVariables) throws Exception {
+
+    public static String call(AbstractForm owner, String id, String... pathVariables)
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, ServletException, IOException {
         FormSign sv = new FormSign(id);
         String formId = sv.getId();
         String funcCode = sv.getValue();
@@ -14,5 +21,5 @@ public class FormQuery {
         bean.setPathVariables(pathVariables);
         return bean._call(funcCode);
     }
-    
+
 }
