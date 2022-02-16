@@ -1,10 +1,10 @@
 package cn.cerc.mis.ado;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,19 +108,25 @@ public class EntityQuery {
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
-                .collect(Collectors.toSet());
+        Set<T> set = new LinkedHashSet<>();
+        new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
+                .forEach(set::add);
+        return set;
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toSet());
+        Set<T> set = new LinkedHashSet<>();
+        new EntityMany<T>(handle, clazz, sqlText, true, true).stream().forEach(set::add);
+        return set;
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toSet());
+        Set<T> set = new LinkedHashSet<>();
+        new EntityMany<T>(handle, clazz, where.build(), true, true).stream().forEach(set::add);
+        return set;
     }
 
 }
