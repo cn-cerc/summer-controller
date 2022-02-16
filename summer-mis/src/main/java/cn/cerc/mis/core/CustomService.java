@@ -126,6 +126,11 @@ public abstract class CustomService extends Handle implements IService {
         return this.funcCode;
     }
 
+    // FishingO2O项目还有使用XML配置，移除后才能删除
+    public void setFuncCode(String funcCode) {
+        this.funcCode = funcCode;
+    }
+
     public IStatus success() {
         return new ServiceStatus(ServiceState.OK);
     }
