@@ -89,12 +89,12 @@ public final class ServiceSign {
             description = item.method().getDeclaredAnnotation(Description.class);
             if (description != null)
                 System.out.println(String.format("/** %s */", description.value()));
-            DataValidate dataValidate = item.method().getDeclaredAnnotation(DataValidate.class);
+            DataValidate[] dataValidates = item.method().getDeclaredAnnotationsByType(DataValidate.class);
             String funcCode = item.method().getName();
-            if (dataValidate != null) {
+            if (dataValidates.length > 0) {
                 StringBuffer sb = new StringBuffer();
-                for (int i = 0; i < dataValidate.value().length; i++)
-                    sb.append("\"").append(dataValidate.value()[i]).append("\",");
+                for (int i = 0; i < dataValidates.length; i++)
+                    sb.append("\"").append(dataValidates[i].value()).append("\",");
                 sb.delete(sb.length() - 1, sb.length());
                 if (item.version().ordinal() > 0)
                     System.out.println(String.format(

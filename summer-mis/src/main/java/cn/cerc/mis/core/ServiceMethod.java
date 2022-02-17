@@ -35,15 +35,17 @@ public final class ServiceMethod {
     public DataSet call(Object owner, IHandle handle, DataSet dataIn)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, DataValidateException {
         // 调用数据校验
-        DataValidate validate = method.getDeclaredAnnotation(DataValidate.class);
-        if (validate != null) {
-            DataRow headIn = dataIn.head();
-            String errorMsg = validate.message();
-            for (String fieldCode : validate.value()) {
+        DataValidate[] validates = method.getDeclaredAnnotationsByType(DataValidate.class);
+        if (validates.length > 0) {
+            for (DataValidate validate : validates) {
+                DataRow headIn = dataIn.head();
+                String errorMsg = validate.message();
+                String fieldCode = validate.value();
                 if (!headIn.has(fieldCode)) {
-                    if (errorMsg.contains("%s"))
-                        throw new DataValidateException(String.format(errorMsg, fieldCode));
-                    else
+                    if (errorMsg.contains("%s")) {
+                        String message = "".equals(validate.name()) ? fieldCode : validate.name();
+                        throw new DataValidateException(String.format(errorMsg, message));
+                    } else
                         throw new DataValidateException(errorMsg);
                 }
             }
