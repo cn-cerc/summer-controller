@@ -14,22 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface Webform {
 
-    String value() default "";
-
     String name();
 
     String module();
 
     String parent();
 
-    String versions();
-
-    String security() default "";
-
-    String hide() default "";
-
-    String custom() default "";
-
-    String describe() default "";
+    boolean appStore() default false;
 
 }

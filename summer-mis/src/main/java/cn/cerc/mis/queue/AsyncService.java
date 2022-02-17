@@ -13,18 +13,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
-import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.QueueDB;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.client.IServiceProxy;
+import cn.cerc.mis.client.ServiceSign;
+import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.message.MessageRecord;
 
-public class AsyncService implements IServiceProxy {
+public class AsyncService extends ServiceQuery {
+    public static final String _message_ = "_message_";
     private static final Logger log = LoggerFactory.getLogger(AsyncService.class);
     private static final ClassResource res = new ClassResource(AsyncService.class, SummerMIS.ID);
 
@@ -41,12 +42,7 @@ public class AsyncService implements IServiceProxy {
 
     private String corpNo;
     private String userCode;
-    // 预约的服务
-    private String service;
-    // 调用参数
-    private DataSet dataIn;
-    // 执行结果
-    private DataSet dataOut;
+
     // 预约时间，若为空则表示立即执行
     private String timer;
     // 执行进度
@@ -54,18 +50,12 @@ public class AsyncService implements IServiceProxy {
     // 处理时间
     private String processTime;
     //
-    private IHandle handle;
-    //
     private MessageLevel messageLevel = MessageLevel.Service;
     //
     private String msgId;
 
-    public AsyncService() {
-
-    }
-
     public AsyncService(IHandle handle) {
-        this.handle = handle;
+        super(handle);
         if (handle != null) {
             this.setCorpNo(handle.getCorpNo());
             this.setUserCode(handle.getUserCode());
@@ -103,7 +93,6 @@ public class AsyncService implements IServiceProxy {
         return this;
     }
 
-    @Override
     public boolean exec(Object... args) {
         DataRow headIn = dataIn().head();
         if (args.length > 0) {
@@ -114,7 +103,7 @@ public class AsyncService implements IServiceProxy {
                 headIn.setValue(args[i].toString(), args[i + 1]);
             }
         }
-        headIn.setValue("token", handle.getSession().getToken());
+        headIn.setValue("token", this.getSession().getToken());
 
         String subject = this.getSubject();
         if ("".equals(subject)) {
@@ -125,13 +114,13 @@ public class AsyncService implements IServiceProxy {
         dataOut().head().setValue("_msgId_", msgId);
         if (this.process == MessageProcess.working) {
             // 返回消息的编号插入到阿里云消息队列
-            QueueQuery ds = new QueueQuery(handle);
+            QueueQuery ds = new QueueQuery(this);
             ds.setQueueMode(QueueMode.append);
             ds.add("select * from %s", QueueDB.SUMMER);
             ds.open();
             ds.appendDataSet(this.dataIn(), true);
             ds.head().setValue("_queueId_", msgId);
-            ds.head().setValue("_service_", this.service);
+            ds.head().setValue("_service_", this.serviceId());
             ds.head().setValue("_corpNo_", this.corpNo);
             ds.head().setValue("_userCode_", this.userCode);
             ds.head().setValue("_content_", this.toString());
@@ -141,9 +130,6 @@ public class AsyncService implements IServiceProxy {
     }
 
     private void send() {
-        if (handle == null) {
-            throw new RuntimeException("handle is null");
-        }
         String subject = this.getSubject();
         if (subject == null || "".equals(subject)) {
             throw new RuntimeException("subject is null");
@@ -156,7 +142,7 @@ public class AsyncService implements IServiceProxy {
         msg.setSubject(subject);
         msg.setProcess(this.process);
         log.debug(this.getCorpNo() + ":" + this.getUserCode() + ":" + this);
-        this.msgId = msg.send(handle);
+        this.msgId = msg.send(this);
     }
 
     @Override
@@ -164,12 +150,12 @@ public class AsyncService implements IServiceProxy {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode content = mapper.createObjectNode();
 
-        content.put("service", this.service);
-        if (this.dataIn != null) {
-            content.put("dataIn", dataIn.json());
+        content.put("service", this.serviceId());
+        if (this.dataIn() != null) {
+            content.put("dataIn", dataIn().json());
         }
-        if (this.dataOut != null) {
-            content.put("dataOut", dataOut.json());
+        if (this.dataOut() != null) {
+            content.put("dataOut", dataOut().json());
         }
         content.put("timer", this.timer);
         content.put("process", this.process.ordinal());
@@ -179,39 +165,20 @@ public class AsyncService implements IServiceProxy {
         return content.toString();
     }
 
-    @Override
     public String getService() {
-        return service;
+        return serviceId();
     }
 
     @Override
-    public AsyncService setService(String service) {
-        this.service = service;
+    public AsyncService setService(ServiceSign service) {
+        super.setService(service);
         return this;
     }
 
-    @Override
-    public DataSet dataIn() {
-        if (dataIn == null) {
-            dataIn = new DataSet();
-        }
-        return dataIn;
-    }
-
-    public void setDataIn(DataSet dataIn) {
-        this.dataIn = dataIn;
-    }
-
-    @Override
-    public DataSet dataOut() {
-        if (dataOut == null) {
-            dataOut = new DataSet();
-        }
-        return dataOut;
-    }
-
-    public void setDataOut(DataSet dataOut) {
-        this.dataOut = dataOut;
+    @Deprecated
+    public AsyncService setService(String service) {
+        super.setService(new ServiceSign(service));
+        return this;
     }
 
     public MessageProcess getProcess() {
@@ -238,6 +205,7 @@ public class AsyncService implements IServiceProxy {
         this.processTime = processTime;
     }
 
+    @Override
     public String getCorpNo() {
         return corpNo;
     }
@@ -246,6 +214,7 @@ public class AsyncService implements IServiceProxy {
         this.corpNo = corpNo;
     }
 
+    @Override
     public String getUserCode() {
         return userCode;
     }
@@ -254,15 +223,12 @@ public class AsyncService implements IServiceProxy {
         this.userCode = userCode;
     }
 
-    @Override
     public String message() {
-        if (dataOut == null) {
+        if (super.dataOut() == null)
             return null;
-        }
-        if (!dataOut.head().exists(_message_)) {
+        if (!super.dataOut().head().exists(_message_))
             return null;
-        }
-        return dataOut.head().getString(_message_);
+        return super.dataOut().head().getString(_message_);
     }
 
     public MessageLevel getMessageLevel() {

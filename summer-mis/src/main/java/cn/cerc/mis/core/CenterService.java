@@ -1,8 +1,9 @@
 package cn.cerc.mis.core;
 
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.client.IServiceServer;
+import cn.cerc.mis.client.ServiceServerImpl;
 import cn.cerc.mis.client.RemoteService;
+import cn.cerc.mis.client.ServiceSign;
 
 /**
  * 调用中心数据库权限等服务
@@ -11,11 +12,15 @@ import cn.cerc.mis.client.RemoteService;
  *
  */
 public class CenterService extends RemoteService {
-    private IServiceServer server = new CenterServer();
+    private static final ServiceServerImpl server = new CenterServer();
 
     public CenterService(IHandle handle) {
         super(handle);
-        this.setServer(server);
+    }
+
+    public CenterService setService(String serviceId) {
+        super.setService(new ServiceSign(serviceId, server));
+        return this;
     }
 
 }

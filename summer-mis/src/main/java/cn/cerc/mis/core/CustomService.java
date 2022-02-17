@@ -1,21 +1,17 @@
 package cn.cerc.mis.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
-import cn.cerc.mis.security.SecurityPolice;
-import cn.cerc.mis.security.SecurityStopException;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -48,11 +44,8 @@ public abstract class CustomService extends Handle implements IService {
         if ("_call".equals(function.getString()))
             return new DataSet().setMessage("function is call");
         if (Utils.isEmpty(this.funcCode))
-            this.setFuncCode(function.getString());
-        return this.execute(handle, dataIn);
-    }
+            this.funcCode = function.getString();
 
-    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         this.setSession(handle.getSession());
         this.dataIn = dataIn;
         String funcCode = dataIn.head().getString("_function_");
@@ -61,83 +54,19 @@ public abstract class CustomService extends Handle implements IService {
         else
             this.funcCode = funcCode;
 
-        DataSet dataOut = new DataSet();
-        this.dataOut = dataOut;
-
+        this.dataOut = new DataSet();
         if (Utils.isEmpty(funcCode))
             return dataOut.setMessage("function is null");
 
         Class<?> self = this.getClass();
-        Method method;
-        try {
-            method = self.getMethod(funcCode);
-        } catch (NoSuchMethodException | SecurityException e1) {
-            method = null;
-        }
-        if (method == null) {
-            try {
-                method = self.getMethod(funcCode, IHandle.class, DataSet.class);
-                if ("execute".equals(funcCode))
-                    return dataOut.setMessage("function is execute");
-            } catch (NoSuchMethodException | SecurityException e1) {
-                method = null;
-            }
-        }
-        if (method == null) {
-            try {
-                method = self.getMethod(funcCode, DataSet.class, DataSet.class);
-            } catch (NoSuchMethodException | SecurityException e1) {
-                method = null;
-            }
-        }
-
-        if (method == null) {
+        ServiceMethod sm = ServiceMethod.build(self, funcCode);
+        if (sm == null) {
             dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
             dataOut.setState(ServiceState.NOT_FIND_SERVICE);
             return dataOut;
         }
-
         try {
-            DataValidate validate = method.getDeclaredAnnotation(DataValidate.class);
-            if (validate != null) {
-                DataRow headIn = dataIn.head();
-                String errorMsg = validate.message();
-                for (String fieldCode : validate.value()) {
-                    if (!headIn.has(fieldCode)) {
-                        if (errorMsg.contains("%s"))
-                            throw new DataValidateException(String.format(errorMsg, fieldCode));
-                        else
-                            throw new DataValidateException(errorMsg);
-                    }
-                }
-            }
-            if (!SecurityPolice.check(this, method, this)) {
-                dataOut.setMessage(SecurityStopException.getAccessDisabled());
-                dataOut.setState(ServiceState.ACCESS_DISABLED);
-                return dataOut;
-            }
-            // 执行具体的服务函数
-            if (method.getParameterCount() == 0) {
-                int state = (Boolean) method.invoke(this) ? ServiceState.OK : ServiceState.ERROR;
-                dataOut.setState(state);
-            } else if (method.getParameterCount() == 1) {
-                dataOut = (DataSet) method.invoke(this, dataIn);
-                this.dataOut = dataOut;
-            } else {
-                if (method.getReturnType().equals(IStatus.class)) {
-                    IStatus result = (IStatus) method.invoke(this, dataIn, dataOut);
-                    if (dataOut.state() == ServiceState.ERROR)
-                        dataOut.setState(result.getState());
-                    if (dataOut.message() == null)
-                        dataOut.setMessage(result.getMessage());
-                } else {
-                    dataOut = (DataSet) method.invoke(this, handle, dataIn);
-                    this.dataOut = dataOut;
-                }
-            }
-            // 防止调用者修改并回写到数据库
-            dataOut.disableStorage();
-            dataOut.first();
+            this.dataOut = sm.call(this, handle, dataIn);
             return dataOut;
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             Throwable err = e.getCause() != null ? e.getCause() : e;
@@ -197,6 +126,7 @@ public abstract class CustomService extends Handle implements IService {
         return this.funcCode;
     }
 
+    // FishingO2O项目还有使用XML配置，移除后才能删除
     public void setFuncCode(String funcCode) {
         this.funcCode = funcCode;
     }
@@ -229,10 +159,5 @@ public abstract class CustomService extends Handle implements IService {
     public Object getProperty(String key) {
         return getSession().getProperty(key);
     }
-
-//    @Deprecated
-//    public  void setProperty(String key, Object value) {
-//        getSession().setProperty(key, value);
-//    }
 
 }

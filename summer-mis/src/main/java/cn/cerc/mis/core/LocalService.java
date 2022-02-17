@@ -1,16 +1,12 @@
 package cn.cerc.mis.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.Variant;
-import cn.cerc.mis.client.IServiceProxy;
+import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.other.MemoryBuffer;
 
-public class LocalService extends CustomServiceProxy implements IServiceProxy {
-    private static final Logger log = LoggerFactory.getLogger(LocalService.class);
+public class LocalService extends ServiceQuery {
 
     public LocalService(IHandle handle) {
         super(handle);
@@ -18,11 +14,20 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
 
     public LocalService(IHandle handle, String service) {
         this(handle);
+        super.setService(new ServiceSign(service));
+    }
+
+    public LocalService(IHandle handle, ServiceSign service) {
+        this(handle);
         this.setService(service);
     }
 
+    public LocalService setService(String service) {
+        super.setService(new ServiceSign(service));
+        return this;
+    }
+
     // 带缓存调用服务
-    @Override
     public boolean exec(Object... args) {
         if (args.length > 0) {
             DataRow headIn = dataIn().head();
@@ -32,26 +37,7 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
                 headIn.setValue(args[i].toString(), args[i + 1]);
         }
 
-        Variant function = new Variant("execute").setTag(service());
-        Object object = getServiceObject(function);
-        if (object == null)
-            return false;
-
-        try {
-            if (object instanceof IHandle)
-                ((IHandle) object).setSession(this.getSession());
-
-            // 没有缓存时，直接读取并存入缓存
-            setDataOut(((IService) object)._call(this, dataIn(), function));
-            return dataOut().state() > 0;
-        } catch (Exception e) {
-            Throwable err = e;
-            if (e.getCause() != null)
-                err = e.getCause();
-            log.error(err.getMessage(), err);
-            dataOut().setState(ServiceState.ERROR).setMessage(err.getMessage());
-            return false;
-        }
+        return super.call(dataIn()).isOk();
     }
 
     public String getExportKey() {
@@ -62,15 +48,41 @@ public class LocalService extends CustomServiceProxy implements IServiceProxy {
         return tmp;
     }
 
+    public final String service() {
+        return serviceId();
+    }
+
+    public String message() {
+        if (super.dataOut() != null && super.dataOut().message() != null) {
+            return super.dataOut().message().replaceAll("'", "\"");
+        } else {
+            return null;
+        }
+    }
+
     @Deprecated
     public void setBufferRead(boolean value) {
         // 此属性已被移除
     }
 
-    @Override
-    public LocalService setService(String service) {
-        super.setService(service);
-        return this;
+    @Deprecated
+    public String getService() {
+        return serviceId();
+    }
+
+    @Deprecated
+    public DataSet getDataIn() {
+        return dataIn();
+    }
+
+    @Deprecated
+    public DataSet getDataOut() {
+        return dataOut();
+    }
+
+    @Deprecated
+    public String getMessage() {
+        return message();
     }
 
 }

@@ -1,10 +1,10 @@
 package cn.cerc.mis.core;
 
-public class IdValue {
+public class FormSign {
     private String id;
     private String value;
 
-    public IdValue(String text) {
+    public FormSign(String text) {
         String items[] = text.split("\\.");
         switch (items.length) {
         case 1: {

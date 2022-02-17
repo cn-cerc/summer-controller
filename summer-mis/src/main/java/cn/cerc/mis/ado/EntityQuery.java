@@ -1,29 +1,26 @@
 package cn.cerc.mis.ado;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
-import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
-import cn.cerc.db.core.SqlServer;
-import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 import cn.cerc.db.redis.JedisFactory;
 import redis.clients.jedis.Jedis;
 
-public class EntityFactory {
-    private static final Logger log = LoggerFactory.getLogger(EntityFactory.class);
+public class EntityQuery {
+    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
 
     public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
@@ -88,7 +85,7 @@ public class EntityFactory {
         for (int i = 0; i < values.length - 1; i++)
             params[i] = values[i];
 
-        SqlQuery query = EntityFactory.loadMany(handle, clazz, params).dataSet();
+        SqlQuery query = EntityMany.open(handle, clazz, params).dataSet();
         if (query.size() > 1000)
             log.warn("corpNo{}, entity {}, size larger than 1000.", handle.getCorpNo(), clazz);
         for (DataRow row : query) {
@@ -102,7 +99,7 @@ public class EntityFactory {
                 return Optional.of(row.asEntity(clazz));
         }
 
-        EntityOne<T> loadOne = EntityFactory.loadOne(handle, clazz, values);
+        EntityOne<T> loadOne = EntityOne.open(handle, clazz, values);
         if (loadOne.isPresent())
             return Optional.of(loadOne.get());
         if (actionInsert != null)
@@ -111,69 +108,25 @@ public class EntityFactory {
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
-                .collect(Collectors.toSet());
+        Set<T> set = new LinkedHashSet<>();
+        new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
+                .forEach(set::add);
+        return set;
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toSet());
+        Set<T> set = new LinkedHashSet<>();
+        new EntityMany<T>(handle, clazz, sqlText, true, true).stream().forEach(set::add);
+        return set;
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toSet());
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, String... values) {
-        return EntityOne.open(handle, clazz, values);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return EntityOne.open(handle, clazz, sqlText);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOne(IHandle handle, Class<T> clazz,
-            Consumer<SqlWhere> consumer) {
-        return EntityOne.open(handle, clazz, consumer);
-    }
-
-    public static <T extends EntityImpl> EntityOne<T> loadOneByUID(IHandle handle, Class<T> clazz, long uid) {
-        return EntityOne.open(handle, clazz, uid);
-    }
-
-    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, String... values) {
-        return EntityMany.open(handle, clazz, values);
-    }
-
-    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return EntityMany.open(handle, clazz, sqlText);
-    }
-
-    public static <T extends EntityImpl> EntityMany<T> loadMany(IHandle handle, Class<T> clazz,
-            Consumer<SqlWhere> consumer) {
-        return EntityMany.open(handle, clazz, consumer);
-    }
-
-    @Deprecated
-    public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz) {
-        EntityHelper<T> helper = EntityHelper.create(clazz);
-        SqlServer server = clazz.getAnnotation(SqlServer.class);
-        SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
-        SqlQuery query = new SqlQuery(handle, sqlServerType);
-        query.operator().setTable(helper.table());
-        query.operator().setOid(helper.idFieldCode());
-        query.operator().setVersionField(helper.versionFieldCode());
-        EntityHome.registerCacheListener(query, clazz, true);
-        return query;
-    }
-
-    @Deprecated
-    public static <T extends EntityImpl> SqlQuery buildQuery(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        SqlQuery query = loadMany(handle, clazz, sqlText).dataSet();
-        query.setReadonly(false);
-        return query;
+        Set<T> set = new LinkedHashSet<>();
+        new EntityMany<T>(handle, clazz, where.build(), true, true).stream().forEach(set::add);
+        return set;
     }
 
 }
