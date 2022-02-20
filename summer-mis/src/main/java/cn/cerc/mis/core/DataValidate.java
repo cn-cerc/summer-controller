@@ -19,7 +19,7 @@ public @interface DataValidate {
 
     String name() default "";
 
-    /** sample:$value > 0 */
+    /* sample:$value > 0 */
     String allow() default "";
 
 }

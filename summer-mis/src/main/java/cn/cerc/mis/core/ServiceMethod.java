@@ -94,6 +94,7 @@ public final class ServiceMethod {
         case ResultBooleanByHeadIn: {
             boolean result = (Boolean) method.invoke(owner, handle, dataIn.head());
             dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
+            break;
         }
         default: {
             dataOut = new DataSet().setMessage("can't support " + this.version.name());
