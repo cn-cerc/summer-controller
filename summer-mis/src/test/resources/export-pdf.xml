@@ -7,11 +7,11 @@
         <property name="header" value="地藤系统：0755-33502780"/>
         <property name="columns">
             <list>
-                <bean class="export.excel.StringColumn">
+                <bean class="cn.cerc.mis.excel.input.StringColumn">
                     <property name="code" value="Code_"/>
                     <property name="name" value="代码"/>
                 </bean>
-                <bean class="export.excel.StringColumn">
+                <bean class="cn.cerc.mis.excel.input.StringColumn">
                     <property name="code" value="Name_"/>
                     <property name="name" value="名称"/>
                 </bean>
