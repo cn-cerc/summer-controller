@@ -89,12 +89,12 @@ public class SecurityPolice {
 
         log.debug("validate:{} in {}", value, values);
         String version = null;
-        int site = values.indexOf("#");
-        if (site > -1) {
+        int index = values.indexOf("#");
+        if (index > -1) {
             String tmp = values;
-            values = tmp.substring(0, site);
+            values = tmp.substring(0, index);
             // 取出当前版本标识, 值如：1
-            version = tmp.substring(site + 1).trim();
+            version = tmp.substring(index + 1).trim();
         }
         String text = value;
         int point = value.indexOf("#");
@@ -102,7 +102,7 @@ public class SecurityPolice {
             text = value.substring(0, point);
 
         // 支持版本号比对
-        if (site > -1 && point > -1) {
+        if (index > -1 && point > -1) {
             // 取出授权版本列表，值如：1,3,
             String versions = value.substring(point + 1).trim();
             if (version.length() > 0 && versions.length() > 0) {
@@ -240,6 +240,16 @@ public class SecurityPolice {
                     sb.append("]");
                     result = sb.toString();
                 }
+            }
+            // 追加菜单/服务标记的版本号
+            Versions versions = bean.getClass().getDeclaredAnnotation(Versions.class);
+            StringBuilder builder = new StringBuilder();
+            if (versions != null) {
+                int[] value = versions.value();
+                for (int i : value) {
+                    builder.append(i).append(",");
+                }
+                result = result + "#" + builder.toString();
             }
         } else if (handle != null) {
             if (bean instanceof IForm) {
