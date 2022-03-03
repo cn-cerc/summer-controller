@@ -106,10 +106,21 @@ public class AsyncService extends ServiceQuery {
         headIn.setValue("token", this.getSession().getToken());
 
         String subject = this.getSubject();
-        if ("".equals(subject)) {
+        if ("".equals(subject))
             throw new RuntimeException(res.getString(7, "后台任务标题不允许为空！"));
-        }
-        this.send(); // 发送到队列服务器
+
+        if (subject == null || "".equals(subject))
+            throw new RuntimeException("subject is null");
+
+        MessageRecord msg = new MessageRecord();
+        msg.setCorpNo(this.getCorpNo());
+        msg.setUserCode(this.getUserCode());
+        msg.setLevel(this.messageLevel);
+        msg.setContent(this.toString());
+        msg.setSubject(subject);
+        msg.setProcess(this.process);
+        log.debug(this.getCorpNo() + ":" + this.getUserCode() + ":" + this);
+        this.msgId = msg.send(this);
 
         dataOut().head().setValue("_msgId_", msgId);
         if (this.process == MessageProcess.working) {
@@ -129,27 +140,9 @@ public class AsyncService extends ServiceQuery {
         return !"".equals(msgId);
     }
 
-    private void send() {
-        String subject = this.getSubject();
-        if (subject == null || "".equals(subject)) {
-            throw new RuntimeException("subject is null");
-        }
-        MessageRecord msg = new MessageRecord();
-        msg.setCorpNo(this.getCorpNo());
-        msg.setUserCode(this.getUserCode());
-        msg.setLevel(this.messageLevel);
-        msg.setContent(this.toString());
-        msg.setSubject(subject);
-        msg.setProcess(this.process);
-        log.debug(this.getCorpNo() + ":" + this.getUserCode() + ":" + this);
-        this.msgId = msg.send(this);
-    }
-
     @Override
     public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode content = mapper.createObjectNode();
-
+        ObjectNode content = new ObjectMapper().createObjectNode();
         content.put("service", this.serviceId());
         if (this.dataIn() != null) {
             content.put("dataIn", dataIn().json());

@@ -29,10 +29,6 @@ public class ExportExcel implements IHandle {
     private boolean saveLocal = false;
     private ISession session;
 
-    public ExportExcel() {
-
-    }
-
     public ExportExcel(IHandle handle, HttpServletResponse response) {
         this.setSession(handle.getSession());
         this.response = response;
