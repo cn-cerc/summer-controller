@@ -30,7 +30,7 @@ public class AsyncService extends ServiceQuery {
     private static final ClassResource res = new ClassResource(AsyncService.class, SummerMIS.ID);
 
     // 状态列表
-    private static List<String> processTiles = new ArrayList<>();
+    private static final List<String> processTiles = new ArrayList<>();
 
     static {
         processTiles.add(res.getString(1, "中止执行"));
@@ -38,6 +38,7 @@ public class AsyncService extends ServiceQuery {
         processTiles.add(res.getString(3, "正在执行中"));
         processTiles.add(res.getString(4, "执行成功"));
         processTiles.add(res.getString(5, "执行失败"));
+        processTiles.add(res.getString(6, "下载完成"));
     }
 
     private String corpNo;
@@ -97,7 +98,7 @@ public class AsyncService extends ServiceQuery {
         DataRow headIn = dataIn().head();
         if (args.length > 0) {
             if (args.length % 2 != 0) {
-                throw new RuntimeException(res.getString(6, "传入的参数数量必须为偶数！"));
+                throw new RuntimeException(res.getString(7, "传入的参数数量必须为偶数！"));
             }
             for (int i = 0; i < args.length; i = i + 2) {
                 headIn.setValue(args[i].toString(), args[i + 1]);
@@ -107,7 +108,7 @@ public class AsyncService extends ServiceQuery {
 
         String subject = this.getSubject();
         if ("".equals(subject))
-            throw new RuntimeException(res.getString(7, "后台任务标题不允许为空！"));
+            throw new RuntimeException(res.getString(8, "后台任务标题不允许为空！"));
 
         if (subject == null || "".equals(subject))
             throw new RuntimeException("subject is null");
