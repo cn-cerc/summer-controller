@@ -41,11 +41,11 @@ public class LocalService extends ServiceQuery {
     }
 
     public String getExportKey() {
-        String tmp = "" + System.currentTimeMillis();
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), tmp)) {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), timestamp)) {
             buff.setValue("data", this.dataIn().json());
         }
-        return tmp;
+        return timestamp;
     }
 
     public final String service() {

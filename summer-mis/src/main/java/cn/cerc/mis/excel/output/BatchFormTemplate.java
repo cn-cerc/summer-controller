@@ -48,6 +48,7 @@ public class BatchFormTemplate extends FormTemplate {
             newRow += this.getHeads().size() + dataSet.size() + 6;
             this.setRow(newRow);
         }
+        items.clear();
     }
 
     public void add(DataSet item) {
