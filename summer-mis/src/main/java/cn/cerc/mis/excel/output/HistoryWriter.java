@@ -1,7 +1,11 @@
 package cn.cerc.mis.excel.output;
 
-public interface HistoryWriter {
-    void start(Object handle, ExcelTemplate template);
+import cn.cerc.db.core.IHandle;
 
-    void finish(Object handle, ExcelTemplate template);
+public interface HistoryWriter {
+
+    void start(IHandle handle, ExcelTemplate template);
+
+    void finish(IHandle handle, ExcelTemplate template);
+
 }

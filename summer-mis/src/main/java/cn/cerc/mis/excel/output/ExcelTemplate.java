@@ -107,13 +107,16 @@ public class ExcelTemplate {
                     if (changeRowHeight) {
                         sheet.setRowView(row, 650, false);
                     }
+                    if (sheet.getRows() > 65536)
+                        throw new RuntimeException("你导出的数据量过大，超过了Excel的上限，请调整查询条件");
                     writeColumn(sheet, col, row, column, oss, wc);
                 }
             }
         }
     }
 
-    protected void writeColumn(WritableSheet sheet, int col, int row, Column column, OssConnection oss, WritableCellFormat wc) throws WriteException {
+    protected void writeColumn(WritableSheet sheet, int col, int row, Column column, OssConnection oss,
+            WritableCellFormat wc) throws WriteException {
         if (column instanceof NumberColumn) {
             if (LanguageResource.isLanguageTW()) {
                 Label item = new Label(col, row, decimalformat.format(column.getValue()));
