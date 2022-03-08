@@ -2,7 +2,6 @@ package cn.cerc.mis.excel.output;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import cn.cerc.db.core.ClassResource;
@@ -20,7 +19,7 @@ import jxl.write.WriteException;
 public class BatchFormTemplate extends FormTemplate {
     private static final ClassResource res = new ClassResource(BatchFormTemplate.class, SummerMIS.ID);
     private static final DecimalFormat format = new DecimalFormat(ApplicationConfig.getPattern());
-    private static final List<DataSet> items = new ArrayList<>();
+    private List<DataSet> items;
 
     @Override
     public void output(WritableSheet sheet) throws WriteException {
@@ -48,11 +47,14 @@ public class BatchFormTemplate extends FormTemplate {
             newRow += this.getHeads().size() + dataSet.size() + 6;
             this.setRow(newRow);
         }
-        items.clear();
     }
 
-    public void add(DataSet item) {
-        items.add(item);
+    public List<DataSet> getItems() {
+        return items;
+    }
+
+    public void setItems(List<DataSet> items) {
+        this.items = items;
     }
 
 }
