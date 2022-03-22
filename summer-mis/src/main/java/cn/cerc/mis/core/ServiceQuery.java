@@ -9,6 +9,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.client.ServiceSign;
+import cn.cerc.mis.other.MemoryBuffer;
 
 public class ServiceQuery implements IHandle {
     private ServiceSign service;
@@ -92,6 +93,14 @@ public class ServiceQuery implements IHandle {
         if (this.dataOut == null)
             this.dataOut = new DataSet();
         return dataOut;
+    }
+
+    public String getExportKey() {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), timestamp)) {
+            buff.setValue("data", this.dataIn().json());
+        }
+        return timestamp;
     }
 
     @Override
