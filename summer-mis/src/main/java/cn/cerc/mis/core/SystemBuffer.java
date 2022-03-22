@@ -155,7 +155,7 @@ public class SystemBuffer {
      * key = corpNo + machineCode
      */
     public enum PrintService implements IBufferKey {
-        MachineCode;
+        MachineCode, Number;
 
         @Override
         public int getStartingPoint() {
