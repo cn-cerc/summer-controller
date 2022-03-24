@@ -187,7 +187,8 @@ public class ImportExcel extends ImportExcelFile {
                     valList.add(value);
                 }
                 for (int j = 0; j < valList.size(); j++) {
-                    ds.setValue(fields.get(j), valList.get(j));
+                    if (!Utils.isEmpty(fields.get(j)))
+                        ds.setValue(fields.get(j), valList.get(j));
                 }
             }
             i++;
