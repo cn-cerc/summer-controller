@@ -1,6 +1,7 @@
 package cn.cerc.mis.core;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -236,25 +237,38 @@ public class AppClient implements Serializable {
     }
 
     /**
-     * 获取客户端的访问地址
-     * 
+     * 获取客户端真实IP地址，不直接使用request.getRemoteAddr() 的原因是有可能用户使用了代理软件方式避免真实IP地址
+     * <p>
+     * x-forwarded-for 是一串IP值，取第一个非unknown的有效IP字符串为客户端的真实IP
+     * <p>
+     * 如：x-forwarded-for：192.168.1.110, 192.168.1.120, 192.168.1.130, 192.168.1.100
+     * <p>
+     * 用户真实IP为： 192.168.1.110
+     *
      * @param request HttpServletRequest
      * 
-     * @return ip 地址
+     * @return IP地址
      */
     public static String getClientIP(HttpServletRequest request) {
+        if (request == null)
+            return "";
         try {
-            if (request == null)
-                return "";
             String ip = request.getHeader("x-forwarded-for");
             if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
                 ip = request.getHeader("Proxy-Client-IP");
             if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
                 ip = request.getHeader("WL-Proxy-Client-IP");
             if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+                ip = request.getHeader("HTTP_CLIENT_IP");
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+                ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
                 ip = request.getRemoteAddr();
             if ("0:0:0:0:0:0:0:1".equals(ip))
                 ip = "0.0.0.0";
+            // 以第一个IP地址为用户的真实地址
+            String arr[] = ip.split(",");
+            ip = Arrays.stream(arr).findFirst().orElse("").trim();
             return ip;
         } catch (Exception e) {
             e.printStackTrace();
