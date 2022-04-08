@@ -3,15 +3,21 @@ package cn.cerc.mis.client;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.context.annotation.Description;
 
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.EntityImpl;
+import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceMethod;
+import cn.cerc.mis.core.ServiceState;
 
 public final class ServiceSign {
     private String id;
@@ -116,6 +122,33 @@ public final class ServiceSign {
         }
 
         System.out.println("}");
+    }
+
+    /**
+     * 服务返回结果转换为指定的业务对象
+     * 
+     * @param <T>    业务对象实体类
+     * @param handle 句柄
+     * @param clazz  业务对象实体类class
+     * @param values 对应实体类的缓存key
+     * @return 指定的实体对象
+     */
+    public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
+        if (this.server() == null || this.server().isLocal(handle, this))
+            return EntityQuery.findOne(handle, clazz, values);
+        else {
+            EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+            DataSet dataIn = new DataSet();
+            DataRow headIn = dataIn.head();
+            int site = entityKey.corpNo() ? 1 : 0;
+            String[] fields = entityKey.fields();
+            for (int i = site; i < fields.length; i++)
+                headIn.setValue(fields[i], values[i - site]);
+            DataSet dataOut = this.call(handle, dataIn);
+            if (dataOut.state() == ServiceState.OK)
+                return Optional.of(dataOut.current().asEntity(clazz));
+            return Optional.empty();
+        }
     }
 
 }
