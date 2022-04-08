@@ -14,11 +14,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.QueueDB;
+import cn.cerc.db.queue.IQueueConfig;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.client.ServiceSign;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
@@ -125,10 +126,11 @@ public class AsyncService extends ServiceQuery {
 
         dataOut().head().setValue("_msgId_", msgId);
         if (this.process == MessageProcess.working) {
+            IQueueConfig config = Application.getBean(IQueueConfig.class);
             // 返回消息的编号插入到阿里云消息队列
             QueueQuery ds = new QueueQuery(this);
             ds.setQueueMode(QueueMode.append);
-            ds.add("select * from %s", QueueDB.SUMMER);
+            ds.add("select * from %s", config.getSummerQueue());
             ds.open();
             ds.appendDataSet(this.dataIn(), true);
             ds.head().setValue("_queueId_", msgId);

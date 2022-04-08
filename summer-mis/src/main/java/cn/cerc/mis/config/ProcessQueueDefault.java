@@ -8,9 +8,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.dao.BatchScript;
-import cn.cerc.db.queue.QueueDB;
+import cn.cerc.db.queue.IQueueConfig;
 import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.message.MessageProcess;
@@ -26,9 +27,10 @@ public class ProcessQueueDefault extends AbstractTask {
 
     @Override
     public void execute() throws Exception {
+        IQueueConfig config = Application.getBean(IQueueConfig.class);
         QueueQuery query = new QueueQuery(this);
         query.setQueueMode(QueueMode.recevie);
-        query.add("select * from %s ", QueueDB.SUMMER);
+        query.add("select * from %s ", config.getSummerQueue());
         query.open();
         if (!query.getActive()) {
             return;
