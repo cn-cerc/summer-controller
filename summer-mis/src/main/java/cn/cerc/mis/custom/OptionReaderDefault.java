@@ -21,6 +21,7 @@ import cn.cerc.mis.core.ISystemTable;
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class OptionReaderDefault implements IOptionReader, IHandle {
+
     @Autowired
     private ISystemTable systemTable;
     private ISession session;
@@ -38,7 +39,7 @@ public class OptionReaderDefault implements IOptionReader, IHandle {
 
         return query.eof() ? defaultValue : query.getString("Value_");
     }
-    
+
     @Override
     public String getUserValue(String userCode, String optionKey, String defaultValue) {
         if (Utils.isEmpty(optionKey))
