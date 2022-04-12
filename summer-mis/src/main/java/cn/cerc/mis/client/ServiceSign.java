@@ -2,6 +2,7 @@ package cn.cerc.mis.client;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -148,6 +149,30 @@ public final class ServiceSign {
             if (dataOut.state() == ServiceState.OK)
                 return Optional.of(dataOut.current().asEntity(clazz));
             return Optional.empty();
+        }
+    }
+
+    public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
+        if (this.server() == null || this.server().isLocal(handle, this))
+            return EntityQuery.findMany(handle, clazz, values);
+        else {
+            Set<T> set = new LinkedHashSet<>();
+            EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+            DataSet dataIn = new DataSet();
+            DataRow headIn = dataIn.head();
+            int site = entityKey.corpNo() ? 1 : 0;
+            String[] fields = entityKey.fields();
+            for (int i = site; i < fields.length; i++)
+                headIn.setValue(fields[i], values[i - site]);
+            DataSet dataOut = this.call(handle, dataIn);
+            if (dataOut.state() != ServiceState.OK)
+                return set;
+
+            dataOut.records().stream().map(item -> {
+                T entity = item.asEntity(clazz);
+                return entity;
+            }).forEach(set::add);
+            return set;
         }
     }
 
