@@ -162,8 +162,10 @@ public final class ServiceSign {
             DataRow headIn = dataIn.head();
             int site = entityKey.corpNo() ? 1 : 0;
             String[] fields = entityKey.fields();
-            for (int i = site; i < fields.length; i++)
-                headIn.setValue(fields[i], values[i - site]);
+            if (values != null && values.length > 0) {
+                for (int i = site; i < fields.length; i++)
+                    headIn.setValue(fields[i], values[i - site]);
+            }
             DataSet dataOut = this.call(handle, dataIn);
             if (dataOut.state() != ServiceState.OK)
                 return set;
