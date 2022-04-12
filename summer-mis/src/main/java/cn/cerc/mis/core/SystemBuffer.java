@@ -46,7 +46,12 @@ public class SystemBuffer {
         /**
          * 超时服务
          */
-        TimeOut;
+        ServiceTimeout,
+
+        /**
+         * 超时页面
+         */
+        ViewPageTimeout;
 
         @Override
         public int getStartingPoint() {

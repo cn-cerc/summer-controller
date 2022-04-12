@@ -18,11 +18,16 @@ public interface ServiceServerImpl {
 
     String getToken(IHandle handle);
 
-    default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
+    default boolean isLocal(IHandle handle, ServiceSign service) {
         String url = this.getRequestUrl(handle, service.id());
-        if (url == null)
+        return url == null;
+    }
+
+    default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
+        if (isLocal(handle, service))
             return LocalServer.call(service, handle, dataIn);
 
+        String url = this.getRequestUrl(handle, service.id());
         try {
             Curl curl = new Curl();
             String token = this.getToken(handle);
