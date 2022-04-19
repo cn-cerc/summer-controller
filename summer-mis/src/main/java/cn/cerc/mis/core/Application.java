@@ -195,6 +195,15 @@ public class Application implements ApplicationContextAware {
         return bean;
     }
 
+    public static <T> T getBean(ISession session, Class<T> requiredType) {
+        if (context.getBeanNamesForType(requiredType).length == 0)
+            return null;
+        T bean = context.getBean(requiredType);
+        if ((session != null) && (bean instanceof IHandle))
+            ((IHandle) bean).setSession(session);
+        return bean;
+    }
+
     public static Object getBean(ISession session, String beanId) {
         if (!context.containsBean(beanId))
             return null;
