@@ -92,7 +92,6 @@ public class ProcessService extends AbstractTask {
         if (!um.updateAsyncService(msgId, async.toString(), async.getProcess())) {
             throw new RuntimeException(String.format("msgId %s not find.", msgId));
         }
-
         log.debug(async.getService() + ":" + subject + ":" + async.getProcess().getTitle());
     }
 }

@@ -43,6 +43,7 @@ public class AsyncService extends ServiceQuery {
 
     private String corpNo;
     private String userCode;
+    private String token;
 
     // 预约时间，若为空则表示立即执行
     private String timer;
@@ -76,21 +77,23 @@ public class AsyncService extends ServiceQuery {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode json = mapper.readTree(jsonString);
         this.setService(json.get("service").asText());
-        if (json.has("dataOut")) {
+        if (json.has("dataOut"))
             this.dataOut().setJson(json.get("dataOut").asText());
-        }
-        if (json.has("dataIn")) {
+
+        if (json.has("dataIn"))
             this.dataIn().setJson(json.get("dataIn").asText());
-        }
-        if (json.has("process")) {
+
+        if (json.has("process"))
             this.setProcess(MessageProcess.values()[json.get("process").asInt()]);
-        }
-        if (json.has("timer")) {
+
+        if (json.has("timer"))
             this.setTimer(json.get("timer").asText());
-        }
-        if (json.has("processTime")) {
+
+        if (json.has("processTime"))
             this.setProcessTime(json.get("processTime").asText());
-        }
+
+        if (json.has("token"))
+            this.setToken(json.get("token").asText());
         return this;
     }
 
@@ -105,6 +108,7 @@ public class AsyncService extends ServiceQuery {
             }
         }
         headIn.setValue("token", this.getSession().getToken());
+        this.setToken(this.getSession().getToken());
 
         String subject = this.getSubject();
         if ("".equals(subject))
@@ -117,7 +121,7 @@ public class AsyncService extends ServiceQuery {
         msg.setCorpNo(this.getCorpNo());
         msg.setUserCode(this.getUserCode());
         msg.setLevel(this.messageLevel);
-        msg.setContent(this.toString());
+        msg.setContent(this.toJson());
         msg.setSubject(subject);
         msg.setProcess(this.process);
         log.debug(this.getCorpNo() + ":" + this.getUserCode() + ":" + this);
@@ -130,6 +134,7 @@ public class AsyncService extends ServiceQuery {
             ds.setQueueMode(QueueMode.append);
             ds.add("select * from %s", QueueConfig.getSummerQueue());
             ds.open();
+
             ds.appendDataSet(this.dataIn(), true);
             ds.head().setValue("_queueId_", msgId);
             ds.head().setValue("_service_", this.serviceId());
@@ -143,6 +148,10 @@ public class AsyncService extends ServiceQuery {
 
     @Override
     public String toString() {
+        return this.toJson();
+    }
+
+    private String toJson() {
         ObjectNode content = new ObjectMapper().createObjectNode();
         content.put("service", this.serviceId());
         if (this.dataIn() != null) {
@@ -152,6 +161,7 @@ public class AsyncService extends ServiceQuery {
             content.put("dataOut", dataOut().json());
         }
         content.put("timer", this.timer);
+        content.put("token", this.token);
         content.put("process", this.process.ordinal());
         if (this.processTime != null) {
             content.put("processTime", this.processTime);
@@ -247,6 +257,14 @@ public class AsyncService extends ServiceQuery {
 
     public String getMsgId() {
         return msgId;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Deprecated
