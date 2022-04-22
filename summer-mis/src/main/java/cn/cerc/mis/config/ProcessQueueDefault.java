@@ -55,10 +55,10 @@ public class ProcessQueueDefault extends AbstractTask {
         }
 
         // 调用队列内容中指定的服务
-        BookHandle bh = new BookHandle(this, corpNo);
-        bh.setUserCode(userCode);
+        BookHandle bookHandle = new BookHandle(this, corpNo);
+        bookHandle.setUserCode(userCode);
 
-        LocalService svr = new LocalService(bh);
+        LocalService svr = new LocalService(bookHandle);
         svr.setService(service);
         svr.dataIn().appendDataSet(query, true);
 
