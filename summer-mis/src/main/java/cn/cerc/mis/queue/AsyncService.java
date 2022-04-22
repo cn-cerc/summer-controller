@@ -128,21 +128,6 @@ public class AsyncService extends ServiceQuery {
         this.msgId = msg.send(this);
 
         dataOut().head().setValue("_msgId_", msgId);
-        if (this.process == MessageProcess.working) {
-            // 返回消息的编号插入到阿里云消息队列
-            QueueQuery ds = new QueueQuery(this);
-            ds.setQueueMode(QueueMode.append);
-            ds.add("select * from %s", QueueConfig.getSummerQueue());
-            ds.open();
-
-            ds.appendDataSet(this.dataIn(), true);
-            ds.head().setValue("_queueId_", msgId);
-            ds.head().setValue("_service_", this.serviceId());
-            ds.head().setValue("_corpNo_", this.corpNo);
-            ds.head().setValue("_userCode_", this.userCode);
-            ds.head().setValue("_content_", this.toString());
-            ds.save();
-        }
         return !"".equals(msgId);
     }
 

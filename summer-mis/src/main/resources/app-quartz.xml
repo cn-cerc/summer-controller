@@ -23,29 +23,6 @@
         </property>
     </bean>
 
-    <!-- 定义具体的业务逻辑处理类 -->
-    <bean id="rule" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail">
-            <!-- 调度业务 -->
-            <bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-                <property name="targetObject" ref="processQueue"/>
-                <property name="targetMethod" value="run"/>
-            </bean>
-        </property>
-        <property name="cronExpression" value="* * * * * ?"/>
-    </bean>
-
-    <!-- 调度触发器，启动时延期15秒开始所有的任务 -->
-    <bean id="startQuertz" lazy-init="false" autowire="no"
-          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="triggers">
-            <list>
-                <ref bean="rule"/>
-            </list>
-        </property>
-        <property name="startupDelay" value="30"/>
-    </bean>
-
     <!-- 使用此文件注意：必须把下面的定义放到application.xml中 -->
-    <!-- <bean id="ProcessQueue" class="cn.cerc.mis.config.ProcessQueueDefault"></bean> -->
+    <!-- </bean> -->
 </beans>
