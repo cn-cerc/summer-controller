@@ -14,9 +14,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.QueueConfig;
-import cn.cerc.db.queue.QueueMode;
-import cn.cerc.db.queue.QueueQuery;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.core.ServiceQuery;
@@ -62,6 +59,11 @@ public class AsyncService extends ServiceQuery {
             this.setCorpNo(handle.getCorpNo());
             this.setUserCode(handle.getUserCode());
         }
+    }
+
+    public AsyncService(IHandle handle, ServiceSign service) {
+        this(handle);
+        this.setService(service);
     }
 
     public AsyncService(IHandle handle, String service) {
@@ -128,21 +130,6 @@ public class AsyncService extends ServiceQuery {
         this.msgId = msg.send(this);
 
         dataOut().head().setValue("_msgId_", msgId);
-        if (this.process == MessageProcess.working) {
-            // 返回消息的编号插入到阿里云消息队列
-            QueueQuery ds = new QueueQuery(this);
-            ds.setQueueMode(QueueMode.append);
-            ds.add("select * from %s", QueueConfig.getSummerQueue());
-            ds.open();
-
-            ds.appendDataSet(this.dataIn(), true);
-            ds.head().setValue("_queueId_", msgId);
-            ds.head().setValue("_service_", this.serviceId());
-            ds.head().setValue("_corpNo_", this.corpNo);
-            ds.head().setValue("_userCode_", this.userCode);
-            ds.head().setValue("_content_", this.toString());
-            ds.save();
-        }
         return !"".equals(msgId);
     }
 
