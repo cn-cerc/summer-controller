@@ -28,7 +28,4 @@
         class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="startupDelay" value="15" />
     </bean>
-
-    <!-- 使用此文件注意：必须把下面的定义放到application.xml中 -->
-    <!-- </bean> -->
 </beans>
