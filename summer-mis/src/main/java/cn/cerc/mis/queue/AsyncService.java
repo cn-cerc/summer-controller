@@ -14,9 +14,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.QueueConfig;
-import cn.cerc.db.queue.QueueMode;
-import cn.cerc.db.queue.QueueQuery;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.core.ServiceQuery;
@@ -62,6 +59,11 @@ public class AsyncService extends ServiceQuery {
             this.setCorpNo(handle.getCorpNo());
             this.setUserCode(handle.getUserCode());
         }
+    }
+
+    public AsyncService(IHandle handle, ServiceSign service) {
+        this(handle);
+        this.setService(service);
     }
 
     public AsyncService(IHandle handle, String service) {
