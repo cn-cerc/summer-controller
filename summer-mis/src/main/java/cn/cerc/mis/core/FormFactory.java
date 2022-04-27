@@ -64,7 +64,7 @@ public class FormFactory implements ApplicationContextAware {
 
             String token = (String) req.getSession().getAttribute(ISession.TOKEN);
             String replica = (String) req.getSession().getAttribute(ISession.REPLICA);
-            if (!token.equals(replica) && !Utils.isEmpty(replica)) {
+            if (!Utils.isEmpty(token) && !Utils.isEmpty(replica) && !token.equals(replica)) {
                 token = replica;// 恢复上次正确的token信息
                 req.getSession().setAttribute(ISession.TOKEN, token);
             }
