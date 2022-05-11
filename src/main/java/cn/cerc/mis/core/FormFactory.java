@@ -1,19 +1,5 @@
 package cn.cerc.mis.core;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
-
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
@@ -21,6 +7,18 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.cache.ISessionCache;
 import cn.cerc.mis.other.PageNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Map;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -63,11 +61,6 @@ public class FormFactory implements ApplicationContextAware {
             form.setSession(session);
 
             String token = (String) req.getSession().getAttribute(ISession.TOKEN);
-            String replica = (String) req.getSession().getAttribute(ISession.REPLICA);
-            if (!Utils.isEmpty(token) && !Utils.isEmpty(replica) && !token.equals(replica)) {
-                token = replica;// 恢复上次正确的token信息
-                req.getSession().setAttribute(ISession.TOKEN, token);
-            }
             session.loadToken(token);
 
             // 取出自定义session中用户设置的语言类型，并写入到request
