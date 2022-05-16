@@ -51,9 +51,7 @@ public enum AppStaticFileDefault {
 
     public static void main(String[] args) {
         for (int i = 0; i < 5555; i++) {
-            new Thread(() -> {
-                AppStaticFileDefault.getInstance().isStaticFile(".ico");
-            }).start();
+            new Thread(() -> AppStaticFileDefault.getInstance().isStaticFile(".ico")).start();
         }
     }
 

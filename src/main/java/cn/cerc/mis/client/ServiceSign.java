@@ -170,10 +170,7 @@ public final class ServiceSign {
             if (dataOut.state() != ServiceState.OK)
                 return set;
 
-            dataOut.records().stream().map(item -> {
-                T entity = item.asEntity(clazz);
-                return entity;
-            }).forEach(set::add);
+            dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
             return set;
         }
     }
