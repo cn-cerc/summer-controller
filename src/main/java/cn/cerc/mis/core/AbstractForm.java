@@ -216,31 +216,35 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                     throw new RuntimeException(String.format("找不到目标可执行函数 %s", funcCode));
                 if (!SecurityPolice.check(this, method, this))
                     throw new SecurityStopException(method, this);
-                Object[] args = new Object[method.getParameterCount()];
-                List<String> list = new ArrayList<>();
-                Enumeration<String> parameterNames = this.getRequest().getParameterNames();
-                while (parameterNames.hasMoreElements())
-                    list.add(parameterNames.nextElement());
+                if (method.getParameterCount() > 0) {
+                    Object[] args = new Object[method.getParameterCount()];
+                    List<String> list = new ArrayList<>();
+                    Enumeration<String> parameterNames = this.getRequest().getParameterNames();
+                    while (parameterNames.hasMoreElements())
+                        list.add(parameterNames.nextElement());
 
-                if (list.size() < method.getParameters().length)
-                    throw new RuntimeException("参数传入个数小于方法声明需要的参数数量");
+                    if (list.size() < method.getParameters().length)
+                        throw new RuntimeException("参数传入个数小于方法声明需要的参数数量");
 
-                int i = 0;
-                for (Parameter arg : method.getParameters()) {
-                    String tmp = this.getRequest().getParameter(list.get(i));
-                    PathVariable pathVariable = arg.getAnnotation(PathVariable.class);
-                    if (pathVariable != null)
-                        tmp = this.getRequest().getParameter(pathVariable.value());
+                    int i = 0;
+                    for (Parameter arg : method.getParameters()) {
+                        String tmp = this.getRequest().getParameter(list.get(i));
+                        PathVariable pathVariable = arg.getAnnotation(PathVariable.class);
+                        if (pathVariable != null)
+                            tmp = this.getRequest().getParameter(pathVariable.value());
 
-                    String paramType = arg.getParameterizedType().getTypeName();
-                    if ("int".equals(paramType) || Integer.class.getName().equals(paramType))
-                        args[i++] = Integer.parseInt(tmp);
-                    else if (String.class.getName().equals(paramType))
-                        args[i++] = tmp;
-                    else
-                        throw new RuntimeException(String.format("不支持的参数类型 %s", paramType));
+                        String paramType = arg.getParameterizedType().getTypeName();
+                        if ("int".equals(paramType) || Integer.class.getName().equals(paramType))
+                            args[i++] = Integer.parseInt(tmp);
+                        else if (String.class.getName().equals(paramType))
+                            args[i++] = tmp;
+                        else
+                            throw new RuntimeException(String.format("不支持的参数类型 %s", paramType));
+                    }
+                    result = method.invoke(this, args);
+                } else {
+                    result = method.invoke(this);
                 }
-                result = method.invoke(this, args);
             }
             }
 
