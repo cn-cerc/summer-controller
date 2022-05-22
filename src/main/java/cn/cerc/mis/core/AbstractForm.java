@@ -3,7 +3,11 @@ package cn.cerc.mis.core;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -14,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.security.Permission;
@@ -42,6 +47,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     private String module;
     private String[] pathVariables;
     private String beanName;
+    private Object tmp;
 
     public Map<String, String> getParams() {
         return params;
@@ -200,18 +206,45 @@ public abstract class AbstractForm implements IForm, InitializingBean {
             }
             default: {
                 if (this.getClient().isPhone()) {
-                    try {
-                        method = this.getClass().getMethod(funcCode + "_phone");
-                    } catch (NoSuchMethodException e) {
-                        method = this.getClass().getMethod(funcCode);
-                    }
+                    method = findMethod(this.getClass(), funcCode + "_phone");
+                    if (method == null)
+                        method = findMethod(this.getClass(), funcCode);
                 } else {
-                    method = this.getClass().getMethod(funcCode);
+                    method = findMethod(this.getClass(), funcCode);
                 }
-                if (!SecurityPolice.check(this, method, this)) {
+                if (method == null)
+                    throw new RuntimeException(String.format("找不到目标可执行函数 %s", funcCode));
+                if (!SecurityPolice.check(this, method, this))
                     throw new SecurityStopException(method, this);
+                if (method.getParameterCount() > 0) {
+                    Object[] args = new Object[method.getParameterCount()];
+                    List<String> list = new ArrayList<>();
+                    Enumeration<String> parameterNames = this.getRequest().getParameterNames();
+                    while (parameterNames.hasMoreElements())
+                        list.add(parameterNames.nextElement());
+
+                    if (list.size() < method.getParameters().length)
+                        throw new RuntimeException("参数传入个数小于方法声明需要的参数数量");
+
+                    int i = 0;
+                    for (Parameter arg : method.getParameters()) {
+                        String tmp = this.getRequest().getParameter(list.get(i));
+                        PathVariable pathVariable = arg.getAnnotation(PathVariable.class);
+                        if (pathVariable != null)
+                            tmp = this.getRequest().getParameter(pathVariable.value());
+
+                        String paramType = arg.getParameterizedType().getTypeName();
+                        if ("int".equals(paramType) || Integer.class.getName().equals(paramType))
+                            args[i++] = Integer.parseInt(tmp);
+                        else if (String.class.getName().equals(paramType))
+                            args[i++] = tmp;
+                        else
+                            throw new RuntimeException(String.format("不支持的参数类型 %s", paramType));
+                    }
+                    result = method.invoke(this, args);
+                } else {
+                    result = method.invoke(this);
                 }
-                result = method.invoke(this);
             }
             }
 
@@ -229,6 +262,14 @@ public abstract class AbstractForm implements IForm, InitializingBean {
             this.setParam("message", e.getMessage());
             return e.getViewFile();
         }
+    }
+
+    private Method findMethod(Class<? extends AbstractForm> clazz, String funcCode) {
+        for (Method item : clazz.getDeclaredMethods()) {
+            if (funcCode.equals(item.getName()))
+                return item;
+        }
+        return null;
     }
 
     @Override
