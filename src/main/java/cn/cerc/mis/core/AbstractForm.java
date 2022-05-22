@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -217,12 +221,19 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                 }
                 int i = 0;
                 Object[] args = new Object[method.getParameterCount()];
+                List<String> list = new ArrayList<>();
+                Enumeration<String> parameterNames = this.getRequest().getParameterNames();
+                while (parameterNames.hasMoreElements())
+                    list.add(parameterNames.nextElement());
+
                 for (Parameter arg : method.getParameters()) {
                     PathVariable pathVariable = arg.getAnnotation(PathVariable.class);
                     if (pathVariable != null)
                         args[i++] = this.getRequest().getParameter(pathVariable.value());
                     else
-                        args[i++] = this.getRequest().getParameter(arg.getName());
+                        args[i++] = this.getRequest().getParameter(list.get(i - 1));
+                    Type type = arg.getParameterizedType();
+                    System.out.println(type.getTypeName());
                 }
                 result = method.invoke(this, args);
             }
