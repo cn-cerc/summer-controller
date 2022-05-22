@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlText;
@@ -16,11 +17,11 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
         return new EntityOne<T>(handle, clazz, sql, false, false);
     }
-    
+
     public static <T extends EntityImpl> EntityOne<T> open(IHandle handle, Class<T> clazz, SqlText sqlText) {
         return new EntityOne<T>(handle, clazz, sqlText, false, false);
     }
-    
+
     public static <T extends EntityImpl> EntityOne<T> open(IHandle handle, Class<T> clazz,
             Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
@@ -34,8 +35,7 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         return new EntityOne<T>(handle, clazz, sql, false, false);
     }
 
-    public EntityOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer,
-            boolean writeCacheAtOpen) {
+    public EntityOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
         if (query.size() > 1)
             throw new RuntimeException("There're too many records.");
@@ -99,6 +99,10 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
 
     public DataRow current() {
         return query.current();
+    }
+
+    public DataSet dataSet() {
+        return query;
     }
 
 }

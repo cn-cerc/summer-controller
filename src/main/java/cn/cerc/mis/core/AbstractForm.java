@@ -3,6 +3,7 @@ package cn.cerc.mis.core;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.security.Permission;
@@ -206,12 +208,23 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                         method = this.getClass().getMethod(funcCode);
                     }
                 } else {
-                    method = this.getClass().getMethod(funcCode);
+                    method = findMethod(this.getClass(), funcCode);
+                    if (method == null)
+                        throw new RuntimeException("");
                 }
                 if (!SecurityPolice.check(this, method, this)) {
                     throw new SecurityStopException(method, this);
                 }
-                result = method.invoke(this);
+                int i = 0;
+                Object[] args = new Object[method.getParameterCount()];
+                for (Parameter arg : method.getParameters()) {
+                    PathVariable pathVariable = arg.getAnnotation(PathVariable.class);
+                    if (pathVariable != null)
+                        args[i++] = this.getRequest().getParameter(pathVariable.value());
+                    else
+                        args[i++] = this.getRequest().getParameter(arg.getName());
+                }
+                result = method.invoke(this, args);
             }
             }
 
@@ -229,6 +242,14 @@ public abstract class AbstractForm implements IForm, InitializingBean {
             this.setParam("message", e.getMessage());
             return e.getViewFile();
         }
+    }
+
+    private Method findMethod(Class<? extends AbstractForm> clazz, String funcCode) {
+        for (Method item : clazz.getDeclaredMethods()) {
+            if (funcCode.equals(item.getName()))
+                return item;
+        }
+        return null;
     }
 
     @Override
