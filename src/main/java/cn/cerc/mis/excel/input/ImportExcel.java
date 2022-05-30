@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jxl.WorkbookSettings;
 import org.apache.commons.fileupload.FileItem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -54,7 +55,7 @@ public class ImportExcel extends ImportExcelFile {
     public void exportTemplate() throws IOException, WriteException {
         DataSet dataOut = dataSet();
         this.setResponse(response);
-        OutputStream os = response.getOutputStream();// 取得输出流
+        OutputStream outputStream = response.getOutputStream();// 取得输出流
         response.reset();// 清空输出流
 
         template = this.getTemplate();
@@ -65,9 +66,10 @@ public class ImportExcel extends ImportExcelFile {
         response.setContentType("application/msexcel");// 定义输出类型
 
         List<ImportColumn> columns = template.getColumns();
-
+        WorkbookSettings settings = new WorkbookSettings();
+        settings.setGCDisabled(true);
         // 创建工作薄
-        WritableWorkbook workbook = Workbook.createWorkbook(os);
+        WritableWorkbook workbook = Workbook.createWorkbook(outputStream, settings);
 
         // 创建新的一页
         WritableSheet sheet = workbook.createSheet("First Sheet", 0);
@@ -102,7 +104,7 @@ public class ImportExcel extends ImportExcelFile {
         // 把创建的内容写入到输出流中，并关闭输出流
         workbook.write();
         workbook.close();
-        os.close();
+        outputStream.close();
     }
 
     public HttpServletResponse getResponse() {
@@ -196,7 +198,7 @@ public class ImportExcel extends ImportExcelFile {
     }
 
     private void readFileFromXLS(FileItem file, DataSet ds)
-            throws IOException, BiffException, Exception, ColumnValidateException {
+            throws Exception {
         // 获取Excel文件对象
         Workbook rwb = Workbook.getWorkbook(file.getInputStream());
         // 获取文件的指定工作表 默认的第一个
