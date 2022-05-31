@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -61,7 +62,7 @@ public class ImportExcel extends ImportExcelFile {
         template = this.getTemplate();
         // 下面是对中文文件名的处理
         response.setCharacterEncoding("UTF-8");// 设置相应内容的编码格式
-        String fname = URLEncoder.encode(template.getFileName(), "UTF-8");
+        String fname = URLEncoder.encode(template.getFileName(), StandardCharsets.UTF_8);
         response.setHeader("Content-Disposition", "attachment;filename=" + fname + ".xls");
         response.setContentType("application/msexcel");// 定义输出类型
 
