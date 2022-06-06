@@ -21,7 +21,10 @@ public enum MessageLevel {
     Printer(3),
 
     // 导出消息-2天
-    Export(2);
+    Export(2),
+
+    // 用户普通消息
+    User(30);
 
     private int day;
 
