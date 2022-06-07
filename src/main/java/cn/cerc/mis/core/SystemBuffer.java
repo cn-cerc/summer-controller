@@ -3,9 +3,7 @@ package cn.cerc.mis.core;
 public class SystemBuffer {
 
     /**
-     * 
      * key = ClassName + UserCode + Version
-     *
      */
     public enum UserObject implements IBufferKey {
         ClassName, Permissions, Permission;
@@ -90,9 +88,7 @@ public class SystemBuffer {
     }
 
     /**
-     * 
      * key = UserCode + DeviceId / ExportKey
-     *
      */
     public enum User implements IBufferKey {
         SessionInfo, ExportKey;
@@ -115,7 +111,7 @@ public class SystemBuffer {
     }
 
     public enum SyncServer implements IBufferKey {
-        Diteng, Diaoyou, Tieke;
+        Diteng, Diaoyou, Tieke, Heritage;
 
         @Override
         public int getStartingPoint() {

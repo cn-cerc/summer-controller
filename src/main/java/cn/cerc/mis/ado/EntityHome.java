@@ -1,7 +1,9 @@
 package cn.cerc.mis.ado;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -306,6 +308,23 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         if (recNo == 0)
             throw new RuntimeException("refresh error, not find in query");
         query.current().saveToEntity(entity);
+    }
+
+    public EntityHome<T> setJoinName(EntityHome<? extends EntityImpl> join, String codeField, String nameField) {
+        if (query.size() == 0)
+            return this;
+
+        Map<String, String> items = new HashMap<>();
+        join.query.forEach(row -> items.put(row.getString(codeField), row.getString(nameField)));
+
+        T entity = null;
+        query.first();
+        while (query.fetch()) {
+            if (entity == null)
+                entity = query.current().asEntity(this.clazz);
+            entity.onJoinName(query.current(), join.clazz, items);
+        }
+        return this;
     }
 
 }

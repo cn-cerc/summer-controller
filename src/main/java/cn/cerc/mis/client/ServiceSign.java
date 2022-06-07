@@ -2,6 +2,7 @@ package cn.cerc.mis.client;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +22,7 @@ import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
 public final class ServiceSign {
-    private String id;
+    private final String id;
     private int version;
     private Set<String> properties;
     private ServiceServerImpl server;
@@ -75,6 +76,9 @@ public final class ServiceSign {
         }
     }
 
+    /**
+     * 生成指定服务类的签名定义
+     */
     public static void buildSourceCode(Class<?> clazz) {
         if (!IService.class.isAssignableFrom(clazz)) {
             System.out.println(String.format("// %s skip: it's not service", clazz.getSimpleName()));
@@ -91,7 +95,7 @@ public final class ServiceSign {
             if (sm != null)
                 items.add(sm);
         }
-        items.sort((t1, t2) -> t1.method().getName().toLowerCase().compareTo(t2.method().getName().toLowerCase()));
+        items.sort(Comparator.comparing(t -> t.method().getName().toLowerCase()));
         for (ServiceMethod item : items) {
             description = item.method().getDeclaredAnnotation(Description.class);
             if (description != null)
@@ -99,9 +103,9 @@ public final class ServiceSign {
             DataValidate[] dataValidates = item.method().getDeclaredAnnotationsByType(DataValidate.class);
             String funcCode = item.method().getName();
             if (dataValidates.length > 0) {
-                StringBuffer sb = new StringBuffer();
-                for (int i = 0; i < dataValidates.length; i++)
-                    sb.append("\"").append(dataValidates[i].value()).append("\",");
+                StringBuilder sb = new StringBuilder();
+                for (DataValidate dataValidate : dataValidates)
+                    sb.append("\"").append(dataValidate.value()).append("\",");
                 sb.delete(sb.length() - 1, sb.length());
                 if (item.version().ordinal() > 0)
                     System.out.println(String.format(
@@ -121,13 +125,12 @@ public final class ServiceSign {
                             funcCode, clazz.getSimpleName(), funcCode));
             }
         }
-
         System.out.println("}");
     }
 
     /**
      * 服务返回结果转换为指定的业务对象
-     * 
+     *
      * @param <T>    业务对象实体类
      * @param handle 句柄
      * @param clazz  业务对象实体类class
@@ -170,10 +173,7 @@ public final class ServiceSign {
             if (dataOut.state() != ServiceState.OK)
                 return set;
 
-            dataOut.records().stream().map(item -> {
-                T entity = item.asEntity(clazz);
-                return entity;
-            }).forEach(set::add);
+            dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
             return set;
         }
     }

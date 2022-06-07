@@ -12,6 +12,8 @@ import cn.cerc.db.core.ISession;
 public class BookHandle implements IHandle {
     private ISession session;
     private Map<String, Object> params = new HashMap<>();
+    private String originCorpNo;
+    private String originUserCode;
 
     public BookHandle(IHandle handle, String corpNo) {
         init(handle.getSession(), corpNo);
@@ -22,6 +24,8 @@ public class BookHandle implements IHandle {
     }
 
     private void init(ISession owner, String corpNo) {
+        this.originCorpNo = owner.getCorpNo();
+        this.originUserCode = owner.getUserCode();
         this.session = new ISession() {
             @Override
             public Object getProperty(String key) {
@@ -58,7 +62,7 @@ public class BookHandle implements IHandle {
 
             @Override
             public void setRequest(HttpServletRequest request) {
-                
+
             }
 
             @Override
@@ -68,7 +72,7 @@ public class BookHandle implements IHandle {
 
             @Override
             public void setResponse(HttpServletResponse response) {
-                
+
             }
 
             @Override
@@ -98,6 +102,14 @@ public class BookHandle implements IHandle {
     @Override
     public void setSession(ISession session) {
         throw new RuntimeException("BookHandle not support setSession.");
+    }
+
+    public String getOriginCorpNo() {
+        return originCorpNo;
+    }
+
+    public String getOriginUserCode() {
+        return originUserCode;
     }
 
 }
