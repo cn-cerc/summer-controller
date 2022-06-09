@@ -27,10 +27,11 @@ public interface IUserMessage {
      * @param subject  消息标题
      * @param content  消息内容
      * @param process  处理进度
+     * @param UIClass  消息类别
      * @return 返回消息编号（msgID）
      */
     String appendRecord(String corpNo, String userCode, MessageLevel level, String subject, String content,
-            MessageProcess process);
+            MessageProcess process,String UIClass);
 
     /**
      * 读取待处理的任务：队列服务

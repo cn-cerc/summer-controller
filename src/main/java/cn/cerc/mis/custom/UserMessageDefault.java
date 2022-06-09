@@ -46,7 +46,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
 
     @Override
     public String appendRecord(String corpNo, String userCode, MessageLevel level, String subject, String content,
-            MessageProcess process) {
+            MessageProcess process,String UIClass) {
         // 若为异步任务消息请求
         if (level == MessageLevel.Service) {
             // 若已存在同一公司别同一种回算请求在排队或者执行中，则不重复插入回算请求

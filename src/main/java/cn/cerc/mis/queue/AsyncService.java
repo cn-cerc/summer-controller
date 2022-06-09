@@ -125,6 +125,7 @@ public class AsyncService extends ServiceQuery {
         msg.setLevel(this.messageLevel);
         msg.setContent(this.toJson());
         msg.setSubject(subject);
+        msg.setUiClass(MessageRecord.UIClass_Task);
         msg.setProcess(this.process);
         log.debug(this.getCorpNo() + ":" + this.getUserCode() + ":" + this);
         this.msgId = msg.send(this);

@@ -13,13 +13,18 @@ import cn.cerc.mis.core.IUserMessage;
  */
 public class MessageRecord {
     private static final ClassResource res = new ClassResource(MessageRecord.class, SummerMIS.ID);
-
+    public static final String UIClass_Default = "MVDefault"; // 默认类 正常展示
+    public static final String UIClass_Notice = "MVNotice"; // 通知类别 下方需要显示操作 已读 未读
+    public static final String UIClass_Workflow = "MVWorkflow"; // 签核类别 下方显示操作 同意，不同意，详情
+    public static final String UIClass_Task = "MVTask"; // 任务类别 显示出任务状态
+    public static final String UIClass_Export = "MVExport"; // 导出消息 显示出导出状态
     private String corpNo;
     private String userCode;
     private String subject;
     private StringBuilder content = new StringBuilder();
     private MessageLevel level = MessageLevel.General;
     private MessageProcess process;
+    private String uiClass;
 
     public MessageRecord() {
 
@@ -63,7 +68,7 @@ public class MessageRecord {
 
         // 返回消息的编号
         IUserMessage um = Application.getBean(handle, IUserMessage.class);
-        return um.appendRecord(sendCorpNo, userCode, level, subject, content.toString(), process);
+        return um.appendRecord(sendCorpNo, userCode, level, subject, content.toString(), process,uiClass);
     }
 
     public String getContent() {
@@ -132,5 +137,15 @@ public class MessageRecord {
         this.process = process;
         return this;
     }
+
+    public String getUiClass() {
+        return uiClass;
+    }
+
+    public MessageRecord setUiClass(String uiClass) {
+        this.uiClass = uiClass;
+        return this;
+    }
+
 
 }
