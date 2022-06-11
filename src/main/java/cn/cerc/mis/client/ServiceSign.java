@@ -104,7 +104,7 @@ public final class ServiceSign {
             if (description != null)
                 System.out.println(String.format("/** %s */", description.value()));
 
-            // 检查是否有重复的字段
+            // 检查是否有重复校验的字段
             String function = svc.method().getName();
             DataValidate[] dataValidates = svc.method().getDeclaredAnnotationsByType(DataValidate.class);
             List<String> duplicates = Arrays.stream(dataValidates)
