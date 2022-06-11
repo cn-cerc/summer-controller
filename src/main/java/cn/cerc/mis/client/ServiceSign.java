@@ -2,11 +2,14 @@ package cn.cerc.mis.client;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Description;
 
@@ -96,33 +99,42 @@ public final class ServiceSign {
                 items.add(sm);
         }
         items.sort(Comparator.comparing(t -> t.method().getName().toLowerCase()));
-        for (ServiceMethod item : items) {
-            description = item.method().getDeclaredAnnotation(Description.class);
+        for (ServiceMethod svc : items) {
+            description = svc.method().getDeclaredAnnotation(Description.class);
             if (description != null)
                 System.out.println(String.format("/** %s */", description.value()));
-            DataValidate[] dataValidates = item.method().getDeclaredAnnotationsByType(DataValidate.class);
-            String funcCode = item.method().getName();
+
+            // 检查是否有重复的字段
+            String function = svc.method().getName();
+            DataValidate[] dataValidates = svc.method().getDeclaredAnnotationsByType(DataValidate.class);
+            List<String> duplicates = Arrays.stream(dataValidates)
+                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting())).entrySet().stream()
+                    .filter(e -> e.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toList());
+            if (duplicates.size() > 0)
+                throw new RuntimeException(String.format("服务对象 %s 重复定义元素 %s", function, String.join(", ", duplicates)));
+
             if (dataValidates.length > 0) {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder builder = new StringBuilder();
                 for (DataValidate dataValidate : dataValidates)
-                    sb.append("\"").append(dataValidate.value()).append("\",");
-                sb.delete(sb.length() - 1, sb.length());
-                if (item.version().ordinal() > 0)
+                    builder.append("\"").append(dataValidate.value()).append("\",");
+                builder.delete(builder.length() - 1, builder.length());
+
+                if (svc.version().ordinal() > 0)
                     System.out.println(String.format(
                             "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d).setProperties(Set.of(%s));",
-                            funcCode, clazz.getSimpleName(), funcCode, item.version().ordinal(), sb.toString()));
+                            function, clazz.getSimpleName(), function, svc.version().ordinal(), builder.toString()));
                 else
                     System.out.println(String.format(
                             "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setProperties(Set.of(%s));",
-                            funcCode, clazz.getSimpleName(), funcCode, sb.toString()));
+                            function, clazz.getSimpleName(), function, builder.toString()));
             } else {
-                if (item.version().ordinal() > 0)
+                if (svc.version().ordinal() > 0)
                     System.out.println(String.format(
-                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d);", funcCode,
-                            clazz.getSimpleName(), funcCode, item.version().ordinal()));
+                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d);", function,
+                            clazz.getSimpleName(), function, svc.version().ordinal()));
                 else
                     System.out.println(String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\");",
-                            funcCode, clazz.getSimpleName(), funcCode));
+                            function, clazz.getSimpleName(), function));
             }
         }
         System.out.println("}");
