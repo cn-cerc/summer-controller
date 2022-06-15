@@ -37,6 +37,8 @@ public class AppClient implements Serializable {
     public static final String pad = "pad";
     // 电脑
     public static final String pc = "pc";
+    // 看板
+    public static final String kanban = "kanban";
     // 客户端专用浏览器
     public static final String ee = "ee";
 
@@ -157,6 +159,10 @@ public class AppClient implements Serializable {
     public boolean isPhone() {
         return phone.equals(getDevice()) || android.equals(getDevice()) || iphone.equals(getDevice())
                 || wechat.equals(getDevice());
+    }
+
+    public boolean isKanban() {
+        return kanban.equals(getDevice());
     }
 
     public HttpServletRequest getRequest() {
