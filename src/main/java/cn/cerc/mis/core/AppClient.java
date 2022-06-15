@@ -37,6 +37,8 @@ public class AppClient implements Serializable {
     public static final String pad = "pad";
     // 电脑
     public static final String pc = "pc";
+    // 电视
+    public static final String tv = "tv";
     // 客户端专用浏览器
     public static final String ee = "ee";
 
