@@ -18,6 +18,7 @@ public class MessageRecord {
     public static final String UIClass_Workflow = "MVWorkflow"; // 签核类别 下方显示操作 同意，不同意，详情
     public static final String UIClass_Task = "MVTask"; // 任务类别 显示出任务状态
     public static final String UIClass_Export = "MVExport"; // 导出消息 显示出导出状态
+    public static final String UIClass_Subscribe = "MVSubscribe"; // 订阅消息 需要读取subject和content
     private String corpNo;
     private String userCode;
     private String subject;
