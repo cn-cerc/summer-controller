@@ -15,7 +15,11 @@ public final class ServiceMethod {
     private final ServiceMethodVersion version;
 
     public enum ServiceMethodVersion {
-        ResultBoolean, ResultStatus, ResultDataSetByDataIn, ResultDataSetByHeadIn, ResultBooleanByDataIn,
+        ResultBoolean,
+        ResultStatus,
+        ResultDataSetByDataIn,
+        ResultDataSetByHeadIn,
+        ResultBooleanByDataIn,
         ResultBooleanByHeadIn
     }
 
