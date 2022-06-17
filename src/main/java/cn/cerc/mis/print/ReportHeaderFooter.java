@@ -19,7 +19,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import cn.cerc.db.core.ClassResource;
 
 public class ReportHeaderFooter extends PdfPageEventHelper {
-    private static final ClassResource res = new ClassResource(ReportHeaderFooter.class,"summer-mvc");
+    private static final ClassResource res = new ClassResource(ReportHeaderFooter.class, "summer-mvc");
 
     /**
      * 页眉

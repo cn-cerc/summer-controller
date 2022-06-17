@@ -5,7 +5,7 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.Application;
 
 public class StubHandle extends Handle {
-    
+
     // FIXME 此处应该使用ClassConfig
     public static final String DefaultBook = "999001";
     public static final String DefaultUser = DefaultBook + "01";
@@ -20,7 +20,7 @@ public class StubHandle extends Handle {
         Application.initOnlyFramework();
         this.setSession(Application.getSession());
     }
-    
+
     public StubHandle(String corpNo, String userCode) {
         Application.initOnlyFramework();
         this.setSession(Application.getSession());

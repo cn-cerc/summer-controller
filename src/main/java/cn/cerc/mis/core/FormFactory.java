@@ -34,7 +34,7 @@ public class FormFactory implements ApplicationContextAware {
     }
 
     public String getView(IHandle handle, HttpServletRequest req, HttpServletResponse resp, String formId,
-                          String funcCode, String... pathVariables) {
+            String funcCode, String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
 
@@ -99,26 +99,26 @@ public class FormFactory implements ApplicationContextAware {
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
             switch (deviceCheck.pass(form)) {
-                case PASS:
-                    log.debug("{}.{}", formId, funcCode);
-                    return form._call(funcCode);
-                case CHECK:
-                    return "redirect:" + Application.getConfig().getVerifyDevicePage();
-                case LOGIN:
-                    // 登录验证
-                    IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
-                    String loginView = appLogin.getLoginView(form);
-                    if ("".equals(loginView)) {
-                        return null;
-                    }
-                    if (loginView != null) {
-                        return loginView;
-                    }
-                default:
-                    resp.setContentType("text/html;charset=UTF-8");
-                    IErrorPage error = context.getBean(IErrorPage.class);
-                    error.output(req, resp, new RuntimeException(res.getString(2, "对不起，当前设备被禁止使用！")));
+            case PASS:
+                log.debug("{}.{}", formId, funcCode);
+                return form._call(funcCode);
+            case CHECK:
+                return "redirect:" + Application.getConfig().getVerifyDevicePage();
+            case LOGIN:
+                // 登录验证
+                IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
+                String loginView = appLogin.getLoginView(form);
+                if ("".equals(loginView)) {
                     return null;
+                }
+                if (loginView != null) {
+                    return loginView;
+                }
+            default:
+                resp.setContentType("text/html;charset=UTF-8");
+                IErrorPage error = context.getBean(IErrorPage.class);
+                error.output(req, resp, new RuntimeException(res.getString(2, "对不起，当前设备被禁止使用！")));
+                return null;
             }
         } catch (Exception e) {
             e.printStackTrace();

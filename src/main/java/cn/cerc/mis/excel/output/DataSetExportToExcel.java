@@ -52,7 +52,8 @@ public class DataSetExportToExcel {
         workbook.close();
     }
 
-    private static void build(WritableSheet sheet, DataRow dataRow, HashSet<FieldMeta> metas, int row) throws WriteException {
+    private static void build(WritableSheet sheet, DataRow dataRow, HashSet<FieldMeta> metas, int row)
+            throws WriteException {
         int i = 0;
         for (FieldMeta meta : metas) {
             String type = meta.typeValue();

@@ -198,8 +198,7 @@ public class ImportExcel extends ImportExcelFile {
         }
     }
 
-    private void readFileFromXLS(FileItem file, DataSet ds)
-            throws Exception {
+    private void readFileFromXLS(FileItem file, DataSet ds) throws Exception {
         // 获取Excel文件对象
         Workbook rwb = Workbook.getWorkbook(file.getInputStream());
         // 获取文件的指定工作表 默认的第一个

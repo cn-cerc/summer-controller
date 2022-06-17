@@ -30,7 +30,7 @@ public class FieldUseCheck extends Handle {
     }
 
     private boolean checkTable(String tableCode, String fieldCode, String fieldValue) {
-        //FIXME 此处应该进一步抽象处理 
+        // FIXME 此处应该进一步抽象处理
         BuildQuery bq = new BuildQuery(this);
         bq.byField("CorpNo_", this.getCorpNo());
         bq.byParam(String.format("%s=N'%s'", fieldCode, fieldValue));

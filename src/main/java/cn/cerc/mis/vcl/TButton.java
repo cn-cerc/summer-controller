@@ -7,7 +7,7 @@ import javax.swing.JButton;
 
 @SuppressWarnings("serial")
 public class TButton extends JButton {
-    
+
     public TButton(Container owner) {
         super();
         if (owner instanceof TCustomForm)

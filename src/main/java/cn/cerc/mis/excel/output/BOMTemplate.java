@@ -61,7 +61,7 @@ public class BOMTemplate extends ExcelTemplate {
         super.output(sheet);
 
         this.setRow(this.getRow() + materialDataSet.size() + 2);
-        sheet.addCell(new Label(0, this.getRow(), res.getString(2,"制成清单：")));
+        sheet.addCell(new Label(0, this.getRow(), res.getString(2, "制成清单：")));
         this.setRow(this.getRow() + 1);
         this.getColumns().clear();
         this.getColumns().addAll(makes);

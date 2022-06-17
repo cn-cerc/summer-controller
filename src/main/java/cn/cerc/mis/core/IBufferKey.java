@@ -6,6 +6,6 @@ public interface IBufferKey {
     int getStartingPoint();
 
     int getMinimumNumber();
-    
+
     int getMaximumNumber();
 }

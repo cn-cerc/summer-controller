@@ -96,8 +96,7 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
     }
 
     public static void main(String[] args) {
-        EntityOne<SampleEntity> loadOne = EntityOne.open(null, SampleEntity.class,
-                new SqlText(SqlServerType.Mysql));
+        EntityOne<SampleEntity> loadOne = EntityOne.open(null, SampleEntity.class, new SqlText(SqlServerType.Mysql));
         // 找不到就抛错，否则就执行更新
         loadOne.isEmptyThrow(() -> new RuntimeException("找不到相应的记录"));
         // 找到就抛错，否则就执行插入
@@ -120,8 +119,7 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
         entity.post();
 
         // 对于多条记录的处理
-        EntityMany<SampleEntity> loadAll = EntityMany.open(null, SampleEntity.class,
-                new SqlText(SqlServerType.Mysql));
+        EntityMany<SampleEntity> loadAll = EntityMany.open(null, SampleEntity.class, new SqlText(SqlServerType.Mysql));
         // 插入一条件
         loadAll.insert(item -> {
             item.setCode_("a01");

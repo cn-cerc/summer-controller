@@ -17,7 +17,7 @@ public class CenterServer implements ServiceServerImpl {
     public String getRequestUrl(IHandle handle, String service) {
         return site == null ? null : String.format("%s?service=%s", site, service);
     }
-    
+
     @Override
     public String getToken(IHandle handle) {
         return null;

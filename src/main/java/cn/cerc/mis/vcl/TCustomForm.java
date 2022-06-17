@@ -16,7 +16,7 @@ public class TCustomForm extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel content = new JPanel();
     private Position position = Position.Default;
-    
+
     public enum Position {
         Default, ScreenCenter,
     }
@@ -24,15 +24,15 @@ public class TCustomForm extends JFrame {
     public TCustomForm() {
         this.setTitle("(未命名)");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+
         Toolkit kit = Toolkit.getDefaultToolkit();
         Dimension screenSize = kit.getScreenSize();
         this.setSize(screenSize.width / 2, screenSize.height / 2);
 
 //        this.setContentPane(content);
-        
+
         this.add(content, BorderLayout.CENTER);
-  
+
         this.setPosition(Position.ScreenCenter);
     }
 

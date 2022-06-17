@@ -190,8 +190,8 @@ public abstract class AbstractForm implements IForm, InitializingBean {
             case 3: {
                 if (this.getClient().isPhone()) {
                     try {
-                        method = this.getClass().getMethod(funcCode + "_phone", String.class, String.class,
-                                String.class);
+                        method = this.getClass()
+                                .getMethod(funcCode + "_phone", String.class, String.class, String.class);
                     } catch (NoSuchMethodException e) {
                         method = this.getClass().getMethod(funcCode, String.class, String.class, String.class);
                     }

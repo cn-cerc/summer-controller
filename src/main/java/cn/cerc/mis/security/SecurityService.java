@@ -27,7 +27,7 @@ public interface SecurityService extends IService {
     /**
      * 返回指定对象id需要的授权码, 主要用于在service未定义授权代码时，从数据库中取值
      * 
-     * @param handle      执行环境
+     * @param handle    执行环境
      * @param outParam: key = object id, value = 默认授权码
      */
     void loadPermission(IHandle handle, Variant outParam);

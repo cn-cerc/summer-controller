@@ -69,7 +69,7 @@ public class MessageRecord {
 
         // 返回消息的编号
         IUserMessage um = Application.getBean(handle, IUserMessage.class);
-        return um.appendRecord(sendCorpNo, userCode, level, subject, content.toString(), process,uiClass);
+        return um.appendRecord(sendCorpNo, userCode, level, subject, content.toString(), process, uiClass);
     }
 
     public String getContent() {
@@ -147,6 +147,5 @@ public class MessageRecord {
         this.uiClass = uiClass;
         return this;
     }
-
 
 }

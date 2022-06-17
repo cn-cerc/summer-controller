@@ -22,7 +22,7 @@ import cn.cerc.db.core.Handle;
 import cn.cerc.mis.excel.output.Column;
 
 public class PrintTemplate extends Handle {
-    private static final ClassResource res = new ClassResource(PrintTemplate.class,"summer-mvc");
+    private static final ClassResource res = new ClassResource(PrintTemplate.class, "summer-mvc");
 
     protected DataSet dataSet;
     protected Document document;

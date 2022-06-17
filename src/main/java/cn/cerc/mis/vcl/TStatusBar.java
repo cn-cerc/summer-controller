@@ -16,7 +16,7 @@ public class TStatusBar extends JPanel {
         label.setVisible(true);
         this.add(label);
         this.setLayout(new FlowLayout(FlowLayout.LEFT));
-        this.setBackground(new Color(200,200,200));
+        this.setBackground(new Color(200, 200, 200));
         label.setText("please");
     }
 

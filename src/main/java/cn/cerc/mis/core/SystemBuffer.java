@@ -50,7 +50,7 @@ public class SystemBuffer {
          * 超时页面
          */
         ViewPageTimeout,
-        
+
         /**
          * 超时Frm
          */

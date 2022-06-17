@@ -137,7 +137,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                 @Override
                 public void setRequest(HttpServletRequest request) {
                     // TODO Auto-generated method stub
-                    
+
                 }
 
                 @Override
@@ -149,7 +149,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                 @Override
                 public void setResponse(HttpServletResponse response) {
                     // TODO Auto-generated method stub
-                    
+
                 }
 
                 @Override

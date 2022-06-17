@@ -77,7 +77,7 @@ public class ResponseHandler {
             if (!"".equals(sb.toString())) {
                 Document doc = DocumentHelper.parseText(sb.toString());
                 Element root = doc.getRootElement();
-                for (Iterator iterator = root.elementIterator(); iterator.hasNext(); ) {
+                for (Iterator iterator = root.elementIterator(); iterator.hasNext();) {
                     Element e = (Element) iterator.next();
                     smap.put(e.getName(), e.getText());
                 }

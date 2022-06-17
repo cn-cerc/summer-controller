@@ -30,7 +30,7 @@ public class ResourceBuffer {
         }
 
         ILanguageReader reader = Application.getBean(handle, ILanguageReader.class);
-        String result =  reader.getOrSet(handle, lang, text);
+        String result = reader.getOrSet(handle, lang, text);
         items.put(text, result);
         return result;
     }
