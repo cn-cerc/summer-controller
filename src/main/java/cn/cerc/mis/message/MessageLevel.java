@@ -36,4 +36,12 @@ public enum MessageLevel {
         return day;
     }
 
+    public static MessageLevel getEnum(int val) {
+        for (MessageLevel m : values()) {
+            if (m.ordinal() == val)
+                return m;
+        }
+        return null;
+    }
+
 }

@@ -11,4 +11,12 @@ public enum MessageProcess {
         return AsyncService.getProcessTitle(this.ordinal());
     }
 
+    public static MessageProcess getEnum(int val) {
+        for (MessageProcess m : values()) {
+            if (m.ordinal() == val)
+                return m;
+        }
+        return null;
+    }
+
 }
