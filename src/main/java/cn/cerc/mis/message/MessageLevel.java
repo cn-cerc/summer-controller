@@ -36,7 +36,7 @@ public enum MessageLevel {
         return day;
     }
 
-    public static MessageLevel getEnum(int val) {
+    public static MessageLevel getItem(int val) {
         MessageLevel value = null;
         for (MessageLevel item : values()) {
             if (item.ordinal() == val) {
