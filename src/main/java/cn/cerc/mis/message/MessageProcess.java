@@ -12,11 +12,16 @@ public enum MessageProcess {
     }
 
     public static MessageProcess getEnum(int val) {
-        for (MessageProcess m : values()) {
-            if (m.ordinal() == val)
-                return m;
+        MessageProcess value = null;
+        for (MessageProcess item : values()) {
+            if (item.ordinal() == val) {
+                value = item;
+                break;
+            }
         }
-        return null;
+        if (value == null)
+            throw new RuntimeException(String.format("不支持的消息进度 %s", val));
+        return value;
     }
 
 }

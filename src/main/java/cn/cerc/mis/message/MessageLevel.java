@@ -37,11 +37,16 @@ public enum MessageLevel {
     }
 
     public static MessageLevel getEnum(int val) {
-        for (MessageLevel m : values()) {
-            if (m.ordinal() == val)
-                return m;
+        MessageLevel value = null;
+        for (MessageLevel item : values()) {
+            if (item.ordinal() == val) {
+                value = item;
+                break;
+            }
         }
-        return null;
+        if (value == null)
+            throw new RuntimeException(String.format("不支持的消息类别 %s", val));
+        return value;
     }
 
 }
