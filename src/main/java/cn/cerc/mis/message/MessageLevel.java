@@ -36,4 +36,17 @@ public enum MessageLevel {
         return day;
     }
 
+    public static MessageLevel getItem(int val) {
+        MessageLevel value = null;
+        for (MessageLevel item : values()) {
+            if (item.ordinal() == val) {
+                value = item;
+                break;
+            }
+        }
+        if (value == null)
+            throw new RuntimeException(String.format("不支持的消息类别 %s", val));
+        return value;
+    }
+
 }

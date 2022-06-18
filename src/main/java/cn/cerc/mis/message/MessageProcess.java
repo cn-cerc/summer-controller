@@ -11,4 +11,17 @@ public enum MessageProcess {
         return AsyncService.getProcessTitle(this.ordinal());
     }
 
+    public static MessageProcess getItem(int val) {
+        MessageProcess value = null;
+        for (MessageProcess item : values()) {
+            if (item.ordinal() == val) {
+                value = item;
+                break;
+            }
+        }
+        if (value == null)
+            throw new RuntimeException(String.format("不支持的消息进度 %s", val));
+        return value;
+    }
+
 }
