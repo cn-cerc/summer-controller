@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
-import cn.cerc.db.mongo.MongoConfig;
 import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlServerSlave;
@@ -124,11 +123,11 @@ public class CustomSession implements ISession {
             return connections.get(key);
         }
 
-        if (MongoConfig.SessionId.equals(key)) {
-            MongoConfig obj = new MongoConfig();
-            connections.put(MongoConfig.SessionId, obj);
-            return connections.get(key);
-        }
+//        if (MongoConfig.SessionId.equals(key)) {
+//            MongoConfig obj = new MongoConfig();
+//            connections.put(MongoConfig.SessionId, obj);
+//            return connections.get(key);
+//        }
         return null;
     }
 
