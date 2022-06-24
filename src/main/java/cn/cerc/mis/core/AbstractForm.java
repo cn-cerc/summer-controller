@@ -47,7 +47,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     private String module;
     private String[] pathVariables;
     private String beanName;
-    private Object tmp;
 
     public Map<String, String> getParams() {
         return params;
@@ -144,11 +143,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         } else {
             response.setContentType("text/html;charset=UTF-8");
         }
-
-        HttpServletRequest request = this.getRequest();
-        String CLIENTVER = request.getParameter("CLIENTVER");
-        if (CLIENTVER != null)
-            request.getSession().setAttribute("CLIENTVER", CLIENTVER);
 
         Object result;
         Method method = null;

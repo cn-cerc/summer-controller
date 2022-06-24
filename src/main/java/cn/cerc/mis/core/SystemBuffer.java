@@ -6,7 +6,9 @@ public class SystemBuffer {
      * key = ClassName + UserCode + Version
      */
     public enum UserObject implements IBufferKey {
-        ClassName, Permissions, Permission;
+        ClassName,
+        Permissions,
+        Permission;
 
         @Override
         public int getStartingPoint() {
@@ -54,7 +56,12 @@ public class SystemBuffer {
         /**
          * 超时Frm
          */
-        FrmTimeout;
+        FrmTimeout,
+
+        /**
+         * JSesssionID
+         */
+        JSessionID;
 
         @Override
         public int getStartingPoint() {
@@ -73,7 +80,9 @@ public class SystemBuffer {
     }
 
     public enum Token implements IBufferKey {
-        DeviceInfo, SessionBase, UserMessage;
+        DeviceInfo,
+        SessionBase,
+        UserMessage;
 
         @Override
         public int getStartingPoint() {
@@ -96,7 +105,8 @@ public class SystemBuffer {
      * key = UserCode + DeviceId / ExportKey
      */
     public enum User implements IBufferKey {
-        SessionInfo, ExportKey;
+        SessionInfo,
+        ExportKey;
 
         @Override
         public int getStartingPoint() {
@@ -116,7 +126,10 @@ public class SystemBuffer {
     }
 
     public enum SyncServer implements IBufferKey {
-        Diteng, Diaoyou, Tieke, Heritage;
+        Diteng,
+        Diaoyou,
+        Tieke,
+        Heritage;
 
         @Override
         public int getStartingPoint() {
@@ -161,7 +174,8 @@ public class SystemBuffer {
      * key = corpNo + machineCode
      */
     public enum PrintService implements IBufferKey {
-        MachineCode, Number;
+        MachineCode,
+        Number;
 
         @Override
         public int getStartingPoint() {
@@ -201,6 +215,6 @@ public class SystemBuffer {
         public int getMaximumNumber() {
             return 10;
         }
-
     }
+
 }
