@@ -11,9 +11,13 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.mysql.MysqlQuery;
+import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.mis.core.AppClient;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
+import cn.cerc.mis.other.MemoryBuffer;
+import redis.clients.jedis.Jedis;
 
 //TODO 此对象需要做更进一步抽象处理
 public class R {
@@ -36,7 +40,11 @@ public class R {
                 log.debug(request.getClass().getName());
                 if (request instanceof HttpServletRequest) {
                     HttpServletRequest req = (HttpServletRequest) request;
-                    temp = req.getSession().getAttribute(ISession.LANGUAGE_ID);
+                    String key = MemoryBuffer.buildObjectKey(AppClient.class, req.getSession().getId(),
+                            AppClient.Version);
+                    try (Jedis redis = JedisFactory.getJedis()) {
+                        temp = redis.hget(key, ISession.LANGUAGE_ID);
+                    }
                     log.debug("session language value " + temp);
                 }
             }
