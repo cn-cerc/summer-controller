@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.annotation.Scope;
@@ -51,6 +53,43 @@ public class AppClient implements Serializable {
     private String languageId; // device language: cn/en
     private HttpServletRequest request;
 
+    private static final String key(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return "";
+        }
+        String jsessionid = Stream.of(cookies)
+                .filter(item -> ISession.JSESSIONID.equals(item.getName()))
+                .findFirst()
+                .orElse(null)
+                .getValue();
+        return MemoryBuffer.buildObjectKey(AppClient.class, jsessionid, AppClient.Version);
+    }
+
+    public static final String value(HttpServletRequest request, String field) {
+        try (Jedis redis = JedisFactory.getJedis()) {
+            return redis.hget(AppClient.key(request), field);
+        }
+    }
+
+    public static final Long setValue(HttpServletRequest request, String field, String value) {
+        try (Jedis redis = JedisFactory.getJedis()) {
+            return redis.hset(AppClient.key(request), field, value);
+        }
+    }
+
+    public static final String msetValue(HttpServletRequest request, final Map<String, String> hash) {
+        try (Jedis redis = JedisFactory.getJedis()) {
+            return redis.hmset(AppClient.key(request), hash);
+        }
+    }
+
+    public static final Long del(HttpServletRequest request, String field) {
+        try (Jedis redis = JedisFactory.getJedis()) {
+            return redis.del(AppClient.key(request), field);
+        }
+    }
+
     /**
      * 根据 request 构建访问设备信息
      */
@@ -75,7 +114,7 @@ public class AppClient implements Serializable {
             items.put(ISession.TOKEN, this.token);
 
         // 将设备信息写入缓存并设置超时时间
-        String key = MemoryBuffer.buildObjectKey(AppClient.class, request.getSession().getId(), Version);
+        String key = AppClient.key(request);
         if (items.size() > 0) {
             try (Jedis redis = JedisFactory.getJedis()) {
                 redis.hmset(key, items);
@@ -106,10 +145,7 @@ public class AppClient implements Serializable {
         value = value == null ? "" : value;
         this.deviceId = value;
         request.setAttribute(CLIENT_ID, this.deviceId);
-        String key = MemoryBuffer.buildObjectKey(AppClient.class, request.getSession().getId(), Version);
-        try (Jedis redis = JedisFactory.getJedis()) {
-            redis.hset(key, AppClient.CLIENT_ID, device);
-        }
+        AppClient.setValue(request, AppClient.CLIENT_ID, device);
         if (value != null && value.length() == 28)// 微信openid的长度
             setDevice(phone);
     }
@@ -131,10 +167,7 @@ public class AppClient implements Serializable {
         // 更新request属性
         request.setAttribute(DEVICE, device);
         // 更新缓存属性
-        String key = MemoryBuffer.buildObjectKey(AppClient.class, request.getSession().getId(), Version);
-        try (Jedis redis = JedisFactory.getJedis()) {
-            redis.hset(key, AppClient.DEVICE, device);
-        }
+        AppClient.setValue(request, AppClient.DEVICE, device);
         return;
     }
 
@@ -147,9 +180,8 @@ public class AppClient implements Serializable {
     }
 
     public void clear() {
-        String key = MemoryBuffer.buildObjectKey(AppClient.class, request.getSession().getId(), Version);
         try (Jedis redis = JedisFactory.getJedis()) {
-            redis.del(key);
+            redis.del(AppClient.key(request));
         }
         this.token = null;
     }

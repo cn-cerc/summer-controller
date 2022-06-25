@@ -18,12 +18,9 @@ import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
-import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.cache.ISessionCache;
-import cn.cerc.mis.other.MemoryBuffer;
 import cn.cerc.mis.other.PageNotFoundException;
-import redis.clients.jedis.Jedis;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -65,11 +62,7 @@ public class FormFactory implements ApplicationContextAware {
             form.setSession(session);
 
             // 将设备信息写入缓存并设置超时时间
-            String token;
-            String key = MemoryBuffer.buildObjectKey(AppClient.class, req.getSession().getId(), AppClient.Version);
-            try (Jedis redis = JedisFactory.getJedis()) {
-                token = redis.hget(key, ISession.TOKEN);
-            }
+            String token = AppClient.value(req, ISession.TOKEN);
             session.loadToken(token);
 
             // 取出自定义session中用户设置的语言类型，并写入到request
