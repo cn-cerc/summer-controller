@@ -12,7 +12,6 @@ import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.mis.core.Application;
-import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
 
 //TODO 此对象需要做更进一步抽象处理
@@ -41,15 +40,7 @@ public class R {
                 }
             }
         }
-
-        String language = temp == null ? Application.getLanguageId() : (String) temp;
-        try {
-            IAppLanguage obj = Application.getBean(IAppLanguage.class);
-            language = obj.getLanguageId(handle.getSession(), language);
-        } catch (Exception e) {
-            language = LanguageResource.appLanguage;
-        }
-        return language;
+        return (temp == null ? Application.getLanguageId() : (String) temp);
     }
 
     public static String asString(IHandle handle, String text) {
