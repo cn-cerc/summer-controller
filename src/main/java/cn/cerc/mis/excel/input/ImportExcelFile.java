@@ -38,8 +38,8 @@ public class ImportExcelFile {
                 FileItem fileItem = uploadFiles.get(i);
                 if (fileItem.isFormField()) {
                     // 普通数据
-                    String val = new String(
-                            fileItem.getString().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+                    String val = new String(fileItem.getString().getBytes(StandardCharsets.ISO_8859_1),
+                            StandardCharsets.UTF_8);
                     dataSet.head().setValue(fileItem.getFieldName(), val);
                 } else {
                     // 文件数据
