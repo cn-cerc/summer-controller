@@ -74,14 +74,12 @@ public class FormFactory implements ApplicationContextAware {
                         Cookie cookie = new Cookie(ISession.COOKIE, token);
                         cookie.setPath("/");
                         cookie.setHttpOnly(true);
-                        cookie.setSecure(true);
                         resp.addCookie(cookie);
                     }
                 } else {
                     Cookie cookie = new Cookie(ISession.COOKIE, token);
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
-                    cookie.setSecure(true);
                     resp.addCookie(cookie);
                 }
             }
