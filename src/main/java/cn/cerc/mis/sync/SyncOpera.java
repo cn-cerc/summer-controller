@@ -2,7 +2,10 @@ package cn.cerc.mis.sync;
 
 public enum SyncOpera {
 
-    Append, Delete, Update, Reset;
+    Append,
+    Delete,
+    Update,
+    Reset;
 
     public static String getName(SyncOpera opera) {
         switch (opera) {

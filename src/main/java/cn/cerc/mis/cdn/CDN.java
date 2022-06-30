@@ -1,6 +1,7 @@
 package cn.cerc.mis.cdn;
 
 import cn.cerc.db.core.ClassConfig;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 
 public class CDN {
@@ -13,6 +14,13 @@ public class CDN {
 
     public static String get(String file) {
         return file + "?v=" + config.getString(BROWSER_CACHE_VERSION, "1.0.0.0");
+    }
+
+    public static final String getSite() {
+        String site = config.getProperty("cdn.site", "");
+        if (Utils.isEmpty(site))
+            throw new RuntimeException("CDN 地址没有配置");
+        return site;
     }
 
 }
