@@ -1,14 +1,5 @@
 package cn.cerc.mis.security;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.mssql.MssqlServer;
@@ -17,10 +8,18 @@ import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.db.redis.RedisRecord;
+import cn.cerc.mis.core.AppClient;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
-import cn.cerc.mis.other.MemoryBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
 //@Scope(WebApplicationContext.SCOPE_SESSION)
@@ -30,7 +29,7 @@ import redis.clients.jedis.Jedis;
 public class CustomSession implements ISession {
     private static final Logger log = LoggerFactory.getLogger(CustomSession.class);
     protected Map<String, Object> connections = new HashMap<>();
-    private Map<String, Object> params = new HashMap<>();
+    private final Map<String, Object> params = new HashMap<>();
     protected String permissions = null;
     private HttpServletRequest request;
     private HttpServletResponse response;
@@ -49,7 +48,7 @@ public class CustomSession implements ISession {
         params.put(Application.ProxyUsers, "");
 
         if (log.isDebugEnabled()) {
-            synchronized (this.getClass()) {
+            synchronized (CustomSession.class) {
                 ++currentSize;
                 log.debug("current size: {}", currentSize);
             }
@@ -80,7 +79,7 @@ public class CustomSession implements ISession {
         if (key == null)
             return this;
 
-        Object result = null;
+        Object result;
         if (params.containsKey(key)) {
             result = params.get(key);
             if (result != null)
@@ -147,7 +146,7 @@ public class CustomSession implements ISession {
         if (log.isDebugEnabled()) {
             if (this.active) {
                 this.active = false;
-                synchronized (this.getClass()) {
+                synchronized (CustomSession.class) {
                     --currentSize;
                     log.debug("current size: {}", currentSize);
                 }
@@ -179,15 +178,15 @@ public class CustomSession implements ISession {
 
     @Override
     public void loadToken(String token) {
-        SecurityService ws = Application.getBean(SecurityService.class);
-        if (ws != null && ws.initSession(this, token)) {
-            String key = MemoryBuffer.buildKey(SystemBuffer.UserObject.Permissions, token);
-            try (Jedis jedis = JedisFactory.getJedis()) {
-                String value = jedis.get(key);
+        SecurityService security = Application.getBean(SecurityService.class);
+        if (security != null && security.initSession(this, token)) {
+            String key = AppClient.buildKey(token);
+            try (Jedis redis = JedisFactory.getJedis()) {
+                String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
                 if (value == null) {
-                    value = ws.getPermissions(this);
-                    jedis.set(key, value);
-                    jedis.expire(key, 3600);
+                    value = security.getPermissions(this);
+                    redis.hset(key, SystemBuffer.UserObject.Permissions.name(), value);
+                    redis.expire(key, RedisRecord.TIMEOUT);
                 }
                 this.permissions = value;
             }
