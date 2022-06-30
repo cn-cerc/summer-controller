@@ -65,10 +65,7 @@ public class AppClient implements Serializable {
         Cookie[] cookies = request.getCookies();
         if (cookies == null)
             return "";
-        Cookie cookie = Stream.of(cookies)
-                .filter(item -> ISession.COOKIE.equals(item.getName()))
-                .findAny()
-                .orElse(null);
+        Cookie cookie = Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().orElse(null);
         if (cookie == null)
             return "";
         String cookieId = cookie.getValue();
@@ -88,7 +85,7 @@ public class AppClient implements Serializable {
             return value;
         }
         if (Utils.isEmpty(key)) {
-            log.warn("jsessionid is empty");
+            log.warn("cookie field {} value is empty", field);
             return "";
         }
         try (Jedis redis = JedisFactory.getJedis()) {

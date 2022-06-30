@@ -70,14 +70,14 @@ public class FormFactory implements ApplicationContextAware {
             if (!Utils.isEmpty(token)) {
                 Cookie[] cookies = req.getCookies();
                 if (cookies != null) {
-                    if (Stream.of(cookies).filter(item -> ISession.COOKIE.equals(item.getName())).findAny().isEmpty()) {
-                        Cookie cookie = new Cookie(ISession.COOKIE, token);
+                    if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
+                        Cookie cookie = new Cookie(ISession.TOKEN, token);
                         cookie.setPath("/");
                         cookie.setHttpOnly(true);
                         resp.addCookie(cookie);
                     }
                 } else {
-                    Cookie cookie = new Cookie(ISession.COOKIE, token);
+                    Cookie cookie = new Cookie(ISession.TOKEN, token);
                     cookie.setPath("/");
                     cookie.setHttpOnly(true);
                     resp.addCookie(cookie);
