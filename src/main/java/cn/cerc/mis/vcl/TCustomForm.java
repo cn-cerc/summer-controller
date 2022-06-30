@@ -18,7 +18,8 @@ public class TCustomForm extends JFrame {
     private Position position = Position.Default;
 
     public enum Position {
-        Default, ScreenCenter,
+        Default,
+        ScreenCenter,
     }
 
     public TCustomForm() {
