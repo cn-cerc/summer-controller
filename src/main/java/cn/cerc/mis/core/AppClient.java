@@ -96,7 +96,7 @@ public class AppClient implements Serializable {
     public static final Long setValue(HttpServletRequest request, String field, String value) {
         String key = AppClient.key(request);
         if (Utils.isEmpty(key)) {
-            log.warn("jsessionid is empty");
+            log.warn("cookie field {} value is empty", field);
             return 0L;
         }
         try (Jedis redis = JedisFactory.getJedis()) {
@@ -107,7 +107,7 @@ public class AppClient implements Serializable {
     public static final String msetValue(HttpServletRequest request, final Map<String, String> hash) {
         String key = AppClient.key(request);
         if (Utils.isEmpty(key)) {
-            log.warn("jsessionid is empty");
+            log.warn("cookie field {} value is empty", ISession.TOKEN);
             return "";
         }
         try (Jedis redis = JedisFactory.getJedis()) {
@@ -118,7 +118,7 @@ public class AppClient implements Serializable {
     public static final Long del(HttpServletRequest request, String field) {
         String key = AppClient.key(request);
         if (Utils.isEmpty(key)) {
-            log.warn("jsessionid is empty");
+            log.warn("cookie field {} value is empty", field);
             return 0L;
         }
         try (Jedis redis = JedisFactory.getJedis()) {
