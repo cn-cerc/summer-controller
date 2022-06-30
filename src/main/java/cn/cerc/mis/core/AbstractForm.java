@@ -34,8 +34,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 //    private static final ClassConfig config = new ClassConfig(AbstractForm.class, SummerMIS.ID);
 
     private String id;
-    @Autowired
-    private AppClient client;
 
     @Autowired
     private ISession session;
@@ -68,7 +66,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 
     @Override
     public AppClient getClient() {
-        return this.client;
+        return new AppClient(this.getRequest());
     }
 
     @Override

@@ -2,22 +2,24 @@ package cn.cerc.mis.core;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.google.gson.Gson;
 
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
@@ -25,6 +27,8 @@ import redis.clients.jedis.Jedis;
 @Scope(WebApplicationContext.SCOPE_REQUEST)
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AppClient implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
+
     private static final long serialVersionUID = -3593077761901636920L;
 
     // 缓存版本
@@ -47,143 +51,128 @@ public class AppClient implements Serializable {
     // 客户端专用浏览器
     public static final String ee = "ee";
 
-    private String token; // application session id;
-    private String deviceId; // device id
-    private String device; // phone/pad/ee/pc
-    private String languageId; // device language: cn/en
     private HttpServletRequest request;
+
+    public AppClient(HttpServletRequest request) {
+        this.request = request;
+    }
+
+    public static final String buildKey(String token) {
+        return MemoryBuffer.buildObjectKey(AppClient.class, token, AppClient.Version);
+    }
 
     private static final String key(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
+        if (cookies == null)
             return "";
-        }
-        String jsessionid = Stream.of(cookies)
-                .filter(item -> ISession.JSESSIONID.equals(item.getName()))
-                .findFirst()
-                .orElse(null)
-                .getValue();
-        return MemoryBuffer.buildObjectKey(AppClient.class, jsessionid, AppClient.Version);
+        Cookie cookie = Stream.of(cookies)
+                .filter(item -> ISession.COOKIE.equals(item.getName()))
+                .findAny()
+                .orElse(null);
+        if (cookie == null)
+            return "";
+        String cookieId = cookie.getValue();
+        if (Utils.isEmpty(cookieId))
+            return "";
+        return AppClient.buildKey(cookieId);
     }
 
     public static final String value(HttpServletRequest request, String field) {
+        String key = AppClient.key(request);
+        String value = request.getParameter(field);
+        if (!Utils.isEmpty(value)) {
+            try (Jedis redis = JedisFactory.getJedis()) {
+                if (!Utils.isEmpty(key))
+                    redis.hset(key, field, value);
+            }
+            return value;
+        }
+        if (Utils.isEmpty(key)) {
+            log.warn("jsessionid is empty");
+            return "";
+        }
         try (Jedis redis = JedisFactory.getJedis()) {
-            return redis.hget(AppClient.key(request), field);
+            return redis.hget(key, field);
         }
     }
 
     public static final Long setValue(HttpServletRequest request, String field, String value) {
+        String key = AppClient.key(request);
+        if (Utils.isEmpty(key)) {
+            log.warn("jsessionid is empty");
+            return 0L;
+        }
         try (Jedis redis = JedisFactory.getJedis()) {
             return redis.hset(AppClient.key(request), field, value);
         }
     }
 
     public static final String msetValue(HttpServletRequest request, final Map<String, String> hash) {
+        String key = AppClient.key(request);
+        if (Utils.isEmpty(key)) {
+            log.warn("jsessionid is empty");
+            return "";
+        }
         try (Jedis redis = JedisFactory.getJedis()) {
             return redis.hmset(AppClient.key(request), hash);
         }
     }
 
     public static final Long del(HttpServletRequest request, String field) {
+        String key = AppClient.key(request);
+        if (Utils.isEmpty(key)) {
+            log.warn("jsessionid is empty");
+            return 0L;
+        }
         try (Jedis redis = JedisFactory.getJedis()) {
             return redis.del(AppClient.key(request), field);
         }
     }
 
-    /**
-     * 根据 request 构建访问设备信息
-     */
-    public void setRequest(HttpServletRequest request) {
-        this.request = request;
-
-        Map<String, String> items = new HashMap<>();
-        this.device = request.getParameter(DEVICE);
-        if (!Utils.isEmpty(this.device))
-            items.put(AppClient.DEVICE, this.device);
-
-        this.deviceId = request.getParameter(CLIENT_ID);
-        if (!Utils.isEmpty(this.deviceId))
-            items.put(AppClient.CLIENT_ID, this.deviceId);
-
-        this.languageId = request.getParameter(ISession.LANGUAGE_ID);
-        if (!Utils.isEmpty(this.languageId))
-            items.put(ISession.LANGUAGE_ID, this.languageId);
-
-        this.token = request.getParameter(ISession.TOKEN);// 获取客户端的 token
-        if (!Utils.isEmpty(this.token))
-            items.put(ISession.TOKEN, this.token);
-
-        // 将设备信息写入缓存并设置超时时间
-        String key = AppClient.key(request);
-        if (items.size() > 0) {
-            try (Jedis redis = JedisFactory.getJedis()) {
-                redis.hmset(key, items);
-                redis.expire(key, RedisRecord.TIMEOUT);
-            }
-        }
-
-        // 一次性从缓存中取值
-        try (Jedis redis = JedisFactory.getJedis()) {
-            this.device = redis.hget(key, AppClient.DEVICE);
-            this.deviceId = redis.hget(key, AppClient.CLIENT_ID);
-            this.languageId = redis.hget(key, ISession.LANGUAGE_ID);
-            this.token = redis.hget(key, ISession.TOKEN);
-        }
-
-        // 往当前的request写入设备信息
-        request.setAttribute(DEVICE, this.device);
-        request.setAttribute(CLIENT_ID, this.deviceId);
-        request.setAttribute(ISession.LANGUAGE_ID, this.languageId);
-        request.setAttribute(ISession.TOKEN, this.token);
-    }
-
     public String getId() {
-        return this.deviceId == null ? Application.WebClient : this.deviceId;
+        return AppClient.value(this.request, AppClient.CLIENT_ID);
     }
 
     public void setId(String value) {
-        value = value == null ? "" : value;
-        this.deviceId = value;
-        request.setAttribute(CLIENT_ID, this.deviceId);
-        AppClient.setValue(request, AppClient.CLIENT_ID, device);
+        String clientId = value == null ? "" : value;
+        request.setAttribute(AppClient.CLIENT_ID, clientId);
+        AppClient.setValue(request, AppClient.CLIENT_ID, clientId);
         if (value != null && value.length() == 28)// 微信openid的长度
             setDevice(phone);
     }
 
     /**
      * 设备类型默认是 pc
-     *
-     * @return device
      */
     public String getDevice() {
-        return this.device == null ? pc : device;
+        String device = AppClient.value(this.request, AppClient.DEVICE);
+        return Utils.isEmpty(device) ? pc : device;
     }
 
     public void setDevice(String device) {
         if (Utils.isEmpty(device))
             return;
-        // 更新类属性
-        this.device = device;
-        // 更新request属性
-        request.setAttribute(DEVICE, device);
-        // 更新缓存属性
+        request.setAttribute(AppClient.DEVICE, device);
         AppClient.setValue(request, AppClient.DEVICE, device);
         return;
     }
 
     public String getLanguage() {
-        return languageId == null ? LanguageResource.appLanguage : languageId;
+        String languageId = AppClient.value(this.request, ISession.LANGUAGE_ID);
+        return Utils.isEmpty(languageId) ? LanguageResource.appLanguage : languageId;
     }
 
     public String getToken() {
-        return "".equals(token) ? null : token;
+        String token = AppClient.value(this.request, ISession.TOKEN);
+        return Utils.isEmpty(token) ? null : token;
     }
 
-    public void clear() {
+    public void clear(String cookId) {
+        if (Utils.isEmpty(cookId))
+            return;
         try (Jedis redis = JedisFactory.getJedis()) {
-            redis.del(AppClient.key(request));
+            redis.del(AppClient.buildKey(cookId));
         }
-        this.token = null;
     }
 
     public boolean isPhone() {
@@ -237,11 +226,12 @@ public class AppClient implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("token: ").append(this.token).append(", ");
-        builder.append("deviceId: ").append(this.deviceId).append(", ");
-        builder.append("deviceType: ").append(this.device);
-        return builder.toString();
+        Map<String, String> items;
+        try (Jedis redis = JedisFactory.getJedis()) {
+            String key = AppClient.key(this.request);
+            items = redis.hgetAll(key);
+        }
+        return new Gson().toJson(items);
     }
 
 }

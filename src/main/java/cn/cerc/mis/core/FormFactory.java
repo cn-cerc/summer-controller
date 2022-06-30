@@ -2,8 +2,10 @@ package cn.cerc.mis.core;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,7 +44,6 @@ public class FormFactory implements ApplicationContextAware {
 
         // 建立数据库资源
         try {
-            req.setAttribute("myappHandle", handle);
             ISession session = handle.getSession();
             session.setProperty(Application.SessionId, req.getSession().getId());
             session.setProperty(ISession.REQUEST, req);
@@ -61,10 +62,29 @@ public class FormFactory implements ApplicationContextAware {
                 throw new PageNotFoundException(req.getServletPath());
             form.setSession(session);
 
-            // 将设备信息写入缓存并设置超时时间
+            // 取得页面传递进来的sid，并将sid进行保存
             String token = AppClient.value(req, ISession.TOKEN);
             session.loadToken(token);
 
+            // 检查cookie的数据状态
+            if (!Utils.isEmpty(token)) {
+                Cookie[] cookies = req.getCookies();
+                if (cookies != null) {
+                    if (Stream.of(cookies).filter(item -> ISession.COOKIE.equals(item.getName())).findAny().isEmpty()) {
+                        Cookie cookie = new Cookie(ISession.COOKIE, token);
+                        cookie.setPath("/");
+                        cookie.setHttpOnly(true);
+                        cookie.setSecure(true);
+                        resp.addCookie(cookie);
+                    }
+                } else {
+                    Cookie cookie = new Cookie(ISession.COOKIE, token);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(true);
+                    cookie.setSecure(true);
+                    resp.addCookie(cookie);
+                }
+            }
             // 取出自定义session中用户设置的语言类型，并写入到request
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
@@ -85,18 +105,15 @@ public class FormFactory implements ApplicationContextAware {
                 // 刷新session缓存
                 Map<String, ISessionCache> items = Application.getContext().getBeansOfType(ISessionCache.class);
                 items.forEach((k, v) -> v.clearCache());
-                if ("".equals(loginView)) {
+                if ("".equals(loginView))
                     return null;
-                }
-                if (loginView != null) {
+                if (loginView != null)
                     return loginView;
-                }
             }
 
             // 设备检查
-            if (form.isSecurityDevice()) {
+            if (form.isSecurityDevice())
                 return form._call(funcCode);
-            }
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
             switch (deviceCheck.pass(form)) {
