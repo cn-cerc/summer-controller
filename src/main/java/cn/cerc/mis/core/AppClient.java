@@ -91,6 +91,7 @@ public class AppClient implements Serializable {
             return "";
         }
         try (Jedis redis = JedisFactory.getJedis()) {
+            redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
             return redis.hget(key, field);
         }
     }
