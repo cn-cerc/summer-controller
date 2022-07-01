@@ -210,6 +210,6 @@ public class SystemBuffer {
         public int getMaximumNumber() {
             return 10;
         }
-
     }
+
 }

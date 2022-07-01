@@ -1,12 +1,14 @@
 package cn.cerc.mis.core;
 
-import cn.cerc.db.core.ClassResource;
-import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.Utils;
-import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.cache.ISessionCache;
-import cn.cerc.mis.other.PageNotFoundException;
+import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,11 +16,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Utils;
+import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.cache.ISessionCache;
+import cn.cerc.mis.other.PageNotFoundException;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -40,7 +44,6 @@ public class FormFactory implements ApplicationContextAware {
 
         // 建立数据库资源
         try {
-            req.setAttribute("myappHandle", handle);
             ISession session = handle.getSession();
             session.setProperty(Application.SessionId, req.getSession().getId());
             session.setProperty(ISession.REQUEST, req);
@@ -57,15 +60,14 @@ public class FormFactory implements ApplicationContextAware {
             }
             if (form == null)
                 throw new PageNotFoundException(req.getServletPath());
-
             form.setSession(session);
 
-            String token = (String) req.getSession().getAttribute(ISession.TOKEN);
+            // 取得页面cookie传递进来的sid，并将sid进行保存
+            String token = AppClient.value(req, ISession.TOKEN);
             session.loadToken(token);
 
             // 取出自定义session中用户设置的语言类型，并写入到request
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
-            req.getSession().setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
             req.setAttribute("_showMenu_", !AppClient.ee.equals(form.getClient().getDevice()));
             form.setId(formId);
@@ -84,18 +86,42 @@ public class FormFactory implements ApplicationContextAware {
                 // 刷新session缓存
                 Map<String, ISessionCache> items = Application.getContext().getBeansOfType(ISessionCache.class);
                 items.forEach((k, v) -> v.clearCache());
-                if ("".equals(loginView)) {
-                    return null;
+                // 清空当前无效的cookie信息
+                Cookie[] cookies = form.getRequest().getCookies();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        cookie.setMaxAge(0);
+                        cookie.setPath("/");
+                        form.getResponse().addCookie(cookie);
+                    }
                 }
-                if (loginView != null) {
+                if ("".equals(loginView))
+                    return null;
+                if (loginView != null)
                     return loginView;
+            }
+
+            // 只有通过了登录校验的token才返回给cookie
+            if (!Utils.isEmpty(token)) {
+                Cookie[] cookies = req.getCookies();
+                if (cookies != null) {
+                    if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
+                        Cookie cookie = new Cookie(ISession.TOKEN, token);
+                        cookie.setPath("/");
+                        cookie.setHttpOnly(true);
+                        resp.addCookie(cookie);
+                    }
+                } else {
+                    Cookie cookie = new Cookie(ISession.TOKEN, token);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(true);
+                    resp.addCookie(cookie);
                 }
             }
 
             // 设备检查
-            if (form.isSecurityDevice()) {
+            if (form.isSecurityDevice())
                 return form._call(funcCode);
-            }
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
             switch (deviceCheck.pass(form)) {

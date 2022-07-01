@@ -11,6 +11,7 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.mysql.MysqlQuery;
+import cn.cerc.mis.core.AppClient;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IAppLanguage;
 import cn.cerc.mis.core.ISystemTable;
@@ -36,7 +37,7 @@ public class R {
                 log.debug(request.getClass().getName());
                 if (request instanceof HttpServletRequest) {
                     HttpServletRequest req = (HttpServletRequest) request;
-                    temp = req.getSession().getAttribute(ISession.LANGUAGE_ID);
+                    temp = AppClient.value(req, ISession.LANGUAGE_ID);
                     log.debug("session language value " + temp);
                 }
             }

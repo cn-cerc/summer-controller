@@ -34,8 +34,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 //    private static final ClassConfig config = new ClassConfig(AbstractForm.class, SummerMIS.ID);
 
     private String id;
-    @Autowired
-    private AppClient client;
 
     @Autowired
     private ISession session;
@@ -47,7 +45,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     private String module;
     private String[] pathVariables;
     private String beanName;
-    private Object tmp;
 
     public Map<String, String> getParams() {
         return params;
@@ -69,7 +66,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 
     @Override
     public AppClient getClient() {
-        return this.client;
+        return new AppClient(this.getRequest());
     }
 
     @Override
@@ -144,11 +141,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         } else {
             response.setContentType("text/html;charset=UTF-8");
         }
-
-        HttpServletRequest request = this.getRequest();
-        String CLIENTVER = request.getParameter("CLIENTVER");
-        if (CLIENTVER != null)
-            request.getSession().setAttribute("CLIENTVER", CLIENTVER);
 
         Object result;
         Method method = null;
