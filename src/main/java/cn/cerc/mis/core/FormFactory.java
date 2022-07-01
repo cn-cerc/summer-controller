@@ -21,7 +21,6 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.cache.ISessionCache;
 import cn.cerc.mis.other.PageNotFoundException;
 
 @Component
@@ -100,10 +99,7 @@ public class FormFactory implements ApplicationContextAware {
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
                 String loginView = appLogin.getLoginView(form);
-                // 刷新session缓存
-                Map<String, ISessionCache> items = Application.getContext().getBeansOfType(ISessionCache.class);
-                items.forEach((k, v) -> v.clearCache());
-                if ("".equals(loginView))
+                if ("".equals(loginView)) {
                     return null;
                 if (loginView != null)
                     return loginView;
