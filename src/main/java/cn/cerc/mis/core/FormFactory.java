@@ -1,7 +1,6 @@
 package cn.cerc.mis.core;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
@@ -99,7 +98,7 @@ public class FormFactory implements ApplicationContextAware {
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
                 String loginView = appLogin.getLoginView(form);
-                if ("".equals(loginView)) {
+                if ("".equals(loginView))
                     return null;
                 if (loginView != null)
                     return loginView;
