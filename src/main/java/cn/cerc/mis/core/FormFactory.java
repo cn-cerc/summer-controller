@@ -1,12 +1,11 @@
 package cn.cerc.mis.core;
 
-import cn.cerc.db.core.ClassResource;
-import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.Utils;
-import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.cache.ISessionCache;
-import cn.cerc.mis.other.PageNotFoundException;
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,11 +13,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
+import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Utils;
+import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.other.PageNotFoundException;
 
 @Component
 public class FormFactory implements ApplicationContextAware {
@@ -81,9 +81,6 @@ public class FormFactory implements ApplicationContextAware {
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
                 String loginView = appLogin.getLoginView(form);
-                // 刷新session缓存
-                Map<String, ISessionCache> items = Application.getContext().getBeansOfType(ISessionCache.class);
-                items.forEach((k, v) -> v.clearCache());
                 if ("".equals(loginView)) {
                     return null;
                 }
