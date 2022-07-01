@@ -6,7 +6,7 @@
     <parent>
         <groupId>cn.cerc</groupId>
         <artifactId>summer-framework</artifactId>
-        <version>11.2.1-SNAPSHOT</version>
+        <version>11.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>summer-mis</artifactId>
     <packaging>jar</packaging>
