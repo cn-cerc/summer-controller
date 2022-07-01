@@ -2,7 +2,6 @@ package cn.cerc.mis.core;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -196,33 +195,6 @@ public class AppClient implements Serializable {
 
     public boolean isKanban() {
         return kanban.equals(getDevice());
-    }
-
-    /**
-     * 根据 request 构建访问设备信息
-     */
-    public static void loadRequest(HttpServletRequest request) {
-        Map<String, String> items = new HashMap<>();
-        String device = request.getParameter(DEVICE);
-        if (!Utils.isEmpty(device))
-            items.put(AppClient.DEVICE, device);
-
-        String deviceId = request.getParameter(CLIENT_ID);
-        if (!Utils.isEmpty(deviceId))
-            items.put(AppClient.CLIENT_ID, deviceId);
-
-        String languageId = request.getParameter(ISession.LANGUAGE_ID);
-        if (!Utils.isEmpty(languageId))
-            items.put(ISession.LANGUAGE_ID, languageId);
-
-        // 将设备信息写入缓存并设置超时时间
-        String key = AppClient.key(request);
-        if (!Utils.isEmpty(key) && items.size() > 0) {
-            try (Jedis redis = JedisFactory.getJedis()) {
-                redis.hmset(key, items);
-                redis.expire(key, RedisRecord.TIMEOUT);
-            }
-        }
     }
 
     /**
