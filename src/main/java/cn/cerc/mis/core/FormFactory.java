@@ -62,27 +62,10 @@ public class FormFactory implements ApplicationContextAware {
                 throw new PageNotFoundException(req.getServletPath());
             form.setSession(session);
 
-            // 取得页面传递进来的sid，并将sid进行保存
+            // 取得页面cookie传递进来的sid，并将sid进行保存
             String token = AppClient.value(req, ISession.TOKEN);
             session.loadToken(token);
 
-            // 检查cookie的数据状态
-            if (!Utils.isEmpty(token)) {
-                Cookie[] cookies = req.getCookies();
-                if (cookies != null) {
-                    if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
-                        Cookie cookie = new Cookie(ISession.TOKEN, token);
-                        cookie.setPath("/");
-                        cookie.setHttpOnly(true);
-                        resp.addCookie(cookie);
-                    }
-                } else {
-                    Cookie cookie = new Cookie(ISession.TOKEN, token);
-                    cookie.setPath("/");
-                    cookie.setHttpOnly(true);
-                    resp.addCookie(cookie);
-                }
-            }
             // 取出自定义session中用户设置的语言类型，并写入到request
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
@@ -103,10 +86,37 @@ public class FormFactory implements ApplicationContextAware {
                 // 刷新session缓存
                 Map<String, ISessionCache> items = Application.getContext().getBeansOfType(ISessionCache.class);
                 items.forEach((k, v) -> v.clearCache());
+                // 清空当前无效的cookie信息
+                Cookie[] cookies = form.getRequest().getCookies();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        cookie.setMaxAge(0);
+                        cookie.setPath("/");
+                        form.getResponse().addCookie(cookie);
+                    }
+                }
                 if ("".equals(loginView))
                     return null;
                 if (loginView != null)
                     return loginView;
+            }
+
+            // 只有通过了登录校验的token才返回给cookie
+            if (!Utils.isEmpty(token)) {
+                Cookie[] cookies = req.getCookies();
+                if (cookies != null) {
+                    if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
+                        Cookie cookie = new Cookie(ISession.TOKEN, token);
+                        cookie.setPath("/");
+                        cookie.setHttpOnly(true);
+                        resp.addCookie(cookie);
+                    }
+                } else {
+                    Cookie cookie = new Cookie(ISession.TOKEN, token);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(true);
+                    resp.addCookie(cookie);
+                }
             }
 
             // 设备检查

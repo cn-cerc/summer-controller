@@ -60,10 +60,12 @@ public class AppClient implements Serializable {
     }
 
     public static final String buildKey(String token) {
+        if (Utils.isEmpty(token))
+            return "";
         return MemoryBuffer.buildObjectKey(AppClient.class, token, AppClient.Version);
     }
 
-    private static final String key(HttpServletRequest request) {
+    private static String getTooken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null)
             return "";
@@ -73,11 +75,19 @@ public class AppClient implements Serializable {
         String cookieId = cookie.getValue();
         if (Utils.isEmpty(cookieId))
             return "";
+        return cookieId;
+    }
+
+    private static final String key(HttpServletRequest request) {
+        String cookieId = getTooken(request);
+        if (Utils.isEmpty(cookieId))
+            return "";
         return AppClient.buildKey(cookieId);
     }
 
     public static final String value(HttpServletRequest request, String field) {
-        String key = AppClient.key(request);
+        String cookieId = getTooken(request);
+        String key = AppClient.buildKey(cookieId);
         String value = request.getParameter(field);
         if (!Utils.isEmpty(value)) {
             try (Jedis redis = JedisFactory.getJedis()) {
@@ -89,6 +99,10 @@ public class AppClient implements Serializable {
         if (Utils.isEmpty(key)) {
             log.warn("cookie field {} value is empty", field);
             return "";
+        }
+        // 如果 cookieId 等于token直接取值
+        if (ISession.TOKEN.equals(field) && !Utils.isEmpty(cookieId)) {
+            return cookieId;
         }
         try (Jedis redis = JedisFactory.getJedis()) {
             redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
