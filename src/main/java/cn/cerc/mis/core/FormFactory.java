@@ -64,23 +64,6 @@ public class FormFactory implements ApplicationContextAware {
             String token = AppClient.value(req, ISession.TOKEN);
             session.loadToken(token);
 
-            // 检查cookie的数据状态
-            if (!Utils.isEmpty(token)) {
-                Cookie[] cookies = req.getCookies();
-                if (cookies != null) {
-                    if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
-                        Cookie cookie = new Cookie(ISession.TOKEN, token);
-                        cookie.setPath("/");
-                        cookie.setHttpOnly(true);
-                        resp.addCookie(cookie);
-                    }
-                } else {
-                    Cookie cookie = new Cookie(ISession.TOKEN, token);
-                    cookie.setPath("/");
-                    cookie.setHttpOnly(true);
-                    resp.addCookie(cookie);
-                }
-            }
             // 取出自定义session中用户设置的语言类型，并写入到request
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
