@@ -56,12 +56,7 @@ public class SystemBuffer {
         /**
          * 超时Frm
          */
-        FrmTimeout,
-
-        /**
-         * JSesssionID
-         */
-        JSessionID;
+        FrmTimeout;
 
         @Override
         public int getStartingPoint() {
