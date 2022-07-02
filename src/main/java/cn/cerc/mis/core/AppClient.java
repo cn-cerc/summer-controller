@@ -2,6 +2,7 @@ package cn.cerc.mis.core;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -37,6 +38,7 @@ public class AppClient implements Serializable {
 
     public static final String CLIENT_ID = "CLIENTID";// deviceId, machineCode 表示同一个设备码栏位
     public static final String DEVICE = "device";
+    public static final String LANGUAGE = "language";
 
     // 手机
     public static final String phone = "phone";
@@ -171,7 +173,7 @@ public class AppClient implements Serializable {
     }
 
     public String getLanguage() {
-        String languageId = AppClient.value(this.request, ISession.LANGUAGE_ID);
+        String languageId = AppClient.value(this.request, AppClient.LANGUAGE);
         return Utils.isEmpty(languageId) ? LanguageResource.appLanguage : languageId;
     }
 
@@ -185,6 +187,37 @@ public class AppClient implements Serializable {
             return;
         try (Jedis redis = JedisFactory.getJedis()) {
             redis.del(AppClient.buildKey(cookId));
+        }
+    }
+
+    /**
+     * 根据 request 构建访问设备信息
+     */
+    public static void setRequest(HttpServletRequest request) {
+        Map<String, String> items = new HashMap<>();
+        String device = request.getParameter(DEVICE);
+        if (!Utils.isEmpty(device))
+            items.put(AppClient.DEVICE, device);
+
+        String deviceId = request.getParameter(CLIENT_ID);
+        if (!Utils.isEmpty(deviceId))
+            items.put(AppClient.CLIENT_ID, deviceId);
+
+        String language = request.getParameter(AppClient.LANGUAGE);
+        if (!Utils.isEmpty(language))
+            items.put(AppClient.LANGUAGE, language);
+
+        String token = request.getParameter(ISession.TOKEN);// 获取客户端的 token
+        if (!Utils.isEmpty(token))
+            items.put(ISession.TOKEN, token);
+
+        // 将设备信息写入缓存并设置超时时间
+        String key = AppClient.key(request);
+        if (items.size() > 0) {
+            try (Jedis redis = JedisFactory.getJedis()) {
+                redis.hmset(key, items);
+                redis.expire(key, RedisRecord.TIMEOUT);
+            }
         }
     }
 

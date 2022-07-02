@@ -69,12 +69,13 @@ public class FormFactory implements ApplicationContextAware {
             // 取出自定义session中用户设置的语言类型，并写入到request
             req.setAttribute(ISession.LANGUAGE_ID, session.getProperty(ISession.LANGUAGE_ID));
 
-            req.setAttribute("_showMenu_", !AppClient.ee.equals(form.getClient().getDevice()));
+            req.setAttribute("_showMenu_", !AppClient.ee.equals(form.getClient().getDevice()));// 如果页面带device，则同时更新
+
             form.setId(formId);
             // 传递路径变量
             form.setPathVariables(pathVariables);
-//
-//            // 匿名访问
+
+            // 匿名访问
             if (form._isAllowGuest())
                 return form._call(funcCode);
 
@@ -134,12 +135,10 @@ public class FormFactory implements ApplicationContextAware {
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
                 String loginView = appLogin.getLoginView(form);
-                if ("".equals(loginView)) {
+                if ("".equals(loginView))
                     return null;
-                }
-                if (loginView != null) {
+                if (loginView != null)
                     return loginView;
-                }
             default:
                 resp.setContentType("text/html;charset=UTF-8");
                 IErrorPage error = context.getBean(IErrorPage.class);
