@@ -87,7 +87,7 @@ public class FormFactory implements ApplicationContextAware {
                 if (cookies != null) {
                     for (Cookie cookie : cookies) {
                         cookie.setMaxAge(0);
-                        cookie.setPath("/");
+                        cookie.setPath(AppClient.COOKIE_ROOT_PATH);
                         form.getResponse().addCookie(cookie);
                     }
                 }
@@ -103,13 +103,13 @@ public class FormFactory implements ApplicationContextAware {
                 if (cookies != null) {
                     if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
                         Cookie cookie = new Cookie(ISession.TOKEN, token);
-                        cookie.setPath("/");
+                        cookie.setPath(AppClient.COOKIE_ROOT_PATH);
                         cookie.setHttpOnly(true);
                         resp.addCookie(cookie);
                     }
                 } else {
                     Cookie cookie = new Cookie(ISession.TOKEN, token);
-                    cookie.setPath("/");
+                    cookie.setPath(AppClient.COOKIE_ROOT_PATH);
                     cookie.setHttpOnly(true);
                     resp.addCookie(cookie);
                 }

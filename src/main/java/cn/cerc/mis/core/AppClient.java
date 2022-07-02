@@ -36,6 +36,8 @@ public class AppClient implements Serializable {
     // 缓存版本
     public static final int Version = 1;
 
+    public static final String COOKIE_ROOT_PATH = "/";
+
     public static final String CLIENT_ID = "CLIENTID";// deviceId, machineCode 表示同一个设备码栏位
     public static final String DEVICE = "device";
     public static final String LANGUAGE = "language";
