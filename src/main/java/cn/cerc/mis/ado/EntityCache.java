@@ -67,6 +67,19 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         log.debug("getSession: {}.{}", clazz.getSimpleName(), String.join(".", values));
         if (entityKey.cache() == CacheLevelEnum.Disabled)
             return getStorage(values);
+        if (entityKey.cache() == CacheLevelEnum.RedisAndSession) {
+            String[] keys = this.buildKeys(values);
+            DataRow row = SessionCache.get(keys);
+            if (row != null && row.size() > 0) {
+                try {
+                    return Optional.of(row.asEntity(clazz));
+                } catch (Exception e) {
+                    log.error("asEntity {} error: {}", clazz.getSimpleName(), row.json());
+                    e.printStackTrace();
+                    SessionCache.del(keys);
+                }
+            }
+        }
         return getRedis(values);
     }
 
@@ -85,11 +98,15 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
                 else if (json != null) {
                     try {
                         DataRow row = new DataRow().setJson(json);
+                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                            SessionCache.set(keys, row);
                         return Optional.of(row.asEntity(clazz));
                     } catch (Exception e) {
                         log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
                         e.printStackTrace();
                         jedis.del(EntityCache.buildKey(keys));
+                        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                            SessionCache.del(keys);
                     }
                 }
             }
@@ -121,6 +138,8 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), "");
             }
+            if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                SessionCache.set(keys, new DataRow());
         }
         return Optional.ofNullable(entity);
     }
@@ -141,6 +160,8 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(buildKey(keys), entityKey.expire(), row.json());
             }
+            if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                SessionCache.set(keys, row);
             return obj;
         }
 
@@ -155,6 +176,8 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
                 for (DataRow row : query) {
                     String[] rowKeys = buildKeys(row);
                     jedis.setex(buildKey(rowKeys), entityKey.expire(), row.json());
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        SessionCache.set(rowKeys, row);
                 }
             }
         }
@@ -180,6 +203,8 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         try (Jedis jedis = JedisFactory.getJedis()) {
             jedis.del(buildKey(keys));
         }
+        if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+            SessionCache.del(keys);
     }
 
     /**

@@ -87,6 +87,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
                     batchKeys.add(EntityCache.buildKey(keys));
                     batchValues.add(row.json());
                     batchValues.add("" + entityKey.expire());
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        SessionCache.set(keys, row);
                 }
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.evalsha(jedis.scriptLoad(LUA_SCRIPT_MSETEX), batchKeys, batchValues);
@@ -100,6 +102,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             String[] keys = ec2.buildKeys(row);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
+                if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                    SessionCache.set(keys, row);
             }
         });
 
@@ -109,6 +113,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             String[] keys = ec3.buildKeys(row);
             try (Jedis jedis = JedisFactory.getJedis()) {
                 jedis.del(EntityCache.buildKey(keys));
+                if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                    SessionCache.del(keys);
             }
         });
     }
