@@ -2,7 +2,6 @@ package cn.cerc.mis.core;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -60,10 +59,12 @@ public class AppClient implements Serializable {
     }
 
     public static final String buildKey(String token) {
+        if (Utils.isEmpty(token))
+            return "";
         return MemoryBuffer.buildObjectKey(AppClient.class, token, AppClient.Version);
     }
 
-    private static final String key(HttpServletRequest request) {
+    private static String getTooken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null)
             return "";
@@ -73,11 +74,19 @@ public class AppClient implements Serializable {
         String cookieId = cookie.getValue();
         if (Utils.isEmpty(cookieId))
             return "";
+        return cookieId;
+    }
+
+    private static final String key(HttpServletRequest request) {
+        String cookieId = getTooken(request);
+        if (Utils.isEmpty(cookieId))
+            return "";
         return AppClient.buildKey(cookieId);
     }
 
     public static final String value(HttpServletRequest request, String field) {
-        String key = AppClient.key(request);
+        String cookieId = getTooken(request);
+        String key = AppClient.buildKey(cookieId);
         String value = request.getParameter(field);
         if (!Utils.isEmpty(value)) {
             try (Jedis redis = JedisFactory.getJedis()) {
@@ -89,6 +98,10 @@ public class AppClient implements Serializable {
         if (Utils.isEmpty(key)) {
             log.warn("cookie field {} value is empty", field);
             return "";
+        }
+        // 如果 cookieId 等于token直接取值
+        if (ISession.TOKEN.equals(field) && !Utils.isEmpty(cookieId)) {
+            return cookieId;
         }
         try (Jedis redis = JedisFactory.getJedis()) {
             redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
@@ -182,33 +195,6 @@ public class AppClient implements Serializable {
 
     public boolean isKanban() {
         return kanban.equals(getDevice());
-    }
-
-    /**
-     * 根据 request 构建访问设备信息
-     */
-    public static void loadRequest(HttpServletRequest request) {
-        Map<String, String> items = new HashMap<>();
-        String device = request.getParameter(DEVICE);
-        if (!Utils.isEmpty(device))
-            items.put(AppClient.DEVICE, device);
-
-        String deviceId = request.getParameter(CLIENT_ID);
-        if (!Utils.isEmpty(deviceId))
-            items.put(AppClient.CLIENT_ID, deviceId);
-
-        String languageId = request.getParameter(ISession.LANGUAGE_ID);
-        if (!Utils.isEmpty(languageId))
-            items.put(ISession.LANGUAGE_ID, languageId);
-
-        // 将设备信息写入缓存并设置超时时间
-        String key = AppClient.key(request);
-        if (!Utils.isEmpty(key) && items.size() > 0) {
-            try (Jedis redis = JedisFactory.getJedis()) {
-                redis.hmset(key, items);
-                redis.expire(key, RedisRecord.TIMEOUT);
-            }
-        }
     }
 
     /**

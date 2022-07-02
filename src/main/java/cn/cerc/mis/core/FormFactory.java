@@ -1,6 +1,7 @@
 package cn.cerc.mis.core;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
@@ -20,6 +21,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.cache.ISessionCache;
 import cn.cerc.mis.other.PageNotFoundException;
 
 @Component
@@ -60,7 +62,7 @@ public class FormFactory implements ApplicationContextAware {
                 throw new PageNotFoundException(req.getServletPath());
             form.setSession(session);
 
-            // 取得页面传递进来的sid，并将sid进行保存
+            // 取得页面cookie传递进来的sid，并将sid进行保存
             String token = AppClient.value(req, ISession.TOKEN);
             session.loadToken(token);
 
@@ -98,10 +100,37 @@ public class FormFactory implements ApplicationContextAware {
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
                 String loginView = appLogin.getLoginView(form);
+                // 清空当前无效的cookie信息
+                Cookie[] cookies = form.getRequest().getCookies();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        cookie.setMaxAge(0);
+                        cookie.setPath("/");
+                        form.getResponse().addCookie(cookie);
+                    }
+                }
                 if ("".equals(loginView))
                     return null;
                 if (loginView != null)
                     return loginView;
+            }
+
+            // 只有通过了登录校验的token才返回给cookie
+            if (!Utils.isEmpty(token)) {
+                Cookie[] cookies = req.getCookies();
+                if (cookies != null) {
+                    if (Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().isEmpty()) {
+                        Cookie cookie = new Cookie(ISession.TOKEN, token);
+                        cookie.setPath("/");
+                        cookie.setHttpOnly(true);
+                        resp.addCookie(cookie);
+                    }
+                } else {
+                    Cookie cookie = new Cookie(ISession.TOKEN, token);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(true);
+                    resp.addCookie(cookie);
+                }
             }
 
             // 设备检查
