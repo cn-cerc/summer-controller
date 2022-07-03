@@ -1,29 +1,26 @@
 package cn.cerc.mis.core;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
-
-import com.google.gson.Gson;
-
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
+import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
 import redis.clients.jedis.Jedis;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @Component
 @Scope(WebApplicationContext.SCOPE_REQUEST)
@@ -56,13 +53,13 @@ public class AppClient implements Serializable {
     // 客户端专用浏览器
     public static final String ee = "ee";
 
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
 
     public AppClient(HttpServletRequest request) {
         this.request = request;
     }
 
-    public static final String buildKey(String token) {
+    public static String buildKey(String token) {
         if (Utils.isEmpty(token))
             return "";
         return MemoryBuffer.buildObjectKey(AppClient.class, token, AppClient.Version);
@@ -81,14 +78,14 @@ public class AppClient implements Serializable {
         return cookieId;
     }
 
-    private static final String key(HttpServletRequest request) {
+    private static String key(HttpServletRequest request) {
         String cookieId = getTooken(request);
         if (Utils.isEmpty(cookieId))
             return "";
         return AppClient.buildKey(cookieId);
     }
 
-    public static final String value(HttpServletRequest request, String field) {
+    public static String value(HttpServletRequest request, String field) {
         String cookieId = getTooken(request);
         String key = AppClient.buildKey(cookieId);
         String value = request.getParameter(field);
@@ -113,7 +110,7 @@ public class AppClient implements Serializable {
         }
     }
 
-    public static final Long setValue(HttpServletRequest request, String field, String value) {
+    public static Long setValue(HttpServletRequest request, String field, String value) {
         String key = AppClient.key(request);
         if (Utils.isEmpty(key)) {
             log.warn("cookie field {} value is empty", field);
@@ -124,18 +121,7 @@ public class AppClient implements Serializable {
         }
     }
 
-    public static final String msetValue(HttpServletRequest request, final Map<String, String> hash) {
-        String key = AppClient.key(request);
-        if (Utils.isEmpty(key)) {
-            log.warn("cookie field {} value is empty", ISession.TOKEN);
-            return "";
-        }
-        try (Jedis redis = JedisFactory.getJedis()) {
-            return redis.hmset(AppClient.key(request), hash);
-        }
-    }
-
-    public static final Long del(HttpServletRequest request, String field) {
+    public static Long del(HttpServletRequest request, String field) {
         String key = AppClient.key(request);
         if (Utils.isEmpty(key)) {
             log.warn("cookie field {} value is empty", field);
@@ -171,7 +157,6 @@ public class AppClient implements Serializable {
             return;
         request.setAttribute(AppClient.DEVICE, device);
         AppClient.setValue(request, AppClient.DEVICE, device);
-        return;
     }
 
     public String getLanguage() {
@@ -263,7 +248,7 @@ public class AppClient implements Serializable {
             if ("0:0:0:0:0:0:0:1".equals(ip))
                 ip = "0.0.0.0";
             // 以第一个IP地址为用户的真实地址
-            String arr[] = ip.split(",");
+            String[] arr = ip.split(",");
             ip = Arrays.stream(arr).findFirst().orElse("").trim();
             return ip;
         } catch (Exception e) {
