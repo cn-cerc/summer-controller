@@ -65,7 +65,7 @@ public class AppClient implements Serializable {
         return MemoryBuffer.buildObjectKey(AppClient.class, token, AppClient.Version);
     }
 
-    private static String getTooken(HttpServletRequest request) {
+    private static String getToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null)
             return "";
@@ -79,14 +79,14 @@ public class AppClient implements Serializable {
     }
 
     private static String key(HttpServletRequest request) {
-        String cookieId = getTooken(request);
+        String cookieId = getToken(request);
         if (Utils.isEmpty(cookieId))
             return "";
         return AppClient.buildKey(cookieId);
     }
 
     public static String value(HttpServletRequest request, String field) {
-        String cookieId = getTooken(request);
+        String cookieId = getToken(request);
         String key = AppClient.buildKey(cookieId);
         String value = request.getParameter(field);
         if (!Utils.isEmpty(value)) {
