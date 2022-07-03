@@ -121,17 +121,6 @@ public class AppClient implements Serializable {
         }
     }
 
-    public static Long del(HttpServletRequest request, String field) {
-        String key = AppClient.key(request);
-        if (Utils.isEmpty(key)) {
-            log.warn("cookie field {} value is empty", field);
-            return 0L;
-        }
-        try (Jedis redis = JedisFactory.getJedis()) {
-            return redis.del(AppClient.key(request), field);
-        }
-    }
-
     public String getId() {
         return AppClient.value(this.request, AppClient.CLIENT_ID);
     }
