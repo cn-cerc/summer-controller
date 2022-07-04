@@ -17,9 +17,9 @@ import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.mis.core.AppClient;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
+import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
@@ -181,7 +181,7 @@ public class CustomSession implements ISession {
     public void loadToken(String token) {
         SecurityService security = Application.getBean(SecurityService.class);
         if (security != null && security.initSession(this, token)) {
-            String key = AppClient.buildKey(token);
+            String key = MemoryBuffer.buildKey(SystemBuffer.Token.Map, token);
             try (Jedis redis = JedisFactory.getJedis()) {
                 String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
                 if (value == null) {

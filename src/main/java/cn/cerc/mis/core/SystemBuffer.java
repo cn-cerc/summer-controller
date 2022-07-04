@@ -56,7 +56,11 @@ public class SystemBuffer {
         /**
          * 超时Frm
          */
-        FrmTimeout;
+        FrmTimeout,
+        /**
+         * token
+         */
+        Token;
 
         @Override
         public int getStartingPoint() {
@@ -77,7 +81,8 @@ public class SystemBuffer {
     public enum Token implements IBufferKey {
         DeviceInfo,
         SessionBase,
-        UserMessage;
+        UserMessage,
+        Map;
 
         @Override
         public int getStartingPoint() {
