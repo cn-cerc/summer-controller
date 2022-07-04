@@ -38,7 +38,7 @@ public class R {
                     HttpServletRequest req = (HttpServletRequest) request;
                     AppClient client = new AppClient(req, null);
                     temp = client.getLanguage();
-                    log.debug("session language value " + temp);
+                    log.debug("cookie cache language {} ", temp);
                 }
             }
         }
