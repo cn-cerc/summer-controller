@@ -3,13 +3,11 @@ package cn.cerc.mis.core;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
@@ -28,15 +26,13 @@ import redis.clients.jedis.Jedis;
 @Scope(WebApplicationContext.SCOPE_REQUEST)
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AppClient implements Serializable {
-    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
+//    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
 
     private static final long serialVersionUID = -3593077761901636920L;
 
     // 缓存版本
     public static final int Version = 1;
-
-    public static final String CLIENT_ID = "CLIENTID";// deviceId, machineCode 表示同一个设备码栏位
-    public static final String DEVICE = "device";
+    public static final String COOKIE_ROOT_PATH = "/";
 
     // 手机
     public static final String phone = "phone";
@@ -52,104 +48,136 @@ public class AppClient implements Serializable {
     // 客户端专用浏览器
     public static final String ee = "ee";
 
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
 
-    public AppClient(HttpServletRequest request) {
+    private String cookieId = "";
+
+    private String key;
+
+    private String token;
+
+    private String device;
+
+    private String deviceId;
+
+    private String language;
+
+    public AppClient(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
-    }
+        this.response = response;
 
-    public static final String buildKey(String token) {
-        if (Utils.isEmpty(token))
-            return "";
-        return MemoryBuffer.buildObjectKey(AppClient.class, token, AppClient.Version);
-    }
-
-    private static String getTooken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null)
-            return "";
-        Cookie cookie = Stream.of(cookies).filter(item -> ISession.TOKEN.equals(item.getName())).findAny().orElse(null);
-        if (cookie == null)
-            return "";
-        String cookieId = cookie.getValue();
-        if (Utils.isEmpty(cookieId))
-            return "";
-        return cookieId;
-    }
-
-    private static final String key(HttpServletRequest request) {
-        String cookieId = getTooken(request);
-        if (Utils.isEmpty(cookieId))
-            return "";
-        return AppClient.buildKey(cookieId);
-    }
-
-    public static final String value(HttpServletRequest request, String field) {
-        String cookieId = getTooken(request);
-        String key = AppClient.buildKey(cookieId);
-        String value = request.getParameter(field);
-        if (!Utils.isEmpty(value)) {
-            try (Jedis redis = JedisFactory.getJedis()) {
-                if (!Utils.isEmpty(key))
-                    redis.hset(key, field, value);
+        Cookie[] cookies = this.request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals(ISession.COOKIE_ID)) {
+                    this.cookieId = cookie.getValue();
+                    break;
+                }
             }
-            return value;
         }
-        if (Utils.isEmpty(key)) {
-            log.warn("cookie field {} value is empty", field);
-            return "";
+
+        if (Utils.isEmpty(this.cookieId)) {
+            this.cookieId = Utils.getGuid();
+            if (response != null) {
+                Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
+                cookie.setPath(COOKIE_ROOT_PATH);
+                cookie.setHttpOnly(true);
+                this.response.addCookie(cookie);
+            }
         }
-        // 如果 cookieId 等于token直接取值
-        if (ISession.TOKEN.equals(field) && !Utils.isEmpty(cookieId)) {
-            return cookieId;
-        }
+
+        this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
+
         try (Jedis redis = JedisFactory.getJedis()) {
+            this.device = request.getParameter(ISession.CLIENT_DEVICE);
+            if (!Utils.isEmpty(device))
+                redis.hset(key, ISession.CLIENT_DEVICE, device);
+            else {
+                this.device = redis.hget(key, ISession.CLIENT_DEVICE);
+                if (Utils.isEmpty(device)) {
+                    device = pc;
+                    redis.hset(key, ISession.CLIENT_DEVICE, device);
+                }
+            }
+
+            this.deviceId = request.getParameter(ISession.CLIENT_ID);
+            if (!Utils.isEmpty(deviceId))
+                redis.hset(key, ISession.CLIENT_ID, deviceId);
+            else {
+                this.deviceId = redis.hget(key, ISession.CLIENT_ID);
+
+                if (Utils.isEmpty(deviceId)) {
+                    if (cookies != null) {
+                        for (Cookie cookie : request.getCookies()) {
+                            if (cookie.getName().equals(ISession.CLIENT_ID)) {
+                                this.deviceId = cookie.getValue();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (Utils.isEmpty(deviceId)) {
+                    deviceId = Utils.getGuid();
+                    redis.hset(key, ISession.CLIENT_ID, deviceId);
+                    if (response != null) {
+                        Cookie cookie = new Cookie(ISession.CLIENT_ID, deviceId);
+                        cookie.setPath(COOKIE_ROOT_PATH);
+                        cookie.setHttpOnly(true);
+                        this.response.addCookie(cookie);
+                    }
+                }
+            }
+
+            this.language = request.getParameter(ISession.LANGUAGE_ID);
+            if (!Utils.isEmpty(language))
+                redis.hset(key, ISession.LANGUAGE_ID, language);
+            else {
+                this.language = redis.hget(key, ISession.LANGUAGE_ID);
+                if (Utils.isEmpty(language)) {
+                    language = LanguageResource.appLanguage;
+                    redis.hset(key, ISession.LANGUAGE_ID, language);
+                }
+            }
+
+            this.token = request.getParameter(ISession.TOKEN);
+            if (!Utils.isEmpty(token))
+                redis.hset(key, ISession.TOKEN, token);
+            else
+                this.token = redis.hget(key, ISession.TOKEN);
+
             redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
-            return redis.hget(key, field);
         }
     }
 
-    public static final Long setValue(HttpServletRequest request, String field, String value) {
-        String key = AppClient.key(request);
-        if (Utils.isEmpty(key)) {
-            log.warn("cookie field {} value is empty", field);
-            return 0L;
-        }
-        try (Jedis redis = JedisFactory.getJedis()) {
-            return redis.hset(AppClient.key(request), field, value);
-        }
+    /**
+     * 读取 cookie 中的 id
+     */
+    public String getCookieId() {
+        return this.cookieId;
     }
 
-    public static final String msetValue(HttpServletRequest request, final Map<String, String> hash) {
-        String key = AppClient.key(request);
-        if (Utils.isEmpty(key)) {
-            log.warn("cookie field {} value is empty", ISession.TOKEN);
-            return "";
-        }
-        try (Jedis redis = JedisFactory.getJedis()) {
-            return redis.hmset(AppClient.key(request), hash);
-        }
+    public String getToken() {
+        return token;
     }
 
-    public static final Long del(HttpServletRequest request, String field) {
-        String key = AppClient.key(request);
-        if (Utils.isEmpty(key)) {
-            log.warn("cookie field {} value is empty", field);
-            return 0L;
-        }
+    public Long delRedis(String field) {
         try (Jedis redis = JedisFactory.getJedis()) {
-            return redis.del(AppClient.key(request), field);
+            return redis.hdel(key, field);
         }
     }
 
     public String getId() {
-        return AppClient.value(this.request, AppClient.CLIENT_ID);
+        return this.deviceId;
     }
 
     public void setId(String value) {
-        String clientId = value == null ? "" : value;
-        request.setAttribute(AppClient.CLIENT_ID, clientId);
-        AppClient.setValue(request, AppClient.CLIENT_ID, clientId);
+        this.deviceId = value == null ? "" : value;
+        request.setAttribute(ISession.CLIENT_ID, deviceId);
+        try (Jedis redis = JedisFactory.getJedis()) {
+            redis.hset(key, ISession.CLIENT_ID, deviceId);
+        }
         if (value != null && value.length() == 28)// 微信openid的长度
             setDevice(phone);
     }
@@ -158,34 +186,20 @@ public class AppClient implements Serializable {
      * 设备类型默认是 pc
      */
     public String getDevice() {
-        String device = AppClient.value(this.request, AppClient.DEVICE);
         return Utils.isEmpty(device) ? pc : device;
     }
 
-    public void setDevice(String device) {
-        if (Utils.isEmpty(device))
-            return;
-        request.setAttribute(AppClient.DEVICE, device);
-        AppClient.setValue(request, AppClient.DEVICE, device);
-        return;
+    public void setDevice(String value) {
+        this.device = Utils.isEmpty(value) ? pc : value;
+        request.setAttribute(ISession.CLIENT_DEVICE, device);
+
+        try (Jedis redis = JedisFactory.getJedis()) {
+            redis.hset(key, ISession.CLIENT_DEVICE, device);
+        }
     }
 
     public String getLanguage() {
-        String languageId = AppClient.value(this.request, ISession.LANGUAGE_ID);
-        return Utils.isEmpty(languageId) ? LanguageResource.appLanguage : languageId;
-    }
-
-    public String getToken() {
-        String token = AppClient.value(this.request, ISession.TOKEN);
-        return Utils.isEmpty(token) ? null : token;
-    }
-
-    public void clear(String cookId) {
-        if (Utils.isEmpty(cookId))
-            return;
-        try (Jedis redis = JedisFactory.getJedis()) {
-            redis.del(AppClient.buildKey(cookId));
-        }
+        return this.language;
     }
 
     public boolean isPhone() {
@@ -228,7 +242,7 @@ public class AppClient implements Serializable {
             if ("0:0:0:0:0:0:0:1".equals(ip))
                 ip = "0.0.0.0";
             // 以第一个IP地址为用户的真实地址
-            String arr[] = ip.split(",");
+            String[] arr = ip.split(",");
             ip = Arrays.stream(arr).findFirst().orElse("").trim();
             return ip;
         } catch (Exception e) {
@@ -241,7 +255,6 @@ public class AppClient implements Serializable {
     public String toString() {
         Map<String, String> items;
         try (Jedis redis = JedisFactory.getJedis()) {
-            String key = AppClient.key(this.request);
             items = redis.hgetAll(key);
         }
         return new Gson().toJson(items);

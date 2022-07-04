@@ -1,5 +1,14 @@
 package cn.cerc.mis.security;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.mssql.MssqlServer;
@@ -8,18 +17,10 @@ import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.db.redis.RedisRecord;
-import cn.cerc.mis.core.AppClient;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
 //@Scope(WebApplicationContext.SCOPE_SESSION)
@@ -180,13 +181,12 @@ public class CustomSession implements ISession {
     public void loadToken(String token) {
         SecurityService security = Application.getBean(SecurityService.class);
         if (security != null && security.initSession(this, token)) {
-            String key = AppClient.buildKey(token);
+            String key = MemoryBuffer.buildKey(SystemBuffer.Token.Map, token);
             try (Jedis redis = JedisFactory.getJedis()) {
                 String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
                 if (value == null) {
                     value = security.getPermissions(this);
                     redis.hset(key, SystemBuffer.UserObject.Permissions.name(), value);
-                    redis.expire(key, RedisRecord.TIMEOUT);
                 }
                 this.permissions = value;
             }

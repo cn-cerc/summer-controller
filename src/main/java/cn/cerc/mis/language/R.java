@@ -36,8 +36,9 @@ public class R {
                 log.debug(request.getClass().getName());
                 if (request instanceof HttpServletRequest) {
                     HttpServletRequest req = (HttpServletRequest) request;
-                    temp = AppClient.value(req, ISession.LANGUAGE_ID);
-                    log.debug("session language value " + temp);
+                    AppClient client = new AppClient(req, null);
+                    temp = client.getLanguage();
+                    log.debug("cookie cache language {} ", temp);
                 }
             }
         }

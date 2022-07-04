@@ -45,6 +45,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     private String module;
     private String[] pathVariables;
     private String beanName;
+    private AppClient client;
 
     public Map<String, String> getParams() {
         return params;
@@ -66,7 +67,9 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 
     @Override
     public AppClient getClient() {
-        return new AppClient(this.getRequest());
+        if (this.client == null)
+            this.client = new AppClient(this.getRequest(), this.getResponse());
+        return this.client;
     }
 
     @Override
