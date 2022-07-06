@@ -41,7 +41,6 @@ public class FormFactory implements ApplicationContextAware {
         // 建立数据库资源
         try {
             ISession session = handle.getSession();
-            session.setProperty(Application.SessionId, req.getSession().getId());
             session.setProperty(ISession.REQUEST, req);
 
             IForm form = null;

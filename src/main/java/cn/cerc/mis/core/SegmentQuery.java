@@ -38,8 +38,9 @@ public class SegmentQuery extends Handle {
             return false;
 
         HttpServletRequest request = (HttpServletRequest) this.getSession().getProperty(ISession.REQUEST);
-        String sessionId = request.getSession().getId();
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, this.getClass().getName(), sessionId,
+        AppClient appClient = new AppClient(request, null);
+        String cookieId = appClient.getCookieId();
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.Service.BigData, this.getClass().getName(), cookieId,
                 MD5.get(dataIn.json()))) {
             if (buff.isNull()) {
                 buff.setValue("beginDate", headIn.getDatetime(fromField));

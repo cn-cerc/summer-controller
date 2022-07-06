@@ -39,7 +39,7 @@ public class Application implements ApplicationContextAware {
 //    public static final String userCode = ISession.USER_CODE;
 //    public static final String userName = ISession.USER_NAME;
     // tomcat JSESSION.ID
-    public static final String SessionId = "sessionId";
+//    public static final String SessionId = "sessionId"; 改为 ISession.Cookie_ID
     // FIXME 如下2个常量需要取消其引用，改为直接使用ISession
 //    @Deprecated
 //    public static final String UserId = "UserID";

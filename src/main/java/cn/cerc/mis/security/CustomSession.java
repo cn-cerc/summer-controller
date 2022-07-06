@@ -44,8 +44,6 @@ public class CustomSession implements ISession {
         params.put(ISession.USER_NAME, "");
         params.put(Application.ClientIP, "0.0.0.0");
         params.put(ISession.LANGUAGE_ID, LanguageResource.appLanguage);
-
-        params.put(Application.SessionId, "");
         params.put(Application.ProxyUsers, "");
 
         if (log.isDebugEnabled()) {

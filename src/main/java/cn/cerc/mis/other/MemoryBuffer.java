@@ -53,16 +53,16 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
         return String.format("%d.%s.%d", SystemBuffer.UserObject.ClassName.ordinal(), class1.getName(), version);
     }
 
-    public static String buildObjectKey(Class<?> class1, String userCode) {
-        if (Utils.isEmpty(userCode))
-            throw new RuntimeException("userCode is empty");
-        return String.format("%d.%s.%s", SystemBuffer.UserObject.ClassName.ordinal(), class1.getName(), userCode);
+    public static String buildObjectKey(Class<?> class1, String field) {
+        if (Utils.isEmpty(field))
+            throw new RuntimeException("field is empty");
+        return String.format("%d.%s.%s", SystemBuffer.UserObject.ClassName.ordinal(), class1.getName(), field);
     }
 
-    public static String buildObjectKey(Class<?> class1, String userCode, int version) {
-        if (Utils.isEmpty(userCode))
-            throw new RuntimeException("userCode is empty");
-        return String.format("%d.%s.%s.%d", SystemBuffer.UserObject.ClassName.ordinal(), class1.getName(), userCode,
+    public static String buildObjectKey(Class<?> class1, String field, int version) {
+        if (Utils.isEmpty(field))
+            throw new RuntimeException("key field is empty");
+        return String.format("%d.%s.%s.%d", SystemBuffer.UserObject.ClassName.ordinal(), class1.getName(), field,
                 version);
     }
 
