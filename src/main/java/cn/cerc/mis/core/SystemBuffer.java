@@ -106,7 +106,8 @@ public class SystemBuffer {
      */
     public enum User implements IBufferKey {
         SessionInfo,
-        ExportKey;
+        ExportKey,
+        BackUrl;
 
         @Override
         public int getStartingPoint() {
