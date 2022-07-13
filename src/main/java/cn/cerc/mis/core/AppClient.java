@@ -118,16 +118,16 @@ public class AppClient implements Serializable {
                     }
                 }
 
-                if (Utils.isEmpty(deviceId)) {
-                    deviceId = Utils.getGuid();
-                    redis.hset(key, ISession.CLIENT_ID, deviceId);
-                    if (response != null) {
-                        Cookie cookie = new Cookie(ISession.CLIENT_ID, deviceId);
-                        cookie.setPath(COOKIE_ROOT_PATH);
-                        cookie.setHttpOnly(true);
-                        this.response.addCookie(cookie);
-                    }
-                }
+//                if (Utils.isEmpty(deviceId)) {
+//                    deviceId = Utils.getGuid();
+//                    redis.hset(key, ISession.CLIENT_ID, deviceId);
+//                    if (response != null) {
+//                        Cookie cookie = new Cookie(ISession.CLIENT_ID, deviceId);
+//                        cookie.setPath(COOKIE_ROOT_PATH);
+//                        cookie.setHttpOnly(true);
+//                        this.response.addCookie(cookie);
+//                    }
+//                }
             }
 
             this.language = request.getParameter(ISession.LANGUAGE_ID);

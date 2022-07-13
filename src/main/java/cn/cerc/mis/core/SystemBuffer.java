@@ -60,7 +60,17 @@ public class SystemBuffer {
         /**
          * token
          */
-        Token;
+        Token,
+
+        /**
+         * 异步服务标记位
+         */
+        QuartzMonitor,
+
+        /**
+         * 导出服务标记位
+         */
+        ExportMonitor;
 
         @Override
         public int getStartingPoint() {
