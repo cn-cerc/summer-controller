@@ -53,7 +53,7 @@ public class Application implements ApplicationContextAware {
     public static final String WebClient = "webclient";
     // 图片静态路径
     private static String staticPath;
-    // 服务路径
+    // 服务访问路径
     private static String servicePath;
     // spring context
     private static ApplicationContext context;
