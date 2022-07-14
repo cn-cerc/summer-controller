@@ -53,6 +53,8 @@ public class Application implements ApplicationContextAware {
     public static final String WebClient = "webclient";
     // 图片静态路径
     private static String staticPath;
+    // 服务访问路径
+    private static String servicePath;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -72,6 +74,7 @@ public class Application implements ApplicationContextAware {
 
     static {
         staticPath = config.getString("app.static.path", "");
+        servicePath = config.getString("app.service.path", "");
     }
 
     /**
@@ -269,6 +272,10 @@ public class Application implements ApplicationContextAware {
 
     public static String getStaticPath() {
         return staticPath;
+    }
+
+    public static String getServicePath() {
+        return servicePath;
     }
 
     @Deprecated
