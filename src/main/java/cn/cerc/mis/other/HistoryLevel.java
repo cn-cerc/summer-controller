@@ -25,7 +25,7 @@ public enum HistoryLevel {
     // 永久保存: 系统参数变更，用户帐号的增减变化等
     Forever(0);
 
-    private int month;
+    private final int month;
 
     HistoryLevel(int month) {
         this.month = month;
