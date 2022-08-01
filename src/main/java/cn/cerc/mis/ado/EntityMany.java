@@ -27,7 +27,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     }
 
     public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz,
-            Consumer<SqlWhere> consumer) {
+                                                            Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
