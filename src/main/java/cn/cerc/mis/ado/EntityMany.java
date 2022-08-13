@@ -1,20 +1,27 @@
 package cn.cerc.mis.ado;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
+import cn.cerc.db.dao.BatchScript;
 
 public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements Iterable<T> {
 
@@ -27,7 +34,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     }
 
     public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz,
-                                                            Consumer<SqlWhere> consumer) {
+            Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
@@ -65,9 +72,44 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
         return entity;
     }
 
+    /**
+     * 使用 insert into values (),(),(); 的格式提升插入速度
+     */
     public void insert(List<T> list) {
-        for (T entity : list)
-            insert(entity);
+        BatchScript script = new BatchScript(query);
+        script.add("insert into ").add(this.helper.table()).add(" (");
+        String idField = this.helper.idField().get().getName();
+        Set<String> set = this.helper.fields()
+                .keySet()
+                .stream()
+                .filter(item -> !item.equals(idField))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        script.add(String.join(",", set));
+        script.add(") values ");
+        List<String> items = new ArrayList<>();
+        for (T entity : list) {
+            entity.onInsertPost(this);
+            List<String> values = new ArrayList<>();
+            Map<String, Field> fields = EntityHelper.create(entity.getClass()).fields();
+            for (String fieldCode : fields.keySet()) {
+                if (fieldCode.equals(idField))
+                    continue;
+                try {
+                    Object object = fields.get(fieldCode).get(entity);
+                    String value = "''";
+                    if (object != null)
+                        value = "'" + object.toString() + "'";
+                    values.add(value);
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            items.add("(" + String.join(",", values) + ")");
+        }
+        if (items.size() > 0) {
+            script.add(String.join(",", items));
+            script.exec();
+        }
     }
 
     public T get(int index) {
