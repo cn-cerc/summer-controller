@@ -21,7 +21,11 @@ public enum AppStaticFileDefault {
         suffix.add(".htm");
         suffix.add(".html");
         suffix.add(".map");
+        suffix.add(".txt");
 
+        // apple universal link
+        suffix.add("apple-app-site-association");
+        
         // 图片文件
         suffix.add(".jpg");
         suffix.add(".png");
