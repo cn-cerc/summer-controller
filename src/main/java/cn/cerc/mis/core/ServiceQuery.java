@@ -27,6 +27,7 @@ public class ServiceQuery implements IHandle {
         return new ServiceQuery(handle, service).call(dataIn);
     }
 
+    @Deprecated
     public static ServiceQuery open(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
         DataSet dataIn = new DataSet();
         headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
