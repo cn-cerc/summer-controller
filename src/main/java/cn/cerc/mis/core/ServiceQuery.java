@@ -27,6 +27,10 @@ public class ServiceQuery implements IHandle {
         return new ServiceQuery(handle, service).call(dataIn);
     }
 
+    /**
+     * 外部使用请改为 DataRow.of() 代替 Map.of
+     */
+    @Deprecated
     public static ServiceQuery open(IHandle handle, ServiceSign service, Map<String, Object> headIn) {
         DataSet dataIn = new DataSet();
         headIn.forEach((key, value) -> dataIn.head().setValue(key, value));
