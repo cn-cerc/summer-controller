@@ -67,6 +67,10 @@ public final class ServiceSign {
         return this;
     }
 
+    public DataSet call(IHandle handle) {
+        return call(handle, new DataSet());
+    }
+
     public DataSet call(IHandle handle, DataSet dataIn) {
         try {
             if (server == null)
