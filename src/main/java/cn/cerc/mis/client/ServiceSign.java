@@ -67,6 +67,12 @@ public final class ServiceSign {
         return this;
     }
 
+    public DataSet call(IHandle handle, DataRow headIn) {
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return call(handle, dataIn);
+    }
+
     public DataSet call(IHandle handle) {
         return call(handle, new DataSet());
     }
