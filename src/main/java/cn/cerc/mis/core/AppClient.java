@@ -138,24 +138,24 @@ public class AppClient implements Serializable {
     /**
      * 根据 request 生成 cookieId
      */
-    public static boolean createCookie(HttpServletRequest request, HttpServletResponse response, Variant value) {
+    public static boolean createCookie(HttpServletRequest request, HttpServletResponse response, Variant variant) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals(ISession.COOKIE_ID)) {
-                    value.setData(cookie.getValue());
+                    variant.setData(cookie.getValue());
                     break;
                 }
             }
         }
 
-        if (!value.isModified()) {
+        if (!variant.isModified()) {
             String cookieId = Utils.getGuid();
             Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
             cookie.setPath(COOKIE_ROOT_PATH);
             cookie.setHttpOnly(true);
             response.addCookie(cookie);
-            value.setData(cookieId);
+            variant.setData(cookieId);
             return true;
         } else {
             return false;
