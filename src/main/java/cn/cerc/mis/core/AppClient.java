@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
@@ -49,7 +50,6 @@ public class AppClient implements Serializable {
     public static final String ee = "ee";
 
     private final HttpServletRequest request;
-    private final HttpServletResponse response;
 
     private String cookieId = "";
 
@@ -65,30 +65,14 @@ public class AppClient implements Serializable {
 
     public AppClient(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
-        this.response = response;
 
-        Cookie[] cookies = this.request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(ISession.COOKIE_ID)) {
-                    this.cookieId = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (Utils.isEmpty(this.cookieId)) {
-            this.cookieId = Utils.getGuid();
-            if (response != null) {
-                Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
-                cookie.setPath(COOKIE_ROOT_PATH);
-                cookie.setHttpOnly(true);
-                this.response.addCookie(cookie);
-            }
-        }
+        Variant variant = new Variant();
+        AppClient.createCookie(request, response, variant);
+        this.cookieId = variant.getString();
 
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
 
+        Cookie[] cookies = request.getCookies();
         try (Jedis redis = JedisFactory.getJedis()) {
             this.device = request.getParameter(ISession.CLIENT_DEVICE);
             if (!Utils.isEmpty(device))
@@ -148,6 +132,33 @@ public class AppClient implements Serializable {
                 this.token = redis.hget(key, ISession.TOKEN);
 
             redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
+        }
+    }
+
+    /**
+     * 根据 request 生成 cookieId
+     */
+    public static boolean createCookie(HttpServletRequest request, HttpServletResponse response, Variant value) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals(ISession.COOKIE_ID)) {
+                    value.setData(cookie.getValue());
+                    break;
+                }
+            }
+        }
+
+        if (!value.isModified()) {
+            String cookieId = Utils.getGuid();
+            Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
+            cookie.setPath(COOKIE_ROOT_PATH);
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
+            value.setData(cookieId);
+            return true;
+        } else {
+            return false;
         }
     }
 
