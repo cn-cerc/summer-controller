@@ -4,6 +4,9 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
@@ -12,6 +15,7 @@ import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 
 public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
+    private static final Logger log = LoggerFactory.getLogger(EntityOne.class);
 
     public static <T extends EntityImpl> EntityOne<T> open(IHandle handle, Class<T> clazz, String... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
@@ -37,8 +41,10 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
 
     public EntityOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
-        if (query.size() > 1)
-            throw new RuntimeException("There're too many records.");
+        if (query.size() > 1) {
+            log.error("There are too many records. Entity {} sqlText {}", clazz.getName(), sql.text());
+            throw new RuntimeException("There are too many records.");
+        }
     }
 
     @Override
