@@ -43,7 +43,8 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
         if (query.size() > 1) {
             log.error("There are too many records. Entity {} sqlText {}", clazz.getName(), sql.text());
-            throw new RuntimeException("There are too many records.");
+            throw new RuntimeException(
+                    String.format("There are too many records. Entity %s", clazz.getName(), sql.text()));
         }
     }
 
