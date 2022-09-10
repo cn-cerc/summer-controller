@@ -169,6 +169,10 @@ public class AppClient implements Serializable {
         return this.cookieId;
     }
 
+    public String key() {
+        return this.key;
+    }
+
     public String getToken() {
         return token;
     }
