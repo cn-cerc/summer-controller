@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,12 +24,18 @@ import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
+import cn.cerc.mis.core.SystemBuffer;
+import cn.cerc.mis.other.MemoryBuffer;
 
 public final class ServiceSign {
     private final String id;
     private int version;
     private Set<String> properties;
     private ServiceServerImpl server;
+
+    private IHandle handle;
+    private DataSet dataIn;
+    private DataSet dataOut;
 
     public ServiceSign(String id) {
         super();
@@ -67,14 +74,16 @@ public final class ServiceSign {
         return this;
     }
 
-    public DataSet call(IHandle handle, DataRow headIn) {
-        DataSet dataIn = new DataSet();
-        dataIn.head().copyValues(headIn);
-        return call(handle, dataIn);
+    public ServiceSign call(IHandle handle) {
+        dataOut = call(handle, new DataSet());
+        return this;
     }
 
-    public DataSet call(IHandle handle) {
-        return call(handle, new DataSet());
+    public ServiceSign call(IHandle handle, DataRow headIn) {
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        dataOut = call(handle, dataIn);
+        return this;
     }
 
     public DataSet call(IHandle handle, DataSet dataIn) {
@@ -87,6 +96,56 @@ public final class ServiceSign {
             e.printStackTrace();
             return new DataSet().setMessage(e.getMessage());
         }
+    }
+
+    public String getExportKey() {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, handle.getUserCode(), timestamp)) {
+            buff.setValue("data", this.dataIn.json());
+        }
+        return timestamp;
+    }
+
+    public final DataSet dataIn() {
+        if (this.dataIn == null)
+            this.dataIn = new DataSet();
+        return dataIn;
+    }
+
+    public final DataSet dataOut() {
+        if (this.dataOut == null)
+            this.dataOut = new DataSet();
+        return dataOut;
+    }
+
+    public boolean isOk() {
+        Objects.requireNonNull(dataOut);
+        return dataOut.state() > 0;
+    }
+
+    public boolean isOkElseThrow() throws ServiceExecuteException {
+        if (!isOk())
+            throw new ServiceExecuteException(dataOut.message());
+        return true;
+    }
+
+    public boolean isFail() {
+        Objects.requireNonNull(dataOut);
+        return dataOut.state() <= 0;
+    }
+
+    public DataSet getDataOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
+        if (dataOut.state() <= 0)
+            throw new ServiceExecuteException(dataOut.message());
+        return dataOut;
+    }
+
+    public DataRow getHeadOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
+        if (dataOut.state() <= 0)
+            throw new ServiceExecuteException(dataOut.message());
+        return dataOut.head();
     }
 
     /**
@@ -155,6 +214,8 @@ public final class ServiceSign {
     }
 
     /**
+     * 业务对象建议使用 asRecord
+     * 
      * 服务返回结果转换为指定的业务对象
      *
      * @param <T>    业务对象实体类
@@ -163,6 +224,7 @@ public final class ServiceSign {
      * @param values 对应实体类的缓存key
      * @return 指定的实体对象
      */
+    @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findOne(handle, clazz, values);
@@ -181,6 +243,10 @@ public final class ServiceSign {
         }
     }
 
+    /**
+     * 业务对象建议使用 asRecord
+     */
+    @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findMany(handle, clazz, values);

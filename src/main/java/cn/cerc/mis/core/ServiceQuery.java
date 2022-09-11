@@ -11,6 +11,10 @@ import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.other.MemoryBuffer;
 
+/**
+ * 建议直接使用 ServiceSign
+ */
+@Deprecated
 public class ServiceQuery implements IHandle {
     private ServiceSign service;
     private DataSet dataIn;
