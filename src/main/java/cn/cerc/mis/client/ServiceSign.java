@@ -141,6 +141,52 @@ public final class ServiceSign {
         return dataOut.head();
     }
 
+    public String getExportKey() {
+        return ServiceExport.build(handle, this.dataIn);
+    }
+
+    public final DataSet dataIn() {
+        if (this.dataIn == null)
+            this.dataIn = new DataSet();
+        return dataIn;
+    }
+
+    public final DataSet dataOut() {
+        if (this.dataOut == null)
+            this.dataOut = new DataSet();
+        return dataOut;
+    }
+
+    public boolean isOk() {
+        Objects.requireNonNull(dataOut);
+        return dataOut.state() > 0;
+    }
+
+    public boolean isOkElseThrow() throws ServiceExecuteException {
+        if (!isOk())
+            throw new ServiceExecuteException(dataOut.message());
+        return true;
+    }
+
+    public boolean isFail() {
+        Objects.requireNonNull(dataOut);
+        return dataOut.state() <= 0;
+    }
+
+    public DataSet getDataOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
+        if (dataOut.state() <= 0)
+            throw new ServiceExecuteException(dataOut.message());
+        return dataOut;
+    }
+
+    public DataRow getHeadOutElseThrow() throws ServiceExecuteException {
+        Objects.requireNonNull(dataOut);
+        if (dataOut.state() <= 0)
+            throw new ServiceExecuteException(dataOut.message());
+        return dataOut.head();
+    }
+
     /**
      * 生成指定服务类的签名定义
      */
