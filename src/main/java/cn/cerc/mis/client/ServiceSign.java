@@ -1,6 +1,10 @@
 package cn.cerc.mis.client;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,7 +29,7 @@ import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
-public final class ServiceSign {
+public final class ServiceSign implements ServiceProxy, InvocationHandler {
     private final String id;
     private int version;
     private Set<String> properties;
@@ -34,6 +38,8 @@ public final class ServiceSign {
     private IHandle handle;
     private DataSet dataIn;
     private DataSet dataOut;
+    private Class<?> headImpl;
+    private Class<?> bodyImpl;
 
     public ServiceSign(String id) {
         super();
@@ -72,16 +78,19 @@ public final class ServiceSign {
         return this;
     }
 
+    @Override
     public ServiceSign call(IHandle handle) {
         return call(handle, new DataSet());
     }
 
+    @Override
     public ServiceSign call(IHandle handle, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
         return call(handle, dataIn);
     }
 
+    @Override
     public ServiceSign call(IHandle handle, DataSet dataIn) {
         try {
             if (server == null)
@@ -170,12 +179,8 @@ public final class ServiceSign {
             String function = svc.method().getName();
             DataValidate[] dataValidates = svc.method().getDeclaredAnnotationsByType(DataValidate.class);
             List<String> duplicates = Arrays.stream(dataValidates)
-                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting()))
-                    .entrySet()
-                    .stream()
-                    .filter(e -> e.getValue() > 1)
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting())).entrySet().stream()
+                    .filter(e -> e.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toList());
             if (duplicates.size() > 0)
                 throw new RuntimeException(String.format("服务对象 %s 重复定义元素 %s", function, String.join(", ", duplicates)));
 
@@ -261,6 +266,64 @@ public final class ServiceSign {
             dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
             return set;
         }
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (method.getName().equals("call")) {
+            if (args.length == 1)
+                return this.call((IHandle) args[0]);
+            else if (args[1] instanceof DataRow)
+                return this.call((IHandle) args[0], (DataRow) args[1]);
+            else
+                return this.call((IHandle) args[0], (DataSet) args[1]);
+        } else if (method.getName().equals("head")) {
+            if (this.headImpl == null)
+                throw new RuntimeException("not define interface: body");
+            return dataOut.head().asRecord(headImpl);
+        } else if (method.getName().equals("body")) {
+            if (this.bodyImpl == null)
+                throw new RuntimeException("not define interface: body");
+            List<Object> result = new ArrayList<>();
+            dataOut.forEach(item -> result.add(item.asRecord(bodyImpl)));
+            return result;
+        } else
+            throw new RuntimeException("not support method: " + method.getName());
+    }
+
+    public static ServiceProxy build(String id) {
+        return build(id, null, ServiceProxy.class);
+    }
+
+    public static ServiceProxy build(String id, ServiceServerImpl server) {
+        return build(id, server, ServiceProxy.class);
+    }
+
+    public static <T> T build(String id, Class<T> clazz) {
+        return build(id, null, clazz);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T build(String id, ServiceServerImpl server, Class<T> clazz) {
+        ServiceSign sign = new ServiceSign(id, server);
+        try {
+            Method head = clazz.getMethod("head");
+            if (head != null)
+                sign.headImpl = head.getReturnType();
+        } catch (NoSuchMethodException | SecurityException e) {
+        }
+        try {
+            Method body = clazz.getMethod("body");
+            if (body != null) {
+                if (body.getReturnType() != List.class)
+                    throw new RuntimeException("only support List<Body>");
+                Type genericReturnType = body.getGenericReturnType();
+                ParameterizedType pt = (ParameterizedType) genericReturnType;
+                sign.bodyImpl = (Class<?>) pt.getActualTypeArguments()[0];
+            }
+        } catch (NoSuchMethodException | SecurityException e) {
+        }
+        return (T) Proxy.newProxyInstance(ServiceSign.class.getClassLoader(), new Class[] { clazz }, sign);
     }
 
 }
