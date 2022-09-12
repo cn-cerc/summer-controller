@@ -38,8 +38,8 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
     private IHandle handle;
     private DataSet dataIn;
     private DataSet dataOut;
-    private Class<?> headImpl;
-    private Class<?> bodyImpl;
+    private Class<?> headStructure;
+    private Class<?> bodyStructure;
 
     public ServiceSign(String id) {
         super();
@@ -278,14 +278,14 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
             else
                 return this.call((IHandle) args[0], (DataSet) args[1]);
         } else if (method.getName().equals("head")) {
-            if (this.headImpl == null)
+            if (this.headStructure == null)
                 throw new RuntimeException("not define interface: body");
-            return dataOut.head().asRecord(headImpl);
+            return dataOut.head().asRecord(headStructure);
         } else if (method.getName().equals("body")) {
-            if (this.bodyImpl == null)
+            if (this.bodyStructure == null)
                 throw new RuntimeException("not define interface: body");
             List<Object> result = new ArrayList<>();
-            dataOut.forEach(item -> result.add(item.asRecord(bodyImpl)));
+            dataOut.forEach(item -> result.add(item.asRecord(bodyStructure)));
             return result;
         } else
             throw new RuntimeException("not support method: " + method.getName());
@@ -309,7 +309,7 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
         try {
             Method head = clazz.getMethod("head");
             if (head != null)
-                sign.headImpl = head.getReturnType();
+                sign.headStructure = head.getReturnType();
         } catch (NoSuchMethodException | SecurityException e) {
         }
         try {
@@ -319,7 +319,7 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
                     throw new RuntimeException("only support List<Body>");
                 Type genericReturnType = body.getGenericReturnType();
                 ParameterizedType pt = (ParameterizedType) genericReturnType;
-                sign.bodyImpl = (Class<?>) pt.getActualTypeArguments()[0];
+                sign.bodyStructure = (Class<?>) pt.getActualTypeArguments()[0];
             }
         } catch (NoSuchMethodException | SecurityException e) {
         }
