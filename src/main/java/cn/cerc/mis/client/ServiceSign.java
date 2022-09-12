@@ -24,8 +24,6 @@ import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
-import cn.cerc.mis.core.SystemBuffer;
-import cn.cerc.mis.other.MemoryBuffer;
 
 public final class ServiceSign {
     private final String id;
@@ -99,11 +97,7 @@ public final class ServiceSign {
     }
 
     public String getExportKey() {
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, handle.getUserCode(), timestamp)) {
-            buff.setValue("data", this.dataIn.json());
-        }
-        return timestamp;
+        return ServiceExport.build(handle, this.dataIn);
     }
 
     public final DataSet dataIn() {
