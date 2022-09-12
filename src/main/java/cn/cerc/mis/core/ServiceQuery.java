@@ -8,9 +8,13 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.client.ServiceExecuteException;
+import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceSign;
-import cn.cerc.mis.other.MemoryBuffer;
 
+/**
+ * 建议直接使用 ServiceSign
+ */
+@Deprecated
 public class ServiceQuery implements IHandle {
     private ServiceSign service;
     private DataSet dataIn;
@@ -100,11 +104,7 @@ public class ServiceQuery implements IHandle {
     }
 
     public String getExportKey() {
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        try (MemoryBuffer buff = new MemoryBuffer(SystemBuffer.User.ExportKey, this.getUserCode(), timestamp)) {
-            buff.setValue("data", this.dataIn().json());
-        }
-        return timestamp;
+        return ServiceExport.build(this, this.dataIn());
     }
 
     @Override
