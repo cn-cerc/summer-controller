@@ -279,7 +279,7 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
                 return this.call((IHandle) args[0], (DataSet) args[1]);
         } else if (method.getName().equals("head")) {
             if (this.headStructure == null)
-                throw new RuntimeException("not define interface: body");
+                throw new RuntimeException("not define interface: head");
             return dataOut.head().asRecord(headStructure);
         } else if (method.getName().equals("body")) {
             if (this.bodyStructure == null)
