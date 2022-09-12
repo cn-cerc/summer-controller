@@ -73,27 +73,26 @@ public final class ServiceSign {
     }
 
     public ServiceSign call(IHandle handle) {
-        dataOut = call(handle, new DataSet());
-        return this;
+        return call(handle, new DataSet());
     }
 
     public ServiceSign call(IHandle handle, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
-        dataOut = call(handle, dataIn);
-        return this;
+        return call(handle, dataIn);
     }
 
-    public DataSet call(IHandle handle, DataSet dataIn) {
+    public ServiceSign call(IHandle handle, DataSet dataIn) {
         try {
             if (server == null)
-                return LocalServer.call(this, handle, dataIn);
+                dataOut = LocalServer.call(this, handle, dataIn);
             else
-                return server.call(this, handle, dataIn);
+                dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
-            return new DataSet().setMessage(e.getMessage());
+            dataOut = new DataSet().setMessage(e.getMessage());
         }
+        return this;
     }
 
     public String getExportKey() {
@@ -230,7 +229,7 @@ public final class ServiceSign {
             String[] fields = entityKey.fields();
             for (int i = site; i < fields.length; i++)
                 headIn.setValue(fields[i], values[i - site]);
-            DataSet dataOut = this.call(handle, dataIn);
+            DataSet dataOut = this.call(handle, dataIn).dataOut;
             if (dataOut.state() == ServiceState.OK)
                 return Optional.of(dataOut.current().asEntity(clazz));
             return Optional.empty();
@@ -255,7 +254,7 @@ public final class ServiceSign {
                 for (int i = site; i < fields.length; i++)
                     headIn.setValue(fields[i], values[i - site]);
             }
-            DataSet dataOut = this.call(handle, dataIn);
+            DataSet dataOut = this.call(handle, dataIn).dataOut;
             if (dataOut.state() != ServiceState.OK)
                 return set;
 

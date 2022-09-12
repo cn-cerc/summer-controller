@@ -52,7 +52,7 @@ public class ServiceQuery implements IHandle {
 
     public ServiceQuery call(DataSet dataIn) {
         this.dataIn = dataIn;
-        this.dataOut = this.service.call(this, dataIn);
+        this.dataOut = this.service.call(this, dataIn).dataOut();
         return this;
     }
 
