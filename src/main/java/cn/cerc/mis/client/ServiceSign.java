@@ -26,6 +26,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
+import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
@@ -99,7 +100,7 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
     public ServiceSign call(IHandle handle, DataSet dataIn) {
         try {
             if (server == null)
-                dataOut = LocalServer.call(this, handle, dataIn);
+                dataOut = LocalService.call(this, handle, dataIn);
             else
                 dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {

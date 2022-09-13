@@ -11,10 +11,6 @@ import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceSign;
 
-/**
- * 建议直接使用 ServiceSign
- */
-@Deprecated
 public class ServiceQuery implements IHandle {
     private ServiceSign service;
     private DataSet dataIn;

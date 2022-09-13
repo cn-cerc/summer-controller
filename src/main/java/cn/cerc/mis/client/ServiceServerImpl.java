@@ -9,6 +9,7 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
 public interface ServiceServerImpl {
@@ -25,7 +26,7 @@ public interface ServiceServerImpl {
 
     default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         if (isLocal(handle, service))
-            return LocalServer.call(service, handle, dataIn);
+            return LocalService.call(service, handle, dataIn);
 
         String url = this.getRequestUrl(handle, service.id());
         try {
