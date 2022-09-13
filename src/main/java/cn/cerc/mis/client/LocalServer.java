@@ -7,6 +7,12 @@ import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IService;
 
+/**
+ * 请改使用 LocalService.call
+ * 
+ * @author ZhangGong
+ *
+ */
 @Deprecated
 public class LocalServer {
 
