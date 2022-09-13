@@ -97,6 +97,8 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
 
     @Override
     public ServiceSign call(IHandle handle, DataSet dataIn) {
+        this.handle = handle;
+        this.dataIn = dataIn;
         try {
             if (server == null)
                 dataOut = LocalServer.call(this, handle, dataIn);
@@ -126,7 +128,7 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
     }
 
     public String getExportKey() {
-        return ServiceExport.build(handle, this.dataIn);
+        return ServiceExport.build(this.handle, this.dataIn);
     }
 
     public final DataSet dataIn() {
@@ -200,8 +202,12 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
             String function = svc.method().getName();
             DataValidate[] dataValidates = svc.method().getDeclaredAnnotationsByType(DataValidate.class);
             List<String> duplicates = Arrays.stream(dataValidates)
-                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting())).entrySet().stream()
-                    .filter(e -> e.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toList());
+                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting()))
+                    .entrySet()
+                    .stream()
+                    .filter(e -> e.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
             if (duplicates.size() > 0)
                 throw new RuntimeException(String.format("服务对象 %s 重复定义元素 %s", function, String.join(", ", duplicates)));
 
