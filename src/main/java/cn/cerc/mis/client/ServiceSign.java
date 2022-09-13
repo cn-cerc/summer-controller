@@ -29,7 +29,7 @@ import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
-public final class ServiceSign implements ServiceProxy, InvocationHandler {
+public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
     private final String id;
     private int version;
     private Set<String> properties;
@@ -79,6 +79,11 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
     }
 
     @Override
+    public ServiceSign sign() {
+        return this;
+    }
+
+    @Override
     public ServiceSign call(IHandle handle) {
         return call(handle, new DataSet());
     }
@@ -102,6 +107,22 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
             dataOut = new DataSet().setMessage(e.getMessage());
         }
         return this;
+    }
+
+    @Override
+    public Object head() {
+        if (this.headStructure == null)
+            throw new RuntimeException("not define interface: headStructure");
+        return dataOut.head().asRecord(headStructure);
+    }
+
+    @Override
+    public List<Object> body() {
+        if (this.bodyStructure == null)
+            throw new RuntimeException("not define interface: bodyStructure");
+        List<Object> result = new ArrayList<>();
+        dataOut.forEach(item -> result.add(item.asRecord(bodyStructure)));
+        return result;
     }
 
     public String getExportKey() {
@@ -270,33 +291,24 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getName().equals("call")) {
-            if (args.length == 1)
-                return this.call((IHandle) args[0]);
-            else if (args[1] instanceof DataRow)
-                return this.call((IHandle) args[0], (DataRow) args[1]);
-            else
-                return this.call((IHandle) args[0], (DataSet) args[1]);
-        } else if (method.getName().equals("head")) {
-            if (this.headStructure == null)
-                throw new RuntimeException("not define interface: head");
-            return dataOut.head().asRecord(headStructure);
-        } else if (method.getName().equals("body")) {
-            if (this.bodyStructure == null)
-                throw new RuntimeException("not define interface: body");
-            List<Object> result = new ArrayList<>();
-            dataOut.forEach(item -> result.add(item.asRecord(bodyStructure)));
-            return result;
-        } else
+        if (method.getName().equals("sign"))
+            return this.sign();
+        else if (method.getName().equals("call"))
+            return method.invoke(this, args);
+        else if (method.getName().equals("head"))
+            return this.head();
+        else if (method.getName().equals("body"))
+            return this.body();
+        else
             throw new RuntimeException("not support method: " + method.getName());
     }
 
-    public static ServiceProxy build(String id) {
-        return build(id, null, ServiceProxy.class);
+    public static ServiceSignImpl build(String id) {
+        return build(id, null, ServiceSignImpl.class);
     }
 
-    public static ServiceProxy build(String id, ServiceServerImpl server) {
-        return build(id, server, ServiceProxy.class);
+    public static ServiceSignImpl build(String id, ServiceServerImpl server) {
+        return build(id, server, ServiceSignImpl.class);
     }
 
     public static <T> T build(String id, Class<T> clazz) {
@@ -308,7 +320,7 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
         ServiceSign sign = new ServiceSign(id, server);
         try {
             Method head = clazz.getMethod("head");
-            if (head != null)
+            if (head != null && head.getReturnType() != Object.class)
                 sign.headStructure = head.getReturnType();
         } catch (NoSuchMethodException | SecurityException e) {
         }
@@ -319,7 +331,8 @@ public final class ServiceSign implements ServiceProxy, InvocationHandler {
                     throw new RuntimeException("only support List<Body>");
                 Type genericReturnType = body.getGenericReturnType();
                 ParameterizedType pt = (ParameterizedType) genericReturnType;
-                sign.bodyStructure = (Class<?>) pt.getActualTypeArguments()[0];
+                if (!"?".equals(pt.getActualTypeArguments()[0].getTypeName()))
+                    sign.bodyStructure = (Class<?>) pt.getActualTypeArguments()[0];
             }
         } catch (NoSuchMethodException | SecurityException e) {
         }
