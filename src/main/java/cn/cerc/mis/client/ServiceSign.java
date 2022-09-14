@@ -94,10 +94,11 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
     @Override
     public ServiceSign call(IHandle handle, DataSet dataIn) {
+        this.setSession(handle.getSession());
         DataSet dataOut = null;
         try {
             if (server == null)
-                dataOut = LocalService.call(this, handle, dataIn);
+                dataOut = LocalService.call(this.id, handle, dataIn);
             else
                 dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {

@@ -26,7 +26,7 @@ public interface ServiceServerImpl {
 
     default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         if (isLocal(handle, service))
-            return LocalService.call(service, handle, dataIn);
+            return LocalService.call(service.id(), handle, dataIn);
 
         String url = this.getRequestUrl(handle, service.id());
         try {
