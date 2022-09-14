@@ -95,6 +95,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     @Override
     public ServiceSign call(IHandle handle, DataSet dataIn) {
         this.setSession(handle.getSession());
+        this.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
             if (server == null)

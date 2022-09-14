@@ -12,18 +12,6 @@ public class ServiceProxy implements IHandle {
     private DataSet dataOut;
     private ISession session;
 
-    public final DataSet dataIn() {
-        if (this.dataIn == null)
-            this.dataIn = new DataSet();
-        return dataIn;
-    }
-
-    public final DataSet dataOut() {
-        if (this.dataOut == null)
-            this.dataOut = new DataSet();
-        return dataOut;
-    }
-
     public final boolean isOk() {
         Objects.requireNonNull(dataOut);
         return dataOut.state() > 0;
@@ -64,8 +52,20 @@ public class ServiceProxy implements IHandle {
         this.session = session;
     }
 
+    public final DataSet dataOut() {
+        if (this.dataOut == null)
+            this.dataOut = new DataSet();
+        return dataOut;
+    }
+
     protected void setDataOut(DataSet dataOut) {
         this.dataOut = dataOut;
+    }
+
+    protected final DataSet dataIn() {
+        if (this.dataIn == null)
+            this.dataIn = new DataSet();
+        return dataIn;
     }
 
     protected void setDataIn(DataSet dataIn) {
