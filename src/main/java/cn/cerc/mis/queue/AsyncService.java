@@ -15,16 +15,17 @@ import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
-import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.message.MessageRecord;
 
-public class AsyncService extends ServiceQuery {
+public class AsyncService extends ServiceProxy {
     public static final String _message_ = "_message_";
     private static final Logger log = LoggerFactory.getLogger(AsyncService.class);
     private static final ClassResource res = new ClassResource(AsyncService.class, SummerMIS.ID);
+    private ServiceSign service;
 
     // 状态列表
     private static final List<String> processTiles = new ArrayList<>();
@@ -54,7 +55,8 @@ public class AsyncService extends ServiceQuery {
     private String msgId;
 
     public AsyncService(IHandle handle) {
-        super(handle);
+        super();
+        this.setSession(handle.getSession());
         if (handle != null) {
             this.setCorpNo(handle.getCorpNo());
             this.setUserCode(handle.getUserCode());
@@ -141,7 +143,7 @@ public class AsyncService extends ServiceQuery {
 
     private String toJson() {
         ObjectNode content = new ObjectMapper().createObjectNode();
-        content.put("service", this.serviceId());
+        content.put("service", this.service.id());
         if (this.dataIn() != null) {
             content.put("dataIn", dataIn().json());
         }
@@ -158,18 +160,17 @@ public class AsyncService extends ServiceQuery {
     }
 
     public String getService() {
-        return serviceId();
+        return service.id();
     }
 
-    @Override
     public AsyncService setService(ServiceSign service) {
-        super.setService(service);
+        this.service = service;
         return this;
     }
 
     @Deprecated
     public AsyncService setService(String service) {
-        super.setService(new ServiceSign(service));
+        this.setService(new ServiceSign(service));
         return this;
     }
 

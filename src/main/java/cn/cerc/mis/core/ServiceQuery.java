@@ -9,6 +9,7 @@ import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
 
+@Deprecated
 public class ServiceQuery extends ServiceProxy {
     private ServiceSign service;
 

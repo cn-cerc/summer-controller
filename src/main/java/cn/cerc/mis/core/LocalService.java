@@ -42,7 +42,7 @@ public class LocalService extends ServiceProxy {
                 headIn.setValue(args[i].toString(), args[i + 1]);
         }
 
-        DataSet dataOut = LocalService.call(this.service, this, getDataIn());
+        DataSet dataOut = LocalService.call(this.service, this, dataIn());
         this.setDataOut(dataOut);
         return this.isOk();
     }
