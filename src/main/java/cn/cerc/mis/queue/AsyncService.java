@@ -216,6 +216,8 @@ public class AsyncService extends ServiceProxy {
         this.userCode = userCode;
     }
 
+    
+    @Override
     public String message() {
         if (super.dataOut() == null)
             return null;

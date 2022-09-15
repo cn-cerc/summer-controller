@@ -42,7 +42,7 @@ public class ServiceProxy implements IHandle {
         return dataOut.head();
     }
 
-    public final String message() {
+    public String message() {
         return dataOut().message();
     }
 

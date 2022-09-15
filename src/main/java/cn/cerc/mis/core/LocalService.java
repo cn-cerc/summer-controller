@@ -52,6 +52,7 @@ public class LocalService extends ServiceProxy {
         return service;
     }
 
+    @Override
     public String message() {
         if (super.dataOut() != null && super.dataOut().message() != null) {
             return super.dataOut().message().replaceAll("'", "\"");
