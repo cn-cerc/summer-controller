@@ -4,13 +4,27 @@ import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.core.ServiceQuery;
 
-public class RemoteService extends ServiceQuery {
+public class RemoteService extends ServiceProxy {
     private static final ClassResource res = new ClassResource(RemoteService.class, SummerMIS.ID);
+    private ServiceSign sign;
 
     public RemoteService(IHandle handle) {
-        super(handle);
+        super();
+        this.setSession(handle.getSession());
+    }
+
+    public ServiceSign sign() {
+        return this.sign;
+    }
+
+    public void setSign(ServiceSign sign) {
+        this.sign = sign;
+    }
+
+    @Deprecated
+    public void setService(ServiceSign sign) {
+        this.setSign(sign);
     }
 
     public boolean exec(Object... args) {
@@ -22,15 +36,14 @@ public class RemoteService extends ServiceQuery {
                 headIn.setValue(args[i].toString(), args[i + 1]);
         }
 
-        return super.call(dataIn()).isOk();
+        this.setDataOut(this.sign.call(this, this.dataIn()).dataOut());
+        return this.isOk();
+
     }
 
+    @Deprecated
     public final String getService() {
-        return serviceId();
-    }
-
-    public final String message() {
-        return dataOut().message();
+        return sign.id();
     }
 
     @Deprecated
