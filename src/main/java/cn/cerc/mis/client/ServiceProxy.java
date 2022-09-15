@@ -62,7 +62,7 @@ public class ServiceProxy implements IHandle {
         this.dataOut = dataOut;
     }
 
-    protected final DataSet dataIn() {
+    public final DataSet dataIn() {
         if (this.dataIn == null)
             this.dataIn = new DataSet();
         return dataIn;

@@ -5,6 +5,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Variant;
+import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
 
@@ -94,5 +95,19 @@ public class LocalService extends ServiceProxy {
         } catch (ServiceException e) {
             return new DataSet().setMessage(e.getMessage());
         }
+    }
+
+    public String getExportKey() {
+        return ServiceExport.build(this, this.dataIn());
+    }
+
+    @Deprecated
+    public void setService(ServiceSign sign) {
+        this.service = sign.id();
+    }
+
+    @Deprecated
+    public String serviceId() {
+        return this.service();
     }
 }
