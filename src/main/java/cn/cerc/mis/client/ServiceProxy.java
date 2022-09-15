@@ -42,6 +42,10 @@ public class ServiceProxy implements IHandle {
         return dataOut.head();
     }
 
+    public final String message() {
+        return dataOut().message();
+    }
+
     @Override
     public ISession getSession() {
         return session;

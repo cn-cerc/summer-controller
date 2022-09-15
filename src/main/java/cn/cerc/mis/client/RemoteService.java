@@ -22,6 +22,7 @@ public class RemoteService extends ServiceProxy {
         this.sign = sign;
     }
 
+    @Deprecated
     public void setService(ServiceSign sign) {
         this.setSign(sign);
     }
@@ -43,10 +44,6 @@ public class RemoteService extends ServiceProxy {
     @Deprecated
     public final String getService() {
         return sign.id();
-    }
-
-    public final String message() {
-        return dataOut().message();
     }
 
     @Deprecated
