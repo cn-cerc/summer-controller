@@ -102,9 +102,13 @@ public class LocalService extends ServiceProxy {
         return ServiceExport.build(this, this.dataIn());
     }
 
+    public void setSign(ServiceSign sign) {
+        this.service = sign.id();
+    }
+
     @Deprecated
     public void setService(ServiceSign sign) {
-        this.service = sign.id();
+        this.setSign(sign);
     }
 
     @Deprecated
