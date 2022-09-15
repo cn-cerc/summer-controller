@@ -93,9 +93,20 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @Override
+    protected ServiceSign clone() {
+        ServiceSign sign = new ServiceSign(this.id, this.server);
+        sign.setSession(this.getSession());
+        sign.version = this.version;
+        sign.headStructure = this.headStructure;
+        sign.bodyStructure = this.bodyStructure;
+        sign.properties = this.properties;
+        return sign;
+    }
+
+    @Override
     public ServiceSign call(IHandle handle, DataSet dataIn) {
-        this.setSession(handle.getSession());
-        this.setDataIn(dataIn);
+        ServiceSign sign = this.clone();
+        sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
             if (server == null)
@@ -106,8 +117,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
         }
-        this.setDataOut(dataOut);
-        return this;
+        sign.setDataOut(dataOut);
+        return sign;
     }
 
     @Override
@@ -159,12 +170,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             String function = svc.method().getName();
             DataValidate[] dataValidates = svc.method().getDeclaredAnnotationsByType(DataValidate.class);
             List<String> duplicates = Arrays.stream(dataValidates)
-                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting()))
-                    .entrySet()
-                    .stream()
-                    .filter(e -> e.getValue() > 1)
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.groupingBy(e -> e.value(), Collectors.counting())).entrySet().stream()
+                    .filter(e -> e.getValue() > 1).map(Map.Entry::getKey).collect(Collectors.toList());
             if (duplicates.size() > 0)
                 throw new RuntimeException(String.format("服务对象 %s 重复定义元素 %s", function, String.join(", ", duplicates)));
 
