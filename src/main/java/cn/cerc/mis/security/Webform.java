@@ -22,8 +22,6 @@ public @interface Webform {
 
     MenuGroupEnum group() default MenuGroupEnum.日常操作;
 
-    String parent() default "";
-
     boolean appStore() default false;
 
 }
