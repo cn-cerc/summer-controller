@@ -16,9 +16,11 @@ public @interface Webform {
 
     int id() default 0;
 
-    String name();
-
     String module();
+
+    MenuGroupEnum group() default MenuGroupEnum.日常操作;
+
+    String name();
 
     String parent();
 
