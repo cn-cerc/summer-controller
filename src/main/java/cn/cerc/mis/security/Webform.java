@@ -24,4 +24,6 @@ public @interface Webform {
 
     boolean appStore() default false;
 
+    boolean custom() default false;
+
 }
