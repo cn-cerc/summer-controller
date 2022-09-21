@@ -101,6 +101,34 @@ public class AsyncService extends ServiceProxy {
         return this;
     }
 
+    public boolean call(DataRow dataRow) {
+        DataRow headIn = dataIn().head();
+        headIn.copyValues(dataRow);
+        headIn.setValue("token", this.getSession().getToken());
+        this.setToken(this.getSession().getToken());
+
+        String subject = this.getSubject();
+        if ("".equals(subject))
+            throw new RuntimeException(res.getString(8, "后台任务标题不允许为空！"));
+
+        if (subject == null || "".equals(subject))
+            throw new RuntimeException("subject is null");
+
+        MessageRecord msg = new MessageRecord();
+        msg.setCorpNo(this.getCorpNo());
+        msg.setUserCode(this.getUserCode());
+        msg.setLevel(this.messageLevel);
+        msg.setContent(this.toJson());
+        msg.setSubject(subject);
+        msg.setUiClass(MessageRecord.UIClass_Task);
+        msg.setProcess(this.process);
+        log.debug(this.getCorpNo() + ":" + this.getUserCode() + ":" + this);
+        this.msgId = msg.send(this);
+
+        dataOut().head().setValue("_msgId_", msgId);
+        return !"".equals(msgId);
+    }
+
     public boolean exec(Object... args) {
         DataRow headIn = dataIn().head();
         if (args.length > 0) {

@@ -33,16 +33,14 @@ public class LocalService extends ServiceProxy {
         return this;
     }
 
-    // 带缓存调用服务
-    public boolean exec(Object... args) {
-        if (args.length > 0) {
-            DataRow headIn = dataIn().head();
-            if (args.length % 2 != 0)
-                throw new RuntimeException("传入的参数数量必须为偶数！");
-            for (int i = 0; i < args.length; i = i + 2)
-                headIn.setValue(args[i].toString(), args[i + 1]);
-        }
+    public boolean exec() {
+        DataSet dataOut = LocalService.call(this.service, this, dataIn());
+        this.setDataOut(dataOut);
+        return this.isOk();
+    }
 
+    public boolean call(DataRow headIn) {
+        dataIn().head().copyValues(headIn);
         DataSet dataOut = LocalService.call(this.service, this, dataIn());
         this.setDataOut(dataOut);
         return this.isOk();

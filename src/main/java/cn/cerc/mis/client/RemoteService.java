@@ -27,6 +27,12 @@ public class RemoteService extends ServiceProxy {
         this.setSign(sign);
     }
 
+    public boolean call(DataRow dataRow) {
+        dataIn().head().copyValues(dataRow);
+        this.setDataOut(this.sign.call(this, this.dataIn()).dataOut());
+        return this.isOk();
+    }
+
     public boolean exec(Object... args) {
         if (args.length > 0) {
             DataRow headIn = dataIn().head();
