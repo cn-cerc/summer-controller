@@ -218,7 +218,6 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      * @param values 对应实体类的缓存key
      * @return 指定的实体对象
      */
-    @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findOne(handle, clazz, values);
@@ -240,7 +239,6 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     /**
      * 业务对象建议使用 asRecord
      */
-    @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findMany(handle, clazz, values);
