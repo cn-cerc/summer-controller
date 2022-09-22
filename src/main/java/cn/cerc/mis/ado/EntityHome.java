@@ -28,6 +28,7 @@ import cn.cerc.db.mssql.MssqlDatabase;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.sqlite.SqliteDatabase;
+import cn.cerc.mis.ado.EntityLogUtils.AppendModelEnum;
 import redis.clients.jedis.Jedis;
 
 public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
@@ -171,6 +172,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
     protected void insert(T entity) {
         query.setReadonly(false);
         try {
+            EntityLogUtils.create(query, entity, AppendModelEnum.添加).execute();
             helper.onInsertPostDefault(entity);
             entity.onInsertPost(query);
             query.append();
@@ -272,6 +274,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
+            EntityLogUtils.create(query, entity, AppendModelEnum.修改).execute();
             helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();
