@@ -24,8 +24,6 @@ public @interface Webform {
 
     boolean appStore() default false;
 
-    boolean custom() default false;
-
     // 是否需要自动帮助中心
     boolean autoHelper() default true;
 }
