@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public enum MenuGroupEnum {
 
-    基本设置, 日常操作, 管理报表, 其它工具, 定制菜单, 自制菜单, 选购菜单, 管理模组;
+    基本设置, 日常操作, 管理报表, 其它工具, 定制菜单, 自制菜单, 选购菜单, 停用菜单, 管理模组;
 
     public static String[] getNames() {
         List<String> list = new ArrayList<>();
