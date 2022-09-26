@@ -16,7 +16,10 @@ import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityHomeImpl;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
+import cn.cerc.db.core.FieldMeta;
 import cn.cerc.db.core.Handle;
+import cn.cerc.db.core.HistoryLoggerImpl;
+import cn.cerc.db.core.HistoryTypeEnum;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISqlDatabase;
 import cn.cerc.db.core.SqlQuery;
@@ -28,7 +31,7 @@ import cn.cerc.db.mssql.MssqlDatabase;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.sqlite.SqliteDatabase;
-import cn.cerc.mis.ado.EntityLogUtils.AppendModelEnum;
+import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
 
 public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
@@ -172,12 +175,12 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
     protected void insert(T entity) {
         query.setReadonly(false);
         try {
-            EntityLogUtils.create(query, entity, AppendModelEnum.添加).execute();
             helper.onInsertPostDefault(entity);
             entity.onInsertPost(query);
             query.append();
             query.current().loadFromEntity(entity);
             query.post();
+            saveHistory(query, entity, HistoryTypeEnum.INSERT);
             query.current().saveToEntity(entity);
             entity.setEntityHome(this);
         } finally {
@@ -222,6 +225,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             while (!query.eof()) {
                 T entity = this.query.current().asEntity(clazz);
                 if (predicate.test(entity)) {
+                    saveHistory(query, entity, HistoryTypeEnum.DELETE);
                     query.delete();
                     result++;
                 } else
@@ -274,16 +278,33 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
-            EntityLogUtils.create(query, entity, AppendModelEnum.修改).execute();
             helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();
             query.current().loadFromEntity(entity);
+            saveHistory(query, entity, HistoryTypeEnum.UPDATE);
             query.post();
         } finally {
             query.setReadonly(true);
         }
         return this;
+    }
+
+    private void saveHistory(SqlQuery query, T entity, HistoryTypeEnum historyType) {
+        boolean enableHistory = false;
+        for (FieldMeta meta : this.query.fields()) {
+            if (meta.isMasterField()) {
+                enableHistory = true;
+                break;
+            }
+        }
+        if (enableHistory) {
+            HistoryLoggerImpl logger = entity.getHistoryLogger();
+            if (logger == null)
+                logger = Application.getBean(HistoryLoggerImpl.class);
+            if (logger != null)
+                logger.save(query, historyType, entity.getClass());
+        }
     }
 
     /**
