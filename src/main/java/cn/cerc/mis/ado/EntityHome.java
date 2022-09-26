@@ -290,7 +290,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         return this;
     }
 
-    private void saveHistory(SqlQuery query, T entity, HistoryTypeEnum historyType) {
+    protected void saveHistory(SqlQuery query, T entity, HistoryTypeEnum historyType) {
         boolean enableHistory = false;
         for (FieldMeta meta : this.query.fields()) {
             if (meta.history() != null && meta.history().master()) {

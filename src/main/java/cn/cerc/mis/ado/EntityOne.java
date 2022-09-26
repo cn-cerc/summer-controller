@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
+import cn.cerc.db.core.HistoryTypeEnum;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
@@ -97,6 +98,7 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         T entity = null;
         try {
             entity = query.current().asEntity(clazz);
+            saveHistory(query, entity, HistoryTypeEnum.DELETE);
             query.delete();
         } finally {
             query.setReadonly(true);
