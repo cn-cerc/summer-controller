@@ -20,7 +20,7 @@ public @interface Webform {
 
     String name();
 
-    MenuGroupEnum group() default MenuGroupEnum.日常操作;
+    MenuGroupEnum group();// default MenuGroupEnum.日常操作;
 
     boolean appStore() default false;
 
