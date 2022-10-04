@@ -20,6 +20,7 @@ public class MessageRecord {
     public static final String UIClass_Export = "MVExport"; // 导出消息 显示出导出状态
     public static final String UIClass_Subscribe = "MVSubscribe"; // 订阅消息 需要读取subject和content
     public static final String UIClass_Image = "MVImage"; // 图片消息
+    public static final String UIClass_Audio = "MVAudio"; // 语音消息
     private String corpNo;
     private String userCode;
     private String subject;

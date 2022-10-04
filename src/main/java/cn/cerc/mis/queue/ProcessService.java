@@ -12,7 +12,6 @@ import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.IUserMessage;
-import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.task.AbstractTask;
 
@@ -66,8 +65,8 @@ public class ProcessService extends AbstractTask {
         try {
             // 执行指定的数据服务
             BookHandle handle = new BookHandle(this, corpNo).setUserCode(userCode);
-            ServiceQuery auto = new ServiceQuery(handle, new ServiceSign(async.getService()));
-            if (auto.call(async.dataIn()).isOk()) {
+            ServiceSign auto = async.getSign().call(handle, async.dataIn());
+            if (auto.isOk()) {
                 async.setProcess(MessageProcess.ok);
             } else {
                 async.setProcess(MessageProcess.error);
@@ -92,6 +91,6 @@ public class ProcessService extends AbstractTask {
         if (!um.updateAsyncService(msgId, async.toString(), async.getProcess())) {
             throw new RuntimeException(String.format("msgId %s not find.", msgId));
         }
-        log.debug(async.getService() + ":" + subject + ":" + async.getProcess().getTitle());
+        log.debug(async.getSign().id() + ":" + subject + ":" + async.getProcess().getTitle());
     }
 }

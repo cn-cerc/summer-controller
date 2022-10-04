@@ -143,7 +143,7 @@ public class AppClient implements Serializable {
         if (cookies != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals(ISession.COOKIE_ID)) {
-                    variant.setData(cookie.getValue());
+                    variant.setValue(cookie.getValue());
                     break;
                 }
             }
@@ -155,7 +155,7 @@ public class AppClient implements Serializable {
             cookie.setPath(COOKIE_ROOT_PATH);
             cookie.setHttpOnly(true);
             response.addCookie(cookie);
-            variant.setData(cookieId);
+            variant.setValue(cookieId);
             return true;
         } else {
             return false;

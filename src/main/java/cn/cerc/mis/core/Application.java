@@ -139,6 +139,10 @@ public class Application implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> requiredType) {
+        if(context == null) {
+            log.error("context is null, getBean return null");
+            return null;
+        }
         String[] beans = context.getBeanNamesForType(requiredType);
         if (beans.length == 0)
             return null;
@@ -239,7 +243,7 @@ public class Application implements ApplicationContextAware {
             String[] params = serviceCode.split("\\.");
             // 支持指定执行函数
             if (params.length > 1)
-                function.setData(params[1]);
+                function.setValue(params[1]);
 
             String beanId = params[0];
             if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))

@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,18 +25,16 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
+import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
-public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
+public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private final String id;
     private int version;
     private Set<String> properties;
     private ServiceServerImpl server;
 
-    private IHandle handle;
-    private DataSet dataIn;
-    private DataSet dataOut;
     private Class<?> headStructure;
     private Class<?> bodyStructure;
 
@@ -96,26 +93,40 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
     }
 
     @Override
+    protected ServiceSign clone() {
+        ServiceSign sign = new ServiceSign(this.id, this.server);
+        sign.setSession(this.getSession());
+        sign.version = this.version;
+        sign.headStructure = this.headStructure;
+        sign.bodyStructure = this.bodyStructure;
+        sign.properties = this.properties;
+        return sign;
+    }
+
+    @Override
     public ServiceSign call(IHandle handle, DataSet dataIn) {
-        this.handle = handle;
-        this.dataIn = dataIn;
+        this.setSession(handle.getSession());
+        ServiceSign sign = this.clone();
+        sign.setDataIn(dataIn);
+        DataSet dataOut = null;
         try {
             if (server == null)
-                dataOut = LocalServer.call(this, handle, dataIn);
+                dataOut = LocalService.call(this.id, handle, dataIn);
             else
                 dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
         }
-        return this;
+        sign.setDataOut(dataOut);
+        return sign;
     }
 
     @Override
     public Object head() {
         if (this.headStructure == null)
             throw new RuntimeException("not define interface: headStructure");
-        return dataOut.head().asRecord(headStructure);
+        return dataOut().head().asRecord(headStructure);
     }
 
     @Override
@@ -123,54 +134,12 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
         if (this.bodyStructure == null)
             throw new RuntimeException("not define interface: bodyStructure");
         List<Object> result = new ArrayList<>();
-        dataOut.forEach(item -> result.add(item.asRecord(bodyStructure)));
+        dataOut().forEach(item -> result.add(item.asRecord(bodyStructure)));
         return result;
     }
 
     public String getExportKey() {
-        return ServiceExport.build(this.handle, this.dataIn);
-    }
-
-    public final DataSet dataIn() {
-        if (this.dataIn == null)
-            this.dataIn = new DataSet();
-        return dataIn;
-    }
-
-    public final DataSet dataOut() {
-        if (this.dataOut == null)
-            this.dataOut = new DataSet();
-        return dataOut;
-    }
-
-    public boolean isOk() {
-        Objects.requireNonNull(dataOut);
-        return dataOut.state() > 0;
-    }
-
-    public boolean isOkElseThrow() throws ServiceExecuteException {
-        if (!isOk())
-            throw new ServiceExecuteException(dataOut.message());
-        return true;
-    }
-
-    public boolean isFail() {
-        Objects.requireNonNull(dataOut);
-        return dataOut.state() <= 0;
-    }
-
-    public DataSet getDataOutElseThrow() throws ServiceExecuteException {
-        Objects.requireNonNull(dataOut);
-        if (dataOut.state() <= 0)
-            throw new ServiceExecuteException(dataOut.message());
-        return dataOut;
-    }
-
-    public DataRow getHeadOutElseThrow() throws ServiceExecuteException {
-        Objects.requireNonNull(dataOut);
-        if (dataOut.state() <= 0)
-            throw new ServiceExecuteException(dataOut.message());
-        return dataOut.head();
+        return ServiceExport.build(this, this.dataIn());
     }
 
     /**
@@ -249,7 +218,6 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
      * @param values 对应实体类的缓存key
      * @return 指定的实体对象
      */
-    @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findOne(handle, clazz, values);
@@ -261,7 +229,7 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
             String[] fields = entityKey.fields();
             for (int i = site; i < fields.length; i++)
                 headIn.setValue(fields[i], values[i - site]);
-            DataSet dataOut = this.call(handle, dataIn).dataOut;
+            DataSet dataOut = this.call(handle, dataIn).dataOut();
             if (dataOut.state() == ServiceState.OK)
                 return Optional.of(dataOut.current().asEntity(clazz));
             return Optional.empty();
@@ -271,7 +239,6 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
     /**
      * 业务对象建议使用 asRecord
      */
-    @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findMany(handle, clazz, values);
@@ -286,7 +253,7 @@ public final class ServiceSign implements ServiceSignImpl, InvocationHandler {
                 for (int i = site; i < fields.length; i++)
                     headIn.setValue(fields[i], values[i - site]);
             }
-            DataSet dataOut = this.call(handle, dataIn).dataOut;
+            DataSet dataOut = this.call(handle, dataIn).dataOut();
             if (dataOut.state() != ServiceState.OK)
                 return set;
 

@@ -7,6 +7,13 @@ import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IService;
 
+/**
+ * 请改使用 LocalService.call
+ * 
+ * @author ZhangGong
+ *
+ */
+@Deprecated
 public class LocalServer {
 
     public static DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {

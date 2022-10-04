@@ -15,16 +15,17 @@ import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
-import cn.cerc.mis.core.ServiceQuery;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 import cn.cerc.mis.message.MessageRecord;
 
-public class AsyncService extends ServiceQuery {
+public class AsyncService extends ServiceProxy {
     public static final String _message_ = "_message_";
     private static final Logger log = LoggerFactory.getLogger(AsyncService.class);
     private static final ClassResource res = new ClassResource(AsyncService.class, SummerMIS.ID);
+    private ServiceSign sign;
 
     // 状态列表
     private static final List<String> processTiles = new ArrayList<>();
@@ -54,7 +55,8 @@ public class AsyncService extends ServiceQuery {
     private String msgId;
 
     public AsyncService(IHandle handle) {
-        super(handle);
+        super();
+        this.setSession(handle.getSession());
         if (handle != null) {
             this.setCorpNo(handle.getCorpNo());
             this.setUserCode(handle.getUserCode());
@@ -141,7 +143,7 @@ public class AsyncService extends ServiceQuery {
 
     private String toJson() {
         ObjectNode content = new ObjectMapper().createObjectNode();
-        content.put("service", this.serviceId());
+        content.put("service", this.sign.id());
         if (this.dataIn() != null) {
             content.put("dataIn", dataIn().json());
         }
@@ -157,19 +159,19 @@ public class AsyncService extends ServiceQuery {
         return content.toString();
     }
 
+    @Deprecated
     public String getService() {
-        return serviceId();
-    }
-
-    @Override
-    public AsyncService setService(ServiceSign service) {
-        super.setService(service);
-        return this;
+        return sign.id();
     }
 
     @Deprecated
+    public AsyncService setService(ServiceSign service) {
+        this.sign = service;
+        return this;
+    }
+
     public AsyncService setService(String service) {
-        super.setService(new ServiceSign(service));
+        this.setSign(new ServiceSign(service));
         return this;
     }
 
@@ -215,6 +217,7 @@ public class AsyncService extends ServiceQuery {
         this.userCode = userCode;
     }
 
+    @Override
     public String message() {
         if (super.dataOut() == null)
             return null;
@@ -258,5 +261,13 @@ public class AsyncService extends ServiceQuery {
     @Deprecated
     public String getMessage() {
         return this.message();
+    }
+
+    public ServiceSign getSign() {
+        return this.sign;
+    }
+
+    public void setSign(ServiceSign sign) {
+        this.sign = sign;
     }
 }
