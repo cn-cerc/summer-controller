@@ -71,13 +71,12 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         return this.client;
     }
 
-    @Override
     public Object getProperty(String key) {
         if ("request".equals(key)) {
-            return this.getRequest();
+            return this.getSession().getRequest();
         }
         if ("session".equals(key)) {
-            return this.getRequest().getSession();
+            return this.getSession().getRequest().getSession();
         }
 
         return this.getSession().getProperty(key);
