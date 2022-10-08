@@ -164,12 +164,12 @@ public class AsyncService extends ServiceProxy {
         return sign.id();
     }
 
-    @Deprecated
     public AsyncService setService(ServiceSign service) {
         this.sign = service;
         return this;
     }
 
+    @Deprecated
     public AsyncService setService(String service) {
         this.setSign(new ServiceSign(service));
         return this;
