@@ -30,6 +30,7 @@ import cn.cerc.db.core.SqlText;
 import cn.cerc.db.mssql.MssqlDatabase;
 import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.db.redis.Redis;
 import cn.cerc.db.sqlite.SqliteDatabase;
 import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
@@ -94,8 +95,9 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(keys, row);
                 }
-                try (Jedis jedis = JedisFactory.getJedis()) {
-                    jedis.evalsha(jedis.scriptLoad(LUA_SCRIPT_MSETEX), batchKeys, batchValues);
+                try (Redis jedis = JedisFactory.getRedis()) {
+                    String sha = jedis.scriptLoad(LUA_SCRIPT_MSETEX);
+                    jedis.evalsha(sha, batchKeys, batchValues);
                 }
             });
         }
