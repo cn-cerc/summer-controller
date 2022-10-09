@@ -1,11 +1,11 @@
 package cn.cerc.mis.core;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
 import cn.cerc.db.redis.Redis;
-
-import static org.junit.Assert.assertEquals;
 
 public class MemcachedTest {
 
@@ -14,11 +14,11 @@ public class MemcachedTest {
     public void test() {
         String buffKey = "test";
         String value = "OK!";
-        Redis.set(buffKey, value, 2);
+        Redis.setValue(buffKey, value, 2);
 
         Object buffData;
         for (int i = 1; i < 5; i++) {
-            buffData = Redis.get(buffKey);
+            buffData = Redis.getValue(buffKey);
             String msg = String.format("第 %d 次测试", i);
             assertEquals(msg, i <= 2 ? value : null, buffData);
             sleep();
