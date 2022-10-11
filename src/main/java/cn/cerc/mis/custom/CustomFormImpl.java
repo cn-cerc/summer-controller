@@ -4,7 +4,8 @@ import cn.cerc.mis.core.IPage;
 
 public interface CustomFormImpl {
 
-    IPage information();
+    IPage information() throws Exception;
 
     IPage document();
+
 }
