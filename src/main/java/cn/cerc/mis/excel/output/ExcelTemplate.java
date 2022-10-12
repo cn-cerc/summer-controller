@@ -11,8 +11,8 @@ import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.Datetime.DateType;
+import cn.cerc.db.core.FastDate;
 import cn.cerc.db.core.LanguageResource;
-import cn.cerc.db.core.TDate;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.mis.config.ApplicationConfig;
@@ -139,7 +139,7 @@ public class ExcelTemplate {
                 Label item = new Label(col, row, value.toString());
                 sheet.addCell(item);
             } else {
-                TDate day = (TDate) column.getValue();
+                FastDate day = (FastDate) column.getValue();
                 DateTime item = new DateTime(col, row, day.asBaseDate(), new WritableCellFormat(df1));
                 sheet.addCell(item);
             }
