@@ -25,7 +25,6 @@ import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
 
-@SuppressWarnings("deprecation")
 public class ExcelTemplate {
     private String fileName;
     private List<Column> columns;
