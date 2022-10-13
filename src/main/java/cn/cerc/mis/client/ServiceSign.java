@@ -122,6 +122,17 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return sign;
     }
 
+    public ServiceSign sign(IHandle handle) {
+        return sign(handle, new DataSet());
+    }
+
+    public ServiceSign sign(IHandle handle, DataSet dataIn) {
+        ServiceSign sign = this.clone();
+        sign.setSession(handle.getSession());
+        sign.setDataIn(dataIn);
+        return sign;
+    }
+
     @Override
     public Object head() {
         if (this.headStructure == null)
