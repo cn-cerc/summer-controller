@@ -38,12 +38,9 @@ public class SyncServerQueue implements ISyncServer {
         if (pushTo == null)
             throw new RuntimeException("pushTo is null");
 
-        // 初始化客户端
-        QueueServer mns = (QueueServer) session.getProperty(QueueServer.SessionId);
-
         // 数据写入队列
         String queueCode = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
-        CloudQueue queue = mns.openQueue(queueCode);
+        CloudQueue queue = QueueServer.openQueue(queueCode);
 
         Message message = new Message();
         message.setMessageBody(record.toString());
@@ -64,8 +61,7 @@ public class SyncServerQueue implements ISyncServer {
 
         // 取出数据队列
         String queueCode = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
-        QueueServer mns = (QueueServer) session.getProperty(QueueServer.SessionId);
-        CloudQueue queue = mns.openQueue(queueCode);
+        CloudQueue queue = QueueServer.openQueue(queueCode);
 
         for (int i = 0; i < maxRecords; i++) {
             Message msg = queue.popMessage();
