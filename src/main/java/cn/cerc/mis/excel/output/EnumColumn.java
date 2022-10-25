@@ -4,11 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 仅支持使用枚举下标储存的数据 <br/>
- * 使导出Excel文件支持枚举类型 在导出模板中加上 <br/>
- * <property name="clazz" value="{ class }"></property> <br/>
- * class: <br/>
- * 独立枚举请使用 package.ClassName <br/>
+ * 仅支持使用枚举下标储存的数据
+ * 
+ * 使导出Excel文件支持枚举类型 在导出模板中加上
+ * 
+ * class:
+ * 
+ * 独立枚举请使用 package.ClassName
+ * 
  * 实体内部枚举使用 package.ClassName$InnerClass
  */
 public class EnumColumn extends Column {
