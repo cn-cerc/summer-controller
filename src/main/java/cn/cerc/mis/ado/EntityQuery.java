@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,6 @@ public class EntityQuery {
     }
 
     /**
-     * 
      * @param <T>          entity 类型
      * @param handle       IHandle
      * @param clazz        entity.class
@@ -56,7 +56,7 @@ public class EntityQuery {
      * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
     public static <T extends EntityImpl> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz,
-            Consumer<T> actionInsert, String... values) {
+                                                                          Consumer<T> actionInsert, String... values) {
         EntityCache<T> cache = new EntityCache<>(handle, clazz);
         String key = EntityCache.buildKey(cache.buildKeys(values));
         try (Jedis jedis = JedisFactory.getJedis()) {
@@ -108,25 +108,18 @@ public class EntityQuery {
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        Set<T> set = new LinkedHashSet<>();
-        new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
-                .forEach(set::add);
-        return set;
+        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        Set<T> set = new LinkedHashSet<>();
-        new EntityMany<T>(handle, clazz, sqlText, true, true).stream().forEach(set::add);
-        return set;
+        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        Set<T> set = new LinkedHashSet<>();
-        new EntityMany<T>(handle, clazz, where.build(), true, true).stream().forEach(set::add);
-        return set;
+        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 }

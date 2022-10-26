@@ -14,12 +14,16 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface Webform {
 
-    String name();
+    int id() default 0;
 
     String module();
 
-    String parent();
+    String name();
+
+    MenuGroupEnum group() default MenuGroupEnum.日常操作;
 
     boolean appStore() default false;
 
+    // 是否需要自动帮助中心
+    boolean autoHelper() default true;
 }

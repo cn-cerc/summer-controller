@@ -40,7 +40,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 
     private Map<String, String> params = new HashMap<>();
     private String name;
-    private String parent;
     private String permission;
     private String module;
     private String[] pathVariables;
@@ -72,13 +71,12 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         return this.client;
     }
 
-    @Override
     public Object getProperty(String key) {
         if ("request".equals(key)) {
-            return this.getRequest();
+            return this.getSession().getRequest();
         }
         if ("session".equals(key)) {
-            return this.getRequest().getSession();
+            return this.getSession().getRequest().getSession();
         }
 
         return this.getSession().getProperty(key);
@@ -106,14 +104,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     @Override
     public String getParam(String key, String def) {
         return params.getOrDefault(key, def);
-    }
-
-    public String getParent() {
-        return parent;
-    }
-
-    public void setParent(String parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -312,7 +302,6 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         if (obj != null) {
             this.name = obj.name();
             this.module = obj.module();
-            this.parent = obj.parent();
         }
         Permission ps = this.getClass().getAnnotation(Permission.class);
         if (ps != null) {

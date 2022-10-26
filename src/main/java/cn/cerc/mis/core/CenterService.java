@@ -1,8 +1,8 @@
 package cn.cerc.mis.core;
 
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.client.ServiceServerImpl;
 import cn.cerc.mis.client.RemoteService;
+import cn.cerc.mis.client.ServiceServerImpl;
 import cn.cerc.mis.client.ServiceSign;
 
 /**
@@ -19,7 +19,7 @@ public class CenterService extends RemoteService {
     }
 
     public CenterService setService(String serviceId) {
-        super.setService(new ServiceSign(serviceId, server));
+        super.setSign(new ServiceSign(serviceId, server));
         return this;
     }
 

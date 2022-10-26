@@ -267,7 +267,7 @@ public class SecurityPolice {
                     defaultValue = Permission.ADMIN;
                     SecurityService security = Application.getBean(SecurityService.class);
                     if (security != null) {
-                        Variant outParam = new Variant().setTag(beanId);
+                        Variant outParam = new Variant().setKey(beanId);
                         security.loadPermission(handle, outParam);
                         result = outParam.getString();
                     }

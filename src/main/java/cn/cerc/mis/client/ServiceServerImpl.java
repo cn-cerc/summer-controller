@@ -9,6 +9,7 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
 public interface ServiceServerImpl {
@@ -25,7 +26,7 @@ public interface ServiceServerImpl {
 
     default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         if (isLocal(handle, service))
-            return LocalServer.call(service, handle, dataIn);
+            return LocalService.call(service.id(), handle, dataIn);
 
         String url = this.getRequestUrl(handle, service.id());
         try {
@@ -40,7 +41,7 @@ public interface ServiceServerImpl {
             log.debug("response: {}", response);
             return new DataSet().setJson(response);
         } catch (IOException e) {
-            return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
+            return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
         }
     }
 }

@@ -117,7 +117,11 @@ public class SystemBuffer {
     public enum User implements IBufferKey {
         SessionInfo,
         ExportKey,
-        BackUrl;
+        BackUrl,
+        /**
+         * 调用频次
+         */
+        Frequency;
 
         @Override
         public int getStartingPoint() {
@@ -126,7 +130,7 @@ public class SystemBuffer {
 
         @Override
         public int getMinimumNumber() {
-            return 2;
+            return 1;
         }
 
         @Override
