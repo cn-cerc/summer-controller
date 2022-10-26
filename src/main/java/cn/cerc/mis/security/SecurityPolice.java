@@ -44,8 +44,8 @@ public class SecurityPolice {
             log.debug("{}.{}[permissions]={}", handle.getCorpNo(), handle.getUserCode(),
                     handle.getSession().getPermissions());
         }
-        String value = getValue(handle, bean, permission, operators);
-        boolean result = validate(handle.getSession().getPermissions(), value);
+        String value = getValue(handle, bean, permission, operators);// 菜单要求权限
+        boolean result = validate(handle.getSession().getPermissions(), value);// 用户当前权限
         if (log.isDebugEnabled()) {
             String[] path = clazz.getName().split("\\.");
             String beanId = path[path.length - 1];

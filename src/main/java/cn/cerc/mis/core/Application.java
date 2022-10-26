@@ -52,9 +52,9 @@ public class Application implements ApplicationContextAware {
     // 浏览器通用客户设备Id
     public static final String WebClient = "webclient";
     // 图片静态路径
-    private static String staticPath;
+    private static final String staticPath;
     // 服务访问路径
-    private static String servicePath;
+    private static final String servicePath;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -139,7 +139,7 @@ public class Application implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> requiredType) {
-        if(context == null) {
+        if (context == null) {
             log.error("context is null, getBean return null");
             return null;
         }
