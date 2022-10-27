@@ -82,7 +82,6 @@ public class SyncServerQueue implements ISyncServer {
                 e.printStackTrace();
             }
         }
-        consumer.close();
         return maxRecords;
     }
 
