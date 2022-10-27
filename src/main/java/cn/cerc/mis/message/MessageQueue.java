@@ -2,9 +2,9 @@ package cn.cerc.mis.message;
 
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.QueueConfig;
-import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
 import cn.cerc.mis.SummerMIS;
 
@@ -57,13 +57,9 @@ public class MessageQueue {
             throw new RuntimeException(res.getString(3, "公司别不允许为空"));
         }
 
-        // 将消息发送至阿里云MNS
-        QueueQuery query = new QueueQuery(handle);
-        query.setQueueMode(QueueMode.append);
-        query.add("select * from %s", QueueConfig.getMessageQueue());
-        query.open();
-
-        DataRow headIn = query.head();
+        // 将消息发送至阿里云 RocketMQ
+        DataSet dataSet = new DataSet();
+        DataRow headIn = dataSet.head();
         headIn.setValue("CorpNo_", sendCorpNo);
         headIn.setValue("UserCode_", userCode);
         headIn.setValue("Level_", level.ordinal());
@@ -71,7 +67,9 @@ public class MessageQueue {
         headIn.setValue("Subject_", subject);
         headIn.setValue("Content_", content.toString());
         headIn.setValue("Sound_", sound);
-        query.save();
+
+        QueueQuery query = new QueueQuery(QueueConfig.getMessageQueue());
+        query.save(dataSet.json());
     }
 
     public String getContent() {

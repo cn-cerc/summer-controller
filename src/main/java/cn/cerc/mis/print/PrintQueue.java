@@ -1,8 +1,8 @@
 package cn.cerc.mis.print;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.QueueMode;
 import cn.cerc.db.queue.QueueQuery;
 
 public class PrintQueue {
@@ -44,24 +44,18 @@ public class PrintQueue {
         }
 
         String queueCode = buildQueue();
-        // 将消息发送至阿里云MNS
-        QueueQuery query = new QueueQuery(handle);
-        query.setQueueMode(QueueMode.append);
-        query.add("select * from %s", queueCode);
-        query.open();
-        if (!query.isExistQueue()) {
-            query.create(queueCode);
-        }
 
         // 设置参数
-        DataRow headIn = query.head();
+        DataSet dataSet = new DataSet();
+        DataRow headIn = dataSet.head();
         headIn.setJson(reportParams);
         headIn.setValue("_printerId_", printerId);
         headIn.setValue("_reportId_", reportId);
         headIn.setValue("_reportNum_", reportNum);
         headIn.setValue("_reportLineHeight_", reportLineHeight);
         headIn.setValue("_reportRptHead_", reportRptHead);
-        query.save();
+        QueueQuery query = new QueueQuery(queueCode);
+        query.save(dataSet.json());
     }
 
     private String buildQueue() {
