@@ -3,11 +3,10 @@ package cn.cerc.mis.sync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.aliyun.mns.client.CloudQueue;
-import com.aliyun.mns.model.Message;
-
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.queue.QueueConfig;
+import cn.cerc.db.queue.QueueConsumer;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
@@ -39,12 +38,8 @@ public class SyncServerQueue implements ISyncServer {
             throw new RuntimeException("pushTo is null");
 
         // 数据写入队列
-        String queueCode = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
-        CloudQueue queue = QueueServer.openQueue(queueCode);
-
-        Message message = new Message();
-        message.setMessageBody(record.toString());
-        queue.putMessage(message);
+        String topic = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
+        QueueServer.append(topic, QueueConfig.tag, record.toString());
     }
 
     @Override
@@ -60,33 +55,25 @@ public class SyncServerQueue implements ISyncServer {
             throw new RuntimeException("popTo is null");
 
         // 取出数据队列
-        String queueCode = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
-        CloudQueue queue = QueueServer.openQueue(queueCode);
-
-        for (int i = 0; i < maxRecords; i++) {
-            Message msg = queue.popMessage();
-            if (msg == null) {
-                return i;
-            }
-            String receiptHandle = msg.getReceiptHandle();
-            String body = msg.getMessageBody();
+        String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
+        QueueConsumer.create(topic, QueueConfig.tag, body -> {
             if (body == null) {
-                queue.deleteMessage(receiptHandle);
-                continue;
+                return true;
             }
 
             DataRow record = new DataRow();
             record.setJson(body);
             try {
                 if (!popProcesser.popRecord(session, record, true)) {
-                    log.error("{} 处理失败，请检查数据源和帐套信息 {}", receiptHandle, body);
+                    log.error("{} 处理失败，请检查数据源和帐套信息 {}", body);
+                    return false;
                 }
-                queue.deleteMessage(receiptHandle);
+                return true;
             } catch (Exception e) {
-                log.error(record.toString());
-                e.printStackTrace();
+                log.error(record.toString(), e);
             }
-        }
+            return false;
+        });
         return maxRecords;
     }
 
