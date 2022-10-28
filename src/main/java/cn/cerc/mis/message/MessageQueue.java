@@ -68,7 +68,7 @@ public class MessageQueue {
         headIn.setValue("Content_", content.toString());
         headIn.setValue("Sound_", sound);
 
-        QueueQuery query = new QueueQuery(QueueConfig.getMessageQueue());
+        QueueQuery query = new QueueQuery("message");
         query.save(dataSet.json());
     }
 

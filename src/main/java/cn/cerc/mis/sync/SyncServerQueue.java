@@ -10,6 +10,8 @@ import cn.cerc.db.queue.QueueConsumer;
 import cn.cerc.db.queue.QueueServer;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
+import java.time.Duration;
+
 public class SyncServerQueue implements ISyncServer {
 
     private static final Logger log = LoggerFactory.getLogger(SyncServerQueue.class);
@@ -39,7 +41,7 @@ public class SyncServerQueue implements ISyncServer {
 
         // 数据写入队列
         String topic = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
-        QueueServer.append(topic, QueueConfig.tag, record.toString());
+        QueueServer.append(topic, QueueConfig.tag, record.toString(), Duration.ZERO);
     }
 
     @Override
