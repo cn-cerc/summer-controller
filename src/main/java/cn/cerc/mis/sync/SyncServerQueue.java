@@ -1,7 +1,5 @@
 package cn.cerc.mis.sync;
 
-import java.nio.charset.StandardCharsets;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,16 +56,9 @@ public class SyncServerQueue implements ISyncServer {
 
         // 取出数据队列
         String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
-        QueueConsumer consumer = QueueConsumer.create(topic, QueueConfig.tag);
-        for (int i = 0; i < maxRecords; i++) {
-            var message = consumer.recevie();
-            if (message == null) {
-                return i;
-            }
-            String body = StandardCharsets.UTF_8.decode(message.getBody()).toString();
+        QueueConsumer.create(topic, QueueConfig.tag, body -> {
             if (body == null) {
-                consumer.delete(message);
-                continue;
+                return true;
             }
 
             DataRow record = new DataRow();
@@ -75,13 +66,14 @@ public class SyncServerQueue implements ISyncServer {
             try {
                 if (!popProcesser.popRecord(session, record, true)) {
                     log.error("{} 处理失败，请检查数据源和帐套信息 {}", body);
+                    return false;
                 }
-                consumer.delete(message);
+                return true;
             } catch (Exception e) {
-                log.error(record.toString());
-                e.printStackTrace();
+                log.error(record.toString(), e);
             }
-        }
+            return false;
+        });
         return maxRecords;
     }
 
