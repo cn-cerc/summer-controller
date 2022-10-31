@@ -1,19 +1,21 @@
 package cn.cerc.mis.sync;
 
+import java.time.Duration;
+
+import org.apache.rocketmq.client.apis.ClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.ServerConfig;
+import cn.cerc.db.queue.OnStringMessage;
 import cn.cerc.db.queue.QueueConfig;
 import cn.cerc.db.queue.QueueConsumer;
-import cn.cerc.db.queue.QueueServer;
+import cn.cerc.db.queue.QueueProducer;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
-import java.time.Duration;
-
 public class SyncServerQueue implements ISyncServer {
-
     private static final Logger log = LoggerFactory.getLogger(SyncServerQueue.class);
 
     private SyncServer pushFrom;
@@ -41,7 +43,13 @@ public class SyncServerQueue implements ISyncServer {
 
         // 数据写入队列
         String topic = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
-        QueueServer.append(topic, QueueConfig.tag, record.toString(), Duration.ZERO);
+        var queue = new QueueProducer(topic, QueueConfig.tag);
+        try {
+            queue.append(record.toString(), Duration.ZERO);
+        } catch (ClientException e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -58,25 +66,31 @@ public class SyncServerQueue implements ISyncServer {
 
         // 取出数据队列
         String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
-        QueueConsumer.create(topic, QueueConfig.tag, body -> {
-            if (body == null) {
-                return true;
-            }
-
-            DataRow record = new DataRow();
-            record.setJson(body);
-            try {
-                if (!popProcesser.popRecord(session, record, true)) {
-                    log.error("{} 处理失败，请检查数据源和帐套信息 {}", body);
+        if (ServerConfig.enableTaskService()) {
+            OnStringMessage pull = body -> {
+                if (body == null) {
+                    return true;
+                }
+                DataRow record = new DataRow();
+                record.setJson(body);
+                try {
+                    if (!popProcesser.popRecord(session, record, true)) {
+                        log.error("{} 处理失败，请检查数据源和帐套信息 {}", body);
+                        return false;
+                    }
+                    return true;
+                } catch (Exception e) {
+                    log.error(record.toString(), e);
                     return false;
                 }
-                return true;
-            } catch (Exception e) {
-                log.error(record.toString(), e);
-            }
-            return false;
-        });
-        return maxRecords;
+            };
+            var consumer = new QueueConsumer();
+            consumer.addConsumer(topic, QueueConfig.tag, pull);
+            consumer.startPush();
+            return maxRecords;
+        } else {
+            return 0;
+        }
     }
 
 }
