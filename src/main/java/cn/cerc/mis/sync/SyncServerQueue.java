@@ -43,7 +43,7 @@ public class SyncServerQueue implements ISyncServer {
 
         // 数据写入队列
         String topic = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
-        var queue = new QueueProducer(topic, QueueConfig.tag);
+        var queue = new QueueProducer(topic, QueueConfig.tag());
         try {
             queue.append(record.toString(), Duration.ZERO);
         } catch (ClientException e) {
@@ -85,7 +85,7 @@ public class SyncServerQueue implements ISyncServer {
                 }
             };
             var consumer = new QueueConsumer();
-            consumer.addConsumer(topic, QueueConfig.tag, pull);
+            consumer.addConsumer(topic, QueueConfig.tag(), pull);
             consumer.startPush();
             return maxRecords;
         } else {
