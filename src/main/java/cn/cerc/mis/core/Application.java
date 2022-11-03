@@ -139,7 +139,7 @@ public class Application implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> requiredType) {
-        if(context == null) {
+        if (context == null) {
             log.error("context is null, getBean return null");
             return null;
         }
@@ -159,8 +159,10 @@ public class Application implements ApplicationContextAware {
                     if (!item.endsWith("Default"))
                         beanId = item;
                 }
-                if (beanId == null)
+                if (beanId == null) {
+                    log.error("getBean 执行错误：接口 {} 存在多个的实现，必须改进！", requiredType.getName());
                     beanId = beans[0];
+                }
                 return context.getBean(beanId, requiredType);
             }
         }
