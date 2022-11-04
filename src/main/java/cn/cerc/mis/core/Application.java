@@ -108,7 +108,6 @@ public class Application implements ApplicationContextAware {
     public static ApplicationContext initOnlyFramework() {
         if (context == null) {
             // FIXME: 自定义作用域，临时解决 request, session 问题
-
             AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
                     SummerSpringConfiguration.class);
             RequestScope scope = new RequestScope();
@@ -289,6 +288,7 @@ public class Application implements ApplicationContextAware {
         return new Handle(getSession());
     }
 
+    @Deprecated
     public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {
         ApplicationContext context = Application.getContext();
         if (context == null)
