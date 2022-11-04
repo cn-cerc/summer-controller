@@ -16,7 +16,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageObject> extends
 
     public abstract Class<T> getClazz();
 
-    public String push(IHandle handle, T data) {
+    public String append(IHandle handle, T data) {
         if (Utils.isEmpty(data.getToken()))
             data.setToken(handle.getSession().getToken());
         return super.push(new Gson().toJson(data));
