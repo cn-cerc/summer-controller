@@ -19,6 +19,8 @@ public abstract class AbstractObjectQueue<T extends CustomMessageObject> extends
     public String append(IHandle handle, T data) {
         if (Utils.isEmpty(data.getToken()))
             data.setToken(handle.getSession().getToken());
+        if (!data.validate())
+            throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
         return super.push(new Gson().toJson(data));
     }
 
