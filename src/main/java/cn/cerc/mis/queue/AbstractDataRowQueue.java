@@ -8,7 +8,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     /**
      * 生产者投放消息
      */
-    public String append(IHandle handle, DataRow dataRow) {
+    protected String push(IHandle handle, DataRow dataRow) {
         dataRow.setValue("token", handle.getSession().getToken());
         return super.push(dataRow.json());
     }
