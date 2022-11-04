@@ -19,7 +19,7 @@ public class BasicHandle implements IHandle, AutoCloseable {
 
     public BasicHandle(String token) {
         super();
-        this.loadToken(token);
+        getSession().loadToken(token);
     }
 
     @Override
@@ -41,11 +41,6 @@ public class BasicHandle implements IHandle, AutoCloseable {
             session.close();
             session = null;
         }
-    }
-
-    public BasicHandle loadToken(String token) {
-        getSession().loadToken(token);
-        return this;
     }
 
 }
