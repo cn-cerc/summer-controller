@@ -1,7 +1,9 @@
 package cn.cerc.mis.queue;
 
+import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
 import cn.cerc.db.queue.AbstractQueue;
 
 public abstract class AbstractDataRowQueue extends AbstractQueue {
@@ -17,8 +19,15 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     public final boolean consume(String message) {
         var data = new DataRow().setJson(message);
         try (TaskHandle handle = new TaskHandle()) {
-            if (data.has("token"))
+            if (data.has("token")) {
                 handle.getSession().loadToken(data.getString("token"));
+                DataCell corpNo = data.bind("corp_no_");
+                if (corpNo.hasValue())
+                    handle.getSession().setProperty(ISession.CORP_NO, corpNo.getString());
+                DataCell userCode = data.bind("user_code_");
+                if (userCode.hasValue())
+                    handle.getSession().setProperty(ISession.USER_CODE, userCode.getString());
+            }
             return this.execute(handle, data);
         }
     }
