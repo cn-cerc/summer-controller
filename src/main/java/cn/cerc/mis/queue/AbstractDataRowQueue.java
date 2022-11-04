@@ -10,7 +10,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
      */
     public String append(IHandle handle, DataRow dataRow) {
         dataRow.setValue("token", handle.getSession().getToken());
-        return super.sendMessage(dataRow.json());
+        return super.push(dataRow.json());
     }
 
     @Override
