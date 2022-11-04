@@ -23,7 +23,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         }
     }
 
-    public abstract boolean execute(TaskHandle handle, DataRow data);
+    public abstract boolean execute(IHandle handle, DataRow data);
 
 //
 //    public boolean receive(OnMessageDataRow event) {

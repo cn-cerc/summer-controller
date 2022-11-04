@@ -38,7 +38,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageObject> extends
         return result;
     }
 
-    public abstract boolean execute(TaskHandle handle, T entity);
+    public abstract boolean execute(IHandle handle, T entity);
 
 //
 //    public boolean receive(OnObjectMessage<T> event) {
