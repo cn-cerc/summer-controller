@@ -11,7 +11,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 
-public abstract class AbstractObjectQueue<T extends CustomMessageObject> extends AbstractQueue {
+public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
 
     public abstract Class<T> getClazz();

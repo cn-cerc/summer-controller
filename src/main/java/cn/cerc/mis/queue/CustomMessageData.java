@@ -2,7 +2,7 @@ package cn.cerc.mis.queue;
 
 import cn.cerc.db.core.Utils;
 
-public class CustomMessageObject {
+public class CustomMessageData {
     private String token;
 
     public String getToken() {
