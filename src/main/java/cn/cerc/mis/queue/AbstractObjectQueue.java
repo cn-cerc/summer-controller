@@ -8,12 +8,19 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageObject> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
 
     public abstract Class<T> getClazz();
+
+    public String append(IHandle handle, T data) {
+        if (Utils.isEmpty(data.getToken()))
+            data.setToken(handle.getSession().getToken());
+        return super.sendMessage(new Gson().toJson(data));
+    }
 
     @Override
     public boolean consume(String message) {
@@ -24,12 +31,10 @@ public abstract class AbstractObjectQueue<T extends CustomMessageObject> extends
         }
     }
 
-    public T addItem(IHandle handle) {
+    public T addItem() {
         T result = null;
         try {
             result = getClazz().getDeclaredConstructor().newInstance();
-            result.setQueue(this);
-            result.setToken(handle.getSession().getToken());
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             log.error(e.getMessage());
