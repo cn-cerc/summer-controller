@@ -34,4 +34,9 @@ public class BasicHandle implements IHandle, AutoCloseable {
         }
     }
 
+    public BasicHandle loadToken(String token) {
+        session.loadToken(token);
+        return this;
+    }
+
 }
