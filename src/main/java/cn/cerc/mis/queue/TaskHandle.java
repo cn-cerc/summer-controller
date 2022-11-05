@@ -5,7 +5,6 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.mis.security.CustomSession;
 
 public class TaskHandle implements IHandle, AutoCloseable {
-    public static final int UpdateCorpNo = 1;
     private ISession session;
 
     public TaskHandle() {
