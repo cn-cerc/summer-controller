@@ -38,7 +38,7 @@ public class TaskHandle implements IHandle, AutoCloseable {
      */
     public void initToken(String corpNo, String userCode) {
         this.getSession().setProperty(ISession.CORP_NO, corpNo);
-        this.getSession().setProperty(ISession.USER_CODE, corpNo);
+        this.getSession().setProperty(ISession.USER_CODE, userCode);
     }
 
 }
