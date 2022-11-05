@@ -5,13 +5,14 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IUserMessage;
+import cn.cerc.mis.queue.CustomMessageData;
 
 /**
  * 专用于消息发送
  * <p>
  * 注意：公司别和用户代码必须配套
  */
-public class MessageRecord {
+public class MessageRecord extends CustomMessageData {
     private static final ClassResource res = new ClassResource(MessageRecord.class, SummerMIS.ID);
     public static final String UIClass_Default = "MVDefault"; // 默认类 正常展示
     public static final String UIClass_Notice = "MVNotice"; // 通知类别 下方需要显示操作 已读 未读
