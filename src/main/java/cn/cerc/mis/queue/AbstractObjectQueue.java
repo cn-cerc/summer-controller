@@ -28,7 +28,8 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
     public boolean consume(String message) {
         T data = new Gson().fromJson(message, getClazz());
         try (TaskHandle handle = new TaskHandle()) {
-            handle.getSession().loadToken(data.getToken());
+            if (!Utils.isEmpty(data.getToken()))
+                handle.getSession().loadToken(data.getToken());
             return this.execute(handle, data);
         }
     }
