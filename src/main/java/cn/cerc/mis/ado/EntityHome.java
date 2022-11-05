@@ -95,7 +95,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                         SessionCache.set(keys, row);
                 }
-                try (Redis jedis = JedisFactory.getRedis()) {
+                try (Redis jedis = new Redis()) {
                     String sha = jedis.scriptLoad(LUA_SCRIPT_MSETEX);
                     jedis.evalsha(sha, batchKeys, batchValues);
                 }

@@ -108,7 +108,6 @@ public class Application implements ApplicationContextAware {
     public static ApplicationContext initOnlyFramework() {
         if (context == null) {
             // FIXME: 自定义作用域，临时解决 request, session 问题
-
             AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
                     SummerSpringConfiguration.class);
             RequestScope scope = new RequestScope();
@@ -139,7 +138,7 @@ public class Application implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> requiredType) {
-        if(context == null) {
+        if (context == null) {
             log.error("context is null, getBean return null");
             return null;
         }
@@ -159,8 +158,10 @@ public class Application implements ApplicationContextAware {
                     if (!item.endsWith("Default"))
                         beanId = item;
                 }
-                if (beanId == null)
+                if (beanId == null) {
+                    log.error("getBean 执行错误：接口 {} 存在多个的实现，必须改进！", requiredType.getName());
                     beanId = beans[0];
+                }
                 return context.getBean(beanId, requiredType);
             }
         }
@@ -287,6 +288,7 @@ public class Application implements ApplicationContextAware {
         return new Handle(getSession());
     }
 
+    @Deprecated
     public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {
         ApplicationContext context = Application.getContext();
         if (context == null)

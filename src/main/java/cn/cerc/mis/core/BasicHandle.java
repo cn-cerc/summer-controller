@@ -13,6 +13,15 @@ import cn.cerc.db.core.ISession;
 public class BasicHandle implements IHandle, AutoCloseable {
     private ISession session;
 
+    public BasicHandle() {
+        super();
+    }
+
+    public BasicHandle(String token) {
+        super();
+        getSession().loadToken(token);
+    }
+
     @Override
     public ISession getSession() {
         if (session == null)

@@ -15,8 +15,6 @@ import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
-import cn.cerc.db.queue.QueueServer;
-import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.redis.Redis;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
@@ -115,17 +113,6 @@ public class CustomSession implements ISession {
             return connections.get(key);
         }
 
-        if (QueueServer.SessionId.equals(key)) {
-            QueueServer obj = new QueueServer();
-            connections.put(QueueServer.SessionId, obj);
-            return connections.get(key);
-        }
-
-//        if (MongoConfig.SessionId.equals(key)) {
-//            MongoConfig obj = new MongoConfig();
-//            connections.put(MongoConfig.SessionId, obj);
-//            return connections.get(key);
-//        }
         return null;
     }
 
@@ -180,7 +167,7 @@ public class CustomSession implements ISession {
         SecurityService security = Application.getBean(SecurityService.class);
         if (security != null && security.initSession(this, token)) {
             String key = MemoryBuffer.buildKey(SystemBuffer.Token.Map, token);
-            try (Redis redis = JedisFactory.getRedis()) {
+            try (Redis redis = new Redis()) {
                 String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
                 if (value == null) {
                     value = security.getPermissions(this);

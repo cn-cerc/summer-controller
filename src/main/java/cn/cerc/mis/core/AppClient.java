@@ -74,7 +74,7 @@ public class AppClient implements Serializable {
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
 
         Cookie[] cookies = request.getCookies();
-        try (Redis redis = JedisFactory.getRedis()) {
+        try (Redis redis = new Redis()) {
             this.device = request.getParameter(ISession.CLIENT_DEVICE);
             if (!Utils.isEmpty(device))
                 redis.hset(key, ISession.CLIENT_DEVICE, device);
@@ -102,17 +102,6 @@ public class AppClient implements Serializable {
                         }
                     }
                 }
-
-//                if (Utils.isEmpty(deviceId)) {
-//                    deviceId = Utils.getGuid();
-//                    redis.hset(key, ISession.CLIENT_ID, deviceId);
-//                    if (response != null) {
-//                        Cookie cookie = new Cookie(ISession.CLIENT_ID, deviceId);
-//                        cookie.setPath(COOKIE_ROOT_PATH);
-//                        cookie.setHttpOnly(true);
-//                        this.response.addCookie(cookie);
-//                    }
-//                }
             }
 
             this.language = request.getParameter(ISession.LANGUAGE_ID);
