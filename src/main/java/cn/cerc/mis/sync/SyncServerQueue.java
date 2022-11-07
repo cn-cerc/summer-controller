@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.queue.OnStringMessage;
 import cn.cerc.db.queue.QueueConfig;
 import cn.cerc.db.queue.QueueConsumer;
 import cn.cerc.db.queue.QueueProducer;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
 public class SyncServerQueue implements ISyncServer {
@@ -66,7 +66,7 @@ public class SyncServerQueue implements ISyncServer {
 
         // 取出数据队列
         String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
-        if (ServerConfig.enableTaskService()) {
+        if (Application.enableTaskService()) {
             OnStringMessage pull = body -> {
                 if (body == null) {
                     return true;
