@@ -316,4 +316,10 @@ public class Application implements ApplicationContextAware {
         return entityItems.get(table);
     }
 
+    public static boolean enableTaskService() {
+        if (context == null)
+            return false;
+        return config.getBoolean("task.service", false);
+    }
+
 }
