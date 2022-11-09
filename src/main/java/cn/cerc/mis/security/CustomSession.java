@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.mssql.MssqlServer;
@@ -34,6 +35,8 @@ public class CustomSession implements ISession {
     private HttpServletResponse response;
     private static int currentSize = 0;
     private boolean active = true;
+
+    public static final String machineCode = "T1000";
 
     public CustomSession() {
         super();
@@ -202,6 +205,13 @@ public class CustomSession implements ISession {
     @Override
     public void setResponse(HttpServletResponse response) {
         this.response = response;
+    }
+
+    @Override
+    public void atSystemUser() {
+        SecurityService security = Application.getBean(SecurityService.class);
+        String token = security.getSystemUserToken(new Handle(this), this.getCorpNo(), machineCode);
+        this.loadToken(token);
     }
 
 }
