@@ -20,10 +20,10 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         try (TaskHandle handle = new TaskHandle()) {
             if (data.has("token")) {
                 handle.getSession().loadToken(data.getString("token"));
-                DataCell corpNo = data.bind("corp_no_");
+                DataCell corpNo = data.bind("corp_no_");// 执行器的目标帐套
                 DataCell userCode = data.bind("user_code_");
                 if (corpNo.hasValue())
-                    handle.initToken(corpNo.getString(), userCode.getString());
+                    handle.buildSession(corpNo.getString(), userCode.getString());
             }
             return this.execute(handle, data);
         }
@@ -31,7 +31,6 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
 
     public abstract boolean execute(IHandle handle, DataRow data);
 
-//
 //    public boolean receive(OnMessageDataRow event) {
 //        QueueConsumer consumer = new QueueConsumer();
 //        return consumer.receive("tempGroup", this.getTopic(), this.getTag(), data -> event.execute(new DataRow().setJson(data)));

@@ -36,7 +36,7 @@ public class TaskHandle implements IHandle, AutoCloseable {
      * @param corpNo   指定帐套的代码
      * @param userCode 指定用户的代码
      */
-    public void initToken(String corpNo, String userCode) {
+    public void buildSession(String corpNo, String userCode) {
         this.getSession().setProperty(ISession.CORP_NO, corpNo);
         this.getSession().setProperty(ISession.USER_CODE, userCode);
     }
