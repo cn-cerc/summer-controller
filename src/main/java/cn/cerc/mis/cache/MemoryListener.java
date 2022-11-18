@@ -2,7 +2,6 @@ package cn.cerc.mis.cache;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
@@ -22,7 +21,7 @@ import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 @Component
-@WebListener
+//@WebListener
 public class MemoryListener implements ServletContextListener, HttpSessionListener {
     private static final Logger log = LoggerFactory.getLogger(MemoryListener.class);
     public static final String CacheChannel = MemoryBuffer.buildKey(SystemBuffer.Global.CacheReset);
@@ -77,8 +76,8 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
             }
         }
 
-        MysqlServerMaster.closePool();
-        MysqlServerSlave.closePool();
+//        MysqlServerMaster.closePool();
+//        MysqlServerSlave.closePool();
 
         log.info("tomcat 已经关闭");
     }
