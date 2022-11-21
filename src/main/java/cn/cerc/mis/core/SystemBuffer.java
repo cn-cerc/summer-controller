@@ -92,7 +92,8 @@ public class SystemBuffer {
         DeviceInfo,
         SessionBase,
         UserMessage,
-        Map;
+        Map,
+        ReLive;
 
         @Override
         public int getStartingPoint() {

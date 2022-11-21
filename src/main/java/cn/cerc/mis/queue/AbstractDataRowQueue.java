@@ -19,6 +19,8 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         var data = new DataRow().setJson(message);
         try (TaskHandle handle = new TaskHandle()) {
             if (data.has("token")) {
+                // 临时恢复token，由队列自己实现此方法，设置Redis缓存
+                this.repairToken(data.getString("token"));
                 handle.getSession().loadToken(data.getString("token"));
                 DataCell corpNo = data.bind("corp_no_");// 执行器的目标帐套
                 DataCell userCode = data.bind("user_code_");
@@ -27,6 +29,10 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
             }
             return this.execute(handle, data);
         }
+    }
+
+    protected void repairToken(String token) {
+
     }
 
     public abstract boolean execute(IHandle handle, DataRow data);
