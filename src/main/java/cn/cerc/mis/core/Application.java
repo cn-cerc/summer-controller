@@ -52,8 +52,6 @@ public class Application implements ApplicationContextAware {
     public static final String LoginTime = "loginTime";
     // 浏览器通用客户设备Id
     public static final String WebClient = "webclient";
-    // 图片静态路径
-    private static final String staticPath;
     // 服务访问路径
     private static final String servicePath;
     // spring context
@@ -74,9 +72,12 @@ public class Application implements ApplicationContextAware {
 //    public static final String bookNo = ISession.CORP_NO;
 
     static {
-        var root = "/" + ServerConfig.getAppProduct() + "/" + ServerConfig.getAppVersion() + "/common/cdn";
-        staticPath = ZkNode.get().getNodeValue(root, () -> config.getString("app.static.path", ""));
         servicePath = config.getString("app.service.path", "");
+    }
+
+    // 图片静态路径
+    public static String getStaticPath() {
+        return ZkNode.get().getString("common/cdn", () -> config.getString("app.static.path", ""));
     }
 
     /**
@@ -275,10 +276,6 @@ public class Application implements ApplicationContextAware {
         } else {
             throw new RuntimeException("not support language: " + lang);
         }
-    }
-
-    public static String getStaticPath() {
-        return staticPath;
     }
 
     public static String getServicePath() {
