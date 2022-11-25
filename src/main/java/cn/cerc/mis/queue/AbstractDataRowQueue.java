@@ -11,6 +11,10 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
      */
     protected String push(IHandle handle, DataRow dataRow) {
         dataRow.setValue("token", handle.getSession().getToken());
+        if (!dataRow.has("corp_no_"))
+            dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
+        if (!dataRow.has("user_code_"))
+            dataRow.setValue("user_code_", handle.getSession().getUserCode());
         return super.push(dataRow.json());
     }
 
