@@ -1,17 +1,11 @@
 package cn.cerc.mis.sync;
 
-import java.time.Duration;
-
-import org.apache.rocketmq.client.apis.ClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.queue.OnStringMessage;
-import cn.cerc.db.queue.QueueConfig;
-import cn.cerc.db.queue.QueueConsumer;
-import cn.cerc.db.queue.QueueProducer;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
@@ -42,14 +36,14 @@ public class SyncServerQueue implements ISyncServer {
             throw new RuntimeException("pushTo is null");
 
         // 数据写入队列
-        String topic = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
-        var queue = new QueueProducer(topic, QueueConfig.tag());
-        try {
-            queue.append(record.toString(), Duration.ZERO);
-        } catch (ClientException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
-        }
+//        String topic = pushFrom.name().toLowerCase() + "-to-" + pushTo.name().toLowerCase();
+//        var queue = new QueueProducer(topic, QueueConfig.tag());
+//        try {
+//            queue.append(record.toString(), Duration.ZERO);
+//        } catch (ClientException e) {
+//            log.error(e.getMessage());
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -84,9 +78,9 @@ public class SyncServerQueue implements ISyncServer {
                     return false;
                 }
             };
-            var consumer = new QueueConsumer();
-            consumer.addConsumer(topic, QueueConfig.tag(), pull);
-            consumer.startPush();
+//            var consumer = new QueueConsumer();
+//            consumer.addConsumer(topic, QueueConfig.tag(), pull);
+//            consumer.startPush();
             return maxRecords;
         } else {
             return 0;
