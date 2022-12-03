@@ -25,6 +25,7 @@ import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
+import cn.cerc.db.zk.ZkNode;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.ado.AdoTable;
 import cn.cerc.mis.ado.EntityQuery;
@@ -51,10 +52,8 @@ public class Application implements ApplicationContextAware {
     public static final String LoginTime = "loginTime";
     // 浏览器通用客户设备Id
     public static final String WebClient = "webclient";
-    // 图片静态路径
-    private static String staticPath;
     // 服务访问路径
-    private static String servicePath;
+    private static final String servicePath;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -73,8 +72,12 @@ public class Application implements ApplicationContextAware {
 //    public static final String bookNo = ISession.CORP_NO;
 
     static {
-        staticPath = config.getString("app.static.path", "");
         servicePath = config.getString("app.service.path", "");
+    }
+
+    // 图片静态路径
+    public static String getStaticPath() {
+        return ZkNode.get().getString("common/cdn", () -> config.getString("app.static.path", ""));
     }
 
     /**
@@ -273,10 +276,6 @@ public class Application implements ApplicationContextAware {
         } else {
             throw new RuntimeException("not support language: " + lang);
         }
-    }
-
-    public static String getStaticPath() {
-        return staticPath;
     }
 
     public static String getServicePath() {

@@ -2,6 +2,7 @@ package cn.cerc.mis.excel.output;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -157,6 +158,7 @@ public class ExcelTemplate {
                             imageUrl = imageUrl.substring(imageUrl.indexOf("site/") + 5);
                         }
                     }
+                    imageUrl = Utils.decode(imageUrl, StandardCharsets.UTF_8.name());
                     GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(oss.getBucket(), imageUrl);
                     // 设置失效时间
                     req.setExpiration(new Datetime().inc(DateType.Minute, 5).asBaseDate());
