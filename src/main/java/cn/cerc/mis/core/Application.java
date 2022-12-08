@@ -54,6 +54,8 @@ public class Application implements ApplicationContextAware {
     public static final String WebClient = "webclient";
     // 服务访问路径
     private static final String servicePath;
+    // 产品静态文件
+    public static final String productStatic;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -71,9 +73,8 @@ public class Application implements ApplicationContextAware {
 //    @Deprecated
 //    public static final String bookNo = ISession.CORP_NO;
 
-    public static String productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(),
-            ServerConfig.getAppVersion());
     static {
+        productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
         servicePath = config.getString("app.service.path", "");
     }
 
