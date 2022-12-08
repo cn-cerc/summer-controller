@@ -71,13 +71,16 @@ public class Application implements ApplicationContextAware {
 //    @Deprecated
 //    public static final String bookNo = ISession.CORP_NO;
 
+    public static String productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(),
+            ServerConfig.getAppVersion());
     static {
         servicePath = config.getString("app.service.path", "");
     }
 
     // 图片静态路径
     public static String getStaticPath() {
-        return ZkNode.get().getString("common/cdn", () -> config.getString("app.static.path", ""));
+        // zookeeper 路径 /diteng/main/common/cdn
+        return ZkNode.get().getNodeValue(productStatic, () -> config.getString("app.static.path", ""));
     }
 
     /**
