@@ -54,6 +54,8 @@ public class Application implements ApplicationContextAware {
     public static final String WebClient = "webclient";
     // 服务访问路径
     private static final String servicePath;
+    // 产品静态文件
+    public static final String productStatic;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -72,12 +74,14 @@ public class Application implements ApplicationContextAware {
 //    public static final String bookNo = ISession.CORP_NO;
 
     static {
+        productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
         servicePath = config.getString("app.service.path", "");
     }
 
     // 图片静态路径
     public static String getStaticPath() {
-        return ZkNode.get().getString("common/cdn", () -> config.getString("app.static.path", ""));
+        // zookeeper 路径 /diteng/main/common/cdn
+        return ZkNode.get().getNodeValue(productStatic, () -> config.getString("app.static.path", ""));
     }
 
     /**
