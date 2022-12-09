@@ -86,7 +86,7 @@ public class Application implements ApplicationContextAware {
 
     // aui静态资源路径
     public static String getAuiPath(String path) {
-        return config.getString("aui.path", "js/aui/aui-vender.js") + "/" + path;
+        return config.getString("aui.path", "js/aui") + "/" + path;
     }
 
     /**
