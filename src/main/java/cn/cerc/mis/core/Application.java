@@ -84,6 +84,11 @@ public class Application implements ApplicationContextAware {
         return ZkNode.get().getNodeValue(productStatic, () -> config.getString("app.static.path", ""));
     }
 
+    // aui静态资源路径
+    public static String getAuiPath(String path) {
+        return config.getString("aui.path", "js/aui") + "/" + path;
+    }
+
     /**
      * 根据 application.xml 初始化 spring context
      * 
