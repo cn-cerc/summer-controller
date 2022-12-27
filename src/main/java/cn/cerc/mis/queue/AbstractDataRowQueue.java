@@ -4,6 +4,7 @@ import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.AbstractQueue;
+import cn.cerc.db.queue.QueueServiceEnum;
 
 public abstract class AbstractDataRowQueue extends AbstractQueue {
     /**
@@ -19,7 +20,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     }
 
     @Override
-    public final boolean consume(String message) {
+    public final boolean consume(String message, boolean repushOnError) {
         var data = new DataRow().setJson(message);
         try (TaskHandle handle = new TaskHandle()) {
             if (data.has("token")) {
@@ -31,7 +32,13 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
                 if (corpNo.hasValue())
                     handle.buildSession(corpNo.getString(), userCode.getString());
             }
-            return this.execute(handle, data);
+            var result = this.execute(handle, data);
+            // 非Sqlmq队列执行失败后，将其插入到Sqlmq中继续执行
+            if (repushOnError && !result && this.getDelayTime() > 0 && this.getService() != QueueServiceEnum.Sqlmq) {
+                super.pushToSqlmq(message);
+                return true;
+            }
+            return result;
         }
     }
 
