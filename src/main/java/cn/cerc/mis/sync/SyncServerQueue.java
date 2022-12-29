@@ -61,7 +61,7 @@ public class SyncServerQueue implements ISyncServer {
         // 取出数据队列
         String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
         if (Application.enableTaskService()) {
-            OnStringMessage pull = body -> {
+            OnStringMessage pull = (body, repushOnError) -> {
                 if (body == null) {
                     return true;
                 }

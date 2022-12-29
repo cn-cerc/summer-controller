@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
+import cn.cerc.db.queue.QueueServiceEnum;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
@@ -25,12 +26,18 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
     }
 
     @Override
-    public boolean consume(String message) {
+    public boolean consume(String message, boolean repushOnError) {
         T data = new Gson().fromJson(message, getClazz());
         try (TaskHandle handle = new TaskHandle()) {
             if (!Utils.isEmpty(data.getToken()))
                 handle.getSession().loadToken(data.getToken());
-            return this.execute(handle, data);
+            var result = this.execute(handle, data);
+            // 非Sqlmq队列执行失败后，将其插入到Sqlmq中继续执行
+            if (repushOnError && !result && this.getDelayTime() > 0 && this.getService() != QueueServiceEnum.Sqlmq) {
+                super.pushToSqlmq(message);
+                return true;
+            }
+            return result;
         }
     }
 
