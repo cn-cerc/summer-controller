@@ -57,11 +57,6 @@ public class SqlmqLog extends CustomEntity {
         this.setCreate_time_(new Datetime());
     }
 
-    @Override
-    public void onUpdatePost(IHandle handle) {
-        super.onUpdatePost(handle);
-    }
-
     public Integer getUID_() {
         return UID_;
     }

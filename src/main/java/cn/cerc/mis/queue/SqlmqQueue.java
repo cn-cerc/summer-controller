@@ -22,8 +22,6 @@ import cn.cerc.mis.ado.EntityOne;
 
 public class SqlmqQueue implements IHandle {
     private static final Logger log = LoggerFactory.getLogger(SqlmqQueue.class);
-    public static final String s_sqlmq_info = "s_sqlmq_info";
-    public static final String s_sqlmq_log = "s_sqlmq_log";
 
     private String queue;
     private int delayTime = 0;
