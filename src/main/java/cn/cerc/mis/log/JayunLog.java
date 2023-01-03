@@ -7,8 +7,6 @@ import org.apache.log4j.spi.ErrorHandler;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LoggingEvent;
 
-import com.google.gson.Gson;
-
 public class JayunLog implements Appender {
     private String name;
     private Layout layout;
@@ -39,8 +37,7 @@ public class JayunLog implements Appender {
         if (event.getLevel() == Level.ERROR || event.getLevel() == Level.WARN) {
             var data = new JayunLogData(event);
             data.setProject(this.name);
-            String msg = String.format("%s: %s", this.name, new Gson().toJson(data));
-            System.out.println(msg);
+            new QueueJayunLog().push(data);
         }
     }
 
