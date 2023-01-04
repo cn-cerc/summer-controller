@@ -70,7 +70,11 @@ public class SystemBuffer {
         /**
          * 导出服务标记位
          */
-        ExportMonitor;
+        ExportMonitor,
+        /**
+         * 项目错误与警告日志
+         */
+        ErrorWarnLog;
 
         @Override
         public int getStartingPoint() {
