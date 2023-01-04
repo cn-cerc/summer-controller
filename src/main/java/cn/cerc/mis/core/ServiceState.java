@@ -1,6 +1,7 @@
 package cn.cerc.mis.core;
 
 public class ServiceState {
+    // 执行成功
     public static final int OK = 1;
     // 以下为普通错误
     public static final int ERROR = 0;
