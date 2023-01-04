@@ -72,9 +72,9 @@ public class SystemBuffer {
          */
         ExportMonitor,
         /**
-         * 日志
+         * 项目错误与警告日志
          */
-        Log;
+        ErrorWarnLog;
 
         @Override
         public int getStartingPoint() {
