@@ -24,8 +24,7 @@ public class JayunLogData {
         this.message = event.getRenderedMessage();
         if (event.getLevel() == Level.WARN)
             this.level = JayunLogData.Warn;
-        event.getLevel();
-        if (event.getLevel() == Level.ERROR)
+        else if (event.getLevel() == Level.ERROR)
             this.level = JayunLogData.Error;
         else
             this.level = JayunLogData.Info;
