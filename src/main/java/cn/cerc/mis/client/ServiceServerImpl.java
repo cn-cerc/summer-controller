@@ -41,6 +41,7 @@ public interface ServiceServerImpl {
             log.debug("response: {}", response);
             return new DataSet().setJson(response);
         } catch (IOException e) {
+            log.error(e.getMessage(), e);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
         }
     }
