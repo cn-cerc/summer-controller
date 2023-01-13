@@ -8,9 +8,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.google.gson.Gson;
 
@@ -25,8 +25,8 @@ import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 @Component
-//@Scope(WebApplicationContext.SCOPE_REQUEST)
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Scope(WebApplicationContext.SCOPE_REQUEST)
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AppClient implements Serializable {
 //    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
 
