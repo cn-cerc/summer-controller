@@ -21,9 +21,8 @@ import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
 
-//@Scope(WebApplicationContext.SCOPE_REQUEST)
-//@Scope(WebApplicationContext.SCOPE_SESSION)
 //@Component
+//@Scope(WebApplicationContext.SCOPE_SESSION)
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class CustomSession implements ISession {

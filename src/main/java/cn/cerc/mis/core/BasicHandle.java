@@ -1,15 +1,15 @@
 package cn.cerc.mis.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 
 @Component
-@Scope(WebApplicationContext.SCOPE_REQUEST)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class BasicHandle implements IHandle, AutoCloseable {
     private ISession session;
 
