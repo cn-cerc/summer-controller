@@ -25,8 +25,8 @@ import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 @Component
+//@Scope(WebApplicationContext.SCOPE_REQUEST)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AppClient implements Serializable {
 //    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
 
