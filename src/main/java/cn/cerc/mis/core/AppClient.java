@@ -139,7 +139,7 @@ public class AppClient implements Serializable {
             }
         }
 
-        if (!variant.isModified()) {
+        if (!variant.isModified() && response != null) {
             String cookieId = Utils.getGuid();
             Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
             cookie.setPath(COOKIE_ROOT_PATH);
