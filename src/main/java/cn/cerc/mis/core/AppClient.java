@@ -1,7 +1,9 @@
 package cn.cerc.mis.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -41,6 +43,25 @@ public class AppClient implements Serializable {
     public static final String android = "android";
     public static final String iphone = "iphone";
     public static final String wechat = "weixin";
+
+    // GPS
+    public static final String android_gps = "android-gps";
+    public static final String iphone_gps = "iphone-gps";
+
+    /**
+     * 类手机终端
+     */
+    public static final List<String> phone_devices = new ArrayList<>();
+    static {
+        phone_devices.add(AppClient.phone);
+        phone_devices.add(AppClient.android);
+        phone_devices.add(AppClient.iphone);
+        phone_devices.add(AppClient.wechat);
+
+        phone_devices.add(AppClient.android_gps);
+        phone_devices.add(AppClient.iphone_gps);
+    }
+
     // 平板
     public static final String pad = "pad";
     // 电脑
@@ -209,12 +230,25 @@ public class AppClient implements Serializable {
     }
 
     public boolean isPhone() {
-        return phone.equals(getDevice()) || android.equals(getDevice()) || iphone.equals(getDevice())
-                || wechat.equals(getDevice());
+        return phone_devices.contains(getDevice());
     }
 
     public boolean isKanban() {
         return kanban.equals(getDevice());
+    }
+
+    /**
+     * 检查当前的token设备是否是GPS应用
+     */
+    public boolean isGPS() {
+        return android_gps.equals(this.getDevice()) || iphone_gps.equals(this.getDevice());
+    }
+
+    /**
+     * 检查当前的token设备是否是GPS应用
+     */
+    public static boolean isGPS(String device) {
+        return android_gps.equals(device) || iphone_gps.equals(device);
     }
 
     /**
