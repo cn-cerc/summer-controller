@@ -32,12 +32,10 @@ public class SystemBuffer {
          * 在线用户
          */
         OnlineUsers,
-
         /**
          * 缓存重置
          */
         CacheReset,
-
         /**
          * 错误网址
          */
@@ -47,12 +45,10 @@ public class SystemBuffer {
          * 超时服务
          */
         ServiceTimeout,
-
         /**
          * 超时页面
          */
         ViewPageTimeout,
-
         /**
          * 超时Frm
          */
@@ -61,12 +57,10 @@ public class SystemBuffer {
          * token
          */
         Token,
-
         /**
          * 异步服务标记位
          */
         QuartzMonitor,
-
         /**
          * 导出服务标记位
          */
@@ -74,7 +68,11 @@ public class SystemBuffer {
         /**
          * 项目错误与警告日志
          */
-        ErrorWarnLog;
+        ErrorWarnLog,
+        /**
+         * 菜单测试报告
+         */
+        QCMenuReport;
 
         @Override
         public int getStartingPoint() {
