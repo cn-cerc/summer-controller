@@ -11,11 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -24,11 +33,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
-import jxl.Cell;
-import jxl.CellType;
-import jxl.NumberCell;
-import jxl.Sheet;
-import jxl.Workbook;
+import cn.cerc.mis.excel.ExcelCellReader;
 import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
@@ -69,7 +74,7 @@ public class ImportExcel extends ImportExcelFile {
         WorkbookSettings settings = new WorkbookSettings();
         settings.setGCDisabled(true);
         // 创建工作薄
-        WritableWorkbook workbook = Workbook.createWorkbook(outputStream, settings);
+        WritableWorkbook workbook = jxl.Workbook.createWorkbook(outputStream, settings);
 
         // 创建新的一页
         WritableSheet sheet = workbook.createSheet("First Sheet", 0);
@@ -148,7 +153,7 @@ public class ImportExcel extends ImportExcelFile {
         if (file.getName().endsWith(".csv")) {
             readFileFromCSV(file, ds);
         } else {
-            readFileFromXLS(file, ds);
+            readFileFromExcel(file, ds);
         }
         return ds;
     }
@@ -197,24 +202,35 @@ public class ImportExcel extends ImportExcelFile {
         }
     }
 
-    private void readFileFromXLS(FileItem file, DataSet ds) throws Exception {
-        // 获取Excel文件对象
-        Workbook rwb = Workbook.getWorkbook(file.getInputStream());
+    private void readFileFromExcel(FileItem file, DataSet ds) throws Exception {
+        Workbook workbook = null;
+        if (file.getName().endsWith(".xls"))
+            workbook = new HSSFWorkbook(file.getInputStream());
+        if (file.getName().endsWith(".xlsx"))
+            workbook = new XSSFWorkbook(file.getInputStream());
+        if (workbook == null)
+            throw new RuntimeException(String.format("导入的文件：<b>%s</b>, 不是xls或xlsx文件无法导入！", file.getName()));
+
         // 获取文件的指定工作表 默认的第一个
-        Sheet sheet = rwb.getSheet(0);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        int rows = sheet.getLastRowNum() + 1;
+        int columns = StreamSupport.stream(sheet.spliterator(), false).mapToInt(Row::getLastCellNum).max().orElse(0);
 
         ImportExcelTemplate template = this.getTemplate();
-        if (template.getColumns().size() != sheet.getColumns()) {
+        if (template.getColumns().size() != columns) {
             throw new RuntimeException(
                     String.format(res.getString(1, "导入的文件：<b>%s</b>, 其总列数为 %d，而模版总列数为  %d 二者不一致，无法导入！"), file.getName(),
-                            sheet.getColumns(), template.getColumns().size()));
+                            columns, template.getColumns().size()));
         }
 
-        for (int row = 0; row < sheet.getRows(); row++) {
+        for (int row = 0; row < rows; row++) {
             if (row == 0) {
-                for (int col = 0; col < sheet.getColumns(); col++) {
-                    Cell cell = sheet.getCell(col, row);
-                    String value = cell.getContents();
+                for (int col = 0; col < columns; col++) {
+                    Cell cell = sheet.getRow(row).getCell(col);
+                    if (cell == null)
+                        continue;
+                    String value = ExcelCellReader.getString(cell);
                     String title = template.getColumns().get(col).getName();
                     if (!title.equals(value)) {
                         throw new RuntimeException(
@@ -224,13 +240,16 @@ public class ImportExcel extends ImportExcelFile {
                 }
             } else {
                 ds.append();
-                for (int col = 0; col < sheet.getColumns(); col++) {
-                    Cell cell = sheet.getCell(col, row);
-                    String value = cell.getContents();
-                    if (cell.getType() == CellType.NUMBER) {
-                        NumberCell numberCell = (NumberCell) cell;
-                        double d = numberCell.getValue();
-                        value = Utils.formatFloat("0.######", d);
+                for (int col = 0; col < columns; col++) {
+                    Cell cell = sheet.getRow(row).getCell(col);
+                    if (cell == null)
+                        continue;
+                    String value = ExcelCellReader.getString(cell);
+                    if (cell.getCellType() == CellType.NUMERIC) {
+                        if (!DateUtil.isCellDateFormatted(cell)) {
+                            double d = ExcelCellReader.getDouble(cell);
+                            value = Utils.formatFloat("0.######", d);
+                        }
                     }
                     ImportColumn column = template.getColumns().get(col);
                     if (!column.validate(row, col, value)) {
