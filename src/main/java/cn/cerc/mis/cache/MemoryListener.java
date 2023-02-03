@@ -2,7 +2,6 @@ package cn.cerc.mis.cache;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
@@ -22,7 +21,6 @@ import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
 @Component
-@WebListener
 public class MemoryListener implements ServletContextListener, HttpSessionListener {
     private static final Logger log = LoggerFactory.getLogger(MemoryListener.class);
     public static final String CacheChannel = MemoryBuffer.buildKey(SystemBuffer.Global.CacheReset);
