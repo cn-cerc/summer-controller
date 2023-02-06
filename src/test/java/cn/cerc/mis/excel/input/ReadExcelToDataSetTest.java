@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import cn.cerc.db.core.DataSet;
@@ -23,6 +24,7 @@ public class ReadExcelToDataSetTest {
             "AZ", "BA", "BB", "BC", "BD", "BE", "BF", "BG", "BH", "BI" };
 
     @Test
+    @Ignore
     public void test() {
         try {
             File file = new File("/home/h2syj/Documents/old_word/2022-11-08_222031_导入车辆保险.xls");
