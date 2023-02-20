@@ -6,9 +6,6 @@ public class UserClickTooFastException extends Exception {
         super(message);
     }
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -7234752108476360800L;
 
 }
