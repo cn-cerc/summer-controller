@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.mis.other.UserClickTooFastException;
 import cn.cerc.mis.other.PageNotFoundException;
 import cn.cerc.mis.security.SecurityStopException;
 
@@ -24,7 +25,8 @@ public interface IErrorPage {
         else if (e instanceof SecurityStopException)
             _log.warn("client ip {}, {}", AppClient.getClientIP(request), e.getMessage());
         else {
-            _log.warn("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), err);
+            if (!(e instanceof UserClickTooFastException))
+                _log.warn("client ip {}, {}, {}", AppClient.getClientIP(request), e.getMessage(), err);
         }
         String result = this.getErrorPage(request, response, err);
         if (result != null) {
