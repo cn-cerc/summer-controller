@@ -39,6 +39,11 @@ public class JayunLogData {
      */
     private String args;
 
+    /**
+     * 创建时间
+     */
+    private Long timestamp;
+
     public JayunLogData() {
     }
 
@@ -53,6 +58,7 @@ public class JayunLogData {
             level = "info";
         message = event.getRenderedMessage();
         stack = Arrays.asList(event.getThrowableInformation().getThrowableStrRep());
+        timestamp = event.getTimeStamp();
     }
 
     public String getToken() {
@@ -109,6 +115,14 @@ public class JayunLogData {
 
     public void setArgs(String args) {
         this.args = args;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
 }

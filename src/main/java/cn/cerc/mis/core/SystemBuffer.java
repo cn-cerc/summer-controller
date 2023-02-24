@@ -69,6 +69,7 @@ public class SystemBuffer {
          * 项目错误与警告日志
          */
         ErrorWarnLog,
+        InfoErrorWarnLog,
         /**
          * 菜单测试报告
          */
