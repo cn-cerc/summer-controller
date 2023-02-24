@@ -34,9 +34,9 @@ public class JayunLog implements Appender {
 
     @Override
     public void doAppend(LoggingEvent event) {
-        if (event.getLevel() == Level.ERROR || event.getLevel() == Level.WARN) {
+        if (event.getLevel() == Level.ERROR || event.getLevel() == Level.WARN || event.getLevel() == Level.INFO) {
             var data = new JayunLogData(event);
-            data.setProject(this.name);
+            data.setToken(name);
             new QueueJayunLog().push(data);
         }
     }
@@ -75,5 +75,5 @@ public class JayunLog implements Appender {
     public boolean requiresLayout() {
         return false;
     }
-    
+
 }

@@ -30,7 +30,7 @@ public class QueueJayunLog extends AbstractQueue {
         // 本地开发不发送日志到测试平台
         if (ServerConfig.isServerDevelop())
             return true;
-        String site = ZkNode.get().getNodeValue(key("log-api"), () -> "");
+        String site = ZkNode.get().getNodeValue(key("log"), () -> "");
         if (Utils.isEmpty(site))
             return true;
         try {

@@ -1,40 +1,89 @@
 package cn.cerc.mis.log;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 
 public class JayunLogData {
-    public static final int Info = 0;
-    public static final int Warn = 1;
-    public static final int Error = 2;
-
-    private String project;
-    private String source;
-    private long timestamp;
+    public static final String Info = "info";
+    public static final String Warn = "warn";
+    public static final String Error = "error";
+    /**
+     * token
+     */
+    private String token;
+    /**
+     * 类名+行号
+     */
+    private String id;
+    /**
+     * 行号
+     */
+    private int line;
+    /**
+     * 日志等级 (info\warn\error)
+     */
+    private String level;
+    /**
+     * 报错信息
+     */
     private String message;
-    private int level = JayunLogData.Info;
+    /**
+     * 堆栈信息
+     */
+    private List<String> stack;
+    /**
+     * 参数
+     */
+    private String args;
 
     public JayunLogData() {
-
     }
 
     public JayunLogData(LoggingEvent event) {
-        this.source = event.getLoggerName();
-        this.timestamp = event.getTimeStamp();
-        this.message = event.getRenderedMessage();
-        if (event.getLevel() == Level.WARN)
-            this.level = JayunLogData.Warn;
-        else if (event.getLevel() == Level.ERROR)
-            this.level = JayunLogData.Error;
+        id = event.categoryName;
+        line = Integer.parseInt(event.getLocationInformation().getLineNumber());
+        if (event.getLevel() == Level.ERROR)
+            level = "error";
+        else if (event.getLevel() == Level.WARN)
+            level = "warn";
         else
-            this.level = JayunLogData.Info;
+            level = "info";
+        message = event.getRenderedMessage();
+        stack = Arrays.asList(event.getThrowableInformation().getThrowableStrRep());
     }
 
-    public int getLevel() {
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
+
+    public String getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(String level) {
         this.level = level;
     }
 
@@ -46,27 +95,20 @@ public class JayunLogData {
         this.message = message;
     }
 
-    public String getProject() {
-        return project;
+    public List<String> getStack() {
+        return stack;
     }
 
-    public void setProject(String project) {
-        this.project = project;
+    public void setStack(List<String> stack) {
+        this.stack = stack;
     }
 
-    public String getSource() {
-        return source;
+    public String getArgs() {
+        return args;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setArgs(String args) {
+        this.args = args;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
 }
