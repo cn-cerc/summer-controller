@@ -53,11 +53,11 @@ public class JayunLogData {
         id = locationInfo.getClassName();
         line = Integer.parseInt(locationInfo.getLineNumber());
         if (event.getLevel() == Level.ERROR)
-            level = "error";
+            level = Error;
         else if (event.getLevel() == Level.WARN)
-            level = "warn";
+            level = Warn;
         else
-            level = "info";
+            level = Info;
         message = event.getRenderedMessage();
         ThrowableInformation throwableInfo = event.getThrowableInformation();
         if (throwableInfo == null)
