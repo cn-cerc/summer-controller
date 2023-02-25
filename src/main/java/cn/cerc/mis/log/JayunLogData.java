@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
@@ -48,8 +49,9 @@ public class JayunLogData {
     }
 
     public JayunLogData(LoggingEvent event) {
-        id = event.categoryName;
-        line = Integer.parseInt(event.getLocationInformation().getLineNumber());
+        LocationInfo locationInfo = event.getLocationInformation();
+        id = locationInfo.getClassName();
+        line = Integer.parseInt(locationInfo.getLineNumber());
         if (event.getLevel() == Level.ERROR)
             level = "error";
         else if (event.getLevel() == Level.WARN)
@@ -57,11 +59,11 @@ public class JayunLogData {
         else
             level = "info";
         message = event.getRenderedMessage();
-        ThrowableInformation throwableInformation = event.getThrowableInformation();
-        if (throwableInformation == null)
+        ThrowableInformation throwableInfo = event.getThrowableInformation();
+        if (throwableInfo == null)
             stack = null;
         else
-            stack = Arrays.asList(throwableInformation.getThrowableStrRep());
+            stack = Arrays.asList(throwableInfo.getThrowableStrRep());
         timestamp = event.getTimeStamp();
     }
 
