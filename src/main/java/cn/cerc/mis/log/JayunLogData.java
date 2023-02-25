@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
+import org.apache.log4j.spi.ThrowableInformation;
 
 public class JayunLogData {
     public static final String Info = "info";
@@ -38,7 +39,6 @@ public class JayunLogData {
      * 参数
      */
     private String args;
-
     /**
      * 创建时间
      */
@@ -57,7 +57,11 @@ public class JayunLogData {
         else
             level = "info";
         message = event.getRenderedMessage();
-        stack = Arrays.asList(event.getThrowableInformation().getThrowableStrRep());
+        ThrowableInformation throwableInformation = event.getThrowableInformation();
+        if (throwableInformation == null)
+            stack = null;
+        else
+            stack = Arrays.asList(throwableInformation.getThrowableStrRep());
         timestamp = event.getTimeStamp();
     }
 
