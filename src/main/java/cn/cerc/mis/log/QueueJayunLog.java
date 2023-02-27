@@ -30,13 +30,12 @@ public class QueueJayunLog extends AbstractQueue {
         // 本地开发不发送日志到测试平台
         if (ServerConfig.isServerDevelop())
             return true;
-        String site = ZkNode.get().getNodeValue(key("api-log"), () -> "");
+        String site = ZkNode.get().getNodeValue(key("log"), () -> "");
         if (Utils.isEmpty(site))
             return true;
         JayunLogData data = new Gson().fromJson(message, JayunLogData.class);
         String token = ZkNode.get()
-                .getNodeValue(String.format("%s/%s/log/%s", QueueJayunLog.prefix, data.getProject(), data.getLevel()),
-                        () -> "");
+                .getNodeValue(key(String.format("%s/log/%s", data.getProject(), data.getLevel())), () -> "");
         if (Utils.isEmpty(token))
             return true;
         data.setToken(token);
