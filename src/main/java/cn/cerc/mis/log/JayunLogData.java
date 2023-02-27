@@ -13,7 +13,11 @@ public class JayunLogData {
     public static final String Warn = "warn";
     public static final String Error = "error";
     /**
-     * token
+     * 项目
+     */
+    private String project;
+    /**
+     * 授权码
      */
     private String token;
     /**
@@ -67,12 +71,12 @@ public class JayunLogData {
         timestamp = event.getTimeStamp();
     }
 
-    public String getToken() {
-        return token;
+    public String getProject() {
+        return project;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setProject(String project) {
+        this.project = project;
     }
 
     public String getId() {
@@ -129,6 +133,14 @@ public class JayunLogData {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }
