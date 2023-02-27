@@ -47,7 +47,7 @@ public class JayunLogData {
     /**
      * 创建时间
      */
-    private Long timestamp;
+    private long timestamp;
 
     public JayunLogData() {
     }
@@ -127,11 +127,11 @@ public class JayunLogData {
         this.args = args;
     }
 
-    public Long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
