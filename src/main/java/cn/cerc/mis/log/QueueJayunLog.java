@@ -39,6 +39,7 @@ public class QueueJayunLog extends AbstractQueue {
         if (Utils.isEmpty(token))
             return true;
         data.setToken(token);
+        message = new Gson().toJson(data);
         try {
             Curl curl = new Curl();
             curl.doPost(site, message);
