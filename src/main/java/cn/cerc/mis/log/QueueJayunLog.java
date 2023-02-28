@@ -4,17 +4,18 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 
+import cn.cerc.db.SummerDB;
+import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
-import cn.cerc.db.zk.ZkNode;
 
 @Component
 public class QueueJayunLog extends AbstractQueue {
-
-    public static final String prefix = "/jayun-test";
+    private static final ClassConfig config = new ClassConfig(ServerConfig.class, SummerDB.ID);
+    public static final String prefix = "jayun";
 
     public QueueJayunLog() {
         super();
@@ -30,12 +31,11 @@ public class QueueJayunLog extends AbstractQueue {
         // 本地开发不发送日志到测试平台
         if (ServerConfig.isServerDevelop())
             return true;
-        String site = ZkNode.get().getNodeValue(key("log"), () -> "");
+        String site = config.getString(key("api.log.site"), "");
         if (Utils.isEmpty(site))
             return true;
         JayunLogData data = new Gson().fromJson(message, JayunLogData.class);
-        String token = ZkNode.get()
-                .getNodeValue(key(String.format("%s/log/%s", data.getProject(), data.getLevel())), () -> "");
+        String token = config.getString(key(String.format("%s.log.%s.token", data.getProject(), data.getLevel())), "");
         if (Utils.isEmpty(token))
             return true;
         data.setToken(token);
@@ -50,7 +50,7 @@ public class QueueJayunLog extends AbstractQueue {
     }
 
     public static String key(String key) {
-        return String.format("%s/%s", prefix, key);
+        return String.format("%s.%s", prefix, key);
     }
 
 }
