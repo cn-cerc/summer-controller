@@ -41,10 +41,6 @@ public class SystemBuffer {
          */
         ErrorUrl,
         /**
-         * 超时
-         */
-        Timeout,
-        /**
          * 超时服务
          */
         ServiceTimeout,
@@ -75,7 +71,11 @@ public class SystemBuffer {
         /**
          * 菜单测试报告
          */
-        QCMenuReport;
+        QCMenuReport,
+        /**
+         * 超时
+         */
+        Timeout;
 
         @Override
         public int getStartingPoint() {
