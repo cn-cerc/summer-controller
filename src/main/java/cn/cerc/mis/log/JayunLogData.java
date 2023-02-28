@@ -54,21 +54,21 @@ public class JayunLogData {
 
     public JayunLogData(LoggingEvent event) {
         LocationInfo locationInfo = event.getLocationInformation();
-        id = locationInfo.getClassName();
-        line = Integer.parseInt(locationInfo.getLineNumber());
+        this.id = locationInfo.getClassName();
+        this.line = Integer.parseInt(locationInfo.getLineNumber());
         if (event.getLevel() == Level.ERROR)
-            level = Error;
+            this.level = Error;
         else if (event.getLevel() == Level.WARN)
-            level = Warn;
+            this.level = Warn;
         else
-            level = Info;
-        message = event.getRenderedMessage();
+            this.level = Info;
+        this.message = event.getRenderedMessage();
         ThrowableInformation throwableInfo = event.getThrowableInformation();
         if (throwableInfo == null)
-            stack = null;
+            this.stack = null;
         else
-            stack = Arrays.asList(throwableInfo.getThrowableStrRep());
-        timestamp = event.getTimeStamp();
+            this.stack = Arrays.asList(throwableInfo.getThrowableStrRep());
+        this.timestamp = event.getTimeStamp();
     }
 
     public String getProject() {
