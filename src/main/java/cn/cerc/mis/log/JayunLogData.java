@@ -9,9 +9,9 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
 public class JayunLogData {
-    public static final String Info = "info";
-    public static final String Warn = "warn";
-    public static final String Error = "error";
+    public static String info = "info";
+    public static String warn = "warn";
+    public static String error = "error";
     /**
      * 项目
      */
@@ -57,11 +57,11 @@ public class JayunLogData {
         this.id = locationInfo.getClassName();
         this.line = Integer.parseInt(locationInfo.getLineNumber());
         if (event.getLevel() == Level.ERROR)
-            this.level = Error;
+            this.level = error;
         else if (event.getLevel() == Level.WARN)
-            this.level = Warn;
+            this.level = warn;
         else
-            this.level = Info;
+            this.level = info;
         this.message = event.getRenderedMessage();
         ThrowableInformation throwableInfo = event.getThrowableInformation();
         if (throwableInfo == null)
@@ -72,7 +72,7 @@ public class JayunLogData {
     }
 
     public String getProject() {
-        return project;
+        return this.project;
     }
 
     public void setProject(String project) {
@@ -80,7 +80,7 @@ public class JayunLogData {
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -88,7 +88,7 @@ public class JayunLogData {
     }
 
     public int getLine() {
-        return line;
+        return this.line;
     }
 
     public void setLine(int line) {
@@ -96,7 +96,7 @@ public class JayunLogData {
     }
 
     public String getLevel() {
-        return level;
+        return this.level;
     }
 
     public void setLevel(String level) {
@@ -104,7 +104,7 @@ public class JayunLogData {
     }
 
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
     public void setMessage(String message) {
@@ -112,7 +112,7 @@ public class JayunLogData {
     }
 
     public List<String> getStack() {
-        return stack;
+        return this.stack;
     }
 
     public void setStack(List<String> stack) {
@@ -120,7 +120,7 @@ public class JayunLogData {
     }
 
     public String getArgs() {
-        return args;
+        return this.args;
     }
 
     public void setArgs(String args) {
