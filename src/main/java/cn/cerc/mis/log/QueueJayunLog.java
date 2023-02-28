@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 
-import cn.cerc.db.SummerDB;
 import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.ServerConfig;
@@ -14,7 +13,7 @@ import cn.cerc.db.queue.QueueServiceEnum;
 
 @Component
 public class QueueJayunLog extends AbstractQueue {
-    private static final ClassConfig config = new ClassConfig(ServerConfig.class, SummerDB.ID);
+    private static final ClassConfig config = new ClassConfig();
     public static final String prefix = "jayun";
 
     public QueueJayunLog() {
