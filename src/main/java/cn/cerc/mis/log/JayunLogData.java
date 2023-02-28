@@ -1,40 +1,105 @@
 package cn.cerc.mis.log;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.log4j.Level;
+import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
+import org.apache.log4j.spi.ThrowableInformation;
 
 public class JayunLogData {
-    public static final int Info = 0;
-    public static final int Warn = 1;
-    public static final int Error = 2;
-
+    public static final String Info = "info";
+    public static final String Warn = "warn";
+    public static final String Error = "error";
+    /**
+     * 项目
+     */
     private String project;
-    private String source;
-    private long timestamp;
+    /**
+     * 授权码
+     */
+    private String token;
+    /**
+     * 类名+行号
+     */
+    private String id;
+    /**
+     * 行号
+     */
+    private int line;
+    /**
+     * 日志等级 (info\warn\error)
+     */
+    private String level;
+    /**
+     * 报错信息
+     */
     private String message;
-    private int level = JayunLogData.Info;
+    /**
+     * 堆栈信息
+     */
+    private List<String> stack;
+    /**
+     * 参数
+     */
+    private String args;
+    /**
+     * 创建时间
+     */
+    private long timestamp;
 
     public JayunLogData() {
-
     }
 
     public JayunLogData(LoggingEvent event) {
-        this.source = event.getLoggerName();
-        this.timestamp = event.getTimeStamp();
-        this.message = event.getRenderedMessage();
-        if (event.getLevel() == Level.WARN)
-            this.level = JayunLogData.Warn;
-        else if (event.getLevel() == Level.ERROR)
-            this.level = JayunLogData.Error;
+        LocationInfo locationInfo = event.getLocationInformation();
+        id = locationInfo.getClassName();
+        line = Integer.parseInt(locationInfo.getLineNumber());
+        if (event.getLevel() == Level.ERROR)
+            level = Error;
+        else if (event.getLevel() == Level.WARN)
+            level = Warn;
         else
-            this.level = JayunLogData.Info;
+            level = Info;
+        message = event.getRenderedMessage();
+        ThrowableInformation throwableInfo = event.getThrowableInformation();
+        if (throwableInfo == null)
+            stack = null;
+        else
+            stack = Arrays.asList(throwableInfo.getThrowableStrRep());
+        timestamp = event.getTimeStamp();
     }
 
-    public int getLevel() {
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+    }
+
+    public String getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(String level) {
         this.level = level;
     }
 
@@ -46,20 +111,20 @@ public class JayunLogData {
         this.message = message;
     }
 
-    public String getProject() {
-        return project;
+    public List<String> getStack() {
+        return stack;
     }
 
-    public void setProject(String project) {
-        this.project = project;
+    public void setStack(List<String> stack) {
+        this.stack = stack;
     }
 
-    public String getSource() {
-        return source;
+    public String getArgs() {
+        return args;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setArgs(String args) {
+        this.args = args;
     }
 
     public long getTimestamp() {
@@ -69,4 +134,13 @@ public class JayunLogData {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
 }

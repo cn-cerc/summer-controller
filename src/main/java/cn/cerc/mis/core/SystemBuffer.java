@@ -40,7 +40,10 @@ public class SystemBuffer {
          * 错误网址
          */
         ErrorUrl,
-
+        /**
+         * 超时
+         */
+        Timeout,
         /**
          * 超时服务
          */
