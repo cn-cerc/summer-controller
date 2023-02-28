@@ -14,7 +14,7 @@ import cn.cerc.db.queue.QueueServiceEnum;
 @Component
 public class QueueJayunLog extends AbstractQueue {
     private static final ClassConfig config = new ClassConfig();
-    public static final String prefix = "jayun";
+    public static final String prefix = "qc";
 
     public QueueJayunLog() {
         super();
