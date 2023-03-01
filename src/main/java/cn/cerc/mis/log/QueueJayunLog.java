@@ -37,7 +37,7 @@ public class QueueJayunLog extends AbstractQueue {
         if (Utils.isEmpty(site))
             return true;
         JayunLogData data = new Gson().fromJson(message, JayunLogData.class);
-        String token = config.getString(key(String.format("%s.log.%s.token", data.getProject(), data.getLevel())), "");
+        String token = config.getString(key(String.format("%s.log.token", data.getProject())), "");
         if (Utils.isEmpty(token)) {
             log.warn("项目 {} 获取日志等级 {} token为空", data.getProject(), data.getLevel());
             return true;
