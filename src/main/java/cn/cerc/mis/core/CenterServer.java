@@ -23,4 +23,9 @@ public class CenterServer implements ServiceServerImpl {
         return null;
     }
 
+    @Override
+    public void setToken(String token) {
+        throw new RuntimeException("此服务不支持设置token");
+    }
+
 }

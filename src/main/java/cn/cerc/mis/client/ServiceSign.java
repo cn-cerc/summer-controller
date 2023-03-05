@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
@@ -81,17 +83,37 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @Override
-    public ServiceSign call(IHandle handle) {
-        return call(handle, new DataSet());
+    public ServiceSign callLocal(IHandle handle) {
+        return callLocal(handle, new DataSet());
     }
 
     @Override
-    public ServiceSign call(IHandle handle, DataRow headIn) {
+    public ServiceSign callLocal(IHandle handle, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
-        return call(handle, dataIn);
+        return callLocal(handle, dataIn);
     }
 
+    @Override
+    public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
+        this.setSession(handle.getSession());
+        ServiceSign sign = this.clone();
+        sign.setDataIn(dataIn);
+        DataSet dataOut = null;
+        try {
+            if (server == null)
+                dataOut = LocalService.call(this.id, handle, dataIn);
+            else
+                dataOut = server.call(this, handle, dataIn);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            dataOut = new DataSet().setMessage(e.getMessage());
+        }
+        sign.setDataOut(dataOut);
+        return sign;
+    }
+
+    
     @Override
     protected ServiceSign clone() {
         ServiceSign sign = new ServiceSign(this.id, this.server);
@@ -103,17 +125,18 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return sign;
     }
 
-    @Override
-    public ServiceSign call(IHandle handle, DataSet dataIn) {
+    public ServiceSign callRemote(IHandle handle, OriginalTokenImpl otr, DataSet dataIn) {
+        Objects.nonNull(otr);
+        if (otr instanceof IHandle temp)
+            temp.setSession(handle.getSession());
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            if (server == null)
-                dataOut = LocalService.call(this.id, handle, dataIn);
-            else
-                dataOut = server.call(this, handle, dataIn);
+            Objects.nonNull(server);
+            server.setToken(otr.getToken());
+            dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());

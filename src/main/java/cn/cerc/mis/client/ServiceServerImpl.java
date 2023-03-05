@@ -18,6 +18,8 @@ public interface ServiceServerImpl {
     String getRequestUrl(IHandle handle, String service);
 
     String getToken(IHandle handle);
+    
+    void setToken(String token);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
         String url = this.getRequestUrl(handle, service.id());
