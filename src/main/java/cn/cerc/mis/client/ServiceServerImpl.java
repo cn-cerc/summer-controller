@@ -9,6 +9,7 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.queue.TokenConfigImpl;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
@@ -17,9 +18,9 @@ public interface ServiceServerImpl {
 
     String getRequestUrl(IHandle handle, String service);
 
-    String getToken(IHandle handle);
+    void setConfig(TokenConfigImpl token);
     
-    void setToken(String token);
+    TokenConfigImpl getConfig(IHandle handle);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
         String url = this.getRequestUrl(handle, service.id());
@@ -33,7 +34,7 @@ public interface ServiceServerImpl {
         String url = this.getRequestUrl(handle, service.id());
         try {
             Curl curl = new Curl();
-            String token = this.getToken(handle);
+            String token = this.getConfig(handle).getToken();
             if (token != null)
                 curl.put(ISession.TOKEN, token);
             curl.put("dataIn", dataIn.json());

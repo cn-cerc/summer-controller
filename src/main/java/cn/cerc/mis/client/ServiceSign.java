@@ -23,7 +23,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.OriginalTokenImpl;
+import cn.cerc.db.queue.TokenConfigImpl;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
@@ -113,7 +113,6 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return sign;
     }
 
-    
     @Override
     protected ServiceSign clone() {
         ServiceSign sign = new ServiceSign(this.id, this.server);
@@ -125,17 +124,15 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return sign;
     }
 
-    public ServiceSign callRemote(IHandle handle, OriginalTokenImpl otr, DataSet dataIn) {
-        Objects.nonNull(otr);
-        if (otr instanceof IHandle temp)
-            temp.setSession(handle.getSession());
+    public ServiceSign callRemote(IHandle handle, TokenConfigImpl config, DataSet dataIn) {
+        Objects.nonNull(config);
+        config.setSession(handle.getSession());
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
             Objects.nonNull(server);
-            server.setToken(otr.getToken());
             dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();

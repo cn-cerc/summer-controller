@@ -9,8 +9,8 @@ import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.AbstractQueue;
-import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.db.queue.QueueServiceEnum;
+import cn.cerc.db.queue.TokenConfigImpl;
 
 @Deprecated
 public abstract class AbstractDataRowQueue extends AbstractQueue {
@@ -37,15 +37,14 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         return super.push(dataRow.json());
     }
 
-    protected String pushToRemote(IHandle handle, OriginalTokenImpl originalToken, DataRow dataRow) {
-        Objects.requireNonNull(originalToken);
-        if (originalToken instanceof IHandle temp)
-            temp.setSession(handle.getSession());
-        if(originalToken.getToken().equals(handle.getSession().getToken()))
+    protected String pushToRemote(IHandle handle, TokenConfigImpl config, DataRow dataRow) {
+        Objects.requireNonNull(config);
+        config.setSession(handle.getSession());
+        if (config.getToken().equals(handle.getSession().getToken()))
             throw new RuntimeException("远程token不得与当前token一致");
-        
-        this.setOriginal(originalToken.getOriginal());
-        dataRow.setValue("token", originalToken.getToken());
+        if (config.getOriginal() != null)
+            this.setOriginal(config.getOriginal());
+        dataRow.setValue("token", config.getToken());
 
         if (!dataRow.has("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());

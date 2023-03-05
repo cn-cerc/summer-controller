@@ -11,8 +11,8 @@ import com.google.gson.Gson;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
-import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.db.queue.QueueServiceEnum;
+import cn.cerc.db.queue.TokenConfigImpl;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
@@ -35,15 +35,15 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
         return super.push(new Gson().toJson(data));
     }
 
-    public String appendToRemote(IHandle handle, OriginalTokenImpl originalToken, T data) {
-        Objects.requireNonNull(originalToken);
-        if (originalToken instanceof IHandle temp)
-            temp.setSession(handle.getSession());
-        if (originalToken.getToken().equals(handle.getSession().getToken()))
+    public String appendToRemote(IHandle handle, TokenConfigImpl config, T data) {
+        Objects.requireNonNull(config);
+        config.setSession(handle.getSession());
+        if (config.getToken().equals(handle.getSession().getToken()))
             throw new RuntimeException("远程token不得与当前token一致");
 
-        this.setOriginal(originalToken.getOriginal());
-        data.setToken(originalToken.getToken());
+        if (config.getOriginal() != null)
+            this.setOriginal(config.getOriginal());
+        data.setToken(config.getToken());
         if (!data.validate())
             throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
         return super.push(new Gson().toJson(data));
