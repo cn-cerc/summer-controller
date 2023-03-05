@@ -1,6 +1,7 @@
 package cn.cerc.mis.queue;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,27 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
 
     @Deprecated
     public String append(IHandle handle, T data) {
-        return this.append(handle, null, data);
+        return this.appendToLocal(handle, data);
     }
 
-    public String append(IHandle handle, OriginalTokenImpl originalToken, T data) {
-        if (originalToken != null) {
-            this.setOriginal(originalToken.getOriginal());
-            data.setToken(originalToken.getToken());
-        } else if (Utils.isEmpty(data.getToken()))
+    // Local 不需要传递 token，直接使用当前handle的令牌
+    public String appendToLocal(IHandle handle, T data) {
+        if (!Utils.isEmpty(data.getToken()))
+            log.warn("{}.appendToLocal 代码编写不符合规范，请予改进", this.getClass().getName());
+        else
             data.setToken(handle.getSession().getToken());
+        if (!data.validate())
+            throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
+        return super.push(new Gson().toJson(data));
+    }
+
+    public String appendToRemote(IHandle handle, OriginalTokenImpl originalToken, T data) {
+        Objects.requireNonNull(originalToken);
+        if(originalToken.getToken().equals(handle.getSession().getToken()))
+            throw new RuntimeException("远程token不得与当前token一致");
+        
+        this.setOriginal(originalToken.getOriginal());
+        data.setToken(originalToken.getToken());
         if (!data.validate())
             throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
         return super.push(new Gson().toJson(data));

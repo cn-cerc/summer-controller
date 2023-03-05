@@ -1,5 +1,10 @@
 package cn.cerc.mis.queue;
 
+import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
@@ -8,19 +13,37 @@ import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.db.queue.QueueServiceEnum;
 
 public abstract class AbstractDataRowQueue extends AbstractQueue {
+    private static final Logger log = LoggerFactory.getLogger(AbstractDataRowQueue.class);
+
     /**
      * 生产者投放消息
      */
+    @Deprecated
     protected String push(IHandle handle, DataRow dataRow) {
-        return push(handle, null, dataRow);
+        return pushToLocal(handle, dataRow);
     }
 
-    protected String push(IHandle handle, OriginalTokenImpl originalToken, DataRow dataRow) {
-        if (originalToken != null) {
-            this.setOriginal(originalToken.getOriginal());
-            dataRow.setValue("token", originalToken.getToken());
-        } else
+    // Local 不需要传递 token，直接使用当前handle的令牌
+    protected String pushToLocal(IHandle handle, DataRow dataRow) {
+        if (dataRow.has("token"))
+            log.warn("{}.appendToLocal 代码编写不符合规范，请予改进", this.getClass().getName());
+        else
             dataRow.setValue("token", handle.getSession().getToken());
+        if (!dataRow.has("corp_no_"))
+            dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
+        if (!dataRow.has("user_code_"))
+            dataRow.setValue("user_code_", handle.getSession().getUserCode());
+        return super.push(dataRow.json());
+    }
+
+    protected String pushToRemote(IHandle handle, OriginalTokenImpl originalToken, DataRow dataRow) {
+        Objects.requireNonNull(originalToken);
+        if(originalToken.getToken().equals(handle.getSession().getToken()))
+            throw new RuntimeException("远程token不得与当前token一致");
+        
+        this.setOriginal(originalToken.getOriginal());
+        dataRow.setValue("token", originalToken.getToken());
+
         if (!dataRow.has("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
         if (!dataRow.has("user_code_"))
