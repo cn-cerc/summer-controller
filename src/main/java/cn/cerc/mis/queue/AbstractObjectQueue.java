@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
+import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.db.queue.QueueServiceEnum;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
@@ -17,8 +18,16 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
 
     public abstract Class<T> getClazz();
 
+    @Deprecated
     public String append(IHandle handle, T data) {
-        if (Utils.isEmpty(data.getToken()))
+        return this.append(handle, null, data);
+    }
+
+    public String append(IHandle handle, OriginalTokenImpl originalToken, T data) {
+        if (originalToken != null) {
+            this.setOriginal(originalToken.getOriginal());
+            data.setToken(originalToken.getToken());
+        } else if (Utils.isEmpty(data.getToken()))
             data.setToken(handle.getSession().getToken());
         if (!data.validate())
             throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));

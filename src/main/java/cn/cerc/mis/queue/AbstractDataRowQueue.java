@@ -4,6 +4,7 @@ import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.AbstractQueue;
+import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.db.queue.QueueServiceEnum;
 
 public abstract class AbstractDataRowQueue extends AbstractQueue {
@@ -11,7 +12,15 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
      * 生产者投放消息
      */
     protected String push(IHandle handle, DataRow dataRow) {
-        dataRow.setValue("token", handle.getSession().getToken());
+        return push(handle, null, dataRow);
+    }
+
+    protected String push(IHandle handle, OriginalTokenImpl originalToken, DataRow dataRow) {
+        if (originalToken != null) {
+            this.setOriginal(originalToken.getOriginal());
+            dataRow.setValue("token", originalToken.getToken());
+        } else
+            dataRow.setValue("token", handle.getSession().getToken());
         if (!dataRow.has("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
         if (!dataRow.has("user_code_"))
