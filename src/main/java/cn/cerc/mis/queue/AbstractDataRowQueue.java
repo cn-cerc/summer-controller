@@ -40,15 +40,12 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     protected String pushToRemote(IHandle handle, TokenConfigImpl config, DataRow dataRow) {
         Objects.requireNonNull(config);
         config.setSession(handle.getSession());
-        var original = config.getOriginal().orElse(null);
-        if (original != null)
-            this.setOriginal(original);
-        var token = config.getToken().orElse(null);
-        if (token != null) {
+        config.getOriginal().ifPresent(value -> this.setOriginal(value));
+        config.getToken().ifPresent(token -> {
             if (token.equals(handle.getSession().getToken()))
                 throw new RuntimeException("远程token不得与当前token一致");
             dataRow.setValue("token", token);
-        }
+        });
         if (!dataRow.has("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
         if (!dataRow.has("user_code_"))

@@ -35,11 +35,8 @@ public interface ServiceServerImpl {
         try {
             Curl curl = new Curl();
             var config = this.getConfig(handle);
-            if (config != null) {
-                String token = this.getConfig(handle).getToken().orElse(null);
-                if (token != null)
-                    curl.put(ISession.TOKEN, token);
-            }
+            if (config != null)
+                this.getConfig(handle).getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
             curl.put("dataIn", dataIn.json());
             log.debug("request url: {}", url);
             log.debug("request params: {}", curl.getParameters());
