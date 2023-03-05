@@ -1,6 +1,7 @@
 package cn.cerc.mis.client;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
@@ -26,6 +27,14 @@ public class ServiceProxy implements IHandle {
     public final boolean isFail() {
         Objects.requireNonNull(dataOut);
         return dataOut.state() <= 0;
+    }
+
+    public final boolean isFail(Consumer<String> action) {
+        Objects.requireNonNull(dataOut);
+        boolean result = dataOut.state() <= 0;
+        if (action != null)
+            action.accept(dataOut.message());
+        return result;
     }
 
     public final DataSet getDataOutElseThrow() throws ServiceExecuteException {
