@@ -18,6 +18,14 @@ public class ServiceProxy implements IHandle {
         return dataOut.state() > 0;
     }
 
+    public boolean isOkElse(Consumer<String> action) {
+        if (isOk())
+            return true;
+        if (action != null)
+            action.accept(dataOut.message());
+        return false;
+    }
+
     public final boolean isOkElseThrow() throws ServiceExecuteException {
         if (!isOk())
             throw new ServiceExecuteException(dataOut.message());
