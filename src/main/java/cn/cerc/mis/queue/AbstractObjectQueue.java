@@ -37,9 +37,11 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
 
     public String appendToRemote(IHandle handle, OriginalTokenImpl originalToken, T data) {
         Objects.requireNonNull(originalToken);
-        if(originalToken.getToken().equals(handle.getSession().getToken()))
+        if (originalToken instanceof IHandle temp)
+            temp.setSession(handle.getSession());
+        if (originalToken.getToken().equals(handle.getSession().getToken()))
             throw new RuntimeException("远程token不得与当前token一致");
-        
+
         this.setOriginal(originalToken.getOriginal());
         data.setToken(originalToken.getToken());
         if (!data.validate())

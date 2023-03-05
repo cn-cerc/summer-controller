@@ -38,6 +38,8 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
 
     protected String pushToRemote(IHandle handle, OriginalTokenImpl originalToken, DataRow dataRow) {
         Objects.requireNonNull(originalToken);
+        if (originalToken instanceof IHandle temp)
+            temp.setSession(handle.getSession());
         if(originalToken.getToken().equals(handle.getSession().getToken()))
             throw new RuntimeException("远程token不得与当前token一致");
         
