@@ -12,6 +12,7 @@ import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.OriginalTokenImpl;
 import cn.cerc.db.queue.QueueServiceEnum;
 
+@Deprecated
 public abstract class AbstractDataRowQueue extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractDataRowQueue.class);
 
