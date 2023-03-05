@@ -1,7 +1,6 @@
 package cn.cerc.mis.client;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +36,9 @@ public interface ServiceServerImpl {
             Curl curl = new Curl();
             var config = this.getConfig(handle);
             if (config != null) {
-                Optional<String> token = this.getConfig(handle).getToken();
-                if (token.isPresent())
-                    curl.put(ISession.TOKEN, token.get());
+                String token = this.getConfig(handle).getToken().orElse(null);
+                if (token != null)
+                    curl.put(ISession.TOKEN, token);
             }
             curl.put("dataIn", dataIn.json());
             log.debug("request url: {}", url);
