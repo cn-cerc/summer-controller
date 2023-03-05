@@ -38,12 +38,15 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
     public String appendToRemote(IHandle handle, TokenConfigImpl config, T data) {
         Objects.requireNonNull(config);
         config.setSession(handle.getSession());
-        if (config.getToken().equals(handle.getSession().getToken()))
-            throw new RuntimeException("远程token不得与当前token一致");
-
-        if (config.getOriginal() != null)
-            this.setOriginal(config.getOriginal());
-        data.setToken(config.getToken());
+        var original = config.getOriginal().orElse(null);
+        if (original != null)
+            this.setOriginal(original);
+        var token = config.getToken().orElse(null);
+        if (token != null) {
+            if (token.equals(handle.getSession().getToken()))
+                throw new RuntimeException("远程token不得与当前token一致");
+            data.setToken(token);
+        }
         if (!data.validate())
             throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
         return super.push(new Gson().toJson(data));

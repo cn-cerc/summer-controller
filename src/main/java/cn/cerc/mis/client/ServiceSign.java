@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Description;
 
 import cn.cerc.db.core.DataRow;
@@ -32,6 +34,7 @@ import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
+    private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
     private final String id;
     private int version;
     private Set<String> properties;
@@ -83,18 +86,6 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @Override
-    public ServiceSign callLocal(IHandle handle) {
-        return callLocal(handle, new DataSet());
-    }
-
-    @Override
-    public ServiceSign callLocal(IHandle handle, DataRow headIn) {
-        DataSet dataIn = new DataSet();
-        dataIn.head().copyValues(headIn);
-        return callLocal(handle, dataIn);
-    }
-
-    @Override
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
@@ -103,8 +94,10 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         try {
             if (server == null)
                 dataOut = LocalService.call(this.id, handle, dataIn);
-            else
+            else {
+                log.warn("请改使用callRemote调用: {}", this.id);
                 dataOut = server.call(this, handle, dataIn);
+            }
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
@@ -124,15 +117,16 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return sign;
     }
 
+    @Override
     public ServiceSign callRemote(IHandle handle, TokenConfigImpl config, DataSet dataIn) {
-        Objects.nonNull(config);
+        Objects.requireNonNull(config);
         config.setSession(handle.getSession());
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            Objects.nonNull(server);
+            Objects.requireNonNull(server);
             dataOut = server.call(this, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
@@ -260,7 +254,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             String[] fields = entityKey.fields();
             for (int i = site; i < fields.length; i++)
                 headIn.setValue(fields[i], values[i - site]);
-            DataSet dataOut = this.call(handle, dataIn).dataOut();
+            DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
             if (dataOut.state() == ServiceState.OK)
                 return Optional.of(dataOut.current().asEntity(clazz));
             return Optional.empty();
@@ -284,7 +278,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                 for (int i = site; i < fields.length; i++)
                     headIn.setValue(fields[i], values[i - site]);
             }
-            DataSet dataOut = this.call(handle, dataIn).dataOut();
+            DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
             if (dataOut.state() != ServiceState.OK)
                 return set;
 
