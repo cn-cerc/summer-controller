@@ -121,6 +121,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     public ServiceSign callRemote(IHandle handle, TokenConfigImpl config, DataSet dataIn) {
         Objects.requireNonNull(config);
         config.setSession(handle.getSession());
+        server.setConfig(config);
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
