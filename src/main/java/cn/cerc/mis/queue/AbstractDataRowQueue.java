@@ -10,7 +10,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
-import cn.cerc.db.queue.TokenConfigImpl;
+import cn.cerc.mis.client.TokenConfigImpl;
 
 @Deprecated
 public abstract class AbstractDataRowQueue extends AbstractQueue {

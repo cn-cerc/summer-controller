@@ -9,7 +9,6 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.queue.TokenConfigImpl;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 

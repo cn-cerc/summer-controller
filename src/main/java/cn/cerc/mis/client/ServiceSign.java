@@ -25,7 +25,6 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.TokenConfigImpl;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
@@ -118,17 +117,20 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @Override
-    public ServiceSign callRemote(IHandle handle, TokenConfigImpl config, DataSet dataIn) {
+    public ServiceSign callRemote(TokenConfigImpl config, DataSet dataIn) {
         Objects.requireNonNull(config);
-        config.setSession(handle.getSession());
-        server.setConfig(config);
-        this.setSession(handle.getSession());
+        Objects.requireNonNull(config.getSession());
+        this.setSession(config.getSession());
+        // 优先使用RemoteTokenConfig中的Server
+        config.getServer().ifPresent(value -> this.server = value);
+        Objects.requireNonNull(this.server);
+        this.server.setConfig(config);
+        // 返回一个新的sign
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            Objects.requireNonNull(server);
-            dataOut = server.call(this, handle, dataIn);
+            dataOut = this.server.call(this, config, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
@@ -244,6 +246,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      * @param values 对应实体类的缓存key
      * @return 指定的实体对象
      */
+    @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findOne(handle, clazz, values);
@@ -265,6 +268,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     /**
      * 业务对象建议使用 asRecord
      */
+    @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
         if (this.server() == null || this.server().isLocal(handle, this))
             return EntityQuery.findMany(handle, clazz, values);

@@ -12,7 +12,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
-import cn.cerc.db.queue.TokenConfigImpl;
+import cn.cerc.mis.client.TokenConfigImpl;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);

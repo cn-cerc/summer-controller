@@ -5,7 +5,6 @@ import java.util.List;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.queue.TokenConfigImpl;
 
 public interface ServiceSignImpl {
 
@@ -38,17 +37,17 @@ public interface ServiceSignImpl {
 
     ServiceSign callLocal(IHandle handle, DataSet dataIn);
 
-    default ServiceSign callRemote(IHandle handle, TokenConfigImpl config) {
-        return callRemote(handle, config, new DataSet());
+    default ServiceSign callRemote(TokenConfigImpl config) {
+        return callRemote(config, new DataSet());
     }
 
-    default ServiceSign callRemote(IHandle handle, TokenConfigImpl config, DataRow headIn) {
+    default ServiceSign callRemote(TokenConfigImpl config, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
-        return callRemote(handle, config, dataIn);
+        return callRemote(config, dataIn);
     }
 
-    ServiceSign callRemote(IHandle handle, TokenConfigImpl config, DataSet dataIn);
+    ServiceSign callRemote(TokenConfigImpl config, DataSet dataIn);
 
     Object head();
 
