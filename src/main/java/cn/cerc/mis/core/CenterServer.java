@@ -21,13 +21,8 @@ public class CenterServer implements ServiceServerImpl {
     }
 
     @Override
-    public TokenConfigImpl getConfig(IHandle handle) {
+    public TokenConfigImpl getDefaultConfig(IHandle handle) {
         return new TokenConfig(handle, null);
-    }
-
-    @Override
-    public void setConfig(TokenConfigImpl config) {
-        throw new RuntimeException("此服务不支持配置 token");
     }
 
 }

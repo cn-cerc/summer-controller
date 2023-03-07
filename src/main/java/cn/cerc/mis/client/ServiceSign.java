@@ -124,7 +124,6 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         // 优先使用RemoteTokenConfig中的Server
         config.getServer().ifPresent(value -> this.server = value);
         Objects.requireNonNull(this.server);
-        this.server.setConfig(config);
         // 返回一个新的sign
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
