@@ -17,9 +17,7 @@ public interface ServiceServerImpl {
 
     String getRequestUrl(IHandle handle, String service);
 
-    void setConfig(TokenConfigImpl token);
-
-    TokenConfigImpl getConfig(IHandle handle);
+    TokenConfigImpl getDefaultConfig(IHandle handle);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
         String url = this.getRequestUrl(handle, service.id());
@@ -33,9 +31,9 @@ public interface ServiceServerImpl {
         String url = this.getRequestUrl(handle, service.id());
         try {
             Curl curl = new Curl();
-            var config = this.getConfig(handle);
-            if (config != null)
-                this.getConfig(handle).getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
+            TokenConfigImpl config = handle instanceof TokenConfigImpl ? (TokenConfigImpl) handle
+                    : this.getDefaultConfig(handle);
+            config.getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
             curl.put("dataIn", dataIn.json());
             log.debug("request url: {}", url);
             log.debug("request params: {}", curl.getParameters());
