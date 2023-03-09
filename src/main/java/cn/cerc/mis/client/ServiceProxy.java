@@ -40,7 +40,7 @@ public class ServiceProxy implements IHandle {
     public final boolean isFail(Consumer<String> action) {
         Objects.requireNonNull(dataOut);
         boolean result = dataOut.state() <= 0;
-        if (action != null)
+        if (result && action != null)
             action.accept(dataOut.message());
         return result;
     }
