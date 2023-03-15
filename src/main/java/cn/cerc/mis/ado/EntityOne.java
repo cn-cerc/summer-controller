@@ -106,10 +106,6 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         return entity;
     }
 
-    public String sqlText() {
-        return this.query.sqlText();
-    }
-
     public DataRow current() {
         return query.current();
     }
