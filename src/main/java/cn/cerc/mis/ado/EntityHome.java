@@ -353,4 +353,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         return this;
     }
 
+    public String sqlText() {
+        return this.query.sqlText();
+    }
+
 }
