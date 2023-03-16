@@ -11,4 +11,6 @@ public class ServiceState {
     public static final int ACCESS_DISABLED = -2;
     // 调用超时
     public static final int CALL_TIMEOUT = -3;
+    // 令牌失效
+    public static final int TOKEN_INVALID = -4;
 }
