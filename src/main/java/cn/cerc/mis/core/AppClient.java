@@ -250,6 +250,8 @@ public class AppClient implements Serializable {
      * 检查当前的token设备是否是GPS应用
      */
     public boolean isGPS() {
+        if (Utils.isEmpty(this.getPkgId()))
+            return false;
         return gps_pkg.contains(this.getPkgId());
     }
 
@@ -257,6 +259,8 @@ public class AppClient implements Serializable {
      * 检查当前的token设备是否是GPS应用
      */
     public static boolean isGPS(String pkgId) {
+        if (Utils.isEmpty(pkgId))
+            return false;
         return gps_pkg.contains(pkgId);
     }
 
