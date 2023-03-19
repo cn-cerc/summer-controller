@@ -37,7 +37,7 @@ public class ComplexColumn extends Column {
         DataRow record = this.getRecord();
         StringBuffer buff = new StringBuffer();
         for (String field : fields) {
-            if (record.has(field)) {
+            if (record.hasValue(field)) {
                 if (buff.length() > 0) {
                     buff.append(",");
                 }

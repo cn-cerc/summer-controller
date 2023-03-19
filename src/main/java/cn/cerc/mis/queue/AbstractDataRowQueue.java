@@ -26,13 +26,13 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
 
     // Local 不需要传递 token，直接使用当前handle的令牌
     protected String pushToLocal(IHandle handle, DataRow dataRow) {
-        if (dataRow.has("token"))
+        if (dataRow.hasValue("token"))
             log.warn("{}.appendToLocal 代码编写不符合规范，请予改进", this.getClass().getName());
         else
             dataRow.setValue("token", handle.getSession().getToken());
-        if (!dataRow.has("corp_no_"))
+        if (!dataRow.hasValue("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
-        if (!dataRow.has("user_code_"))
+        if (!dataRow.hasValue("user_code_"))
             dataRow.setValue("user_code_", handle.getSession().getUserCode());
         return super.push(dataRow.json());
     }
@@ -46,9 +46,9 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
                 throw new RuntimeException("远程token不得与当前token一致");
             dataRow.setValue("token", token);
         });
-        if (!dataRow.has("corp_no_"))
+        if (!dataRow.hasValue("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
-        if (!dataRow.has("user_code_"))
+        if (!dataRow.hasValue("user_code_"))
             dataRow.setValue("user_code_", handle.getSession().getUserCode());
         return super.push(dataRow.json());
     }
@@ -57,7 +57,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     public final boolean consume(String message, boolean repushOnError) {
         var data = new DataRow().setJson(message);
         try (TaskHandle handle = new TaskHandle()) {
-            if (data.has("token")) {
+            if (data.hasValue("token")) {
                 // 临时恢复token，由队列自己实现此方法，设置Redis缓存
                 this.repairToken(data.getString("token"));
                 handle.getSession().loadToken(data.getString("token"));
