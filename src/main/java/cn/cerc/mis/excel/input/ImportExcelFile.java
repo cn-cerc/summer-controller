@@ -44,7 +44,7 @@ public class ImportExcelFile {
                 } else {
                     // 文件数据
                     if (fileItem.getSize() > 0) {
-                        DataRow rs = dataSet.append().currentRow().orElseThrow();
+                        DataRow rs = dataSet.append().current();
                         rs.setValue("_FieldNo", i);
                         rs.setValue("_FieldName", fileItem.getFieldName());
                         rs.setValue("_ContentType", fileItem.getContentType());
