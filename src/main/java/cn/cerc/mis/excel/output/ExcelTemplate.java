@@ -102,7 +102,7 @@ public class ExcelTemplate {
                 row++;
                 for (int col = 0; col < columns.size(); col++) {
                     Column column = columns.get(col);
-                    column.setRecord(dataSet.current());
+                    column.setRecord(dataSet.currentRow().get());
                     // 650像素大约每一行占2.5行
                     if (changeRowHeight) {
                         sheet.setRowView(row, 650, false);

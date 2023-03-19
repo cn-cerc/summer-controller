@@ -180,10 +180,10 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             helper.onInsertPostDefault(entity);
             entity.onInsertPost(query);
             query.append();
-            query.current().loadFromEntity(entity);
+            query.currentRow().get().loadFromEntity(entity);
             query.post();
             saveHistory(query, entity, HistoryTypeEnum.INSERT);
-            query.current().saveToEntity(entity);
+            query.currentRow().get().saveToEntity(entity);
             entity.setEntityHome(this);
         } finally {
             query.setReadonly(true);
@@ -199,7 +199,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             this.insert(obj);
         else {
             save(recNo - 1, obj);
-            query.current().saveToEntity(obj);
+            query.currentRow().get().saveToEntity(obj);
         }
     }
 
@@ -225,7 +225,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             int result = 0;
             query.first();
             while (!query.eof()) {
-                T entity = this.query.current().asEntity(clazz);
+                T entity = this.query.asEntity(clazz).orElseThrow();
                 if (predicate.test(entity)) {
                     saveHistory(query, entity, HistoryTypeEnum.DELETE);
                     query.delete();
@@ -254,7 +254,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         String value = String.valueOf(idValue);
 
         // 优先判断是否为当前行
-        DataRow current = query.current();
+        DataRow current = query.currentRow().get();
         if (current != null) {
             if (current.getString(helper.idFieldCode()).equals(value))
                 return query.recNo();
@@ -283,7 +283,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();
-            query.current().loadFromEntity(entity);
+            query.currentRow().get().loadFromEntity(entity);
             saveHistory(query, entity, HistoryTypeEnum.UPDATE);
             query.post();
         } finally {
@@ -314,7 +314,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
      * @return 判断传入的entity对象，是不是当前记录
      */
     protected boolean isCurrentRow(T entity) {
-        DataRow row = query.current();
+        DataRow row = query.currentRow().get();
         if (row == null)
             return false;
 
@@ -333,7 +333,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         int recNo = this.findRecNo(entity);
         if (recNo == 0)
             throw new RuntimeException("refresh error, not find in query");
-        query.current().saveToEntity(entity);
+        query.currentRow().get().saveToEntity(entity);
     }
 
     public EntityHome<T> setJoinName(EntityHome<? extends EntityImpl> join, String codeField, String nameField) {
@@ -347,8 +347,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         query.first();
         while (query.fetch()) {
             if (entity == null)
-                entity = query.current().asEntity(this.clazz);
-            entity.onJoinName(query.current(), join.clazz, items);
+                entity = query.asEntity(this.clazz).orElseThrow();
+            entity.onJoinName(query.currentRow().get(), join.clazz, items);
         }
         return this;
     }

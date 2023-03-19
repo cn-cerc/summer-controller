@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.queue.OnStringMessage;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
@@ -59,25 +58,25 @@ public class SyncServerQueue implements ISyncServer {
             throw new RuntimeException("popTo is null");
 
         // 取出数据队列
-        String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
+//        String topic = popFrom.name().toLowerCase() + "-to-" + popTo.name().toLowerCase();
         if (Application.enableTaskService()) {
-            OnStringMessage pull = (body, repushOnError) -> {
-                if (body == null) {
-                    return true;
-                }
-                DataRow record = new DataRow();
-                record.setJson(body);
-                try {
-                    if (!popProcesser.popRecord(session, record, true)) {
-                        log.error("{} 处理失败，请检查数据源和帐套信息 {}", body);
-                        return false;
-                    }
-                    return true;
-                } catch (Exception e) {
-                    log.error(record.toString(), e);
-                    return false;
-                }
-            };
+//            OnStringMessage pull = (body, repushOnError) -> {
+//                if (body == null) {
+//                    return true;
+//                }
+//                DataRow record = new DataRow();
+//                record.setJson(body);
+//                try {
+//                    if (!popProcesser.popRecord(session, record, true)) {
+//                        log.error("{} 处理失败，请检查数据源和帐套信息 {}", body);
+//                        return false;
+//                    }
+//                    return true;
+//                } catch (Exception e) {
+//                    log.error(record.toString(), e);
+//                    return false;
+//                }
+//            };
 //            var consumer = new QueueConsumer();
 //            consumer.addConsumer(topic, QueueConfig.tag(), pull);
 //            consumer.startPush();
