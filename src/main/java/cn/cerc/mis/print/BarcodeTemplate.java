@@ -50,7 +50,7 @@ public class BarcodeTemplate extends PrintTemplate {
         dataSet.first();
         while (dataSet.fetch()) {
             // 商品名称
-            if (dataSet.currentRow().get().hasValue("Name_")) {
+            if (dataSet.current().hasValue("Name_")) {
                 document.add(new Paragraph(dataSet.getString("Name_"), f8));
             }
             // 商品条码

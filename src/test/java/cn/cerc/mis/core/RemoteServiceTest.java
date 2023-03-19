@@ -45,7 +45,7 @@ public class RemoteServiceTest {
         log.info("{}", dataOut.size());
 
         while (dataOut.fetch()) {
-            log.info("{}", dataOut.currentRow().get());
+            log.info("{}", dataOut.current());
         }
     }
 

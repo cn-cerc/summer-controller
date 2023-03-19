@@ -94,7 +94,7 @@ public class ImportExcel extends ImportExcelFile {
                 row++;
                 for (int col = 0; col < columns.size(); col++) {
                     ImportColumn column = columns.get(col);
-                    column.setRecord(dataOut.currentRow().get());
+                    column.setRecord(dataOut.current());
                     if (column instanceof ImportNumberColumn) {
                         jxl.write.Number item = new jxl.write.Number(col, row, (double) column.getValue());
                         sheet.addCell(item);
@@ -265,7 +265,7 @@ public class ImportExcel extends ImportExcelFile {
                     }
                     ds.setValue(column.getCode(), value);
                 }
-                if (readHandle != null && !readHandle.process(ds.currentRow().get())) {
+                if (readHandle != null && !readHandle.process(ds.current())) {
                     break;
                 }
             }
