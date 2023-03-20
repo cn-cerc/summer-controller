@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.db.redis.JedisFactory;
@@ -45,8 +46,7 @@ public class AppClient implements Serializable {
     public static final String wechat = "weixin";
 
     // GPS
-    public static final String android_gps = "android-gps";
-    public static final String iphone_gps = "iphone-gps";
+    public static final String gps_pkg = ServerConfig.INSTANCE.getProperty("app.gps.pkgId", "");
 
     /**
      * 类手机终端
@@ -57,9 +57,6 @@ public class AppClient implements Serializable {
         phone_devices.add(AppClient.android);
         phone_devices.add(AppClient.iphone);
         phone_devices.add(AppClient.wechat);
-
-        phone_devices.add(AppClient.android_gps);
-        phone_devices.add(AppClient.iphone_gps);
     }
 
     // 平板
@@ -82,6 +79,8 @@ public class AppClient implements Serializable {
     private String device;
 
     private String deviceId;
+
+    private String pkgId;
 
     private String language;
 
@@ -124,6 +123,12 @@ public class AppClient implements Serializable {
                     }
                 }
             }
+
+            this.pkgId = request.getParameter(ISession.PKG_ID);
+            if (!Utils.isEmpty(pkgId))
+                redis.hset(key, ISession.PKG_ID, pkgId);
+            else
+                this.pkgId = redis.hget(key, ISession.PKG_ID);
 
             this.language = request.getParameter(ISession.LANGUAGE_ID);
             if (!Utils.isEmpty(language))
@@ -225,6 +230,10 @@ public class AppClient implements Serializable {
         }
     }
 
+    public String getPkgId() {
+        return this.pkgId;
+    }
+
     public String getLanguage() {
         return this.language;
     }
@@ -241,14 +250,18 @@ public class AppClient implements Serializable {
      * 检查当前的token设备是否是GPS应用
      */
     public boolean isGPS() {
-        return android_gps.equals(this.getDevice()) || iphone_gps.equals(this.getDevice());
+        if (Utils.isEmpty(this.getPkgId()))
+            return false;
+        return gps_pkg.contains(this.getPkgId());
     }
 
     /**
      * 检查当前的token设备是否是GPS应用
      */
-    public static boolean isGPS(String device) {
-        return android_gps.equals(device) || iphone_gps.equals(device);
+    public static boolean isGPS(String pkgId) {
+        if (Utils.isEmpty(pkgId))
+            return false;
+        return gps_pkg.contains(pkgId);
     }
 
     /**
