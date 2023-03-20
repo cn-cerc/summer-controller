@@ -1,7 +1,9 @@
 package cn.cerc.mis.print;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletOutputStream;
@@ -17,9 +19,13 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.MD5;
+import cn.cerc.db.oss.OssConnection;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.core.Application;
 
 public class ExportPdf implements IHandle {
     private static final ClassResource res = new ClassResource(ExportPdf.class, SummerMIS.ID);
@@ -143,11 +149,24 @@ public class ExportPdf implements IHandle {
         document.close();
 
         // 第六步
-        response.setContentType("application/pdf");
-        response.setContentLength(pdfStream.size());
+        byte[] bytes = pdfStream.toByteArray();
 
+        String md5 = MD5.get(bytes);
+
+        String filePath = String.join("/", template.getFileName(), md5, template.getFileName().concat(".pdf"));
+        OssConnection oss = Application.getBean(OssConnection.class);
+        try (InputStream is = new ByteArrayInputStream(bytes)) {
+            oss.upload(filePath, is);
+        }
+
+//        String redirect = String.format("redirect:%s", oss.getSite() + "/" + filePath);
+        
+        String json = DataRow.of("ossPath", oss.getSite() + "/" + filePath).json();
+        response.setContentType("application/json");
         ServletOutputStream out = response.getOutputStream();
-        pdfStream.writeTo(out);
+        String result = new String(json.getBytes(), StandardCharsets.ISO_8859_1);
+        response.setContentLength(result.length());
+        out.println(result);
         out.flush();
         response.flushBuffer();
     }
