@@ -291,8 +291,7 @@ public class ImportExcel extends ImportExcelFile {
     public void readRecords(ImportRecord readHandle) throws Exception {
         this.setReadHandle(readHandle);
         DataSet ds = dataSet();
-        while (ds.fetch()) {
-            readFileData(ds.current());
-        }
+        for (var item : ds)
+            readFileData(item);
     }
 }

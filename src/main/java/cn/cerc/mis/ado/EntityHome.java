@@ -225,7 +225,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             int result = 0;
             query.first();
             while (!query.eof()) {
-                T entity = this.query.current().asEntity(clazz);
+                T entity = this.query.asEntity(clazz).orElseThrow();
                 if (predicate.test(entity)) {
                     saveHistory(query, entity, HistoryTypeEnum.DELETE);
                     query.delete();
@@ -347,7 +347,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         query.first();
         while (query.fetch()) {
             if (entity == null)
-                entity = query.current().asEntity(this.clazz);
+                entity = query.asEntity(this.clazz).orElseThrow();
             entity.onJoinName(query.current(), join.clazz, items);
         }
         return this;

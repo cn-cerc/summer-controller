@@ -97,7 +97,7 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         query.setReadonly(false);
         T entity = null;
         try {
-            entity = query.current().asEntity(clazz);
+            entity = query.asEntity(clazz).orElseThrow();
             saveHistory(query, entity, HistoryTypeEnum.DELETE);
             query.delete();
         } finally {
@@ -106,10 +106,19 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         return entity;
     }
 
+    /**
+     * 
+     * @return 请改使用 dataSet 函数
+     */
+    @Deprecated
     public DataRow current() {
         return query.current();
     }
 
+    /**
+     * 
+     * @return 返回数据实体
+     */
     public DataSet dataSet() {
         return query;
     }
