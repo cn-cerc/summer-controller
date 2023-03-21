@@ -47,6 +47,13 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         this.id = id;
     }
 
+    /**
+     * 请改用 RemoteToken 方式调用
+     * 
+     * @param id
+     * @param server
+     */
+    @Deprecated
     public ServiceSign(String id, ServiceServerImpl server) {
         super();
         this.id = id;
