@@ -26,6 +26,7 @@ public class MessageRecord extends CustomMessageData {
     private String userCode;
     private String subject;
     private StringBuilder content = new StringBuilder();
+    private StringBuilder senderContent = new StringBuilder();
     private MessageLevel level = MessageLevel.General;
     private MessageProcess process;
     private String uiClass;
@@ -72,7 +73,7 @@ public class MessageRecord extends CustomMessageData {
 
         // 返回消息的编号
         IUserMessage um = Application.getBean(handle, IUserMessage.class);
-        return um.appendRecord(sendCorpNo, userCode, level, subject, content.toString(), process, uiClass);
+        return um.appendRecord(sendCorpNo, userCode, level, subject, content.toString(), senderContent.toString(), process, uiClass);
     }
 
     public String getContent() {
@@ -90,6 +91,10 @@ public class MessageRecord extends CustomMessageData {
 
     public void append(String format, Object... args) {
         content.append(String.format(format, args));
+    }
+
+    public void appendSenderContent(String senderContent) {
+        this.senderContent.append(senderContent);
     }
 
     public MessageLevel getLevel() {

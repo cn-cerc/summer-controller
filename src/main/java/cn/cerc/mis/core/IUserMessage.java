@@ -21,17 +21,18 @@ public interface IUserMessage {
     /**
      * 增加新的消息，并返回消息编号（msgID）
      * 
-     * @param corpNo   帐套代码
-     * @param userCode 用户代码
-     * @param level    消息等级
-     * @param subject  消息标题
-     * @param content  消息内容
-     * @param process  处理进度
-     * @param UIClass  消息类别
+     * @param corpNo        帐套代码
+     * @param userCode      用户代码
+     * @param level         消息等级
+     * @param subject       消息标题
+     * @param content       消息内容
+     * @param senderContent 发送人自身看的消息内容
+     * @param process       处理进度
+     * @param UIClass       消息类别
      * @return 返回消息编号（msgID）
      */
     String appendRecord(String corpNo, String userCode, MessageLevel level, String subject, String content,
-            MessageProcess process, String UIClass);
+            String senderContent, MessageProcess process, String UIClass);
 
     /**
      * 读取待处理的任务：队列服务

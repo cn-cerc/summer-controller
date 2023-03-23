@@ -46,7 +46,7 @@ public class UserMessageDefault implements IHandle, IUserMessage {
 
     @Override
     public String appendRecord(String corpNo, String userCode, MessageLevel level, String subject, String content,
-            MessageProcess process, String UIClass) {
+            String senderContent, MessageProcess process, String UIClass) {
         // 若为异步任务消息请求
         if (level == MessageLevel.Service) {
             // 若已存在同一公司别同一种回算请求在排队或者执行中，则不重复插入回算请求
@@ -76,6 +76,10 @@ public class UserMessageDefault implements IHandle, IUserMessage {
         cdsMsg.setValue("Subject_", subject);
         if (content.length() > 0) {
             cdsMsg.setValue("Content_", content);
+        }
+
+        if (senderContent.length() > 0) {
+            cdsMsg.setValue("SenderContent_", senderContent);
         }
         cdsMsg.setValue("AppUser_", session.getUserCode());
         cdsMsg.setValue("AppDate_", new Datetime());
