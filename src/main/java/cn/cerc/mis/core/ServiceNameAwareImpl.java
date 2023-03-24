@@ -4,6 +4,6 @@ import cn.cerc.db.core.Variant;
 
 public interface ServiceNameAwareImpl {
     
-    void setServiceId(Variant service);
+    void setServiceId(Variant serviceId);
     
 }
