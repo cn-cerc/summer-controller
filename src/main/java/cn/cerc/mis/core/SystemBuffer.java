@@ -45,7 +45,7 @@ public class SystemBuffer {
          */
         ServiceTimeout,
         /**
-         * 超时页面
+         * 前台超时页面
          */
         ViewPageTimeout,
         /**
@@ -75,7 +75,11 @@ public class SystemBuffer {
         /**
          * 超时
          */
-        Timeout;
+        Timeout,
+        /**
+         * 项目错误js日志
+         */
+        ErrorJsLog;
 
         @Override
         public int getStartingPoint() {
