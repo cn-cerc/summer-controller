@@ -19,4 +19,10 @@ public @interface Submenu {
      * @return 快捷子菜单名称
      */
     String value();
+
+    /**
+     * 
+     * @return 显示次序
+     */
+    int order();
 }
