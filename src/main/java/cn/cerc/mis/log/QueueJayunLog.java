@@ -21,7 +21,7 @@ public class QueueJayunLog extends AbstractQueue {
 
     public QueueJayunLog() {
         super();
-        this.setService(QueueServiceEnum.Redis);
+        this.setService(QueueServiceEnum.RabbitMQ);
     }
 
     public String push(JayunLogData logData) {
