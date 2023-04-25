@@ -16,12 +16,14 @@ import cn.cerc.db.queue.QueueServiceEnum;
 @Component
 public class QueueJayunLog extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(QueueJayunLog.class);
+    // FIXME 如果记录INFO日志，会导致循环调用
     private static final ClassConfig config = new ClassConfig();
     public static final String prefix = "qc";
 
     public QueueJayunLog() {
         super();
         this.setService(QueueServiceEnum.RabbitMQ);
+        this.setPushMode(true);
     }
 
     public String push(JayunLogData logData) {
