@@ -1,5 +1,8 @@
 package cn.cerc.mis.log;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,6 +22,9 @@ public class QueueJayunLog extends AbstractQueue {
     // FIXME 如果记录INFO日志，会导致循环调用
     private static final ClassConfig config = new ClassConfig();
     public static final String prefix = "qc";
+
+    // 创建一个缓存线程池，在必要的时候在创建线程，若线程空闲60秒则终止该线程
+    public static final ExecutorService pool = Executors.newCachedThreadPool();
 
     public QueueJayunLog() {
         super();
@@ -45,13 +51,16 @@ public class QueueJayunLog extends AbstractQueue {
             return true;
         }
         data.setToken(token);
-        message = new Gson().toJson(data);
-        try {
-            Curl curl = new Curl();
-            curl.doPost(site, message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String json = new Gson().toJson(data);
+        pool.submit(() -> {
+            try {
+                Curl curl = new Curl();
+                String response = curl.doPost(site, json);
+                System.out.println(response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         return true;
     }
 
