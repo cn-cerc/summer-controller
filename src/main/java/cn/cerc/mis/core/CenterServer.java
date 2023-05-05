@@ -4,6 +4,8 @@ import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.client.ServiceServerImpl;
+import cn.cerc.mis.client.TokenConfig;
+import cn.cerc.mis.client.TokenConfigImpl;
 
 public class CenterServer implements ServiceServerImpl {
     private static final ClassConfig config = new ClassConfig(CenterServer.class, SummerMIS.ID);
@@ -19,8 +21,8 @@ public class CenterServer implements ServiceServerImpl {
     }
 
     @Override
-    public String getToken(IHandle handle) {
-        return null;
+    public TokenConfigImpl getDefaultConfig(IHandle handle) {
+        return new TokenConfig(handle, null);
     }
 
 }

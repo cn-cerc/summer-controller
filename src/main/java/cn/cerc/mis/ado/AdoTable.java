@@ -24,7 +24,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
         DataRow headIn = dataIn.head();
         for (Field field : this.getClass().getDeclaredFields()) {
             Search search = field.getAnnotation(Search.class);
-            if (search != null && !headIn.has(field.getName()))
+            if (search != null && !headIn.hasValue(field.getName()))
                 return new DataSet().setMessage(field.getName() + " can not be null");
         }
 
@@ -77,7 +77,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
         dataIn.head().remove("_sql_");
 
         for (FieldMeta meta : dataIn.head().getFields()) {
-            if (!headIn.has(meta.code())) {
+            if (!headIn.hasValue(meta.code())) {
                 continue;
             }
             String value = Utils.safeString(headIn.getString(meta.code())).trim();
@@ -137,7 +137,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
         for (Field field : fields) {
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
-                if (!column.nullable() && !row.has(field.getName()))
+                if (!column.nullable() && !row.hasValue(field.getName()))
                     throw new RuntimeException(field.getName() + " can not be null");
             }
         }

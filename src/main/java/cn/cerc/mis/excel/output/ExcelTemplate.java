@@ -2,6 +2,7 @@ package cn.cerc.mis.excel.output;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -11,8 +12,8 @@ import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.Datetime.DateType;
+import cn.cerc.db.core.FastDate;
 import cn.cerc.db.core.LanguageResource;
-import cn.cerc.db.core.TDate;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.mis.config.ApplicationConfig;
@@ -25,7 +26,6 @@ import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WriteException;
 
-@SuppressWarnings("deprecation")
 public class ExcelTemplate {
     private String fileName;
     private List<Column> columns;
@@ -139,7 +139,7 @@ public class ExcelTemplate {
                 Label item = new Label(col, row, value.toString());
                 sheet.addCell(item);
             } else {
-                TDate day = (TDate) column.getValue();
+                FastDate day = (FastDate) column.getValue();
                 DateTime item = new DateTime(col, row, day.asBaseDate(), new WritableCellFormat(df1));
                 sheet.addCell(item);
             }
@@ -158,6 +158,7 @@ public class ExcelTemplate {
                             imageUrl = imageUrl.substring(imageUrl.indexOf("site/") + 5);
                         }
                     }
+                    imageUrl = Utils.decode(imageUrl, StandardCharsets.UTF_8.name());
                     GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(oss.getBucket(), imageUrl);
                     // 设置失效时间
                     req.setExpiration(new Datetime().inc(DateType.Minute, 5).asBaseDate());

@@ -25,6 +25,7 @@ import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
+import cn.cerc.db.zk.ZkNode;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.ado.AdoTable;
 import cn.cerc.mis.ado.EntityQuery;
@@ -51,10 +52,10 @@ public class Application implements ApplicationContextAware {
     public static final String LoginTime = "loginTime";
     // 浏览器通用客户设备Id
     public static final String WebClient = "webclient";
-    // 图片静态路径
-    private static String staticPath;
     // 服务访问路径
-    private static String servicePath;
+    private static final String servicePath;
+    // 产品静态文件
+    public static final String productStatic;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -73,8 +74,19 @@ public class Application implements ApplicationContextAware {
 //    public static final String bookNo = ISession.CORP_NO;
 
     static {
-        staticPath = config.getString("app.static.path", "");
+        productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
         servicePath = config.getString("app.service.path", "");
+    }
+
+    // 图片静态路径
+    public static String getStaticPath() {
+        // zookeeper 路径 /diteng/main/common/cdn
+        return ZkNode.get().getNodeValue(productStatic, () -> config.getString("app.static.path", "https://cdn.diteng.site/alpha-static"));
+    }
+
+    // aui静态资源路径
+    public static String getAuiPath(String path) {
+        return config.getString("aui.path", "js/aui") + "/" + path;
     }
 
     /**
@@ -108,7 +120,6 @@ public class Application implements ApplicationContextAware {
     public static ApplicationContext initOnlyFramework() {
         if (context == null) {
             // FIXME: 自定义作用域，临时解决 request, session 问题
-
             AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
                     SummerSpringConfiguration.class);
             RequestScope scope = new RequestScope();
@@ -139,6 +150,10 @@ public class Application implements ApplicationContextAware {
     }
 
     public static <T> T getBean(Class<T> requiredType) {
+        if (context == null) {
+            log.error("context is null, getBean return null");
+            return null;
+        }
         String[] beans = context.getBeanNamesForType(requiredType);
         if (beans.length == 0)
             return null;
@@ -155,8 +170,10 @@ public class Application implements ApplicationContextAware {
                     if (!item.endsWith("Default"))
                         beanId = item;
                 }
-                if (beanId == null)
+                if (beanId == null) {
+                    log.error("getBean 执行错误：接口 {} 存在多个的实现，必须改进！", requiredType.getName());
                     beanId = beans[0];
+                }
                 return context.getBean(beanId, requiredType);
             }
         }
@@ -239,7 +256,7 @@ public class Application implements ApplicationContextAware {
             String[] params = serviceCode.split("\\.");
             // 支持指定执行函数
             if (params.length > 1)
-                function.setData(params[1]);
+                function.setValue(params[1]);
 
             String beanId = params[0];
             if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
@@ -270,10 +287,6 @@ public class Application implements ApplicationContextAware {
         }
     }
 
-    public static String getStaticPath() {
-        return staticPath;
-    }
-
     public static String getServicePath() {
         return servicePath;
     }
@@ -283,6 +296,7 @@ public class Application implements ApplicationContextAware {
         return new Handle(getSession());
     }
 
+    @Deprecated
     public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {
         ApplicationContext context = Application.getContext();
         if (context == null)
@@ -308,6 +322,12 @@ public class Application implements ApplicationContextAware {
         }
 
         return entityItems.get(table);
+    }
+
+    public static boolean enableTaskService() {
+        if (context == null)
+            return false;
+        return config.getBoolean("task.service", false);
     }
 
 }

@@ -1,7 +1,9 @@
 package cn.cerc.mis.core;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -16,8 +18,11 @@ import com.google.gson.Gson;
 
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.core.Variant;
 import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.db.redis.Redis;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
@@ -39,6 +44,21 @@ public class AppClient implements Serializable {
     public static final String android = "android";
     public static final String iphone = "iphone";
     public static final String wechat = "weixin";
+
+    // GPS
+    public static final String gps_pkg = ServerConfig.INSTANCE.getProperty("app.gps.pkgId", "");
+
+    /**
+     * 类手机终端
+     */
+    public static final List<String> phone_devices = new ArrayList<>();
+    static {
+        phone_devices.add(AppClient.phone);
+        phone_devices.add(AppClient.android);
+        phone_devices.add(AppClient.iphone);
+        phone_devices.add(AppClient.wechat);
+    }
+
     // 平板
     public static final String pad = "pad";
     // 电脑
@@ -49,7 +69,6 @@ public class AppClient implements Serializable {
     public static final String ee = "ee";
 
     private final HttpServletRequest request;
-    private final HttpServletResponse response;
 
     private String cookieId = "";
 
@@ -61,35 +80,21 @@ public class AppClient implements Serializable {
 
     private String deviceId;
 
+    private String pkgId;
+
     private String language;
 
     public AppClient(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
-        this.response = response;
 
-        Cookie[] cookies = this.request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(ISession.COOKIE_ID)) {
-                    this.cookieId = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (Utils.isEmpty(this.cookieId)) {
-            this.cookieId = Utils.getGuid();
-            if (response != null) {
-                Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
-                cookie.setPath(COOKIE_ROOT_PATH);
-                cookie.setHttpOnly(true);
-                this.response.addCookie(cookie);
-            }
-        }
+        Variant variant = new Variant();
+        AppClient.createCookie(request, response, variant);
+        this.cookieId = variant.getString();
 
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
 
-        try (Jedis redis = JedisFactory.getJedis()) {
+        Cookie[] cookies = request.getCookies();
+        try (Redis redis = new Redis()) {
             this.device = request.getParameter(ISession.CLIENT_DEVICE);
             if (!Utils.isEmpty(device))
                 redis.hset(key, ISession.CLIENT_DEVICE, device);
@@ -117,18 +122,13 @@ public class AppClient implements Serializable {
                         }
                     }
                 }
-
-//                if (Utils.isEmpty(deviceId)) {
-//                    deviceId = Utils.getGuid();
-//                    redis.hset(key, ISession.CLIENT_ID, deviceId);
-//                    if (response != null) {
-//                        Cookie cookie = new Cookie(ISession.CLIENT_ID, deviceId);
-//                        cookie.setPath(COOKIE_ROOT_PATH);
-//                        cookie.setHttpOnly(true);
-//                        this.response.addCookie(cookie);
-//                    }
-//                }
             }
+
+            this.pkgId = request.getParameter(ISession.PKG_ID);
+            if (!Utils.isEmpty(pkgId))
+                redis.hset(key, ISession.PKG_ID, pkgId);
+            else
+                this.pkgId = redis.hget(key, ISession.PKG_ID);
 
             this.language = request.getParameter(ISession.LANGUAGE_ID);
             if (!Utils.isEmpty(language))
@@ -152,10 +152,42 @@ public class AppClient implements Serializable {
     }
 
     /**
+     * 根据 request 生成 cookieId
+     */
+    public static boolean createCookie(HttpServletRequest request, HttpServletResponse response, Variant variant) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals(ISession.COOKIE_ID)) {
+                    variant.setValue(cookie.getValue());
+                    break;
+                }
+            }
+        }
+
+        if (!variant.isModified()) {
+            String cookieId = Utils.getGuid();
+            Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
+            cookie.setPath(COOKIE_ROOT_PATH);
+            cookie.setHttpOnly(true);
+            if (response != null)
+                response.addCookie(cookie);
+            variant.setValue(cookieId);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * 读取 cookie 中的 id
      */
     public String getCookieId() {
         return this.cookieId;
+    }
+
+    public String key() {
+        return this.key;
     }
 
     public String getToken() {
@@ -198,17 +230,38 @@ public class AppClient implements Serializable {
         }
     }
 
+    public String getPkgId() {
+        return this.pkgId;
+    }
+
     public String getLanguage() {
         return this.language;
     }
 
     public boolean isPhone() {
-        return phone.equals(getDevice()) || android.equals(getDevice()) || iphone.equals(getDevice())
-                || wechat.equals(getDevice());
+        return phone_devices.contains(getDevice());
     }
 
     public boolean isKanban() {
         return kanban.equals(getDevice());
+    }
+
+    /**
+     * 检查当前的token设备是否是GPS应用
+     */
+    public boolean isGPS() {
+        if (Utils.isEmpty(this.getPkgId()))
+            return false;
+        return gps_pkg.contains(this.getPkgId());
+    }
+
+    /**
+     * 检查当前的token设备是否是GPS应用
+     */
+    public static boolean isGPS(String pkgId) {
+        if (Utils.isEmpty(pkgId))
+            return false;
+        return gps_pkg.contains(pkgId);
     }
 
     /**

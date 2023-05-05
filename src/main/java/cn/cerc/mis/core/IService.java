@@ -65,6 +65,12 @@ public interface IService {
 
         // 执行具体的服务函数
         try {
+            if (this instanceof ServiceNameAwareImpl service) {
+                String key = function.key();
+                if (key != null && key.endsWith(".execute"))
+                    function.setKey(key.substring(0, key.lastIndexOf(".execute")));
+                service.setServiceId(function);
+            }
             return sm.call(this, handle, dataIn);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             Throwable err = e.getCause() != null ? e.getCause() : e;

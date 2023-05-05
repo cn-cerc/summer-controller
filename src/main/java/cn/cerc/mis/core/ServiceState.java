@@ -1,6 +1,7 @@
 package cn.cerc.mis.core;
 
 public class ServiceState {
+    // 执行成功
     public static final int OK = 1;
     // 以下为普通错误
     public static final int ERROR = 0;
@@ -10,4 +11,6 @@ public class ServiceState {
     public static final int ACCESS_DISABLED = -2;
     // 调用超时
     public static final int CALL_TIMEOUT = -3;
+    // 令牌失效
+    public static final int TOKEN_INVALID = -4;
 }

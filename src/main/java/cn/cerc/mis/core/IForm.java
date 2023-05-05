@@ -32,16 +32,16 @@ public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBean
 
     void setPathVariables(String[] pathVariables);
 
-    @Deprecated
-    default Object getProperty(String key) {
-        return getSession().getProperty(key);
-    }
+//    @Deprecated
+//    default Object getProperty(String key) {
+//        return getSession().getProperty(key);
+//    }
 
-    @Override
-    @Deprecated
-    default void setProperty(String key, Object value) {
-        getSession().setProperty(key, value);
-    }
+//    @Override
+//    @Deprecated
+//    default void setProperty(String key, Object value) {
+//        getSession().setProperty(key, value);
+//    }
 
     @Override
     HttpServletRequest getRequest();

@@ -32,27 +32,22 @@ public class SystemBuffer {
          * 在线用户
          */
         OnlineUsers,
-
         /**
          * 缓存重置
          */
         CacheReset,
-
         /**
          * 错误网址
          */
         ErrorUrl,
-
         /**
          * 超时服务
          */
         ServiceTimeout,
-
         /**
-         * 超时页面
+         * 前台超时页面
          */
         ViewPageTimeout,
-
         /**
          * 超时Frm
          */
@@ -61,16 +56,30 @@ public class SystemBuffer {
          * token
          */
         Token,
-
         /**
          * 异步服务标记位
          */
         QuartzMonitor,
-
         /**
          * 导出服务标记位
          */
-        ExportMonitor;
+        ExportMonitor,
+        /**
+         * 项目错误与警告日志
+         */
+        ErrorWarnLog,
+        /**
+         * 菜单测试报告
+         */
+        QCMenuReport,
+        /**
+         * 超时
+         */
+        Timeout,
+        /**
+         * 项目错误js日志
+         */
+        ErrorJsLog;
 
         @Override
         public int getStartingPoint() {
@@ -92,7 +101,8 @@ public class SystemBuffer {
         DeviceInfo,
         SessionBase,
         UserMessage,
-        Map;
+        Map,
+        ReLive;
 
         @Override
         public int getStartingPoint() {
@@ -117,7 +127,11 @@ public class SystemBuffer {
     public enum User implements IBufferKey {
         SessionInfo,
         ExportKey,
-        BackUrl;
+        BackUrl,
+        /**
+         * 调用频次
+         */
+        Frequency;
 
         @Override
         public int getStartingPoint() {
@@ -126,7 +140,7 @@ public class SystemBuffer {
 
         @Override
         public int getMinimumNumber() {
-            return 2;
+            return 1;
         }
 
         @Override

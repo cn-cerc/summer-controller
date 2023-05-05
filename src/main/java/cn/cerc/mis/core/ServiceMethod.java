@@ -45,7 +45,7 @@ public final class ServiceMethod {
                 DataRow headIn = dataIn.head();
                 String errorMsg = validate.message();
                 String fieldCode = validate.value();
-                if (!headIn.has(fieldCode)) {
+                if (!headIn.hasValue(fieldCode)) {
                     if (errorMsg.contains("%s")) {
                         String message = "".equals(validate.name()) ? fieldCode : validate.name();
                         throw new DataValidateException(String.format(errorMsg, message));

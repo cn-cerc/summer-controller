@@ -31,4 +31,6 @@ public interface SecurityService extends IService {
      * @param outParam: key = object id, value = 默认授权码
      */
     void loadPermission(IHandle handle, Variant outParam);
+
+    String getSystemUserToken(IHandle handle, String corpNo, String machineCode);
 }

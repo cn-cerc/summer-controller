@@ -7,11 +7,18 @@ import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IService;
 
+/**
+ * 请改使用 LocalService.call
+ * 
+ * @author ZhangGong
+ *
+ */
+@Deprecated
 public class LocalServer {
 
     public static DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         try {
-            Variant function = new Variant("execute").setTag(service.id());
+            Variant function = new Variant("execute").setKey(service.id());
             IService bean = Application.getService(handle, service.id(), function);
             return bean._call(handle, dataIn, function);
         } catch (ClassNotFoundException e) {

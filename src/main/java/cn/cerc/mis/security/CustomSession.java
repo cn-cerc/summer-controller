@@ -9,22 +9,20 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.mssql.MssqlServer;
 import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
-import cn.cerc.db.queue.QueueServer;
-import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.db.redis.Redis;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
-import redis.clients.jedis.Jedis;
 
-//@Scope(WebApplicationContext.SCOPE_REQUEST)
-//@Scope(WebApplicationContext.SCOPE_SESSION)
 //@Component
+//@Scope(WebApplicationContext.SCOPE_SESSION)
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 //@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class CustomSession implements ISession {
@@ -36,6 +34,8 @@ public class CustomSession implements ISession {
     private HttpServletResponse response;
     private static int currentSize = 0;
     private boolean active = true;
+
+    public static final String machineCode = "T1000";
 
     public CustomSession() {
         super();
@@ -115,17 +115,6 @@ public class CustomSession implements ISession {
             return connections.get(key);
         }
 
-        if (QueueServer.SessionId.equals(key)) {
-            QueueServer obj = new QueueServer();
-            connections.put(QueueServer.SessionId, obj);
-            return connections.get(key);
-        }
-
-//        if (MongoConfig.SessionId.equals(key)) {
-//            MongoConfig obj = new MongoConfig();
-//            connections.put(MongoConfig.SessionId, obj);
-//            return connections.get(key);
-//        }
         return null;
     }
 
@@ -180,7 +169,7 @@ public class CustomSession implements ISession {
         SecurityService security = Application.getBean(SecurityService.class);
         if (security != null && security.initSession(this, token)) {
             String key = MemoryBuffer.buildKey(SystemBuffer.Token.Map, token);
-            try (Jedis redis = JedisFactory.getJedis()) {
+            try (Redis redis = new Redis()) {
                 String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
                 if (value == null) {
                     value = security.getPermissions(this);
@@ -215,6 +204,13 @@ public class CustomSession implements ISession {
     @Override
     public void setResponse(HttpServletResponse response) {
         this.response = response;
+    }
+
+    @Override
+    public void atSystemUser() {
+        SecurityService security = Application.getBean(SecurityService.class);
+        String token = security.getSystemUserToken(new Handle(this), this.getCorpNo(), machineCode);
+        this.loadToken(token);
     }
 
 }

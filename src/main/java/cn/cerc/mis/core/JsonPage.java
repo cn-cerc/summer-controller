@@ -49,15 +49,21 @@ public class JsonPage implements IPage {
     @Override
     public String execute() throws ServletException, IOException {
         PrintWriter writer = getResponse().getWriter();
+        writer.print(this.json());
+        return null;
+    }
+
+    public String json() {
+        String json;
         if (this.data == null) {
             if (items == null) {
                 items = new HashMap<>();
             }
-            writer.print(new Gson().toJson(items));
+            json = new Gson().toJson(items);
         } else {
-            writer.print(new Gson().toJson(this.data));
+            json = new Gson().toJson(this.data);
         }
-        return null;
+        return json;
     }
 
     @Deprecated
