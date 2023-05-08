@@ -52,6 +52,8 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
     @Override
     public boolean consume(String message, boolean repushOnError) {
         T data = new Gson().fromJson(message, getClazz());
+        if (data == null)
+            return true;
         try (TaskHandle handle = new TaskHandle()) {
             if (!Utils.isEmpty(data.getToken()))
                 handle.getSession().loadToken(data.getToken());

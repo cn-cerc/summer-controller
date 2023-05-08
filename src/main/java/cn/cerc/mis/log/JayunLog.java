@@ -7,6 +7,8 @@ import org.apache.log4j.spi.ErrorHandler;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LoggingEvent;
 
+import cn.cerc.db.core.ServerConfig;
+
 public class JayunLog implements Appender {
     private String name;
     private Layout layout;
@@ -35,6 +37,12 @@ public class JayunLog implements Appender {
     @Override
     public void doAppend(LoggingEvent event) {
         if (event.getLevel() == Level.ERROR || event.getLevel() == Level.WARN) {
+            // 本地开发不发送日志到测试平台
+            if (ServerConfig.isServerDevelop())
+                return;
+            // 灰度发布不发送日志到测试平台
+            if (ServerConfig.isServerGray())
+                return;
             var data = new JayunLogData(event);
             data.setProject(this.name);
             new QueueJayunLog().push(data);
