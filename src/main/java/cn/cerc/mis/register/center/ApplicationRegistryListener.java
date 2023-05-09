@@ -15,7 +15,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.zk.ZkServer;
 
 @Component
-public class ServiceRegistryListener implements ApplicationListener<ContextRefreshedEvent> {
+public class ApplicationRegistryListener implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
