@@ -38,6 +38,9 @@ public class ApplicationRegistryListener implements ApplicationListener<ContextR
             InetAddress addr = InetAddress.getLocalHost();
             String ip = addr.getHostAddress();
             String hostname = addr.getHostName();
+            String dockerIP = System.getenv("DOCKER_HOST");
+            if (!Utils.isEmpty(dockerIP))
+                ip = dockerIP;
             server.create(String.join("/", path, Utils.getGuid()), String.join("-", hostname, ip, "alive"),
                     CreateMode.EPHEMERAL);
         } catch (KeeperException | InterruptedException | UnknownHostException e) {
