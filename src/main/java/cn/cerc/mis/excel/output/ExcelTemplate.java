@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 
@@ -14,7 +15,9 @@ import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.Datetime.DateType;
 import cn.cerc.db.core.FastDate;
 import cn.cerc.db.core.LanguageResource;
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.mongo.MongoOSS;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.mis.config.ApplicationConfig;
 import jxl.write.DateFormat;
@@ -86,12 +89,6 @@ public class ExcelTemplate {
             sheet.addCell(item);
         }
 
-        OssConnection oss = null;
-        if (changeRowHeight) {
-            oss = new OssConnection();
-            // 先初始化一次
-            oss.getClient();
-        }
         // 输出列数据
         if (dataSet != null) {
             dataSet.first();
@@ -109,14 +106,13 @@ public class ExcelTemplate {
                     }
                     if (sheet.getRows() > 65535)
                         throw new RuntimeException("你导出的数据量过大，超过了Excel的上限，请调整查询条件");
-                    writeColumn(sheet, col, row, column, oss, wc);
+                    writeColumn(sheet, col, row, column, wc);
                 }
             }
         }
     }
 
-    protected void writeColumn(WritableSheet sheet, int col, int row, Column column, OssConnection oss,
-            WritableCellFormat wc) throws WriteException {
+    protected void writeColumn(WritableSheet sheet, int col, int row, Column column, WritableCellFormat wc) throws WriteException {
         if (column instanceof NumberColumn) {
             if (LanguageResource.isLanguageTW()) {
                 Label item = new Label(col, row, decimalformat.format(column.getValue()));
@@ -147,24 +143,29 @@ public class ExcelTemplate {
             DateTime item = new DateTime(col, row, (Date) column.getValue(), new WritableCellFormat(df2));
             sheet.addCell(item);
         } else if (column instanceof ImageColumn) {
-            if (oss != null && !Utils.isEmpty(column.getValue().toString())) {
+            if (!Utils.isEmpty(column.getValue().toString())) {
                 String imageUrl = column.getValue().toString();
                 try {
                     // 截取https://ossBucket.ossSite后面的部分
-                    if (imageUrl.startsWith("https://")) {
-                        if (imageUrl.contains("com/")) {
-                            imageUrl = imageUrl.substring(imageUrl.indexOf("com/") + 4);
-                        } else if (imageUrl.contains("site/")) {
-                            imageUrl = imageUrl.substring(imageUrl.indexOf("site/") + 5);
-                        }
+                    if (imageUrl.startsWith("http")) {
+                        Optional<String> childUrl = MongoOSS.getChildUrl(imageUrl);
+                        if (childUrl.isPresent())
+                            imageUrl = childUrl.get();
                     }
                     imageUrl = Utils.decode(imageUrl, StandardCharsets.UTF_8.name());
-                    GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(oss.getBucket(), imageUrl);
-                    // 设置失效时间
-                    req.setExpiration(new Datetime().inc(DateType.Minute, 5).asBaseDate());
-                    // 压缩方式，长宽80，png格式
-                    req.setProcess("image/resize,m_lfit,h_80,w_80/format,png");
-                    InputStream inputStream = oss.getClient().generatePresignedUrl(req).openStream();
+                    InputStream inputStream;
+                    if (MongoOSS.findByName(imageUrl).isPresent()) {
+                        inputStream = MongoOSS.download(imageUrl);
+                    } else {
+                        // 兼容main分支，后续更新main之后删除，避免发包后影响main
+                        String bucket = ServerConfig.getInstance().getProperty(OssConnection.oss_bucket);
+                        GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucket, imageUrl);
+                        // 设置失效时间
+                        req.setExpiration(new Datetime().inc(DateType.Minute, 5).asBaseDate());
+                        // 压缩方式，长宽80，png格式
+                        req.setProcess("image/resize,m_lfit,h_80,w_80/format,png");
+                        inputStream = new OssConnection().getClient().generatePresignedUrl(req).openStream();
+                    }
                     byte[] bytes = new byte[1024];
                     ByteArrayOutputStream output = new ByteArrayOutputStream();
                     int n;
