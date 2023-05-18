@@ -2,7 +2,6 @@ package cn.cerc.mis.excel.output;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -152,7 +151,6 @@ public class ExcelTemplate {
                         if (childUrl.isPresent())
                             imageUrl = childUrl.get();
                     }
-                    imageUrl = Utils.decode(imageUrl, StandardCharsets.UTF_8.name());
                     InputStream inputStream;
                     if (MongoOSS.findByName(imageUrl).isPresent()) {
                         inputStream = MongoOSS.download(imageUrl);
