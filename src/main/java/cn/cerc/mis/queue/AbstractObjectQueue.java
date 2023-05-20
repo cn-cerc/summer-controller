@@ -41,7 +41,8 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
         config.getOriginal().ifPresent(value -> this.setOriginal(value));
         config.getToken().ifPresent(token -> {
             if (token.equals(handle.getSession().getToken()))
-                throw new RuntimeException("远程token不得与当前token一致");
+                throw new RuntimeException(
+                        String.format("%s 远程token不得与当前token一致 %s", token, handle.getSession().getToken()));
             data.setToken(token);
         });
         if (!data.validate())

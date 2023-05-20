@@ -43,7 +43,8 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         config.getOriginal().ifPresent(value -> this.setOriginal(value));
         config.getToken().ifPresent(token -> {
             if (token.equals(handle.getSession().getToken()))
-                throw new RuntimeException("远程token不得与当前token一致");
+                throw new RuntimeException(
+                        String.format("%s 远程token不得与当前token一致 %s", token, handle.getSession().getToken()));
             dataRow.setValue("token", token);
         });
         if (!dataRow.hasValue("corp_no_"))
