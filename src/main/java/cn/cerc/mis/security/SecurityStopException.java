@@ -1,15 +1,15 @@
 package cn.cerc.mis.security;
 
-import java.lang.reflect.Method;
-
 import cn.cerc.db.core.ClassResource;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.SupportBeanName;
 
+import java.lang.reflect.Method;
+
 public class SecurityStopException extends SecurityException {
     private static final long serialVersionUID = -970178466412571534L;
     private static final ClassResource res = new ClassResource(SecurityStopException.class, SummerMIS.ID);
-    private String message;
+    private final String message;
 
     public SecurityStopException(String message) {
         super(message);
@@ -33,7 +33,7 @@ public class SecurityStopException extends SecurityException {
 
         String[] path = method.getDeclaringClass().getName().split("\\.");
         String beanId = path[path.length - 1];
-        if (bean != null && bean instanceof SupportBeanName)
+        if (bean instanceof SupportBeanName)
             beanId = ((SupportBeanName) bean).getBeanName();
 
         this.message = String.format("[%s.%s]", beanId, method.getName()) + getAccessDisabled();
