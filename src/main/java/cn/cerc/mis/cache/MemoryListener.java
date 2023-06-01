@@ -57,7 +57,10 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
             subthread.requestStop();
             subthread = null;
         }
+        // 关闭所有的 redis 连接池
         JedisFactory.close();
+
+        // TODO 关闭所有的 mysql 连接池
 
         // 通知所有的单例重启缓存
         if (context != null) {

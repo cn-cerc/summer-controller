@@ -13,7 +13,7 @@ import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
 public interface ServiceServerImpl {
-    static final Logger log = LoggerFactory.getLogger(ServiceServerImpl.class);
+    Logger log = LoggerFactory.getLogger(ServiceServerImpl.class);
 
     String getRequestUrl(IHandle handle, String service);
 
@@ -29,19 +29,17 @@ public interface ServiceServerImpl {
             return LocalService.call(service.id(), handle, dataIn);
 
         String url = this.getRequestUrl(handle, service.id());
+        Curl curl = new Curl();
+        TokenConfigImpl config = handle instanceof TokenConfigImpl ? (TokenConfigImpl) handle
+                : this.getDefaultConfig(handle);
+        config.getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
+        curl.put("dataIn", dataIn.json());
         try {
-            Curl curl = new Curl();
-            TokenConfigImpl config = handle instanceof TokenConfigImpl ? (TokenConfigImpl) handle
-                    : this.getDefaultConfig(handle);
-            config.getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
-            curl.put("dataIn", dataIn.json());
-            log.debug("request url: {}", url);
-            log.debug("request params: {}", curl.getParameters());
             String response = curl.doPost(url);
             log.debug("response: {}", response);
             return new DataSet().setJson(response);
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("{} , {} dataIn {} -> {}", url, curl.getParameters(), dataIn.json(), e.getMessage(), e);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
         }
     }

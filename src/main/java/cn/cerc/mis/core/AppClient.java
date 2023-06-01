@@ -10,6 +10,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
@@ -22,7 +24,6 @@ import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.db.redis.JedisFactory;
-import cn.cerc.db.redis.Redis;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
@@ -31,7 +32,7 @@ import redis.clients.jedis.Jedis;
 @Scope(WebApplicationContext.SCOPE_REQUEST)
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AppClient implements Serializable {
-//    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
+    private static final Logger log = LoggerFactory.getLogger(AppClient.class);
 
     private static final long serialVersionUID = -3593077761901636920L;
 
@@ -52,6 +53,7 @@ public class AppClient implements Serializable {
      * 类手机终端
      */
     public static final List<String> phone_devices = new ArrayList<>();
+
     static {
         phone_devices.add(AppClient.phone);
         phone_devices.add(AppClient.android);
@@ -94,7 +96,7 @@ public class AppClient implements Serializable {
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
 
         Cookie[] cookies = request.getCookies();
-        try (Redis redis = new Redis()) {
+        try (Jedis redis = JedisFactory.getJedis()) {
             this.device = request.getParameter(ISession.CLIENT_DEVICE);
             if (!Utils.isEmpty(device))
                 redis.hset(key, ISession.CLIENT_DEVICE, device);
@@ -148,6 +150,8 @@ public class AppClient implements Serializable {
                 this.token = redis.hget(key, ISession.TOKEN);
 
             redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
+        } catch (IllegalStateException e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -274,7 +278,6 @@ public class AppClient implements Serializable {
      * 用户真实IP为： 192.168.1.110
      *
      * @param request HttpServletRequest
-     * 
      * @return IP地址
      */
     public static String getClientIP(HttpServletRequest request) {
