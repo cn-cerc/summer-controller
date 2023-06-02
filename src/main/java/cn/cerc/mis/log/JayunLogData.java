@@ -8,10 +8,24 @@ import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
+import cn.cerc.mis.register.center.ApplicationEnvironment;
+
 public class JayunLogData {
     public static String info = "info";
     public static String warn = "warn";
     public static String error = "error";
+    /**
+     * 主机名
+     */
+    private String hostname;
+    /**
+     * ip地址
+     */
+    private String ip;
+    /**
+     * 端口
+     */
+    private String port;
     /**
      * 项目
      */
@@ -69,6 +83,9 @@ public class JayunLogData {
         else
             this.stack = Arrays.asList(throwableInfo.getThrowableStrRep());
         this.timestamp = event.getTimeStamp();
+        this.hostname = ApplicationEnvironment.hostname();
+        this.ip = ApplicationEnvironment.hostIP();
+        this.port = ApplicationEnvironment.hostPort();
     }
 
     public String getProject() {
@@ -141,6 +158,30 @@ public class JayunLogData {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
     }
 
 }
