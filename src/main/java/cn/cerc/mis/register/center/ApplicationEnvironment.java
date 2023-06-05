@@ -54,7 +54,7 @@ public class ApplicationEnvironment {
 
     /**
      * 应用主机地址
-     * 
+     * <p>
      * docker run <br>
      * --env DOCKER_HOST_IP=`hostname -I | awk '{print $1}'` \ <br>
      * --env DOCKER_HOST_PORT=$port \
@@ -76,7 +76,7 @@ public class ApplicationEnvironment {
 
     /**
      * 应用主机端口
-     * 
+     * <p>
      * docker run <br>
      * --env DOCKER_HOST_IP=`hostname -I | awk '{print $1}'` \ <br>
      * --env DOCKER_HOST_PORT=$port \
