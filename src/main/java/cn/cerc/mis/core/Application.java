@@ -81,7 +81,8 @@ public class Application implements ApplicationContextAware {
     // 图片静态路径
     public static String getStaticPath() {
         // zookeeper 路径 /diteng/main/common/cdn
-        return ZkNode.get().getNodeValue(productStatic, () -> config.getString("app.static.path", "https://cdn.diteng.site/alpha-static"));
+        return ZkNode.get()
+                .getNodeValue(productStatic, () -> config.getString("app.static.path", "http://oss.diteng.top/static"));
     }
 
     // aui静态资源路径
