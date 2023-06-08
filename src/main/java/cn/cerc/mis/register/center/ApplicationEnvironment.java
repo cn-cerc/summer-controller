@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 
 /**
@@ -75,6 +76,17 @@ public class ApplicationEnvironment {
     }
 
     /**
+     * 获取外网服务IP
+     * 
+     * @return
+     */
+    public static String networkIP() {
+        ServerConfig config = ServerConfig.getInstance();
+        String httpPort = config.getProperty("application.external.svc");
+        return httpPort;
+    }
+
+    /**
      * 应用主机端口
      * <p>
      * docker run <br>
@@ -86,31 +98,38 @@ public class ApplicationEnvironment {
         String httpPort = System.getenv("DOCKER_HOST_PORT");
         if (!Utils.isEmpty(httpPort))
             return httpPort;
-
-        try {
-            // Tomcat配置文件路径
-            String catalinaHome = System.getProperty("catalina.home");
-            String serverXmlPath = catalinaHome + File.separator + "conf" + File.separator + "server.xml";
-
-            // 创建DOM解析器
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            Document doc = factory.newDocumentBuilder().parse(serverXmlPath);
-
-            // 查找Connector元素
-            NodeList connectors = doc.getElementsByTagName("Connector");
-            for (int i = 0; i < connectors.getLength(); i++) {
-                Element connector = (Element) connectors.item(i);
-                String protocol = connector.getAttribute("protocol");
-                if (protocol != null && protocol.startsWith("HTTP")) {
-                    httpPort = connector.getAttribute("port");
-                    break;
-                }
-            }
+        
+        //用于开发环境使用
+        ServerConfig config = ServerConfig.getInstance();
+        httpPort = config.getProperty("app.port");
+        if (!Utils.isEmpty(httpPort))
             return httpPort;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return "unknow";
-        }
+        
+        return null;
+//        try {
+//            // Tomcat配置文件路径
+//            String catalinaHome = System.getProperty("catalina.home");
+//            String serverXmlPath = catalinaHome + File.separator + "conf" + File.separator + "server.xml";
+//
+//            // 创建DOM解析器
+//            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//            Document doc = factory.newDocumentBuilder().parse(serverXmlPath);
+//
+//            // 查找Connector元素
+//            NodeList connectors = doc.getElementsByTagName("Connector");
+//            for (int i = 0; i < connectors.getLength(); i++) {
+//                Element connector = (Element) connectors.item(i);
+//                String protocol = connector.getAttribute("protocol");
+//                if (protocol != null && protocol.startsWith("HTTP")) {
+//                    httpPort = connector.getAttribute("port");
+//                    break;
+//                }
+//            }
+//            return httpPort;
+//        } catch (Exception e) {
+//            log.error(e.getMessage(), e);
+//            return "unknow";
+//        }
     }
 
 }
