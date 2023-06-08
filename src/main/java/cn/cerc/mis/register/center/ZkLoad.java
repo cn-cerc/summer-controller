@@ -49,7 +49,6 @@ public class ZkLoad implements Watcher {
 
     public String getUrl(String application) {
         String path = rootPath + application + POINTS;
-        log.info("获取服务 {}", path);
         List<ServerInfo> serverList = serverMap.get(path);
         if (serverList == null || !watched.get()) {
             ZkServer zk = ZkServer.get();
@@ -69,6 +68,7 @@ public class ZkLoad implements Watcher {
                 } else {
                     server = String.format("%s:%s", zkServer.getLanIp(), zkServer.getLanPort());
                 }
+                log.info("获取服务 {}", HTTP + server);
                 return HTTP + server;
             }
         }
