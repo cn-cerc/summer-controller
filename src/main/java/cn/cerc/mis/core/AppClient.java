@@ -251,6 +251,15 @@ public class AppClient implements Serializable {
     }
 
     /**
+     * 判断当前设备是否是pad
+     * 
+     * @return true
+     */
+    public boolean isPad() {
+        return pad.equals(getDevice());
+    }
+
+    /**
      * 检查当前的token设备是否是GPS应用
      */
     public boolean isGPS() {
