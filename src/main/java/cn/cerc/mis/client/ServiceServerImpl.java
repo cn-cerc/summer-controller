@@ -20,15 +20,15 @@ public interface ServiceServerImpl {
 
     String getRequestUrl(IHandle handle, String service);
 
-    default String getApplication() {
+    default ServiceModule getServiceModule() {
         return null;
     };
 
     TokenConfigImpl getDefaultConfig(IHandle handle);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
-        if (getApplication() != null) {
-            if (ServerConfig.getAppOriginal().equals(getApplication().toLowerCase())) {
+        if (getServiceModule() != null) {
+            if (ServerConfig.getAppOriginal().equals(getServiceModule().name().toLowerCase())) {
                 return true;
             }
         }
@@ -49,19 +49,32 @@ public interface ServiceServerImpl {
                     bookHandle = new BookHandle(handle, bookNo);
             }
             return LocalService.call(service.id(), bookHandle, dataIn);
-        }
-        // 远程调用
-        String url = this.getRequestUrl(handle, service.id());
-        Curl curl = new Curl();
-        config.getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
-        curl.put("dataIn", dataIn.json());
-        try {
-            String response = curl.doPost(url);
-            log.debug("response: {}", response);
-            return new DataSet().setJson(response);
-        } catch (IOException e) {
-            log.error("{} , {} dataIn {} -> {}", url, curl.getParameters(), dataIn.json(), e.getMessage(), e);
-            return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
+        } else {
+            // 远程调用
+            int i = 0;
+            Curl curl = new Curl();
+            config.getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
+            curl.put("dataIn", dataIn.json());
+            while (true) {
+                String url = this.getRequestUrl(handle, service.id());
+                try {
+                    String response = curl.doPost(url);
+                    log.debug("response: {}", response);
+                    return new DataSet().setJson(response);
+                } catch (IOException e) {
+                    if (i > 4) {// 可以重试4次
+                        return new DataSet().setState(ServiceState.CALL_TIMEOUT)
+                                .setMessage(url + " remote service error");
+                    }
+                    try {
+                        Thread.sleep(100 * i * i);
+                    } catch (InterruptedException ex) {
+                        log.error(e.getMessage(), ex);
+                    }
+                    i++;
+                    log.error("{} , {} dataIn {} -> {}", url, curl.getParameters(), dataIn.json(), e.getMessage(), e);
+                }
+            }
         }
     }
 }

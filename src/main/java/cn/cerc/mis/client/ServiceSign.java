@@ -1,5 +1,6 @@
 package cn.cerc.mis.client;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -20,21 +21,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Description;
 
+import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.ServerConfig;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
+import cn.cerc.mis.register.center.ZkLoad;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
     private final String id;
+
+    private ServiceModule module;
     private int version;
     private Set<String> properties;
     private ServiceServerImpl server;
@@ -58,6 +66,12 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         super();
         this.id = id;
         this.server = server;
+    }
+
+    public ServiceSign(String id, ServiceModule module) {
+        super();
+        this.id = id;
+        this.module = module;
     }
 
     public String id() {
@@ -91,18 +105,86 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return this;
     }
 
+    public ServiceModule getModule() {
+        return module;
+    }
+
+    public void setModule(ServiceModule module) {
+        this.module = module;
+    }
+
     @Override
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
+//        this.setSession(handle.getSession());
+//        ServiceSign sign = this.clone();
+//        sign.setDataIn(dataIn);
+//        DataSet dataOut = null;
+//        try {
+//            if (server == null)
+//                dataOut = LocalService.call(this.id, handle, dataIn);
+//            else {
+//                log.warn("请改使用callRemote调用: {}", this.id);
+//                dataOut = server.call(this, handle, dataIn);
+//            }
+//        } catch (Throwable e) {
+//            e.printStackTrace();
+//            dataOut = new DataSet().setMessage(e.getMessage());
+//        }
+//        sign.setDataOut(dataOut);
+//        return sign;
+        return this.call(handle, dataIn);
+    }
+
+    boolean isLocal(IHandle handle, ServiceSign service) {
+        if (getModule() != null) {
+            // 服务模块一样的情况下为本地调用
+            if (ServerConfig.getAppOriginal().equals(getModule().name().toLowerCase())) {
+                return true;
+            }
+            return false;
+        }
+        if (server != null) {
+            // 服务模块一样的情况下为本地调用
+            if (ServerConfig.getAppOriginal().equals(server.getServiceModule())) {
+                return true;
+            }
+            return false;
+        }
+        //现在有一部分接口修改
+        return true;
+    }
+
+    public ServiceSign call(IHandle handle, DataSet dataIn) {
+
+        // 判断是否是TokenConfigImpl
+        TokenConfigImpl config = handle instanceof TokenConfigImpl ? (TokenConfigImpl) handle : null;
+        // 判断当前账套和调用账套是否一致
+        if (config == null || Utils.isEmpty(config.getCorpNo())
+                || config.getSession().getCorpNo().equals(config.getCorpNo())) {
+            // 同账套调用
+            config = null;
+        }
+
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            if (server == null)
+            if (isLocal(handle, this))
+                // 同账套且本地服务，
                 dataOut = LocalService.call(this.id, handle, dataIn);
             else {
-                log.warn("请改使用callRemote调用: {}", this.id);
-                dataOut = server.call(this, handle, dataIn);
+//                dataOut = server.call(this, handle, dataIn);
+                // 远程服务或不同账套通过远程调用
+                String token = null;
+                if (config != null) {
+                    // 不同的情况下，需要查询互联关系，判断是否可以调用关系，否则不允许调用
+                    token = config.getToken().get();
+                } else {
+                    // 相同的情况下使用当前token
+                    token = handle.getSession().getToken();
+                }
+                dataOut = this.post(token, handle, dataIn);
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -110,6 +192,53 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         }
         sign.setDataOut(dataOut);
         return sign;
+    }
+
+    public String getRequestUrl(IHandle handle, String service) {
+        String module = null;
+        if (getModule() != null) {
+            module = getModule().name().toLowerCase();
+        }
+        if (this.server != null && Utils.isEmpty(module) && this.server.getServiceModule()!=null) {
+            module = this.server.getServiceModule().name().toLowerCase();
+        }
+        String server = ZkLoad.get().getUrl(module);
+        if (ServerConfig.isServerDevelop()) {
+            return String.format("%s/services/%s", server, service);
+        } else {
+            return String.format("%s/center/services/%s", server, service);
+        }
+    }
+
+    // 重试调用服务
+    public DataSet post(String token, IHandle handle, DataSet dataIn) {
+        int i = 0;
+        Curl curl = new Curl();
+        curl.put(ISession.TOKEN, token);
+        // config.getToken().ifPresent(token -> curl.put(ISession.TOKEN, token));
+        curl.put("dataIn", dataIn.json());
+        while (true) {
+            // 获取服务地址
+            String url = this.getRequestUrl(handle, this.id);
+
+            try {
+                String response = curl.doPost(url);
+                log.debug("response: {}", response);
+                return new DataSet().setJson(response);
+            } catch (IOException e) {
+                int retryTimes = ServerConfig.getInstance().getInt("app.service.retry.times", 4);
+                if (i > retryTimes) {
+                    return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
+                }
+                try {
+                    Thread.sleep(100 * i * i);
+                } catch (InterruptedException ex) {
+                    log.error(e.getMessage(), ex);
+                }
+                i++;
+                log.error("{} , {} dataIn {} -> {}", url, curl.getParameters(), dataIn.json(), e.getMessage(), e);
+            }
+        }
     }
 
     @Override
@@ -125,24 +254,27 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
     @Override
     public ServiceSign callRemote(TokenConfigImpl config, DataSet dataIn) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(config.getSession());
-        this.setSession(config.getSession());
-        // 优先使用RemoteTokenConfig中的Server
-        config.getServer().ifPresent(value -> this.server = value);
-        Objects.requireNonNull(this.server);
-        // 返回一个新的sign
-        ServiceSign sign = this.clone();
-        sign.setDataIn(dataIn);
-        DataSet dataOut = null;
-        try {
-            dataOut = this.server.call(this, config, dataIn);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            dataOut = new DataSet().setMessage(e.getMessage());
-        }
-        sign.setDataOut(dataOut);
-        return sign;
+//        Objects.requireNonNull(config);
+//        Objects.requireNonNull(config.getSession());
+//        this.setSession(config.getSession());
+//        // 优先使用RemoteTokenConfig中的Server
+//        config.getServer().ifPresent(value -> this.server = value);
+//        Objects.requireNonNull(this.server);
+//        // 返回一个新的sign
+//        ServiceSign sign = this.clone();
+//        sign.setDataIn(dataIn);
+//        DataSet dataOut = null;
+//        try {
+//            dataOut = this.server.call(this, config, dataIn);
+//        } catch (Throwable e) {
+//            e.printStackTrace();
+//            dataOut = new DataSet().setMessage(e.getMessage());
+//        }
+//        sign.setDataOut(dataOut);
+//        return sign;
+        
+        log.info("callRemote {}",config.getCorpNo());
+        return this.call(config, dataIn);
     }
 
     public ServiceSign sign(IHandle handle) {
