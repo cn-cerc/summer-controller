@@ -23,6 +23,7 @@ public class ZkLoad implements Watcher {
 
     private static final String POINTS = "/points";
     private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
 
     private static final Logger log = LoggerFactory.getLogger(ZkLoad.class);
 
@@ -47,8 +48,8 @@ public class ZkLoad implements Watcher {
         return instance;
     }
 
-    public String getUrl(String application) {
-        String path = rootPath + application + POINTS;
+    public String getUrl(String module) {
+        String path = rootPath + module + POINTS;
         List<ServerInfo> serverList = serverMap.get(path);
         if (serverList == null || !watched.get()) {
             ZkServer zk = ZkServer.get();
@@ -57,6 +58,7 @@ public class ZkLoad implements Watcher {
                 zk.create(path, "", CreateMode.PERSISTENT);
             }
             serverList = this.refreshChild(path);
+            this.register();//异常情况下，检查服务注册状态
             watched.set(true);
         }
         if (serverList.size() > 0) {
@@ -65,11 +67,13 @@ public class ZkLoad implements Watcher {
                 String server = null;
                 if (!Utils.isEmpty(zkServer.getWanIp()) && !zkServer.getWanIp().equals(currentWanIp)) {
                     server = String.format("%s:%s", zkServer.getWanIp(), zkServer.getWanPort());
+                    if (!server.contains(HTTPS)) {
+                        server = HTTPS + server;
+                    }
                 } else {
-                    server = String.format("%s:%s", zkServer.getLanIp(), zkServer.getLanPort());
+                    server = HTTP + String.format("%s:%s", zkServer.getLanIp(), zkServer.getLanPort());
                 }
-                log.info("获取服务 {}", HTTP + server);
-                return HTTP + server;
+                return server;
             }
         }
         return null;
@@ -104,11 +108,14 @@ public class ZkLoad implements Watcher {
         if (!zk.exists(path)) {
             zk.create(path, "", CreateMode.PERSISTENT);
         }
+
         currentNodePath = new StringBuffer(path).append("/").append(lanIp).append(":").append(lanPort).toString();
-        ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp, wanPort);
-        String content = new Gson().toJson(server);
-        zk.create(currentNodePath, content, CreateMode.EPHEMERAL);
-        log.info("注册服务 {}", currentNodePath);
+        if (!zk.exists(currentNodePath)) {
+            ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp, wanPort);
+            String content = new Gson().toJson(server);
+            zk.create(currentNodePath, content, CreateMode.EPHEMERAL);
+            log.info("注册服务 {}", currentNodePath);
+        }
         return currentNodePath;
     }
 
@@ -142,9 +149,5 @@ public class ZkLoad implements Watcher {
             watched.set(false);
             log.error("监听zk异常", e);
         }
-    }
-
-    public static void main(String[] args) {
-        new ZkLoad().register();
     }
 }
