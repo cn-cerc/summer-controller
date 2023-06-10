@@ -1,18 +1,12 @@
 package cn.cerc.mis.register.center;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
@@ -85,7 +79,6 @@ public class ApplicationEnvironment {
         String httpPort = config.getProperty("application.external.svc");
         return httpPort;
     }
-
     /**
      * 应用主机端口
      * <p>
@@ -104,7 +97,6 @@ public class ApplicationEnvironment {
         httpPort = config.getProperty("app.port");
         if (!Utils.isEmpty(httpPort))
             return httpPort;
-        
         return null;
 //        try {
 //            // Tomcat配置文件路径
