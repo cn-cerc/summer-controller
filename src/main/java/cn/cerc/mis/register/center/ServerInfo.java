@@ -9,20 +9,18 @@ public class ServerInfo implements Serializable {
     public ServerInfo() {
     }
 
-    public ServerInfo(String lanIp, String lanPort, String original, String wanIp, String wanPort) {
+    public ServerInfo(String lanIp, String lanPort, String original, String wanIp) {
         super();
         this.lanIp = lanIp;
         this.lanPort = lanPort;
         this.original = original;
         this.wanIp = wanIp;
-        this.wanPort = wanPort;
     }
 
     private String lanIp;
     private String lanPort;
     private String original;
     private String wanIp;
-    private String wanPort;
 
     public String getLanIp() {
         return lanIp;
@@ -56,18 +54,10 @@ public class ServerInfo implements Serializable {
         this.wanIp = wanIp;
     }
 
-    public String getWanPort() {
-        return wanPort;
-    }
-
-    public void setWanPort(String wanPort) {
-        this.wanPort = wanPort;
-    }
-
     @Override
     public String toString() {
         return "ServerInfo [lanIp=" + lanIp + ", lanPort=" + lanPort + ", original=" + original + ", wanIp=" + wanIp
-                + ", wanPort=" + wanPort + "]";
+                + "]";
     }
 
 }

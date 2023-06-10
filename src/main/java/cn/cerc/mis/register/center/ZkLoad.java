@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,7 +49,7 @@ public class ZkLoad implements Watcher {
         return instance;
     }
 
-    public String getUrl(String module) {
+    public Optional<String> getUrl(String module) {
         String path = rootPath + module + POINTS;
         List<ServerInfo> serverList = serverMap.get(path);
         if (serverList == null || !watched.get()) {
@@ -58,25 +59,25 @@ public class ZkLoad implements Watcher {
                 zk.create(path, "", CreateMode.PERSISTENT);
             }
             serverList = this.refreshChild(path);
-            this.register();//异常情况下，检查服务注册状态
+            this.register();// 异常情况下，检查服务注册状态
             watched.set(true);
         }
         if (serverList.size() > 0) {
-            ServerInfo zkServer = serverList.get(current.getAndIncrement() % serverList.size());
+            ServerInfo zkServer = serverList.get(Math.abs(current.getAndIncrement() % serverList.size()));
             if (zkServer.getLanPort() != null) {
                 String server = null;
                 if (!Utils.isEmpty(zkServer.getWanIp()) && !zkServer.getWanIp().equals(currentWanIp)) {
-                    server = String.format("%s:%s", zkServer.getWanIp(), zkServer.getWanPort());
-                    if (!server.contains(HTTPS)) {
+                    server = zkServer.getWanIp();
+                    if (!server.toLowerCase().startsWith(HTTPS)) {
                         server = HTTPS + server;
                     }
                 } else {
                     server = HTTP + String.format("%s:%s", zkServer.getLanIp(), zkServer.getLanPort());
                 }
-                return server;
+                return Optional.ofNullable(server);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     // 刷新内存
@@ -96,22 +97,23 @@ public class ZkLoad implements Watcher {
     }
 
     // 注册服务IP及端口
-    public String register() {
+    public String register() throws RuntimeException {
         String lanIp = ApplicationEnvironment.hostIP();
         String lanPort = ApplicationEnvironment.hostPort();
+        if (lanPort == null) {
+            throw new RuntimeException("注册服务的端口为空 ，请配置参数 app.port ");
+        }
         String original = ServerConfig.getAppOriginal();
         // 获取外网IP
         currentWanIp = ApplicationEnvironment.networkIP();
-        String wanPort = "80";
         String path = rootPath + original + POINTS;
         ZkServer zk = ZkServer.get();
         if (!zk.exists(path)) {
             zk.create(path, "", CreateMode.PERSISTENT);
         }
-
         currentNodePath = new StringBuffer(path).append("/").append(lanIp).append(":").append(lanPort).toString();
         if (!zk.exists(currentNodePath)) {
-            ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp, wanPort);
+            ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp);
             String content = new Gson().toJson(server);
             zk.create(currentNodePath, content, CreateMode.EPHEMERAL);
             log.info("注册服务 {}", currentNodePath);
