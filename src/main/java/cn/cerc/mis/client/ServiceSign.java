@@ -68,10 +68,10 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         this.server = server;
     }
 
-    public ServiceSign(String id, String module) {
+    public ServiceSign(String id, String original) {
         super();
         this.id = id;
-        this.original = module;
+        this.original = original;
     }
 
     public String id() {
@@ -150,14 +150,14 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     public Optional<String> getRequestUrl(IHandle handle, String service) {
-        String module = null;
+        String original = null;
         if (getOriginal() != null) {
-            module = getOriginal().toLowerCase();
+            original = getOriginal().toLowerCase();
         }
-        if (this.server != null && Utils.isEmpty(module) && this.server.getOriginal() != null) {
-            module = this.server.getOriginal();
+        if (this.server != null && Utils.isEmpty(original) && this.server.getOriginal().isPresent()) {
+            original = this.server.getOriginal().get();
         }
-        Optional<String> server = ZkLoad.get().getUrl(module);
+        Optional<String> server = ZkLoad.get().getUrl(original);
         if (server.isEmpty())
             return Optional.empty();
         if (ServerConfig.isServerDevelop()) {
@@ -187,7 +187,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             } catch (IOException e) {
                 int retryTimes = ServerConfig.getInstance().getInt("app.service.retry.times", 4);
                 if (i >= retryTimes) {
-                    return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(urlStr + " remote service error");
+                    return new DataSet().setState(ServiceState.CALL_TIMEOUT)
+                            .setMessage(urlStr + " remote service error");
                 }
                 try {
                     Thread.sleep(100 * i * i);
@@ -225,10 +226,11 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            if (isLocal(config, this))
+            if (isLocal(config, this)) {
                 // 同账套且本地服务，
+                log.warn("本地接口 {} 使用远程调用告警", this.id);
                 dataOut = LocalService.call(this.id, config, dataIn);
-            else {
+            } else {
                 // 远程服务或不同账套通过远程调用
                 String token = null;
                 if (Utils.isEmpty(config.getCorpNo()) || config.getSession().getCorpNo().equals(config.getCorpNo())) {

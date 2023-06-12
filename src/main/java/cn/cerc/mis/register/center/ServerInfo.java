@@ -2,6 +2,11 @@ package cn.cerc.mis.register.center;
 
 import java.io.Serializable;
 
+/**
+ * 服务注册类
+ * @author admin
+ *
+ */
 public class ServerInfo implements Serializable {
 
     private static final long serialVersionUID = -8863308062165311147L;

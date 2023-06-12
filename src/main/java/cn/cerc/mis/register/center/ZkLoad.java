@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
@@ -49,14 +50,14 @@ public class ZkLoad implements Watcher {
         return instance;
     }
 
-    public Optional<String> getUrl(String module) {
+    public Optional<String> getUrl(String original) {
 
-        if (Utils.isEmpty(module))
+        if (Utils.isEmpty(original))
             return Optional.empty();
-        String path = rootPath + module + POINTS;
+        String path = rootPath + original + POINTS;
         List<ServerInfo> serverList = serverMap.get(path);
-        if (serverList == null || watchedMap.get(module) == null || !watchedMap.get(module).get()) {
-            currentMap.put(module, new AtomicInteger(0));
+        if (serverList == null || watchedMap.get(original) == null || !watchedMap.get(original).get()) {
+            currentMap.put(original, new AtomicInteger(0));
             ZkServer zk = ZkServer.get();
             if (!zk.exists(path)) {
                 // 判断服务节点
@@ -64,11 +65,11 @@ public class ZkLoad implements Watcher {
             }
             serverList = this.refreshChild(path);
             this.register();// 异常情况下，检查服务注册状态
-            watchedMap.put(module, new AtomicBoolean(true));
+            watchedMap.put(original, new AtomicBoolean(true));
         }
         if (serverList.size() > 0) {
             ServerInfo zkServer = serverList
-                    .get(Math.abs(currentMap.get(module).getAndIncrement() % serverList.size()));
+                    .get(Math.abs(currentMap.get(original).getAndIncrement() % serverList.size()));
             if (zkServer.getLanPort() != null) {
                 String server = null;
                 if (!Utils.isEmpty(zkServer.getWanIp()) && !zkServer.getWanIp().equals(currentWanIp)) {
@@ -87,30 +88,35 @@ public class ZkLoad implements Watcher {
 
     // 刷新内存
     public List<ServerInfo> refreshChild(String path) {
-        ZkServer zk = ZkServer.get();
-        zk.client();
         List<ServerInfo> serverList = new ArrayList<>();
-        List<String> childList = zk.getNodes(path, this);
-        for (int i = 0; i < childList.size(); i++) {
-            String content = zk.getValue(path + "/" + childList.get(i));
-            ServerInfo server = new Gson().fromJson(content, ServerInfo.class);
-            serverList.add(server);
+        try {
+            ZkServer zk = ZkServer.get();
+            List<String> childList = zk.client().getChildren(path, this);
+            for (int i = 0; i < childList.size(); i++) {
+                String content = zk.getValue(path + "/" + childList.get(i));
+                ServerInfo server = new Gson().fromJson(content, ServerInfo.class);
+                serverList.add(server);
+            }
+            log.info(childList.toString());
+            serverMap.put(path, serverList);
+        } catch (Exception e) {
+            watchedMap.forEach((original, watched) -> {
+                watched.set(false);
+            });
+            log.error("监听zk异常", e);
         }
-        log.info(childList.toString());
-        serverMap.put(path, serverList);
         return serverList;
     }
 
     // 注册服务IP及端口
     public String register() throws RuntimeException {
         String lanIp = ApplicationEnvironment.hostIP();
-        String lanPort = ApplicationEnvironment.hostPort();
-        if (lanPort == null) {
+        Optional<String> lanPortOpt = ApplicationEnvironment.hostPort();
+        if (lanPortOpt.isEmpty()) {
             throw new RuntimeException("注册服务的端口为空 ，请配置参数 app.port ");
         }
+        String lanPort = lanPortOpt.get();
         String original = ServerConfig.getAppOriginal();
-        // 获取外网IP
-        currentWanIp = ApplicationEnvironment.networkIP();
         String path = rootPath + original + POINTS;
         ZkServer zk = ZkServer.get();
         if (!zk.exists(path)) {
@@ -118,6 +124,12 @@ public class ZkLoad implements Watcher {
         }
         currentNodePath = new StringBuffer(path).append("/").append(lanIp).append(":").append(lanPort).toString();
         if (!zk.exists(currentNodePath)) {
+            // 获取外网IP
+            Optional<String> currentWanIpOpt = ApplicationEnvironment.networkIP();
+            if (currentWanIpOpt.isPresent()) {
+                currentWanIp = currentWanIpOpt.get();
+            }
+            currentWanIp = ApplicationEnvironment.networkIP().get();
             ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp);
             String content = new Gson().toJson(server);
             zk.create(currentNodePath, content, CreateMode.EPHEMERAL);
@@ -146,17 +158,10 @@ public class ZkLoad implements Watcher {
         // 获取事件类型
         Event.EventType eventType = watchedEvent.getType();
         log.info("进入到 process() keeperState: {} , eventType: {} , path: {}", keeperState, eventType, path);
-        try {
-            if (Event.KeeperState.SyncConnected == keeperState) {
-                if (Event.EventType.NodeChildrenChanged == eventType) {
-                    this.refreshChild(path);
-                }
+        if (Event.KeeperState.SyncConnected == keeperState) {
+            if (Event.EventType.NodeChildrenChanged == eventType) {
+                this.refreshChild(path);
             }
-        } catch (Exception e) {
-            watchedMap.forEach((module, watched) -> {
-                watched.set(false);
-            });
-            log.error("监听zk异常", e);
         }
     }
 }
