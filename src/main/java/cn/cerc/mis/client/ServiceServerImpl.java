@@ -39,6 +39,7 @@ public interface ServiceServerImpl {
     default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         if (isLocal(handle, service))
             return LocalService.call(service.id(), handle, dataIn);
+        
         String url = this.getRequestUrl(handle, service.id());
         Curl curl = new Curl();
         TokenConfigImpl config = handle instanceof TokenConfigImpl ? (TokenConfigImpl) handle
