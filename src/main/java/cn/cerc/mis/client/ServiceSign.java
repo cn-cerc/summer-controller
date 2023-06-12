@@ -148,6 +148,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         // 现在有一部分接口修改
         return true;
     }
+
     public Optional<String> getRequestUrl(IHandle handle, String service) {
         String module = null;
         if (getOriginal() != null) {
@@ -160,9 +161,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         if (server.isEmpty())
             return Optional.empty();
         if (ServerConfig.isServerDevelop()) {
-            return Optional.of(String.format("%s/services/%s", server, service));
+            return Optional.of(String.format("%s/services/%s", server.get(), service));
         } else {
-            return Optional.of(String.format("%s/center/services/%s", server, service));
+            return Optional.of(String.format("%s/center/services/%s", server.get(), service));
         }
     }
 
@@ -175,17 +176,18 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         curl.put("dataIn", dataIn.json());
         while (true) {
             // 获取服务地址
-            Optional<String> url = this.getRequestUrl(handle, this.id);
-            if (url.isEmpty())
-                return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
+            Optional<String> urlOpt = this.getRequestUrl(handle, this.id);
+            if (urlOpt.isEmpty())
+                return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(" remote service error");
+            String urlStr = urlOpt.get();
             try {
-                String response = curl.doPost(url.get());
+                String response = curl.doPost(urlStr);
                 log.debug("response: {}", response);
                 return new DataSet().setJson(response);
             } catch (IOException e) {
                 int retryTimes = ServerConfig.getInstance().getInt("app.service.retry.times", 4);
                 if (i >= retryTimes) {
-                    return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
+                    return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(urlStr + " remote service error");
                 }
                 try {
                     Thread.sleep(100 * i * i);
@@ -194,7 +196,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                     break;
                 }
                 i++;
-                log.error("{} , {} dataIn {} -> {}", url, curl.getParameters(), dataIn.json(), e.getMessage(), e);
+                log.error("{} , {} dataIn {} -> {}", urlStr, curl.getParameters(), dataIn.json(), e.getMessage(), e);
             }
         }
         return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(" remote service error");
@@ -216,13 +218,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         Objects.requireNonNull(config);
         Objects.requireNonNull(config.getSession());
         this.setSession(config.getSession());
-     // 判断是否是TokenConfigImpl
+        // 判断是否是TokenConfigImpl
         // 判断当前账套和调用账套是否一致
-        if (config == null || Utils.isEmpty(config.getCorpNo())
-                || config.getSession().getCorpNo().equals(config.getCorpNo())) {
-            // 同账套调用
-            config = null;
-        }
         this.setSession(config.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
@@ -234,12 +231,12 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             else {
                 // 远程服务或不同账套通过远程调用
                 String token = null;
-                if (config != null) {
-                    // 不同的情况下，需要查询互联关系，判断是否可以调用关系，否则不允许调用
-                    token = config.getToken().get();
-                } else {
+                if (Utils.isEmpty(config.getCorpNo()) || config.getSession().getCorpNo().equals(config.getCorpNo())) {
                     // 相同的情况下使用当前token
                     token = config.getSession().getToken();
+                } else {
+                    // 不同的情况下，需要查询互联关系，判断是否可以调用关系，否则不允许调用
+                    token = config.getToken().get();
                 }
                 dataOut = this.post(token, config, dataIn);
             }
