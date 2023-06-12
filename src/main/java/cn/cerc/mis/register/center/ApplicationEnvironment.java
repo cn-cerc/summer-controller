@@ -93,37 +93,12 @@ public class ApplicationEnvironment {
         String httpPort = System.getenv("DOCKER_HOST_PORT");
         if (!Utils.isEmpty(httpPort))
             return Optional.of(httpPort);
-
         // 用于开发环境使用
         ServerConfig config = ServerConfig.getInstance();
         httpPort = config.getProperty("app.port");
         if (!Utils.isEmpty(httpPort))
             return Optional.of(httpPort);
         return Optional.empty();
-//        try {
-//            // Tomcat配置文件路径
-//            String catalinaHome = System.getProperty("catalina.home");
-//            String serverXmlPath = catalinaHome + File.separator + "conf" + File.separator + "server.xml";
-//
-//            // 创建DOM解析器
-//            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//            Document doc = factory.newDocumentBuilder().parse(serverXmlPath);
-//
-//            // 查找Connector元素
-//            NodeList connectors = doc.getElementsByTagName("Connector");
-//            for (int i = 0; i < connectors.getLength(); i++) {
-//                Element connector = (Element) connectors.item(i);
-//                String protocol = connector.getAttribute("protocol");
-//                if (protocol != null && protocol.startsWith("HTTP")) {
-//                    httpPort = connector.getAttribute("port");
-//                    break;
-//                }
-//            }
-//            return httpPort;
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            return "unknow";
-//        }
     }
 
 }
