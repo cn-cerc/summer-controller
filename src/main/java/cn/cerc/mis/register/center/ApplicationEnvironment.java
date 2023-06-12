@@ -3,6 +3,7 @@ package cn.cerc.mis.register.center;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -74,11 +75,12 @@ public class ApplicationEnvironment {
      * 
      * @return
      */
-    public static String networkIP() {
+    public static Optional<String> networkIP() {
         ServerConfig config = ServerConfig.getInstance();
         String httpPort = config.getProperty("application.external.svc");
-        return httpPort;
+        return Optional.ofNullable(httpPort);
     }
+
     /**
      * 应用主机端口
      * <p>
@@ -86,18 +88,18 @@ public class ApplicationEnvironment {
      * --env DOCKER_HOST_IP=`hostname -I | awk '{print $1}'` \ <br>
      * --env DOCKER_HOST_PORT=$port \
      */
-    public static String hostPort() {
+    public static Optional<String> hostPort() {
         // docker 容器内就先读取环境变量，否则读取到的是内网地址，此变量需要建立容器时手动设置
         String httpPort = System.getenv("DOCKER_HOST_PORT");
         if (!Utils.isEmpty(httpPort))
-            return httpPort;
-        
-        //用于开发环境使用
+            return Optional.of(httpPort);
+
+        // 用于开发环境使用
         ServerConfig config = ServerConfig.getInstance();
         httpPort = config.getProperty("app.port");
         if (!Utils.isEmpty(httpPort))
-            return httpPort;
-        return null;
+            return Optional.of(httpPort);
+        return Optional.empty();
 //        try {
 //            // Tomcat配置文件路径
 //            String catalinaHome = System.getProperty("catalina.home");

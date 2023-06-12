@@ -1,6 +1,7 @@
 package cn.cerc.mis.client;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,6 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.ServerConfig;
-import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
@@ -20,15 +20,15 @@ public interface ServiceServerImpl {
 
     String getRequestUrl(IHandle handle, String service);
 
-    default String getOriginal() {
-        return null;
+    default Optional<String> getOriginal() {
+        return Optional.empty();
     }
 
     TokenConfigImpl getDefaultConfig(IHandle handle);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
-        if (getOriginal() != null) {
-            if (ServerConfig.getAppOriginal().equals(getOriginal().toLowerCase())) {
+        if (getOriginal().isPresent()) {
+            if (ServerConfig.getAppOriginal().equals(getOriginal().get().toLowerCase())) {
                 return true;
             }
         }
