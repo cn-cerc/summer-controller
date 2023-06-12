@@ -1,6 +1,7 @@
 package cn.cerc.mis.register.center;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -28,21 +29,20 @@ public class ZkLoad implements Watcher {
 
     private static final Logger log = LoggerFactory.getLogger(ZkLoad.class);
 
-    private Map<String, List<ServerInfo>> serverMap = null;
+    private volatile Map<String, List<ServerInfo>> serverMap = null;
     private static ZkLoad instance = new ZkLoad();
     private String rootPath;
     private String currentNodePath = null;
     //
     private String currentWanIp = null;
-
-    private AtomicInteger current;
-    private AtomicBoolean watched;
+    private volatile Map<String, AtomicInteger> currentMap = null;
+    private volatile Map<String, AtomicBoolean> watchedMap = null;
 
     private ZkLoad() {
         serverMap = new Hashtable<>();
         rootPath = String.format("/%s/%s/", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
-        current = new AtomicInteger(0);
-        watched = new AtomicBoolean(false);
+        currentMap = new Hashtable<>();
+        watchedMap = new Hashtable<>();
     }
 
     public static ZkLoad get() {
@@ -50,9 +50,13 @@ public class ZkLoad implements Watcher {
     }
 
     public Optional<String> getUrl(String module) {
+
+        if (Utils.isEmpty(module))
+            return Optional.empty();
         String path = rootPath + module + POINTS;
         List<ServerInfo> serverList = serverMap.get(path);
-        if (serverList == null || !watched.get()) {
+        if (serverList == null || watchedMap.get(module) == null || !watchedMap.get(module).get()) {
+            currentMap.put(module, new AtomicInteger(0));
             ZkServer zk = ZkServer.get();
             if (!zk.exists(path)) {
                 // 判断服务节点
@@ -60,10 +64,11 @@ public class ZkLoad implements Watcher {
             }
             serverList = this.refreshChild(path);
             this.register();// 异常情况下，检查服务注册状态
-            watched.set(true);
+            watchedMap.put(module, new AtomicBoolean(true));
         }
         if (serverList.size() > 0) {
-            ServerInfo zkServer = serverList.get(Math.abs(current.getAndIncrement() % serverList.size()));
+            ServerInfo zkServer = serverList
+                    .get(Math.abs(currentMap.get(module).getAndIncrement() % serverList.size()));
             if (zkServer.getLanPort() != null) {
                 String server = null;
                 if (!Utils.isEmpty(zkServer.getWanIp()) && !zkServer.getWanIp().equals(currentWanIp)) {
@@ -148,7 +153,9 @@ public class ZkLoad implements Watcher {
                 }
             }
         } catch (Exception e) {
-            watched.set(false);
+            watchedMap.forEach((module, watched) -> {
+                watched.set(false);
+            });
             log.error("监听zk异常", e);
         }
     }
