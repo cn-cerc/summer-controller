@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ import cn.cerc.mis.register.center.ZkLoad;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
+
     public static final String external = "external";
 
     private final String id;
@@ -73,7 +75,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     public ServiceSign(String id, String original) {
         super();
         this.id = id;
-        this.original = original;
+        if (!Utils.isEmpty(original))
+            this.original = original.toLowerCase();
     }
 
     public String id() {
@@ -166,7 +169,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     private String getServiceOriginal() {
         String serviceOriginal = null;
         if (getOriginal() != null) {
-            serviceOriginal = getOriginal().toLowerCase();
+            serviceOriginal = getOriginal();
         }
         if (this.server != null && Utils.isEmpty(serviceOriginal)) {
             serviceOriginal = this.server.getOriginal();
@@ -176,27 +179,29 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
     // 从数据库里获取 original 参数
     public Optional<String> getRequestUrl(IHandle handle, String service, String original) {
-        Optional<String> server = Optional.empty();
-        if (isExternal(handle)) {
-            // 获取外部接口
-            
-            if (this.server != null) {
-                server = Optional.of(this.server.getRequestUrl(handle, service));
-            }
-        } else {
+        Optional<String> url = Optional.empty();
+        if (this.getOriginal() != null && !isExternal(handle)) {
             if ("csp".equals(getServiceOriginal())) {
                 // 如果接口是csp服务，优先调用
                 original = "csp";
             }
-            server = ZkLoad.get().getUrl(original);
-        }
-        if (server.isEmpty())
-            return Optional.empty();
-        if (ServerConfig.isServerDevelop()) {
-            return Optional.of(String.format("%s/services/%s", server.get(), service));
+            Optional<String> server = ZkLoad.get().getUrl(original);
+
+            if (server.isPresent()) {
+                if (ServerConfig.isServerDevelop())
+                    url = Optional.of(String.format("%s/services/%s", server.get(), service));
+                else {
+                    if ("csp".equals(getOriginal()))
+                        url = Optional.of(String.format("%s/center/services/%s", server.get(), service));
+                    else {
+                        url = Optional.of(String.format("%s/services-%s/%s", server.get(), original, service));
+                    }
+                }
+            }
         } else {
-            return Optional.of(String.format("%s/center/services/%s", server.get(), service));
+            url = Optional.of(this.server.getRequestUrl(handle, service));
         }
+        return url;
     }
 
     // 重试调用服务
