@@ -24,6 +24,8 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
     }
 
     public static <T extends EntityImpl> EntityOne<T> open(IHandle handle, Class<T> clazz, SqlText sqlText) {
+        if (sqlText == null)
+            throw new RuntimeException("sqlText can not be empty");
         return new EntityOne<T>(handle, clazz, sqlText, false, false);
     }
 
