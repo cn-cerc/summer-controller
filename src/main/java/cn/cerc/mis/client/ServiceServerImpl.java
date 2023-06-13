@@ -1,7 +1,6 @@
 package cn.cerc.mis.client;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +19,13 @@ public interface ServiceServerImpl {
 
     String getRequestUrl(IHandle handle, String service);
 
-    default Optional<String> getOriginal() {
-        return Optional.empty();
-    }
+    String getOriginal();
 
     TokenConfigImpl getDefaultConfig(IHandle handle);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
-        if (getOriginal().isPresent()) {
-            if (ServerConfig.getAppOriginal().equals(getOriginal().get().toLowerCase())) {
+        if (getOriginal() != null) {
+            if (ServerConfig.getAppOriginal().equals(getOriginal().toLowerCase())) {
                 return true;
             }
         }
@@ -39,7 +36,7 @@ public interface ServiceServerImpl {
     default DataSet call(ServiceSign service, IHandle handle, DataSet dataIn) {
         if (isLocal(handle, service))
             return LocalService.call(service.id(), handle, dataIn);
-        
+
         String url = this.getRequestUrl(handle, service.id());
         Curl curl = new Curl();
         TokenConfigImpl config = handle instanceof TokenConfigImpl ? (TokenConfigImpl) handle

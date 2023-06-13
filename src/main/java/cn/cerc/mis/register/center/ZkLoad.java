@@ -129,7 +129,6 @@ public class ZkLoad implements Watcher {
             if (currentWanIpOpt.isPresent()) {
                 currentWanIp = currentWanIpOpt.get();
             }
-            currentWanIp = ApplicationEnvironment.networkIP().get();
             ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp);
             String content = new Gson().toJson(server);
             zk.create(currentNodePath, content, CreateMode.EPHEMERAL);

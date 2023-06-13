@@ -32,6 +32,7 @@ import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
+import cn.cerc.mis.core.DataValidateException;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
@@ -40,8 +41,9 @@ import cn.cerc.mis.register.center.ZkLoad;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
-    private final String id;
+    public static final String external = "external";
 
+    private final String id;
     private String original;
     private int version;
     private Set<String> properties;
@@ -145,19 +147,49 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             }
             return false;
         }
-        // 现在有一部分接口修改
         return true;
     }
 
-    public Optional<String> getRequestUrl(IHandle handle, String service) {
-        String original = null;
+    boolean isExternal(IHandle handle) {
+        if (ServiceSign.external.equals(this.getOriginal())) {
+            return true;
+        }
+        if (this.server != null) {
+            // 使用外部标识的为外部接口调用
+            if (ServiceSign.external.equals(this.server.getOriginal())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getServiceOriginal() {
+        String serviceOriginal = null;
         if (getOriginal() != null) {
-            original = getOriginal().toLowerCase();
+            serviceOriginal = getOriginal().toLowerCase();
         }
-        if (this.server != null && Utils.isEmpty(original) && this.server.getOriginal().isPresent()) {
-            original = this.server.getOriginal().get();
+        if (this.server != null && Utils.isEmpty(serviceOriginal)) {
+            serviceOriginal = this.server.getOriginal();
         }
-        Optional<String> server = ZkLoad.get().getUrl(original);
+        return serviceOriginal;
+    }
+
+    // 从数据库里获取 original 参数
+    public Optional<String> getRequestUrl(IHandle handle, String service, String original) {
+        Optional<String> server = Optional.empty();
+        if (isExternal(handle)) {
+            // 获取外部接口
+            
+            if (this.server != null) {
+                server = Optional.of(this.server.getRequestUrl(handle, service));
+            }
+        } else {
+            if ("csp".equals(getServiceOriginal())) {
+                // 如果接口是csp服务，优先调用
+                original = "csp";
+            }
+            server = ZkLoad.get().getUrl(original);
+        }
         if (server.isEmpty())
             return Optional.empty();
         if (ServerConfig.isServerDevelop()) {
@@ -168,7 +200,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     // 重试调用服务
-    public DataSet post(String token, IHandle handle, DataSet dataIn) {
+    public DataSet post(String token, IHandle handle, DataSet dataIn, String original) {
         int i = 0;
         Curl curl = new Curl();
         curl.put(ISession.TOKEN, token);
@@ -176,7 +208,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         curl.put("dataIn", dataIn.json());
         while (true) {
             // 获取服务地址
-            Optional<String> urlOpt = this.getRequestUrl(handle, this.id);
+            Optional<String> urlOpt = this.getRequestUrl(handle, this.id, original);
             if (urlOpt.isEmpty())
                 return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(" remote service error");
             String urlStr = urlOpt.get();
@@ -219,13 +251,11 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         Objects.requireNonNull(config);
         Objects.requireNonNull(config.getSession());
         this.setSession(config.getSession());
-        // 判断是否是TokenConfigImpl
-        // 判断当前账套和调用账套是否一致
-        this.setSession(config.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
+            // 判断当前账套和调用账套是否一致
             if (isLocal(config, this)) {
                 // 同账套且本地服务，
                 log.warn("本地接口 {} 使用远程调用告警", this.id);
@@ -233,14 +263,33 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             } else {
                 // 远程服务或不同账套通过远程调用
                 String token = null;
-                if (Utils.isEmpty(config.getCorpNo()) || config.getSession().getCorpNo().equals(config.getCorpNo())) {
-                    // 相同的情况下使用当前token
-                    token = config.getSession().getToken();
+                String original = null;
+                // 外部接口调用
+                if (isExternal(config)) {
+                    Optional<String> tokenOpt = this.server.getDefaultConfig(sign).getToken();
+                    if (tokenOpt.isPresent()) {
+                        token = tokenOpt.get();
+                    }
                 } else {
-                    // 不同的情况下，需要查询互联关系，判断是否可以调用关系，否则不允许调用
-                    token = config.getToken().get();
+                    // 微服务调用
+                    if (Utils.isEmpty(config.getCorpNo())
+                            || config.getSession().getCorpNo().equals(config.getCorpNo())) {
+                        // 相同的情况下使用当前token
+                        token = config.getSession().getToken();
+                        original = ServerConfig.getAppOriginal();
+                    } else {
+                        // 不同的情况下，需要查询互联关系，判断是否可以调用关系，否则不允许调用
+                        token = config.getToken().get();
+                        Optional<String> originalOpt = config.getOriginal();
+                        if (originalOpt.isPresent()) {
+                            original = originalOpt.get();
+                        }
+                    }
+                    DataValidateException.stopRun(
+                            String.format("%s 远程调用服务 %s 的 original不存在", config.getCorpNo(), this.id),
+                            Utils.isEmpty(original));
                 }
-                dataOut = this.post(token, config, dataIn);
+                dataOut = this.post(token, config, dataIn, original);
             }
         } catch (Throwable e) {
             e.printStackTrace();
