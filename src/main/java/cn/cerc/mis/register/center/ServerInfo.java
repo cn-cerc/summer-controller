@@ -58,11 +58,4 @@ public class ServerInfo implements Serializable {
     public void setWanIp(String wanIp) {
         this.wanIp = wanIp;
     }
-
-    @Override
-    public String toString() {
-        return "ServerInfo [lanIp=" + lanIp + ", lanPort=" + lanPort + ", original=" + original + ", wanIp=" + wanIp
-                + "]";
-    }
-
 }
