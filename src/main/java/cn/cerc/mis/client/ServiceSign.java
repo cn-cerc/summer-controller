@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,6 @@ import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.register.center.ZkLoad;
-import site.diteng.common.admin.Original;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
