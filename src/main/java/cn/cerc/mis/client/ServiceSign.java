@@ -39,6 +39,7 @@ import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.register.center.ZkLoad;
+import site.diteng.common.admin.Original;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
@@ -182,21 +183,13 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         Optional<String> url = Optional.empty();
         if (this.getOriginal() != null && !isExternal(handle)) {
             if ("csp".equals(getServiceOriginal())) {
-                // 如果接口是csp服务，优先调用
-                original = "csp";
+                original = "csp";// 如果接口是csp服务，优先调用
             }
             Optional<String> server = ZkLoad.get().getUrl(original);
-
-            if (server.isPresent()) {
-                if (ServerConfig.isServerDevelop())
-                    url = Optional.of(String.format("%s/services/%s", server.get(), service));
-                else {
-                    if ("csp".equals(getOriginal()))
-                        url = Optional.of(String.format("%s/center/services/%s", server.get(), service));
-                    else {
-                        url = Optional.of(String.format("%s/services-%s/%s", server.get(), original, service));
-                    }
-                }
+            if (server.isEmpty()) {
+                Optional.empty();
+            } else {
+                url = Optional.of(String.format("%s/services/%s", server.get(), service));
             }
         } else {
             url = Optional.of(this.server.getRequestUrl(handle, service));

@@ -28,6 +28,8 @@ public class ZkLoad implements Watcher {
     private static final String HTTP = "http://";
     private static final String HTTPS = "https://";
 
+    private static final String CENTER = "/center";
+
     private static final Logger log = LoggerFactory.getLogger(ZkLoad.class);
 
     private volatile Map<String, List<ServerInfo>> serverMap = null;
@@ -74,11 +76,12 @@ public class ZkLoad implements Watcher {
                 String server = null;
                 if (!Utils.isEmpty(zkServer.getWanIp()) && !zkServer.getWanIp().equals(currentWanIp)) {
                     server = zkServer.getWanIp();
+                    server = server + CENTER;
                     if (!server.toLowerCase().startsWith(HTTPS)) {
                         server = HTTPS + server;
                     }
                 } else {
-                    server = HTTP + String.format("%s:%s", zkServer.getLanIp(), zkServer.getLanPort());
+                    server = String.format("%s%s:%s", HTTP, zkServer.getLanIp(), zkServer.getLanPort());
                 }
                 return Optional.ofNullable(server);
             }
