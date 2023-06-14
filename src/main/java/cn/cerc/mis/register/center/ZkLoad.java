@@ -1,16 +1,14 @@
 package cn.cerc.mis.register.center;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
@@ -42,10 +40,10 @@ public class ZkLoad implements Watcher {
     private volatile Map<String, AtomicBoolean> watchedMap = null;
 
     private ZkLoad() {
-        serverMap = new Hashtable<>();
+        serverMap = new ConcurrentHashMap<>();
         rootPath = String.format("/%s/%s/", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
-        currentMap = new Hashtable<>();
-        watchedMap = new Hashtable<>();
+        currentMap = new ConcurrentHashMap<>();
+        watchedMap = new ConcurrentHashMap<>();
     }
 
     public static ZkLoad get() {
