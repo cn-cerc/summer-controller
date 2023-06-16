@@ -100,6 +100,8 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         T entity = null;
         try {
             entity = query.asEntity(clazz).orElseThrow();
+            if (entity.isLocked())
+                throw new RuntimeException("record is locked");
             saveHistory(query, entity, HistoryTypeEnum.DELETE);
             query.delete();
         } finally {

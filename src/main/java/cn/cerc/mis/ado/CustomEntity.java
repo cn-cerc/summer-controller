@@ -2,10 +2,15 @@ package cn.cerc.mis.ado;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityHomeImpl;
 import cn.cerc.db.core.EntityImpl;
 
 public class CustomEntity implements EntityImpl {
+    private static final Logger log = LoggerFactory.getLogger(CustomEntity.class);
     private transient EntityHomeImpl entityHome;
 
     /**
@@ -51,4 +56,22 @@ public class CustomEntity implements EntityImpl {
         entityHome.post(this);
     }
 
+    @Override
+    public boolean isLocked() {
+        boolean result = EntityImpl.super.isLocked();
+        EntityHelper<? extends CustomEntity> helper = EntityHelper.create(this.getClass());
+        var field = helper.lockedField();
+        if (field.isPresent()) {
+            try {
+                Object data = field.get().get(this);
+                if (data instanceof Boolean value)
+                    result = value;
+                else
+                    log.error("locked field type is not Boolean");
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                log.error("isLocked error: {}", e.getMessage());
+            }
+        }
+        return result;
+    }
 }
