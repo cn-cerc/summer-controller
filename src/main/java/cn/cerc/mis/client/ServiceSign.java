@@ -251,7 +251,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            if (config.getServer() != null && config.getServer().isPresent()) {
+            if (config.getServer().isPresent()) {
                 this.server = config.getServer().get();
             }
             // 判断当前账套和调用账套是否一致
