@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.HistoryTypeEnum;
 import cn.cerc.db.core.IHandle;
@@ -99,8 +100,9 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         query.setReadonly(false);
         T entity = null;
         try {
+            var field = EntityHelper.create(clazz).lockedField();
             entity = query.asEntity(clazz).orElseThrow();
-            if (entity.isLocked())
+            if (field.isPresent() && query.getBoolean(field.get().getName()))
                 throw new RuntimeException("record is locked");
             saveHistory(query, entity, HistoryTypeEnum.DELETE);
             query.delete();

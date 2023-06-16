@@ -206,13 +206,10 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
     protected EntityHome<T> update(Consumer<T> action) {
         Objects.requireNonNull(action);
         T entity = null;
-        boolean check = EntityHelper.create(clazz).lockedField().isPresent();
         for (int i = 0; i < query.size(); i++) {
             DataRow row = query.records().get(i);
             entity = row.asEntity(this.clazz);
             entity.setEntityHome(this);
-            if (check && entity.isLocked())
-                throw new RuntimeException("record is locked");
             action.accept(entity);
             save(i, entity);
         }
@@ -225,13 +222,13 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             return 0;
         query.setReadonly(false);
         try {
-            boolean check = EntityHelper.create(clazz).lockedField().isPresent();
+            var field = EntityHelper.create(clazz).lockedField();
             int result = 0;
             query.first();
             while (!query.eof()) {
                 T entity = this.query.asEntity(clazz).orElseThrow();
                 if (predicate.test(entity)) {
-                    if (check && entity.isLocked())
+                    if (field.isPresent() && query.getBoolean(field.get().getName()))
                         throw new RuntimeException("record is locked");
                     saveHistory(query, entity, HistoryTypeEnum.DELETE);
                     query.delete();
@@ -286,8 +283,9 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
-            if (entity.isLocked())
-                throw new RuntimeException("record is locked");
+            var field = EntityHelper.create(clazz).lockedField();
+            if (field.isPresent() && entity.isLocked() && query.getBoolean(field.get().getName()))
+                throw new RuntimeException("record is locked, please unlock first");
             helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();
