@@ -134,7 +134,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return sign;
     }
 
-    boolean isLocal(IHandle handle, ServiceSign service) {
+    boolean isLocal(TokenConfigImpl config, ServiceSign service) {
         if (getOriginal() != null) {
             // 服务模块一样的情况下为本地调用
             if (ServerConfig.getAppOriginal().equals(getOriginal())) {
@@ -251,6 +251,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
+            if (config.getServer() != null && config.getServer().isPresent()) {
+                this.server = config.getServer().get();
+            }
             // 判断当前账套和调用账套是否一致
             if (isLocal(config, this)) {
                 // 同账套且本地服务，
