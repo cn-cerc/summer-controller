@@ -26,7 +26,4 @@ public @interface Webform {
 
     // 是否需要自动帮助中心
     boolean autoHelper() default true;
-
-    // 当作为子菜单时的名字（简称）
-    String subname() default "";
 }
