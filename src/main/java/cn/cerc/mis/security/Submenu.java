@@ -11,18 +11,27 @@ import java.lang.annotation.Target;
  * @author ZhangGong
  *
  */
-@Target(ElementType.METHOD)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Submenu {
     /**
      * 
-     * @return 快捷子菜单名称
+     * @return 返回父级菜单代码，可为空，其逻辑如下：</br>
+     *         若标识为函数时，此值不应该设置，并默认等于其所在类</br>
+     *         若标识为类时，默认等于Webform.module值，此值可被设置</br>
+     * 
      */
-    String value();
+    String parent();
 
     /**
      * 
      * @return 显示次序
      */
     int order();
+
+    /**
+     * 
+     * @return 快捷子菜单名称
+     */
+    String subname();
 }
