@@ -7,6 +7,7 @@ import cn.cerc.db.core.EntityImpl;
 
 public class CustomEntity implements EntityImpl {
     private transient EntityHomeImpl entityHome;
+    private boolean locked = true;
 
     /**
      * 设置EntityQuery
@@ -51,4 +52,13 @@ public class CustomEntity implements EntityImpl {
         entityHome.post(this);
     }
 
+    @Override
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    @Override
+    public boolean isLocked() {
+        return this.locked;
+    }
 }

@@ -222,11 +222,14 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             return 0;
         query.setReadonly(false);
         try {
+            var field = EntityHelper.create(clazz).lockedField();
             int result = 0;
             query.first();
             while (!query.eof()) {
                 T entity = this.query.asEntity(clazz).orElseThrow();
                 if (predicate.test(entity)) {
+                    if (field.isPresent() && query.getBoolean(field.get().getName()))
+                        throw new RuntimeException("record is locked");
                     saveHistory(query, entity, HistoryTypeEnum.DELETE);
                     query.delete();
                     result++;
@@ -280,6 +283,9 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
+            var field = EntityHelper.create(clazz).lockedField();
+            if (field.isPresent() && entity.isLocked() && query.getBoolean(field.get().getName()))
+                throw new RuntimeException("record is locked, please unlock first");
             helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();

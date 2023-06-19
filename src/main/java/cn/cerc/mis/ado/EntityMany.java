@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlQuery;
@@ -27,7 +28,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     }
 
     public static <T extends EntityImpl> EntityMany<T> open(IHandle handle, Class<T> clazz,
-                                                            Consumer<SqlWhere> consumer) {
+            Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
@@ -82,11 +83,15 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     }
 
     public void deleteAll() {
+        var field = EntityHelper.create(clazz).lockedField();
         query.setReadonly(false);
         try {
             query.first();
-            while (!query.eof())
+            while (!query.eof()) {
+                if (field.isPresent() && query.getBoolean(field.get().getName()))
+                    throw new RuntimeException("record is locked");
                 query.delete();
+            }
         } finally {
             query.setReadonly(true);
         }
@@ -95,9 +100,12 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     public void deleteAll(List<T> list) {
         query.setReadonly(false);
         try {
+            var field = EntityHelper.create(clazz).lockedField();
             for (T entity : list) {
                 if (entity.findRecNo() < 0)
                     throw new RuntimeException("delete fail, entity not in query");
+                if (field.isPresent() && query.getBoolean(field.get().getName()))
+                    throw new RuntimeException("record is locked");
                 query.delete();
             }
         } finally {
