@@ -2,6 +2,7 @@ package cn.cerc.mis.log;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LocationInfo;
@@ -85,7 +86,9 @@ public class JayunLogData {
         this.timestamp = event.getTimeStamp();
         this.hostname = ApplicationEnvironment.hostname();
         this.ip = ApplicationEnvironment.hostIP();
-        this.port = ApplicationEnvironment.hostPort();
+        Optional<String> portOpt = ApplicationEnvironment.hostPort();
+        if (portOpt.isPresent())
+            this.port = portOpt.get();
     }
 
     public String getProject() {
