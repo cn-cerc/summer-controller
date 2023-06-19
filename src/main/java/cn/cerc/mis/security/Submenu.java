@@ -16,9 +16,9 @@ import java.lang.annotation.Target;
 public @interface Submenu {
     /**
      * 
-     * @return 返回父级菜单代码，可为空，其逻辑如下：</br>
-     *         若标识为函数时，此值不应该设置，并默认等于其所在类</br>
-     *         若标识为类时，默认等于Webform.module值，此值可被设置</br>
+     * @return 返回父级菜单代码，可为空，其逻辑如下：<br>
+     *         若标识为函数时，此值不应该设置，并默认等于其所在类<br>
+     *         若标识为类时，默认等于Webform.module值，此值可被设置<br>
      *         注意：实际在使用时，数据库中可以分行业设置并覆盖此值
      * 
      */
