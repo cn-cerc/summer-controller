@@ -124,17 +124,17 @@ public class ZkLoad implements Watcher {
             zk.create(path, "", CreateMode.PERSISTENT);
         }
         currentNodePath = new StringBuffer(path).append("/").append(lanIp).append(":").append(lanPort).toString();
-        if (!zk.exists(currentNodePath)) {
-            // 获取外网IP
-            Optional<String> currentWanIpOpt = ApplicationEnvironment.networkIP();
-            if (currentWanIpOpt.isPresent()) {
-                currentWanIp = currentWanIpOpt.get();
-            }
-            ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp);
-            String content = new Gson().toJson(server);
-            zk.create(currentNodePath, content, CreateMode.EPHEMERAL);
-            log.info("注册服务 {}", currentNodePath);
+        // 先删除，再增加
+        zk.delete(currentNodePath);
+        // 获取外网IP
+        Optional<String> currentWanIpOpt = ApplicationEnvironment.networkIP();
+        if (currentWanIpOpt.isPresent()) {
+            currentWanIp = currentWanIpOpt.get();
         }
+        ServerInfo server = new ServerInfo(lanIp, lanPort, original, currentWanIp);
+        String content = new Gson().toJson(server);
+        zk.create(currentNodePath, content, CreateMode.EPHEMERAL);
+        log.info("注册服务 {}", currentNodePath);
         return currentNodePath;
     }
 
@@ -142,10 +142,8 @@ public class ZkLoad implements Watcher {
     public void unRegister() {
         if (!Utils.isEmpty(currentNodePath)) {
             ZkServer zk = ZkServer.get();
-            if (zk.exists(currentNodePath)) {
-                zk.delete(currentNodePath);
-                log.info("删除注册服务 {}", currentNodePath);
-            }
+            zk.delete(currentNodePath);
+            log.info("删除注册服务 {}", currentNodePath);
         }
     }
 
