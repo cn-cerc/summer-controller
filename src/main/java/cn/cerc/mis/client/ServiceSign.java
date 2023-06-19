@@ -187,6 +187,13 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             if (server.isEmpty()) {
                 Optional.empty();
             } else {
+                if (server.get().startsWith("https")) {
+                    if ("csp".equals(original)) {
+                        url = Optional.of(String.format("%s/center/services/%s", server.get(), service));
+                    } else {
+                        url = Optional.of(String.format("%s/services-%s/%s", server.get(), original, service));
+                    }
+                }
                 url = Optional.of(String.format("%s/services/%s", server.get(), service));
             }
         } else {
