@@ -26,7 +26,7 @@ public class ZkLoad implements Watcher {
     private static final String HTTP = "http://";
     private static final String HTTPS = "https://";
 
-    private static final String CENTER = "/center";
+    private static final String REGISTER_CENTER = "register_center";
 
     private static final Logger log = LoggerFactory.getLogger(ZkLoad.class);
 
@@ -41,7 +41,7 @@ public class ZkLoad implements Watcher {
 
     private ZkLoad() {
         serverMap = new ConcurrentHashMap<>();
-        rootPath = String.format("/%s/%s/", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
+        rootPath = String.format("/%s/%s/%s/", REGISTER_CENTER,ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
         currentMap = new ConcurrentHashMap<>();
         watchedMap = new ConcurrentHashMap<>();
     }
