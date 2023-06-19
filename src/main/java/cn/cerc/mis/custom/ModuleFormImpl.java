@@ -1,6 +1,5 @@
 package cn.cerc.mis.custom;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface ModuleFormImpl extends CustomFormImpl {
@@ -11,12 +10,14 @@ public interface ModuleFormImpl extends CustomFormImpl {
     String getModuleReadme();
 
     /**
+     * 设置菜单排序列表
+     * 
      * 实际可用菜单比这个少的，删除这个列表<br>
      * 实际可用菜单比这个多的，显示在这个返回值的后面
      * 
-     * @return 菜单排序建议
+     * @param menus 设置菜单排序列表
      */
-    default List<String> getMenuOrder() {
-        return new ArrayList<String>();
+    default void loadMenuOrder(List<String> menus) {
+
     }
 }
