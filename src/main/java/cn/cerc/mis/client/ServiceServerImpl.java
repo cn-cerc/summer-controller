@@ -9,26 +9,17 @@ import cn.cerc.db.core.Curl;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
 public interface ServiceServerImpl {
-
     Logger log = LoggerFactory.getLogger(ServiceServerImpl.class);
 
     String getRequestUrl(IHandle handle, String service);
 
-    String getOriginal();
-
     TokenConfigImpl getDefaultConfig(IHandle handle);
 
     default boolean isLocal(IHandle handle, ServiceSign service) {
-        if (getOriginal() != null) {
-            if (ServerConfig.getAppOriginal().equals(getOriginal().toLowerCase())) {
-                return true;
-            }
-        }
         String url = this.getRequestUrl(handle, service.id());
         return url == null;
     }
