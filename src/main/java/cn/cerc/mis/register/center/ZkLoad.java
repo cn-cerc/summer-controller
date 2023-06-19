@@ -73,9 +73,8 @@ public class ZkLoad implements Watcher {
                 String server = null;
                 if (!Utils.isEmpty(zkServer.getWanIp()) && !zkServer.getWanIp().equals(currentWanIp)) {
                     server = zkServer.getWanIp();
-                    server = server + CENTER;
                     if (!server.toLowerCase().startsWith(HTTPS)) {
-                        server = HTTPS + server;
+                        server = HTTPS + server.toLowerCase();
                     }
                 } else {
                     server = String.format("%s%s:%s", HTTP, zkServer.getLanIp(), zkServer.getLanPort());
