@@ -64,7 +64,6 @@ public class ZkLoad implements Watcher {
                 zk.create(path, "", CreateMode.PERSISTENT);
             }
             serverList = this.refreshChild(path);
-            this.register();// 异常情况下，检查服务注册状态
             watchedMap.put(original, new AtomicBoolean(true));
         }
         if (serverList.size() > 0) {
