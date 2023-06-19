@@ -193,8 +193,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                     } else {
                         url = Optional.of(String.format("%s/services-%s/%s", server.get(), original, service));
                     }
+                } else {
+                    url = Optional.of(String.format("%s/services/%s", server.get(), service));
                 }
-                url = Optional.of(String.format("%s/services/%s", server.get(), service));
             }
         } else {
             url = Optional.of(this.server.getRequestUrl(handle, service));
