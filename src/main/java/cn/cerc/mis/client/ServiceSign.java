@@ -135,21 +135,23 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     boolean isLocal(TokenConfigImpl config, ServiceSign service) {
-        if (getOriginal() != null) {
-            // 服务模块一样的情况下为本地调用
-            if (ServerConfig.getAppOriginal().equals(getOriginal())) {
-                return true;
+        if (config.getBookNo().isEmpty() || config.getSession().getCorpNo().equals(config.getBookNo().get())) {
+            if (getOriginal() != null) {
+                // 服务模块一样的情况下为本地调用
+                if (ServerConfig.getAppOriginal().equals(getOriginal())) {
+                    return true;
+                }
+                return false;
             }
-            return false;
-        }
-        if (server != null) {
-            // 服务模块一样的情况下为本地调用
-            if (ServerConfig.getAppOriginal().equals(server.getOriginal())) {
-                return true;
+            if (server != null) {
+                // 服务模块一样的情况下为本地调用
+                if (ServerConfig.getAppOriginal().equals(server.getOriginal())) {
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
-        return true;
+        return false;
     }
 
     boolean isExternal(IHandle handle) {
@@ -279,8 +281,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                     }
                 } else {
                     // 微服务调用
-                    if (Utils.isEmpty(config.getCorpNo())
-                            || config.getSession().getCorpNo().equals(config.getCorpNo())) {
+                    if (config.getBookNo().isEmpty()
+                            || config.getSession().getCorpNo().equals(config.getBookNo().get())) {
                         // 相同的情况下使用当前token
                         token = config.getSession().getToken();
                         original = ServerConfig.getAppOriginal();
