@@ -38,10 +38,14 @@ import redis.clients.jedis.Jedis;
 public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
 //    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
-    // 批量写入redis等缓存
-    private static final String LUA_SCRIPT_MSETEX = "local keysLen = table.getn(KEYS);local argvLen = table.getn(ARGV);"
-            + "local idx=1;local argVIdx=1;for idx=1,keysLen,1 do argVIdx=(idx-1)*2+1; "
-            + "redis.call('Set',KEYS[idx],ARGV[argVIdx],'EX',ARGV[argVIdx+1]);end return keysLen;";
+
+    // 构建 Lua 脚本，批量写入 redis 缓存
+    public static final String luaScript = """
+            for i, key in pairs(KEYS) do
+                redis.call('SET', key, ARGV[i * 2 - 1], 'EX', ARGV[i * 2])
+            end
+            return #KEYS
+            """;
     protected final SqlQuery query;
     protected final Class<T> clazz;
     protected EntityHelper<T> helper;
@@ -96,7 +100,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
                         SessionCache.set(keys, row);
                 }
                 try (Redis jedis = new Redis()) {
-                    String sha = jedis.scriptLoad(LUA_SCRIPT_MSETEX);
+                    String sha = jedis.scriptLoad(luaScript);
                     jedis.evalsha(sha, batchKeys, batchValues);
                 }
             });
