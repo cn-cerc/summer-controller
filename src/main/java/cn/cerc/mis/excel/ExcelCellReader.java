@@ -9,7 +9,6 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 import cn.cerc.db.core.Datetime;
-import cn.cerc.db.core.LanguageResource;
 
 public class ExcelCellReader {
 
@@ -24,10 +23,7 @@ public class ExcelCellReader {
                 return new Datetime(date).toString();
             } else {
                 BigDecimal bigDecimal = new BigDecimal(cell.getNumericCellValue());
-                if (LanguageResource.isLanguageTW())
-                    bigDecimal = bigDecimal.setScale(4, RoundingMode.HALF_UP);
-                else
-                    bigDecimal = bigDecimal.setScale(4, RoundingMode.HALF_EVEN);
+                bigDecimal = bigDecimal.setScale(4, RoundingMode.HALF_UP);
                 return bigDecimal.stripTrailingZeros().toPlainString();
             }
         } else if (type == CellType.STRING) {

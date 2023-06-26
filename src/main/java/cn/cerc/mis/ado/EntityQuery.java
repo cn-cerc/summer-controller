@@ -56,7 +56,7 @@ public class EntityQuery {
      * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
     public static <T extends EntityImpl> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz,
-                                                                          Consumer<T> actionInsert, String... values) {
+            Consumer<T> actionInsert, String... values) {
         EntityCache<T> cache = new EntityCache<>(handle, clazz);
         String key = EntityCache.buildKey(cache.buildKeys(values));
         try (Jedis jedis = JedisFactory.getJedis()) {
@@ -86,8 +86,9 @@ public class EntityQuery {
             params[i] = values[i];
 
         SqlQuery query = EntityMany.open(handle, clazz, params).dataSet();
-        if (query.size() > 1000)
-            log.warn("corpNo{}, entity {}, size larger than 1000.", handle.getCorpNo(), clazz);
+        if (query.size() > SqlText.MAX_RECORDS)
+            log.warn("{} -> {} entity size {} larger than {}", handle.getCorpNo(), clazz.getName(), query.size(),
+                    SqlText.MAX_RECORDS);
         for (DataRow row : query) {
             boolean find = offset == 0 ? true : row.getString(entityKey.fields()[0]).equals(handle.getCorpNo());
             for (int i = offset; i < entityKey.fields().length; i++) {
@@ -108,18 +109,21 @@ public class EntityQuery {
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, Consumer<SqlWhere> consumer) {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream().collect(Collectors.toCollection(LinkedHashSet::new));
+        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
 }
