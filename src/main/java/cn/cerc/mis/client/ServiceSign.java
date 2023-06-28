@@ -267,7 +267,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             // 判断当前账套和调用账套是否一致
             if (isLocal(config, this)) {
                 // 同账套且本地服务，
-                log.info("本地接口 {} 使用远程调用告警", this.id);
+                log.debug("本地接口 {} 使用远程调用告警", this.id);
                 dataOut = LocalService.call(this.id, config, dataIn);
             } else {
                 // 远程服务或不同账套通过远程调用
