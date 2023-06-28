@@ -123,7 +123,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             if (server == null)
                 dataOut = LocalService.call(this.id, handle, dataIn);
             else {
-                log.warn("请改使用callRemote调用: {}", this.id);
+                log.info("请改使用callRemote调用: {}", this.id);
                 dataOut = server.call(this, handle, dataIn);
             }
         } catch (Throwable e) {
