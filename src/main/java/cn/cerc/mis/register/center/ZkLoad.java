@@ -41,7 +41,8 @@ public class ZkLoad implements Watcher {
 
     private ZkLoad() {
         serverMap = new ConcurrentHashMap<>();
-        rootPath = String.format("/%s/%s/%s/", REGISTER_CENTER,ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
+        rootPath = String.format("/%s/%s/%s/", REGISTER_CENTER, ServerConfig.getAppProduct(),
+                ServerConfig.getAppVersion());
         currentMap = new ConcurrentHashMap<>();
         watchedMap = new ConcurrentHashMap<>();
     }
@@ -51,7 +52,6 @@ public class ZkLoad implements Watcher {
     }
 
     public Optional<String> getUrl(String original) {
-
         if (Utils.isEmpty(original))
             return Optional.empty();
         String path = rootPath + original + POINTS;
