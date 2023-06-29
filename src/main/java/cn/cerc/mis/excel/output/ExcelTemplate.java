@@ -2,19 +2,22 @@ package cn.cerc.mis.excel.output;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import com.aliyun.oss.model.GeneratePresignedUrlRequest;
+import com.obs.services.model.HttpMethodEnum;
+import com.obs.services.model.TemporarySignatureRequest;
+import com.obs.services.model.TemporarySignatureResponse;
 
 import cn.cerc.db.core.DataSet;
-import cn.cerc.db.core.Datetime;
-import cn.cerc.db.core.Datetime.DateType;
 import cn.cerc.db.core.FastDate;
 import cn.cerc.db.core.LanguageResource;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.mongo.MongoOSS;
 import cn.cerc.db.oss.OssConnection;
@@ -111,7 +114,8 @@ public class ExcelTemplate {
         }
     }
 
-    protected void writeColumn(WritableSheet sheet, int col, int row, Column column, WritableCellFormat wc) throws WriteException {
+    protected void writeColumn(WritableSheet sheet, int col, int row, Column column, WritableCellFormat wc)
+            throws WriteException {
         if (column instanceof NumberColumn) {
             if (LanguageResource.isLanguageTW()) {
                 Label item = new Label(col, row, decimalformat.format(column.getValue()));
@@ -155,14 +159,22 @@ public class ExcelTemplate {
                     if (MongoOSS.findByName(imageUrl).isPresent()) {
                         inputStream = MongoOSS.download(imageUrl);
                     } else {
+                        OssConnection ossConnection = new OssConnection();
                         // 兼容main分支，后续更新main之后删除，避免发包后影响main
-                        String bucket = ServerConfig.getInstance().getProperty(OssConnection.oss_bucket);
-                        GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucket, imageUrl);
-                        // 设置失效时间
-                        req.setExpiration(new Datetime().inc(DateType.Minute, 5).asBaseDate());
-                        // 压缩方式，长宽80，png格式
-                        req.setProcess("image/resize,m_lfit,h_80,w_80/format,png");
-                        inputStream = new OssConnection().getClient().generatePresignedUrl(req).openStream();
+                        String bucket = ossConnection.getBucket();
+
+                        TemporarySignatureRequest request = new TemporarySignatureRequest(HttpMethodEnum.GET,
+                                TimeUnit.MINUTES.toSeconds(5));
+                        request.setBucketName(bucket);
+                        request.setObjectKey(fileName);
+
+                        Map<String, Object> queryParams = new HashMap<String, Object>();
+                        queryParams.put("x-image-process", "image/resize,m_lfit,h_80,w_80/format,png");
+                        request.setQueryParams(queryParams);
+
+                        TemporarySignatureResponse resp = ossConnection.getClient().createTemporarySignature(request);
+                        URL url = new URL(resp.getSignedUrl());
+                        inputStream = url.openStream();
                     }
                     byte[] bytes = new byte[1024];
                     ByteArrayOutputStream output = new ByteArrayOutputStream();
