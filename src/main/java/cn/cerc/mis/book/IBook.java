@@ -7,7 +7,7 @@ public interface IBook extends IBookEnroll {
     void init(IBookManage manage);
 
     // 初始化（ 会被每月调用）
-    void ready();
+    void ready() throws ServiceException;
 
     // 将帐本的更新，保存到数据库中
     void save() throws ServiceException;
