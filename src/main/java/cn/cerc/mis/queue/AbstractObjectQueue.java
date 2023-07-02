@@ -2,6 +2,7 @@ package cn.cerc.mis.queue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,9 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
+import cn.cerc.mis.client.ServiceConfigImpl;
 import cn.cerc.mis.client.TokenConfigImpl;
+import cn.cerc.mis.core.Application;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
@@ -38,13 +41,15 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
     public String appendToRemote(IHandle handle, TokenConfigImpl config, T data) {
         Objects.requireNonNull(config);
         config.setSession(handle.getSession());
-        config.getOriginal().ifPresent(value -> this.setOriginal(value));
-        config.getToken().ifPresent(token -> {
-            if (token.equals(handle.getSession().getToken()))
-                throw new RuntimeException(
-                        String.format("%s 远程token不得与当前token一致 %s", token, handle.getSession().getToken()));
-            data.setToken(token);
-        });
+//        config.getOriginal().ifPresent(value -> this.setOriginal(value));
+
+        var serviceConfig = Application.getBean(ServiceConfigImpl.class);
+        if (config.getBookNo().isPresent()) {
+            Optional<String> remoteToken = serviceConfig.getToken(handle, config.getBookNo().get());
+            if (remoteToken.isPresent())
+                data.setToken(remoteToken.get());
+        }
+
         if (!data.validate())
             throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
         return super.push(new Gson().toJson(data));

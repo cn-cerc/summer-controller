@@ -16,8 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Description;
 
 import cn.cerc.db.core.DataRow;
@@ -25,7 +23,6 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
@@ -33,11 +30,11 @@ import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
-    private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
+//    private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
     private final String id;
     private int version;
     private Set<String> properties;
-    private ServiceServerImpl server;
+    private ServiceOptionImpl server;
 
     private Class<?> headStructure;
     private Class<?> bodyStructure;
@@ -47,14 +44,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         this.id = id;
     }
 
-    /**
-     * 请改用 RemoteToken 方式调用
-     * 
-     * @param id
-     * @param server
-     */
-    @Deprecated
-    public ServiceSign(String id, ServiceServerImpl server) {
+    public ServiceSign(String id, ServiceOptionImpl server) {
         super();
         this.id = id;
         this.server = server;
@@ -64,7 +54,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return id;
     }
 
-    public ServiceServerImpl server() {
+    public ServiceOptionImpl server() {
         return this.server;
     }
 
@@ -98,12 +88,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            if (server == null)
-                dataOut = LocalService.call(this.id, handle, dataIn);
-            else {
-                log.warn("请改使用callRemote调用: {}", this.id);
-                dataOut = server.call(this, handle, dataIn);
-            }
+            dataOut = LocalService.call(this.id, handle, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
@@ -136,7 +121,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            dataOut = this.server.call(this, config, dataIn);
+//            dataOut = this.server.call(this, config, dataIn);
+            dataOut = RemoteService.callRemote(config, server, id, dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
@@ -254,9 +240,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      */
     @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
-        if (this.server() == null || this.server().isLocal(handle, this))
-            return EntityQuery.findOne(handle, clazz, values);
-        else {
+//        if (this.server() == null || this.server().isLocal(handle, this))
+//            return EntityQuery.findOne(handle, clazz, values);
+//        else {
             EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
             DataSet dataIn = new DataSet();
             DataRow headIn = dataIn.head();
@@ -268,7 +254,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             if (dataOut.state() == ServiceState.OK)
                 return Optional.of(dataOut.current().asEntity(clazz));
             return Optional.empty();
-        }
+//        }
     }
 
     /**
@@ -276,9 +262,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      */
     @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        if (this.server() == null || this.server().isLocal(handle, this))
-            return EntityQuery.findMany(handle, clazz, values);
-        else {
+//        if (this.server() == null || this.server().isLocal(handle, this))
+//            return EntityQuery.findMany(handle, clazz, values);
+//        else {
             Set<T> set = new LinkedHashSet<>();
             EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
             DataSet dataIn = new DataSet();
@@ -295,7 +281,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
             dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
             return set;
-        }
+//        }
     }
 
     @Override
@@ -316,7 +302,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return build(id, null, ServiceSignImpl.class);
     }
 
-    public static ServiceSignImpl build(String id, ServiceServerImpl server) {
+    public static ServiceSignImpl build(String id, ServiceOptionImpl server) {
         return build(id, server, ServiceSignImpl.class);
     }
 
@@ -325,7 +311,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T build(String id, ServiceServerImpl server, Class<T> clazz) {
+    public static <T> T build(String id, ServiceOptionImpl server, Class<T> clazz) {
         ServiceSign sign = new ServiceSign(id, server);
         try {
             Method head = clazz.getMethod("head");

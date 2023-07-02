@@ -110,12 +110,10 @@ public class RemoteService extends ServiceProxy {
         String token = config.getToken(handle, corpNo).orElseThrow();
         return callRemote(endpoint, token, service, dataIn);
     }
-    
-    public static DataSet callRemote(IHandle handle, ServiceServerImpl server, String service, DataSet dataIn) {
-        var curCorp = handle.getCorpNo();
-        var config = Application.getBean(ServiceConfigImpl.class);
-        String endpoint = server.getEndpoint(handle, service);
-        String token = server.getToken();
+
+    public static DataSet callRemote(IHandle handle, ServiceOptionImpl server, String service, DataSet dataIn) {
+        String endpoint = server.getEndpoint(handle, service).orElseThrow();
+        String token = server.getToken().orElseThrow();
         return callRemote(endpoint, token, service, dataIn);
     }
 
