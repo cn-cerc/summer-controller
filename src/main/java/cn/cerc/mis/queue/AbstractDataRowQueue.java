@@ -12,7 +12,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
-import cn.cerc.mis.client.ConfigCorpImpl;
+import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.ConfigServiceImpl;
 import cn.cerc.mis.core.Application;
 
@@ -41,7 +41,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         return super.push(dataRow.json());
     }
 
-    protected String pushToRemote(IHandle handle, ConfigCorpImpl config, DataRow dataRow) {
+    protected String pushToRemote(IHandle handle, CorpConfigImpl config, DataRow dataRow) {
         Objects.requireNonNull(config);
         if (!Utils.isEmpty(config.getCorpNo())) {
             var serviceConfig = Application.getBean(ConfigServiceImpl.class);

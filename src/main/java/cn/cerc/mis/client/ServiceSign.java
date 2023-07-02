@@ -109,7 +109,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @Override
-    public ServiceSign callRemote(ConfigCorpImpl corpConfig, DataSet dataIn) {
+    public ServiceSign callRemote(CorpConfigImpl corpConfig, DataSet dataIn) {
         Objects.requireNonNull(corpConfig);
         Objects.requireNonNull(corpConfig.getSession());
         this.setSession(corpConfig.getSession());

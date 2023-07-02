@@ -8,7 +8,7 @@ import cn.cerc.db.core.ISession;
  * @author 张弓
  *
  */
-public interface ConfigCorpImpl {
+public interface CorpConfigImpl {
 
     /**
      * 
