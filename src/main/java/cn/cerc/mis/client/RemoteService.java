@@ -105,7 +105,7 @@ public class RemoteService extends ServiceProxy {
             log.warn("应改使用 callLocal 来调用 {}", service);
             return LocalService.call(service, handle, dataIn);
         }
-        var config = Application.getBean(ServiceConfigImpl.class);
+        var config = Application.getBean(ConfigServiceImpl.class);
         String endpoint = config.getEndpoint(handle, corpNo).orElseThrow();
         String token = config.getToken(handle, corpNo).orElseThrow();
         return callRemote(endpoint, token, service, dataIn);

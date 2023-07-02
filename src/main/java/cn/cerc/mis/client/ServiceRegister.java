@@ -23,7 +23,7 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
     private static final Logger log = LoggerFactory.getLogger(ServiceRegister.class);
 
     @Autowired
-    private ServiceConfigImpl config;
+    private ConfigServiceImpl config;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -77,11 +77,11 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
         }
     }
 
-    public ServiceConfigImpl getConfig() {
+    public ConfigServiceImpl getConfig() {
         return config;
     }
 
-    public void setConfig(ServiceConfigImpl config) {
+    public void setConfig(ConfigServiceImpl config) {
         this.config = config;
     }
 }
