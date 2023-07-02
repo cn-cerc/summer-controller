@@ -14,6 +14,7 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 
 public class ServiceUtils {
@@ -55,7 +56,7 @@ public class ServiceUtils {
         var curCorp = handle.getCorpNo();
         if (curCorp.equals(corpNo)) {
             log.warn("应改使用 callLocal 来调用 {}", service);
-            return callLocal(handle, service, dataIn);
+            return LocalService.call(service, handle, dataIn);
         }
         var config = Application.getBean(ServiceConfigImpl.class);
         String endpoint = config.getEndpoint(handle, corpNo).orElseThrow();
@@ -73,7 +74,7 @@ public class ServiceUtils {
      */
     public static DataSet callCenter(IHandle handle, String service, DataSet dataIn) {
         if ("csp".equals(ServerConfig.getAppOriginal())) {
-            return ServiceUtils.callLocal(handle, service, dataIn);
+            return LocalService.call(service, handle, dataIn);
         } else {
             var registerServer = Application.getBean(ServiceRegister.class);
             var endpoint = registerServer.getServiceSite("csp");
