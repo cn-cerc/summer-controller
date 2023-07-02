@@ -12,34 +12,12 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.ServerConfig;
-import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
-import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
-import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.ServiceState;
 
 public class ServiceUtils {
     private static final Logger log = LoggerFactory.getLogger(ServiceUtils.class);
-
-    /**
-     * 
-     * @param handle
-     * @param service 服务代码
-     * @param dataIn  调用参数
-     * @return
-     */
-    public static DataSet callLocal(IHandle handle, String service, DataSet dataIn) {
-        try {
-            Variant function = new Variant("execute").setKey(service);
-            IService bean = Application.getService(handle, service, function);
-            return bean._call(handle, dataIn, function);
-        } catch (ClassNotFoundException e) {
-            return new DataSet().setMessage("not find service: " + service);
-        } catch (ServiceException e) {
-            return new DataSet().setMessage(e.getMessage());
-        }
-    }
 
     /**
      * 调用远程服务
