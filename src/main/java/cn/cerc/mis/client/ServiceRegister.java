@@ -53,8 +53,6 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
         String hostname = ApplicationEnvironment.hostname();
         DataRow node = DataRow.of("host", config.localhost(), "hostname", hostname, "time", new Datetime());
         zk.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
-
-        getServiceSite(ServerConfig.getAppOriginal());
     }
 
     /**
