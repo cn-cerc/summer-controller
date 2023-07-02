@@ -9,10 +9,11 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
+import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.ServiceConfigImpl;
-import cn.cerc.mis.client.TokenConfigImpl;
 import cn.cerc.mis.core.Application;
 
 @Deprecated
@@ -40,17 +41,15 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         return super.push(dataRow.json());
     }
 
-    protected String pushToRemote(IHandle handle, TokenConfigImpl config, DataRow dataRow) {
+    protected String pushToRemote(IHandle handle, CorpConfigImpl config, DataRow dataRow) {
         Objects.requireNonNull(config);
-        config.setSession(handle.getSession());
-
-        var serviceConfig = Application.getBean(ServiceConfigImpl.class);
-        if (config.getBookNo().isPresent()) {
-            Optional<String> remoteToken = serviceConfig.getToken(handle, config.getBookNo().get());
+        if (!Utils.isEmpty(config.getCorpNo())) {
+            var serviceConfig = Application.getBean(ServiceConfigImpl.class);
+            Optional<String> remoteToken = serviceConfig.getToken(handle, config.getCorpNo());
             if (remoteToken.isPresent())
                 dataRow.setValue("token", remoteToken.get());
         }
-        
+
         if (!dataRow.hasValue("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
         if (!dataRow.hasValue("user_code_"))

@@ -37,17 +37,17 @@ public interface ServiceSignImpl {
 
     ServiceSign callLocal(IHandle handle, DataSet dataIn);
 
-    default ServiceSign callRemote(TokenConfigImpl config) {
+    default ServiceSign callRemote(CorpConfigImpl config) {
         return callRemote(config, new DataSet());
     }
 
-    default ServiceSign callRemote(TokenConfigImpl config, DataRow headIn) {
+    default ServiceSign callRemote(CorpConfigImpl config, DataRow headIn) {
         DataSet dataIn = new DataSet();
         dataIn.head().copyValues(headIn);
         return callRemote(config, dataIn);
     }
 
-    ServiceSign callRemote(TokenConfigImpl config, DataSet dataIn);
+    ServiceSign callRemote(CorpConfigImpl config, DataSet dataIn);
 
     Object head();
 

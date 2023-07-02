@@ -109,20 +109,19 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     }
 
     @Override
-    public ServiceSign callRemote(TokenConfigImpl config, DataSet dataIn) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(config.getSession());
-        this.setSession(config.getSession());
+    public ServiceSign callRemote(CorpConfigImpl corpConfig, DataSet dataIn) {
+        Objects.requireNonNull(corpConfig);
+        Objects.requireNonNull(corpConfig.getSession());
+        this.setSession(corpConfig.getSession());
         // 优先使用RemoteTokenConfig中的Server
-        config.getServer().ifPresent(value -> this.server = value);
+        corpConfig.getServer().ifPresent(value -> this.server = value);
         Objects.requireNonNull(this.server);
         // 返回一个新的sign
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-//            dataOut = this.server.call(this, config, dataIn);
-            dataOut = RemoteService.callRemote(config, server, id, dataIn);
+            dataOut = RemoteService.callRemote(this, corpConfig.getCorpNo(), id(), dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
@@ -243,17 +242,17 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 //        if (this.server() == null || this.server().isLocal(handle, this))
 //            return EntityQuery.findOne(handle, clazz, values);
 //        else {
-            EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
-            DataSet dataIn = new DataSet();
-            DataRow headIn = dataIn.head();
-            int site = entityKey.corpNo() ? 1 : 0;
-            String[] fields = entityKey.fields();
-            for (int i = site; i < fields.length; i++)
-                headIn.setValue(fields[i], values[i - site]);
-            DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
-            if (dataOut.state() == ServiceState.OK)
-                return Optional.of(dataOut.current().asEntity(clazz));
-            return Optional.empty();
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        DataSet dataIn = new DataSet();
+        DataRow headIn = dataIn.head();
+        int site = entityKey.corpNo() ? 1 : 0;
+        String[] fields = entityKey.fields();
+        for (int i = site; i < fields.length; i++)
+            headIn.setValue(fields[i], values[i - site]);
+        DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
+        if (dataOut.state() == ServiceState.OK)
+            return Optional.of(dataOut.current().asEntity(clazz));
+        return Optional.empty();
 //        }
     }
 
@@ -265,22 +264,22 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 //        if (this.server() == null || this.server().isLocal(handle, this))
 //            return EntityQuery.findMany(handle, clazz, values);
 //        else {
-            Set<T> set = new LinkedHashSet<>();
-            EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
-            DataSet dataIn = new DataSet();
-            DataRow headIn = dataIn.head();
-            int site = entityKey.corpNo() ? 1 : 0;
-            String[] fields = entityKey.fields();
-            if (values != null && values.length > 0) {
-                for (int i = site; i < fields.length; i++)
-                    headIn.setValue(fields[i], values[i - site]);
-            }
-            DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
-            if (dataOut.state() != ServiceState.OK)
-                return set;
-
-            dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
+        Set<T> set = new LinkedHashSet<>();
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        DataSet dataIn = new DataSet();
+        DataRow headIn = dataIn.head();
+        int site = entityKey.corpNo() ? 1 : 0;
+        String[] fields = entityKey.fields();
+        if (values != null && values.length > 0) {
+            for (int i = site; i < fields.length; i++)
+                headIn.setValue(fields[i], values[i - site]);
+        }
+        DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
+        if (dataOut.state() != ServiceState.OK)
             return set;
+
+        dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
+        return set;
 //        }
     }
 

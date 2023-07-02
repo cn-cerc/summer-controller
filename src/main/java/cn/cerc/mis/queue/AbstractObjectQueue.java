@@ -13,8 +13,8 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
+import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.ServiceConfigImpl;
-import cn.cerc.mis.client.TokenConfigImpl;
 import cn.cerc.mis.core.Application;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
@@ -38,14 +38,13 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
         return super.push(new Gson().toJson(data));
     }
 
-    public String appendToRemote(IHandle handle, TokenConfigImpl config, T data) {
+    public String appendToRemote(IHandle handle, CorpConfigImpl config, T data) {
         Objects.requireNonNull(config);
-        config.setSession(handle.getSession());
 //        config.getOriginal().ifPresent(value -> this.setOriginal(value));
 
-        var serviceConfig = Application.getBean(ServiceConfigImpl.class);
-        if (config.getBookNo().isPresent()) {
-            Optional<String> remoteToken = serviceConfig.getToken(handle, config.getBookNo().get());
+        if (!Utils.isEmpty(config.getCorpNo())) {
+            var serviceConfig = Application.getBean(ServiceConfigImpl.class);
+            Optional<String> remoteToken = serviceConfig.getToken(handle, config.getCorpNo());
             if (remoteToken.isPresent())
                 data.setToken(remoteToken.get());
         }
