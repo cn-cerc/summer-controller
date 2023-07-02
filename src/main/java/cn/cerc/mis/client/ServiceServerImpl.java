@@ -15,6 +15,12 @@ import cn.cerc.mis.core.ServiceState;
 public interface ServiceServerImpl {
     Logger log = LoggerFactory.getLogger(ServiceServerImpl.class);
 
+    default String getEndpoint(IHandle handle, String service) {
+        return getRequestUrl(handle, service);
+    }
+
+    String getToken();
+
     String getRequestUrl(IHandle handle, String service);
 
     TokenConfigImpl getDefaultConfig(IHandle handle);
@@ -43,4 +49,5 @@ public interface ServiceServerImpl {
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage(url + " remote service error");
         }
     }
+
 }
