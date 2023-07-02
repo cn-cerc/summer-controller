@@ -67,15 +67,14 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
         var zk = ZkNode.get().server();
         var list = zk.getNodes(rootPath);
         if (list.size() > 0) {
-            log.info("{} 有找到可用节点：{}", industry, list.size());
-            for (var item : list)
-                System.out.println(item);
-            var node = new DataRow().setJson(list.get(new Random().nextInt(list.size() - 1)));
-            System.out.println(node);
+            log.debug("{} 有找到可用节点：{}", industry, list.size());
+            var nodeKey = list.get(new Random().nextInt(list.size()));
+            var nodeValue = zk.getValue(rootPath + "/" + nodeKey);
+            var node = new DataRow().setJson(nodeValue);
             return new ServiceSiteRecord(true, industry, node.getString("host"));
         } else {
             var website = zk.getValue(rootPath);
-            log.info("{} 没有有找到可用节点，改使用外网调用：{}", industry, website);
+            log.warn("{} 没有有找到可用节点，改使用外网调用：{}", industry, website);
             return new ServiceSiteRecord(false, industry, website);
         }
     }
@@ -87,5 +86,4 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
     public void setConfig(ServiceConfigImpl config) {
         this.config = config;
     }
-
 }
