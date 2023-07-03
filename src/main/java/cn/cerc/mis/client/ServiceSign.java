@@ -132,7 +132,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             if (corpConfig.isLocal())
                 dataOut = LocalService.call(id(), this, dataIn);
             // 处理特殊的业务场景，创建帐套、钓友商城
-            if (sign.server() != null) {
+            else if (sign.server() != null) {
                 // 获取指定的目标机节点
                 var endpoint = sign.server().getEndpoint(this, id()).orElse(null);
                 // 获取指定的目标机授权
