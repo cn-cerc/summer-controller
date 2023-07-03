@@ -17,4 +17,10 @@ public interface CorpConfigImpl {
     String getCorpNo();
 
     ISession getSession();
+
+    /**
+     * 
+     * @return 判断当前帐套是否在本地
+     */
+    boolean isLocal();
 }

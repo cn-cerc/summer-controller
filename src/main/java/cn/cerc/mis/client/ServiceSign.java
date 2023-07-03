@@ -20,7 +20,6 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
@@ -129,6 +128,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
+            // 防止本地调用
+            if (corpConfig.isLocal())
+                dataOut = LocalService.call(id(), this, dataIn);
             // 处理特殊的业务场景，创建帐套、钓友商城
             if (sign.server() != null) {
                 // 获取指定的目标机节点
@@ -144,10 +146,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                     if (token == null)
                         token = server.getToken(this, corpConfig.getCorpNo()).orElse(null);
                 }
-                if ("000000".equals(corpConfig.getCorpNo()) && ServerConfig.isCspOriginal())
-                    dataOut = LocalService.call(id(), this, dataIn);
-                else
-                    dataOut = RemoteService.call(endpoint, token, id(), dataIn);
+                dataOut = RemoteService.call(endpoint, token, id(), dataIn);
             } else
                 dataOut = RemoteService.call(this, corpConfig.getCorpNo(), id(), dataIn);
         } catch (Throwable e) {
