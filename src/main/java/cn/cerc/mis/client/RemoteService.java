@@ -99,7 +99,7 @@ public class RemoteService extends ServiceProxy {
      * @param dataIn
      * @return
      */
-    public static DataSet callRemote(IHandle handle, String corpNo, String service, DataSet dataIn) {
+    public static DataSet call(IHandle handle, String corpNo, String service, DataSet dataIn) {
         var curCorp = handle.getCorpNo();
         if (curCorp.equals(corpNo)) {
             log.warn("应改使用 callLocal 来调用 {}", service);
