@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import cn.cerc.db.core.IHandle;
 
-public interface ConfigServiceImpl {
+public interface ServerConfigImpl {
     /**
      * 
      * @return 本地主机，ip + port

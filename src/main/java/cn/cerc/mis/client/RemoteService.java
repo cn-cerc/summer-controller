@@ -70,8 +70,8 @@ public class RemoteService extends ServiceProxy {
     /**
      * 调用远程服务
      * 
-     * @param endpoint 远程服务器url
-     * @param token    远程服务器访问凭据
+     * @param endpoint 远程服务器 url
+     * @param token    远程服务器访问 token
      * @param service
      * @param dataIn
      * @return
@@ -94,26 +94,34 @@ public class RemoteService extends ServiceProxy {
      * 根据帐套配置，调用相应的机群服务
      * 
      * @param handle
-     * @param corpNo
+     * @param targetCorpNo 根据被调用目标帐套，获取 endpoint 与 token 并调用
      * @param service
      * @param dataIn
      * @return
      */
-    public static DataSet call(IHandle handle, String corpNo, String service, DataSet dataIn) {
-        var curCorp = handle.getCorpNo();
-        if (curCorp.equals(corpNo)) {
+    public static DataSet call(IHandle handle, String targetCorpNo, String service, DataSet dataIn) {
+        var corpNo = handle.getCorpNo();
+        if (corpNo.equals(corpNo)) {
             log.warn("应改使用 callLocal 来调用 {}", service);
             return LocalService.call(service, handle, dataIn);
         }
-        var config = Application.getBean(ConfigServiceImpl.class);
-        String endpoint = config.getEndpoint(handle, corpNo).orElseThrow();
-        String token = config.getToken(handle, corpNo).orElseThrow();
+        var server = Application.getBean(ServerConfigImpl.class);
+        String endpoint = server.getEndpoint(handle, targetCorpNo).orElseThrow();
+        String token = server.getToken(handle, targetCorpNo).orElseThrow();
         return callRemote(endpoint, token, service, dataIn);
     }
 
-    public static DataSet callRemote(IHandle handle, ServiceOptionImpl server, String service, DataSet dataIn) {
-        String endpoint = server.getEndpoint(handle, service).orElseThrow();
-        String token = server.getToken().orElseThrow();
+    /**
+     * 
+     * @param handle
+     * @param serviceOption 根据 service 配置，获取 endpoint 与 token 并调用
+     * @param service
+     * @param dataIn
+     * @return
+     */
+    public static DataSet callRemote(IHandle handle, ServiceOptionImpl serviceOption, String service, DataSet dataIn) {
+        String endpoint = serviceOption.getEndpoint(handle, service).orElseThrow();
+        String token = serviceOption.getToken().orElseThrow();
         return callRemote(endpoint, token, service, dataIn);
     }
 

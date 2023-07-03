@@ -14,7 +14,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
 import cn.cerc.mis.client.CorpConfigImpl;
-import cn.cerc.mis.client.ConfigServiceImpl;
+import cn.cerc.mis.client.ServerConfigImpl;
 import cn.cerc.mis.core.Application;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
@@ -43,7 +43,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
 //        config.getOriginal().ifPresent(value -> this.setOriginal(value));
 
         if (!Utils.isEmpty(config.getCorpNo())) {
-            var serviceConfig = Application.getBean(ConfigServiceImpl.class);
+            var serviceConfig = Application.getBean(ServerConfigImpl.class);
             Optional<String> remoteToken = serviceConfig.getToken(handle, config.getCorpNo());
             if (remoteToken.isPresent())
                 data.setToken(remoteToken.get());
