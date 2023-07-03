@@ -138,7 +138,7 @@ public class RemoteService extends ServiceProxy {
             return LocalService.call(service, handle, dataIn);
         } else {
             var registerServer = Application.getBean(ServiceRegister.class);
-            var endpoint = registerServer.getServiceSite("csp");
+            var endpoint = registerServer.getServiceHost("csp");
             return callRemote(endpoint.website(), handle.getSession().getToken(), service, dataIn);
         }
     }

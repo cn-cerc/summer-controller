@@ -59,7 +59,7 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
      * 
      * @return 返回可用的服务地址
      */
-    public ServiceSiteRecord getServiceSite(String industry) {
+    public ServiceSiteRecord getServiceHost(String industry) {
         var rootPath = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(),
                 industry);
         var zk = ZkNode.get().server();
