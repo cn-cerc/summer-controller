@@ -119,7 +119,7 @@ public class RemoteService extends ServiceProxy {
      * @param dataIn
      * @return
      */
-    public static DataSet callRemote(IHandle handle, ServiceOptionImpl serviceOption, String service, DataSet dataIn) {
+    public static DataSet call(IHandle handle, ServerOptionImpl serviceOption, String service, DataSet dataIn) {
         String endpoint = serviceOption.getEndpoint(handle, service).orElseThrow();
         String token = serviceOption.getToken().orElseThrow();
         return callRemote(endpoint, token, service, dataIn);

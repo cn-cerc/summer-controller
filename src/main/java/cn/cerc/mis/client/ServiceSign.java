@@ -29,14 +29,14 @@ import cn.cerc.mis.core.ServiceState;
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private final String id;
     private Set<String> properties;
-    private ServiceOptionImpl server;
+    private ServerOptionImpl server;
 
     public ServiceSign(String id) {
         super();
         this.id = id;
     }
 
-    public ServiceSign(String id, ServiceOptionImpl server) {
+    public ServiceSign(String id, ServerOptionImpl server) {
         super();
         this.id = id;
         this.server = server;
@@ -46,7 +46,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return id;
     }
 
-    public ServiceOptionImpl server() {
+    public ServerOptionImpl server() {
         return this.server;
     }
 
