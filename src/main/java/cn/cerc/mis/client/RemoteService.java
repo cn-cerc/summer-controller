@@ -13,7 +13,6 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
@@ -76,7 +75,7 @@ public class RemoteService extends ServiceProxy {
      * @param dataIn
      * @return
      */
-    public static DataSet callRemote(String endpoint, String token, String service, DataSet dataIn) {
+    public static DataSet call(String endpoint, String token, String service, DataSet dataIn) {
         Curl curl = new Curl();
         if (!Utils.isEmpty(token))
             curl.put(ISession.TOKEN, token);
@@ -108,7 +107,7 @@ public class RemoteService extends ServiceProxy {
         var server = Application.getBean(ServerConfigImpl.class);
         String endpoint = server.getEndpoint(handle, targetCorpNo).orElseThrow();
         String token = server.getToken(handle, targetCorpNo).orElseThrow();
-        return callRemote(endpoint, token, service, dataIn);
+        return call(endpoint, token, service, dataIn);
     }
 
     /**
@@ -122,25 +121,7 @@ public class RemoteService extends ServiceProxy {
     public static DataSet call(IHandle handle, ServerOptionImpl serviceOption, String service, DataSet dataIn) {
         String endpoint = serviceOption.getEndpoint(handle, service).orElseThrow();
         String token = serviceOption.getToken().orElseThrow();
-        return callRemote(endpoint, token, service, dataIn);
-    }
-
-    /**
-     * 仅用于调用中心库
-     * 
-     * @param handle
-     * @param service
-     * @param dataIn
-     * @return
-     */
-    public static DataSet callCenter(IHandle handle, String service, DataSet dataIn) {
-        if ("csp".equals(ServerConfig.getAppOriginal())) {
-            return LocalService.call(service, handle, dataIn);
-        } else {
-            var registerServer = Application.getBean(ServiceRegister.class);
-            var endpoint = registerServer.getServiceHost("csp");
-            return callRemote(endpoint.website(), handle.getSession().getToken(), service, dataIn);
-        }
+        return call(endpoint, token, service, dataIn);
     }
 
 }
