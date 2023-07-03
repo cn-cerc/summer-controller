@@ -1,7 +1,6 @@
 package cn.cerc.mis.queue;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         Objects.requireNonNull(config);
         if (!Utils.isEmpty(config.getCorpNo())) {
             var serviceConfig = Application.getBean(ServerConfigImpl.class);
-            Optional<String> remoteToken = serviceConfig.getToken(handle, config.getCorpNo());
+            var remoteToken = serviceConfig.getToken(handle, config.getCorpNo());
             if (remoteToken.isPresent())
                 dataRow.setValue("token", remoteToken.get());
         }
@@ -85,10 +84,5 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     }
 
     public abstract boolean execute(IHandle handle, DataRow data);
-
-//    public boolean receive(OnMessageDataRow event) {
-//        QueueConsumer consumer = new QueueConsumer();
-//        return consumer.receive("tempGroup", this.getTopic(), this.getTag(), data -> event.execute(new DataRow().setJson(data)));
-//    }
 
 }
