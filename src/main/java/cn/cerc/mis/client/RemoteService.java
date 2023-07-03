@@ -99,12 +99,13 @@ public class RemoteService extends ServiceProxy {
      * @param dataIn
      * @return
      */
-    public static DataSet call(IHandle handle, CorpConfigImpl targetConfig,
-            String service, DataSet dataIn, ServerOptionImpl serviceOption) {
+    public static DataSet call(IHandle handle, CorpConfigImpl targetConfig, String service, DataSet dataIn,
+            ServerOptionImpl serviceOption) {
         Objects.requireNonNull(targetConfig);
         // 防止本地调用
         if (targetConfig.isLocal()) {
-            log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", service);
+            if (!"000000".equals(targetConfig.getCorpNo()))
+                log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", service);
             return LocalService.call(service, handle, dataIn);
         } else if (serviceOption != null) {
             // 处理特殊的业务场景，创建帐套、钓友商城
