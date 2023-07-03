@@ -20,6 +20,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
@@ -143,7 +144,10 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                     if (token == null)
                         token = server.getToken(this, corpConfig.getCorpNo()).orElse(null);
                 }
-                dataOut = RemoteService.call(endpoint, token, id(), dataIn);
+                if ("000000".equals(corpConfig.getCorpNo()) && ServerConfig.isCspOriginal())
+                    dataOut = LocalService.call(id(), this, dataIn);
+                else
+                    dataOut = RemoteService.call(endpoint, token, id(), dataIn);
             } else
                 dataOut = RemoteService.call(this, corpConfig.getCorpNo(), id(), dataIn);
         } catch (Throwable e) {
