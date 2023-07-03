@@ -20,6 +20,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
@@ -122,13 +123,29 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         Objects.requireNonNull(corpConfig);
         Objects.requireNonNull(corpConfig.getSession());
         this.setSession(corpConfig.getSession());
-        Objects.requireNonNull(this.server);
         // 返回一个新的sign
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            dataOut = RemoteService.call(this, corpConfig.getCorpNo(), id(), dataIn);
+            // 处理特殊的业务场景，创建帐套、钓友商城
+            if (sign.server() != null) {
+                // 获取指定的目标机节点
+                var endpoint = sign.server().getEndpoint(this, id()).orElse(null);
+                // 获取指定的目标机授权
+                var token = sign.server().getToken().orElse(null);
+                if (endpoint == null || token == null) {
+                    var server = Application.getBean(ServerConfigImpl.class);
+                    // 用于自建的私服企业
+                    if (endpoint == null)
+                        endpoint = server.getEndpoint(this, corpConfig.getCorpNo())
+                                .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+                    if (token == null)
+                        token = server.getToken(this, corpConfig.getCorpNo()).orElse(null);
+                }
+                dataOut = RemoteService.call(endpoint, token, id(), dataIn);
+            } else
+                dataOut = RemoteService.call(this, corpConfig.getCorpNo(), id(), dataIn);
         } catch (Throwable e) {
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());

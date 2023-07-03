@@ -6,9 +6,12 @@ public record ServiceSiteRecord(boolean isLan, String industry, String host) {
      * @return 根据内网还是外网标识，返回相应的网址
      */
     public String website() {
+        // TODO 缺少原始产业别的判断
+        // 192.168.1.20:9101/services/
         if (isLan())
-            return String.format("%s/services/%s", host());
+            return String.format("%s/services/", host());
         else
-            return String.format("%s/services-%s/%s", host(), industry());
+            // www.4plc.cn/services-csp/
+            return String.format("%s/services-%s/", host(), industry());
     }
 }

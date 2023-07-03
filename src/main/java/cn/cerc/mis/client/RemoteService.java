@@ -13,6 +13,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
@@ -50,10 +51,8 @@ public class RemoteService extends ServiceProxy {
             for (int i = 0; i < args.length; i = i + 2)
                 headIn.setValue(args[i].toString(), args[i + 1]);
         }
-
         this.setDataOut(this.sign.call(this, this.dataIn()).dataOut());
         return this.isOk();
-
     }
 
     @Deprecated
@@ -79,12 +78,14 @@ public class RemoteService extends ServiceProxy {
         Curl curl = new Curl();
         if (!Utils.isEmpty(token))
             curl.put(ISession.TOKEN, token);
+        if (Utils.isEmpty(service))
+            throw new RuntimeException("service is null");
         curl.put("dataIn", dataIn.json());
         try {
-            String response = curl.doPost(endpoint);
+            String response = curl.doPost(endpoint + service);
             return new DataSet().setJson(response);
         } catch (IOException | JsonSyntaxException e) {
-            log.error("{} , {} -> {}", endpoint, curl.getParameters(), e.getMessage(), e);
+            log.error("{}{} , {} -> {}", endpoint, service, curl.getParameters(), e.getMessage(), e);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
         }
     }
@@ -99,14 +100,21 @@ public class RemoteService extends ServiceProxy {
      * @return
      */
     public static DataSet call(IHandle handle, String targetCorpNo, String service, DataSet dataIn) {
-        var corpNo = handle.getCorpNo();
-        if (corpNo.equals(corpNo)) {
-            log.warn("应改使用 callLocal 来调用 {}", service);
+        String corpNo = handle.getCorpNo();
+        if ("000000".equals(targetCorpNo) && ServerConfig.isCspOriginal()) {
+            log.warn("别瞎搞，csp 自身应改使用 callLocal 来调用 {}", service);
             return LocalService.call(service, handle, dataIn);
         }
+
+        if (targetCorpNo.equals(corpNo)) {
+            log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", service);
+            return LocalService.call(service, handle, dataIn);
+        }
+
         var server = Application.getBean(ServerConfigImpl.class);
-        String endpoint = server.getEndpoint(handle, targetCorpNo).orElseThrow();
-        String token = server.getToken(handle, targetCorpNo).orElseThrow();
+        String endpoint = server.getEndpoint(handle, targetCorpNo)
+                .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+        String token = server.getToken(handle, targetCorpNo).orElse(null);
         return call(endpoint, token, service, dataIn);
     }
 
