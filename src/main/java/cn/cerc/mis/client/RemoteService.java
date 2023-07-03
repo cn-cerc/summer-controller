@@ -1,6 +1,7 @@
 package cn.cerc.mis.client;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +101,7 @@ public class RemoteService extends ServiceProxy {
      */
     public static DataSet call(IHandle handle, ServerOptionImpl serviceOption, CorpConfigImpl targetConfig,
             String service, DataSet dataIn) {
+        Objects.requireNonNull(targetConfig);
         // 防止本地调用
         if (targetConfig.isLocal()) {
             log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", service);
@@ -127,20 +129,6 @@ public class RemoteService extends ServiceProxy {
             String token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
             return call(endpoint, token, service, dataIn);
         }
-    }
-
-    /**
-     * 
-     * @param handle
-     * @param serviceOption 根据 service 配置，获取 endpoint 与 token 并调用
-     * @param service
-     * @param dataIn
-     * @return
-     */
-    public static DataSet call(IHandle handle, ServerOptionImpl serviceOption, String service, DataSet dataIn) {
-        String endpoint = serviceOption.getEndpoint(handle, service).orElseThrow();
-        String token = serviceOption.getToken().orElseThrow();
-        return call(endpoint, token, service, dataIn);
     }
 
 }
