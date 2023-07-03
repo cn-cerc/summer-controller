@@ -47,11 +47,11 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
 
         // 建立永久结点
         if (!zk.exists(rootPath))
-            zk.create(rootPath, config.website(), CreateMode.PERSISTENT);
+            zk.create(rootPath, config.extranet(), CreateMode.PERSISTENT);
 
         // 建立临时子结点
         String hostname = ApplicationEnvironment.hostname();
-        DataRow node = DataRow.of("host", config.localhost(), "hostname", hostname, "time", new Datetime());
+        DataRow node = DataRow.of("host", config.intranet(), "hostname", hostname, "time", new Datetime());
         zk.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
     }
 
