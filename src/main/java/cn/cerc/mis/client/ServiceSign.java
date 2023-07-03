@@ -94,13 +94,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
-        DataSet dataOut = null;
-        try {
-            dataOut = LocalService.call(this.id, handle, dataIn);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            dataOut = new DataSet().setMessage(e.getMessage());
-        }
+        var dataOut = LocalService.call(this.id, handle, dataIn);
         sign.setDataOut(dataOut);
         return sign;
     }
