@@ -99,8 +99,8 @@ public class RemoteService extends ServiceProxy {
      * @param dataIn
      * @return
      */
-    public static DataSet call(IHandle handle, ServerOptionImpl serviceOption, CorpConfigImpl targetConfig,
-            String service, DataSet dataIn) {
+    public static DataSet call(IHandle handle, CorpConfigImpl targetConfig,
+            String service, DataSet dataIn, ServerOptionImpl serviceOption) {
         Objects.requireNonNull(targetConfig);
         // 防止本地调用
         if (targetConfig.isLocal()) {
