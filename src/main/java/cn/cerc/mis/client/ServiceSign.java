@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Description;
 
 import cn.cerc.db.core.DataRow;
@@ -28,6 +30,7 @@ import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
+    private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
     private final String id;
     private Set<String> properties;
     private ServerOptionImpl server;
@@ -129,10 +132,11 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         DataSet dataOut = null;
         try {
             // 防止本地调用
-            if (corpConfig.isLocal())
+            if (corpConfig.isLocal()) {
+                log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", id());
                 dataOut = LocalService.call(id(), this, dataIn);
-            // 处理特殊的业务场景，创建帐套、钓友商城
-            else if (sign.server() != null) {
+            } else if (sign.server() != null) {
+                // 处理特殊的业务场景，创建帐套、钓友商城
                 // 获取指定的目标机节点
                 var endpoint = sign.server().getEndpoint(this, id()).orElse(null);
                 // 获取指定的目标机授权
@@ -150,6 +154,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             } else
                 dataOut = RemoteService.call(this, corpConfig.getCorpNo(), id(), dataIn);
         } catch (Throwable e) {
+            log.error(e.getMessage(), e);
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
         }
