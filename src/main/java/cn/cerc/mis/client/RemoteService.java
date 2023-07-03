@@ -13,7 +13,6 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
-import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
@@ -99,23 +98,35 @@ public class RemoteService extends ServiceProxy {
      * @param dataIn
      * @return
      */
-    public static DataSet call(IHandle handle, String targetCorpNo, String service, DataSet dataIn) {
-        String corpNo = handle.getCorpNo();
-        if ("000000".equals(targetCorpNo) && ServerConfig.isCspOriginal()) {
-            log.warn("别瞎搞，csp 自身应改使用 callLocal 来调用 {}", service);
-            return LocalService.call(service, handle, dataIn);
-        }
-
-        if (targetCorpNo.equals(corpNo)) {
+    public static DataSet call(IHandle handle, ServerOptionImpl serviceOption, CorpConfigImpl targetConfig,
+            String service, DataSet dataIn) {
+        // 防止本地调用
+        if (targetConfig.isLocal()) {
             log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", service);
             return LocalService.call(service, handle, dataIn);
+        } else if (serviceOption != null) {
+            // 处理特殊的业务场景，创建帐套、钓友商城
+            // 获取指定的目标机节点
+            var endpoint = serviceOption.getEndpoint(handle, service).orElse(null);
+            // 获取指定的目标机授权
+            var token = serviceOption.getToken().orElse(null);
+            if (endpoint == null || token == null) {
+                var server = Application.getBean(ServerConfigImpl.class);
+                // 用于自建的私服企业
+                if (endpoint == null)
+                    endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
+                            .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+                if (token == null)
+                    token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
+            }
+            return RemoteService.call(endpoint, token, service, dataIn);
+        } else {
+            var server = Application.getBean(ServerConfigImpl.class);
+            String endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
+                    .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+            String token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
+            return call(endpoint, token, service, dataIn);
         }
-
-        var server = Application.getBean(ServerConfigImpl.class);
-        String endpoint = server.getEndpoint(handle, targetCorpNo)
-                .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
-        String token = server.getToken(handle, targetCorpNo).orElse(null);
-        return call(endpoint, token, service, dataIn);
     }
 
     /**
