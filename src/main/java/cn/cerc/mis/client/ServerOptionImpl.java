@@ -13,8 +13,8 @@ import cn.cerc.db.core.IHandle;
  * @author 张弓
  *
  */
-public interface ServiceOptionImpl {
-    Logger log = LoggerFactory.getLogger(ServiceOptionImpl.class);
+public interface ServerOptionImpl {
+    Logger log = LoggerFactory.getLogger(ServerOptionImpl.class);
 
     /**
      * 
