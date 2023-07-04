@@ -115,6 +115,7 @@ public class RemoteService extends ServiceProxy {
             var token = serviceOption.getToken().orElse(null);
             if (endpoint == null || token == null) {
                 var server = Application.getBean(ServerConfigImpl.class);
+                Objects.requireNonNull(server);
                 // 用于自建的私服企业
                 if (endpoint == null)
                     endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
@@ -122,6 +123,8 @@ public class RemoteService extends ServiceProxy {
                 if (token == null)
                     token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
             }
+            if (Utils.isEmpty(endpoint))
+                throw new RuntimeException("endpoint 不允许为空");
             return RemoteService.call(endpoint, token, service, dataIn);
         } else {
             var server = Application.getBean(ServerConfigImpl.class);

@@ -85,12 +85,13 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         // 建立临时子结点
         var groupPath = rootPath + "/" + myGroup + "-";
         String hostname = ApplicationEnvironment.hostname();
-        DataRow node = DataRow.of("host", myIntranet, "hostname", hostname, "time", new Datetime());
+        DataRow node = DataRow.of("intranet", myIntranet, "hostname", hostname, "time", new Datetime());
         zk.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
 
         // watch
         log.info("watch: {}", rootPath);
-        zk.client().exists(rootPath, this);
+        // 注册Watcher，监听目录节点的子节点变化
+        zk.client().getChildren(rootPath, this);
     }
 
     /**
@@ -140,7 +141,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     @Override
     public void process(WatchedEvent event) {
         String path = event.getPath();
-        log.info("watch path: {}", path);
+//        log.info("watch path: {}", path);
         try {
             var server = ZkNode.get().server();
             var client = server.client();
@@ -155,34 +156,14 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                             map.put(nodeKey, nodeValue);
                     }
                     intranetItems.put(path, map);
+//                    log.info("{}", new Gson().toJson(map));
                 } else
                     intranetItems.remove(path);
             }
+            // 注册Watcher，监听目录节点的子节点变化
+            server.client().getChildren(path, this);
         } catch (KeeperException | InterruptedException e) {
             log.error(e.getMessage(), e);
         }
-//        if (!path.contains(ROOT_PATH))
-//            return;
-//
-//        // 节点信息被删除，清空缓存列表
-//        if (event.getType() == Event.EventType.NodeDeleted) {
-//            return;
-//        }
-
-//        // 子节点列表有变化，重载缓存列表
-//        if (event.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
-//            var value = server.getValue(node);
-//            if (value != null) {
-//                intranetItems.put(node, value);
-//                log.warn("节点 {} 值变更为 {}", node, value);
-//                server.watch(node, this); // 继续监视
-//            } else {
-//                log.error("节点 {} 不应该找不到！！！", node);
-//            }
-//        } else if (event.getType() == Watcher.Event.EventType.NodeDeleted) {
-//            intranetItems.remove(node);
-//            log.debug("节点 {} 已被删除！", node);
-//        }
-
     }
 }
