@@ -117,7 +117,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             if (map.size() > 0) {
                 log.debug("{} 有找到可用节点：{}", industry, map.size());
                 var list = map.keySet().toArray();
-                var nodeKey = list[new Random().nextInt(intranetItems.size())];
+                var nodeKey = list[new Random().nextInt(map.size())];
                 var nodeValue = map.get(nodeKey);
                 var node = new DataRow().setJson(nodeValue);
                 return new ServiceSiteRecord(true, industry, node.getString("intranet"));
