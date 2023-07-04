@@ -2,9 +2,12 @@ package cn.cerc.mis.client;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -114,20 +117,23 @@ public class RemoteService extends ServiceProxy {
             // 获取指定的目标机授权
             var token = serviceOption.getToken().orElse(null);
             if (endpoint == null || token == null) {
-                var server = Application.getBean(ServerConfigImpl.class);
-                Objects.requireNonNull(server);
                 // 用于自建的私服企业
-                if (endpoint == null)
-                    endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
-                            .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
-                if (token == null)
-                    token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
+                var server = RemoteService.getServerConfig(Application.getContext());
+                if (server.isPresent()) {
+                    if (endpoint == null)
+                        endpoint = server.get()
+                                .getEndpoint(handle, targetConfig.getCorpNo())
+                                .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+                    if (token == null)
+                        token = server.get().getToken(handle, targetConfig.getCorpNo()).orElse(null);
+                }
             }
             if (Utils.isEmpty(endpoint))
                 throw new RuntimeException("endpoint 不允许为空");
             return RemoteService.call(endpoint, token, service, dataIn);
         } else {
-            var server = Application.getBean(ServerConfigImpl.class);
+            var server = RemoteService.getServerConfig(Application.getContext())
+                    .orElseThrow(() -> new RuntimeException("无法获取到有效的微服务配置"));
             String endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
                     .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
             String token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
@@ -135,4 +141,16 @@ public class RemoteService extends ServiceProxy {
         }
     }
 
+    public static Optional<ServerConfigImpl> getServerConfig(ApplicationContext context) {
+        if (context != null) {
+            try {
+                return Optional.of(context.getBean(ServerConfigImpl.class));
+            } catch (NoSuchBeanDefinitionException e) {
+                log.warn("微服务异常：未找到实现 ServerConfigImpl 的类");
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return Optional.empty();
+    }
 }
