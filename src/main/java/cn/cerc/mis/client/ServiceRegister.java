@@ -89,7 +89,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         zk.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
 
         // watch
-        log.info("watch: {}", rootPath);
+        log.debug("watch: {}", rootPath);
         // 注册Watcher，监听目录节点的子节点变化
         zk.client().getChildren(rootPath, this);
     }
