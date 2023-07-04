@@ -1,6 +1,5 @@
 package cn.cerc.mis.client;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,8 +24,8 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.zk.ZkNode;
-import cn.cerc.mis.SummerMIS;
 import cn.cerc.db.zk.ZkServer;
+import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.register.center.ApplicationEnvironment;
 
 @Component
@@ -34,16 +33,14 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     private static final Logger log = LoggerFactory.getLogger(ServiceRegister.class);
     private static final ClassConfig config = new ClassConfig(ServerConfig.class, SummerMIS.ID);
     private ApplicationContext context;
-
-    private static final String ROOT_PATH = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(),
-            ServerConfig.getAppVersion(), ServerConfig.getAppOriginal());
+//
+//    private static final String ROOT_PATH = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(),
+//            ServerConfig.getAppVersion(), ServerConfig.getAppOriginal());
 
     /**
      * 子节点信息列表
      */
     private static final Map<String, Map<String, String>> intranetItems = new ConcurrentHashMap<>();
-
-    private static final Map<String, String> extranetItems = new ConcurrentHashMap<>();
 
     /**
      * 负载均衡计数器
@@ -83,8 +80,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         // 建立永久结点
         var rootPath = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(),
                 ServerConfig.getAppOriginal());
-        if (!zk.exists(rootPath))
-            zk.create(rootPath, myExtranet, CreateMode.PERSISTENT);
+        ZkNode.get().getNodeValue(rootPath, () -> myExtranet);
 
         // 建立临时子结点
         var groupPath = rootPath + "/" + myGroup;
@@ -121,7 +117,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                 var node = new DataRow().setJson(nodeValue);
                 return new ServiceSiteRecord(true, industry, node.getString("intranet"));
             } else {
-                var extranet = extranetItems.get(industry);
+                var extranet = ZkNode.get().getNodeValue(path, () -> "");
                 log.warn("{} 没有有找到可用节点，改使用外网调用：{}", industry, extranet);
                 return new ServiceSiteRecord(false, industry, extranet);
             }
@@ -143,31 +139,19 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String path = event.getPath();
         try {
             var client = server.client();
-            if (path.endsWith("/host")) {
-                if (event.getType() == Watcher.Event.EventType.NodeDataChanged) {
-                    Stat stat = client.exists(path, false);
-                    if (stat != null) {
-                        var value = new String(client.getData(path, this, stat), StandardCharsets.UTF_8);
-                        extranetItems.put(path, value);
-                    } else {
-                        extranetItems.remove(path);
+            log.info("watch path: {}", path);
+            if (event.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
+                Stat stat = client.exists(path, this);
+                if (stat != null) {
+                    var list = server.client().getChildren(path, this);
+                    var map = new ConcurrentHashMap<String, String>();
+                    for (var nodeKey : list) {
+                        var nodeValue = server.getValue(path + "/" + nodeKey);
+                        map.put(nodeKey, nodeValue);
                     }
-                    // TODO 继续监听
-                }
-            } else {
-                if (event.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
-                    Stat stat = client.exists(path, this);
-                    if (stat != null) {
-                        var list = server.client().getChildren(path, this);
-                        var map = new ConcurrentHashMap<String, String>();
-                        for (var nodeKey : list) {
-                            var nodeValue = server.getValue(path + "/" + nodeKey);
-                            map.put(nodeKey, nodeValue);
-                        }
-                        intranetItems.put(path, map);
-                    } else
-                        intranetItems.remove(path);
-                }
+                    intranetItems.put(path, map);
+                } else
+                    intranetItems.remove(path);
             }
         } catch (KeeperException | InterruptedException e) {
             log.error(e.getMessage(), e);
