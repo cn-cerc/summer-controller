@@ -12,7 +12,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
 import cn.cerc.mis.client.CorpConfigImpl;
-import cn.cerc.mis.client.ServerConfigImpl;
+import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.core.Application;
 
 @Deprecated
@@ -43,10 +43,12 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     protected String pushToRemote(IHandle handle, CorpConfigImpl config, DataRow dataRow) {
         Objects.requireNonNull(config);
         if (!Utils.isEmpty(config.getCorpNo())) {
-            var serviceConfig = Application.getBean(ServerConfigImpl.class);
-            var remoteToken = serviceConfig.getToken(handle, config.getCorpNo());
-            if (remoteToken.isPresent())
-                dataRow.setValue("token", remoteToken.get());
+            var serviceConfig = RemoteService.getServerConfig(Application.getContext());
+            if (serviceConfig.isPresent()) {
+                var remoteToken = serviceConfig.get().getToken(handle, config.getCorpNo());
+                if (remoteToken.isPresent())
+                    dataRow.setValue("token", remoteToken.get());
+            }
         }
 
         if (!dataRow.hasValue("corp_no_"))
