@@ -6,24 +6,26 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.ServerConfig;
-import cn.cerc.db.core.Utils;
 import cn.cerc.db.zk.ZkNode;
+import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.register.center.ApplicationEnvironment;
 
 @Component
-public class ServiceRegister implements ApplicationListener<ContextRefreshedEvent> {
+public class ServiceRegister implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger log = LoggerFactory.getLogger(ServiceRegister.class);
-
-    @Autowired
-    private ServerConfigImpl config;
+    private static final ClassConfig config = new ClassConfig(ServerConfig.class, SummerMIS.ID);
+    private ApplicationContext context;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -39,19 +41,32 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
     }
 
     private void register() throws KeeperException, InterruptedException {
-        var zk = ZkNode.get().server();
+        if (context == null) {
+            log.error("applicationContext is null");
+            return;
+        }
 
+        // 取得内网节点地址
+        var port = config.getProperty("application.port", ApplicationEnvironment.hostPort());
+        var ip = ApplicationEnvironment.hostIP();
+        var host = String.format("http://%s:%s", ip, port);
+        var myIntranet = config.getString("application.localhost", host);
+        // 取得外网节点域名
+        var myExtranet = config.getProperty("application.website", "http://localhost:80");
+        // 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
+        var myGroup = config.getProperty("application.group", "undefined");
+
+        var zk = ZkNode.get().server();
+        // 建立永久结点
         var rootPath = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(),
                 ServerConfig.getAppOriginal());
-        var groupPath = rootPath + "/" + (Utils.isEmpty(config.group()) ? "undefined" : config.group());
-
-        // 建立永久结点
         if (!zk.exists(rootPath))
-            zk.create(rootPath, config.extranet(), CreateMode.PERSISTENT);
+            zk.create(rootPath, myExtranet, CreateMode.PERSISTENT);
 
         // 建立临时子结点
+        var groupPath = rootPath + "/" + myGroup;
         String hostname = ApplicationEnvironment.hostname();
-        DataRow node = DataRow.of("host", config.intranet(), "hostname", hostname, "time", new Datetime());
+        DataRow node = DataRow.of("host", myIntranet, "hostname", hostname, "time", new Datetime());
         zk.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
     }
 
@@ -77,11 +92,9 @@ public class ServiceRegister implements ApplicationListener<ContextRefreshedEven
         }
     }
 
-    public ServerConfigImpl getConfig() {
-        return config;
-    }
+    @Override
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        this.context = context;
 
-    public void setConfig(ServerConfigImpl config) {
-        this.config = config;
     }
 }
