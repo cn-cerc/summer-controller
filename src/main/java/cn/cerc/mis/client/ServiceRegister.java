@@ -83,10 +83,14 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         ZkNode.get().getNodeValue(rootPath, () -> myExtranet);
 
         // 建立临时子结点
-        var groupPath = rootPath + "/" + myGroup;
+        var groupPath = rootPath + "/" + myGroup + "-";
         String hostname = ApplicationEnvironment.hostname();
         DataRow node = DataRow.of("host", myIntranet, "hostname", hostname, "time", new Datetime());
         zk.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
+
+        // watch
+        log.info("watch: {}", rootPath);
+        zk.client().exists(rootPath, this);
     }
 
     /**
@@ -135,19 +139,20 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
 
     @Override
     public void process(WatchedEvent event) {
-        var server = ZkNode.get().server();
         String path = event.getPath();
+        log.info("watch path: {}", path);
         try {
+            var server = ZkNode.get().server();
             var client = server.client();
-            log.info("watch path: {}", path);
             if (event.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
-                Stat stat = client.exists(path, this);
+                Stat stat = client.exists(path, false);
                 if (stat != null) {
-                    var list = server.client().getChildren(path, this);
+                    var list = server.client().getChildren(path, false);
                     var map = new ConcurrentHashMap<String, String>();
                     for (var nodeKey : list) {
                         var nodeValue = server.getValue(path + "/" + nodeKey);
-                        map.put(nodeKey, nodeValue);
+                        if (nodeValue != null)
+                            map.put(nodeKey, nodeValue);
                     }
                     intranetItems.put(path, map);
                 } else
