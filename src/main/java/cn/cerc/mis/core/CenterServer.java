@@ -4,7 +4,6 @@ import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.client.ServiceServerImpl;
-import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.client.TokenConfig;
 import cn.cerc.mis.client.TokenConfigImpl;
 
@@ -24,11 +23,6 @@ public class CenterServer implements ServiceServerImpl {
     @Override
     public TokenConfigImpl getDefaultConfig(IHandle handle) {
         return new TokenConfig(handle, null);
-    }
-
-    @Override
-    public String getOriginal() {
-        return ServiceSign.external;
     }
 
 }

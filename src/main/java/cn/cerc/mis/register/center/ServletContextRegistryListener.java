@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-@Component
-@WebListener
+//@Component
+//@WebListener
 public class ServletContextRegistryListener implements ServletContextListener {
 
     private static final Logger log = LoggerFactory.getLogger(ServletContextRegistryListener.class);
