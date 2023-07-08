@@ -42,6 +42,10 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
      * 内网节点信息列表
      */
     private static final Map<String, Map<String, String>> intranets = new ConcurrentHashMap<>();
+    /**
+     * 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
+     */
+    private static final String myGroup = config.getProperty("application.group", "undefined");
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -67,8 +71,6 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String intranet = config.getString("application.localhost", host);
         // 取得外网节点域名
         String extranet = config.getProperty("application.website", "http://127.0.0.1:80");
-        // 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
-        String myGroup = config.getProperty("application.group", "undefined");
 
         ZkServer server = ZkNode.get().server();
         // 建立永久结点
@@ -77,7 +79,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
 
         // 建立临时子结点
         String hostname = ApplicationEnvironment.hostname();
-        String groupPath = root + "/" + myGroup + "-" + hostname + "-";
+        String groupPath = root + "/" + myGroup + "-";
         DataRow node = DataRow.of("intranet", intranet, "hostname", hostname, "time", new Datetime());
         server.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
 
@@ -97,8 +99,10 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                 List<String> list = server.client().getChildren(root, this);
                 items = new ConcurrentHashMap<String, String>();
                 for (String nodeKey : list) {
-                    String nodeValue = server.getValue(root + "/" + nodeKey);
-                    items.put(nodeKey, nodeValue);
+                    if (nodeKey.startsWith(myGroup)) {
+                        String nodeValue = server.getValue(root + "/" + nodeKey);
+                        items.put(nodeKey, nodeValue);
+                    }
                 }
                 intranets.put(root, items);
             }
@@ -138,9 +142,11 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                     List<String> list = server.client().getChildren(path, false);
                     Map<String, String> map = new ConcurrentHashMap<>();
                     for (String nodeKey : list) {
-                        String nodeValue = server.getValue(path + "/" + nodeKey);
-                        if (nodeValue != null)
-                            map.put(nodeKey, nodeValue);
+                        if (nodeKey.startsWith(myGroup)) {
+                            String nodeValue = server.getValue(path + "/" + nodeKey);
+                            if (nodeValue != null)
+                                map.put(nodeKey, nodeValue);
+                        }
                     }
                     intranets.put(path, map);
                     log.info("{} 子节点变化 {}", path, new Gson().toJson(map));
