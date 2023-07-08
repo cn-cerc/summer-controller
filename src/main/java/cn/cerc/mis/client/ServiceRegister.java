@@ -48,9 +48,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         if (event.getApplicationContext().getParent() == null) {
             try {
                 register();
-            } catch (KeeperException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (KeeperException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -66,60 +64,55 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String port = config.getProperty("application.port", ApplicationEnvironment.hostPort());
         String ip = ApplicationEnvironment.hostIP();
         String host = String.format("http://%s:%s", ip, port);
-        String myIntranet = config.getString("application.localhost", host);
+        String intranet = config.getString("application.localhost", host);
         // 取得外网节点域名
-        String myExtranet = config.getProperty("application.website", "http://localhost:80");
+        String extranet = config.getProperty("application.website", "http://localhost:80");
         // 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
         String myGroup = config.getProperty("application.group", "undefined");
 
         ZkServer server = ZkNode.get().server();
         // 建立永久结点
-        String rootPath = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(),
-                ServerConfig.getAppOriginal());
-        ZkNode.get().getNodeValue(rootPath, () -> myExtranet);
+        String root = buildPath(ServerConfig.getAppOriginal());
+        ZkNode.get().getNodeValue(root, () -> extranet);
 
         // 建立临时子结点
-        String groupPath = rootPath + "/" + myGroup + "-";
+        String groupPath = root + "/" + myGroup + "-";
         String hostname = ApplicationEnvironment.hostname();
-        DataRow node = DataRow.of("intranet", myIntranet, "hostname", hostname, "time", new Datetime());
+        DataRow node = DataRow.of("intranet", intranet, "hostname", hostname, "time", new Datetime());
         server.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
 
-        // watch
-        log.debug("watch: {}", rootPath);
         // 注册Watcher，监听目录节点的子节点变化
-        server.client().getChildren(rootPath, this);
+        server.client().getChildren(root, this);
     }
 
     /**
-     * 
      * @return 返回可用的服务地址
      */
     public ServiceSiteRecord getServiceHost(String industry) {
-        String path = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(),
-                industry);
+        String root = buildPath(industry);
         ZkServer server = ZkNode.get().server();
-        Map<String, String> items = intranets.get(path);
+        Map<String, String> items = intranets.get(root);
         try {
             if (items == null) {
-                List<String> list = server.client().getChildren(path, this);
+                List<String> list = server.client().getChildren(root, this);
                 Map<String, String> map = new ConcurrentHashMap<String, String>();
                 for (String nodeKey : list) {
-                    String nodeValue = server.getValue(path + "/" + nodeKey);
+                    String nodeValue = server.getValue(root + "/" + nodeKey);
                     map.put(nodeKey, nodeValue);
                 }
-                intranets.put(path, map);
+                intranets.put(root, map);
             }
 
             if (items.size() > 0) {
-                log.debug("{} 有找到可用节点：{}", industry, items.size());
+                log.debug("{} 行业找到可用节点 {}", industry, items.size());
                 List<String> list = new ArrayList<>(items.keySet());
                 String nodeKey = list.get(new Random().nextInt(items.size()));
                 String nodeValue = items.get(nodeKey);
                 DataRow node = new DataRow().setJson(nodeValue);
                 return new ServiceSiteRecord(true, industry, node.getString("intranet"));
             } else {
-                String extranet = ZkNode.get().getNodeValue(path, () -> "");
-                log.warn("{} 没有有找到可用节点，改使用外网调用：{}", industry, extranet);
+                String extranet = ZkNode.get().getNodeValue(root, () -> "");
+                log.warn("{} 行业未找到可用节点，改使用外网调用{}", industry, extranet);
                 return new ServiceSiteRecord(false, industry, extranet);
             }
         } catch (KeeperException | InterruptedException e) {
@@ -131,13 +124,11 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         this.context = context;
-
     }
 
     @Override
     public void process(WatchedEvent event) {
         String path = event.getPath();
-//        log.info("watch path: {}", path);
         try {
             ZkServer server = ZkNode.get().server();
             ZooKeeper client = server.client();
@@ -165,4 +156,11 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             log.error(e.getMessage(), e);
         }
     }
+
+    private String buildPath(String industry) {
+        String path = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(), industry);
+        log.debug("行业 {} -> 节点 {}", industry, path);
+        return path;
+    }
+
 }
