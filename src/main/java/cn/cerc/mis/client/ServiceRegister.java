@@ -66,7 +66,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String host = String.format("http://%s:%s", ip, port);
         String intranet = config.getString("application.localhost", host);
         // 取得外网节点域名
-        String extranet = config.getProperty("application.website", "http://localhost:80");
+        String extranet = config.getProperty("application.website", "http://127.0.0.1:80");
         // 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
         String myGroup = config.getProperty("application.group", "undefined");
 
@@ -95,12 +95,12 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         try {
             if (items == null) {
                 List<String> list = server.client().getChildren(root, this);
-                Map<String, String> map = new ConcurrentHashMap<String, String>();
+                items = new ConcurrentHashMap<String, String>();
                 for (String nodeKey : list) {
                     String nodeValue = server.getValue(root + "/" + nodeKey);
-                    map.put(nodeKey, nodeValue);
+                    items.put(nodeKey, nodeValue);
                 }
-                intranets.put(root, map);
+                intranets.put(root, items);
             }
 
             if (items != null && items.size() > 0) {
