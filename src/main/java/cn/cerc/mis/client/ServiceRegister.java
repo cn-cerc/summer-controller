@@ -76,8 +76,8 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         ZkNode.get().getNodeValue(root, () -> extranet);
 
         // 建立临时子结点
-        String groupPath = root + "/" + myGroup + "-";
         String hostname = ApplicationEnvironment.hostname();
+        String groupPath = root + "/" + myGroup + "-" + hostname + "-";
         DataRow node = DataRow.of("intranet", intranet, "hostname", hostname, "time", new Datetime());
         server.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
 
@@ -103,7 +103,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                 intranets.put(root, map);
             }
 
-            if (items.size() > 0) {
+            if (items != null && items.size() > 0) {
                 log.debug("{} 行业找到可用节点 {}", industry, items.size());
                 List<String> list = new ArrayList<>(items.keySet());
                 String nodeKey = list.get(new Random().nextInt(items.size()));
@@ -158,7 +158,8 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     }
 
     private String buildPath(String industry) {
-        String path = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(), industry);
+        String path = String.format("/%s/%s/%s/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion(),
+                industry);
         log.debug("行业 {} -> 节点 {}", industry, path);
         return path;
     }
