@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -171,7 +173,8 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
         ds.add("select table_name,table_comment from %s where table_schema='%s'", DataTables, edtDatabase.getText());
         ds.open();
         try {
-            File file = new File(".\\src\\test\\resources\\database.xml");
+            Path filePath = Paths.get(".", "src", "test", "resources", "database.xml");
+            File file = filePath.toFile();
             file.createNewFile();
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));

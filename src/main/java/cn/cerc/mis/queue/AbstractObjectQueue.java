@@ -86,6 +86,13 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
         return result;
     }
 
+    /**
+     * 执行消息消费
+     * 
+     * @param handle
+     * @param entity
+     * @return 消息消费成功否
+     */
     public abstract boolean execute(IHandle handle, T entity);
 
 //
