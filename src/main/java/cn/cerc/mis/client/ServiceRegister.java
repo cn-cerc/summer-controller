@@ -35,17 +35,21 @@ import cn.cerc.mis.register.center.ApplicationEnvironment;
 @Component
 public class ServiceRegister implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Watcher {
     private static final Logger log = LoggerFactory.getLogger(ServiceRegister.class);
-    private static final ClassConfig config = new ClassConfig(ServerConfig.class, SummerMIS.ID);
+    private static final ClassConfig config = new ClassConfig(ServiceRegister.class, SummerMIS.ID);
     private ApplicationContext context;
 
+    /**
+     * 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
+     */
+    public static final String myGroup = config.getProperty("application.group", "undefined");
+    /**
+     * 取得外网节点域名
+     */
+    public static final String extranet = config.getProperty("application.extranet", "http://127.0.0.1");
     /**
      * 内网节点信息列表
      */
     private static final Map<String, Map<String, String>> intranets = new ConcurrentHashMap<>();
-    /**
-     * 主机分组代码: 相同的主机之间，使用 intranet 调用，否则使用 extranet 调用
-     */
-    private static final String myGroup = config.getProperty("application.group", "undefined");
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -64,16 +68,14 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             return;
         }
 
-        // 取得内网节点地址
+        // 取得内网节点信息
         String port = config.getProperty("application.port", ApplicationEnvironment.hostPort());
         String ip = ApplicationEnvironment.hostIP();
         String host = String.format("http://%s:%s", ip, port);
         String intranet = config.getString("application.intranet", host);
-        // 取得外网节点域名
-        String extranet = config.getProperty("application.extranet", "http://127.0.0.1:80");
 
-        ZkServer server = ZkNode.get().server();
         // 建立永久结点
+        ZkServer server = ZkNode.get().server();
         String root = buildPath(ServerConfig.getAppOriginal());
         ZkNode.get().getNodeValue(root, () -> extranet);
 
