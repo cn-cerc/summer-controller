@@ -68,9 +68,9 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String port = config.getProperty("application.port", ApplicationEnvironment.hostPort());
         String ip = ApplicationEnvironment.hostIP();
         String host = String.format("http://%s:%s", ip, port);
-        String intranet = config.getString("application.localhost", host);
+        String intranet = config.getString("application.intranet", host);
         // 取得外网节点域名
-        String extranet = config.getProperty("application.website", "http://127.0.0.1:80");
+        String extranet = config.getProperty("application.extranet", "http://127.0.0.1:80");
 
         ZkServer server = ZkNode.get().server();
         // 建立永久结点
