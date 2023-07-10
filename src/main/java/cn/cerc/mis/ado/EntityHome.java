@@ -207,10 +207,11 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         else {
             try {
                 if (entity.getEntityHome() != this) {
-                    throw new RuntimeException();
+                    throw new InvalidEntityException(
+                            String.format("%s 不是 %s 的亲儿子类，不允许跨子类修改", entity.getClass(), this.getClass()));
                 }
-            } catch (Exception e) {
-                log.warn("{} 不是 {} 亲儿子不允许修改", entity.getClass(), this.getClass(), e);
+            } catch (InvalidEntityException e) {
+                log.warn(e.getMessage(), e);
             }
             save(recNo - 1, obj);
             query.current().saveToEntity(obj);
