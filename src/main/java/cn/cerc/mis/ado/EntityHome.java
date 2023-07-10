@@ -10,6 +10,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.CacheLevelEnum;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.EntityHelper;
@@ -36,7 +39,7 @@ import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
 
 public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
-//    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityHome.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
 
     // 构建 Lua 脚本，批量写入 redis 缓存
@@ -202,6 +205,13 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         if (recNo == 0)
             this.insert(obj);
         else {
+            try {
+                if (entity.getEntityHome() != this) {
+                    throw new RuntimeException();
+                }
+            } catch (Exception e) {
+                log.warn("{} 不是 {} 亲儿子不允许修改", entity.getClass(), this.getClass(), e);
+            }
             save(recNo - 1, obj);
             query.current().saveToEntity(obj);
         }
