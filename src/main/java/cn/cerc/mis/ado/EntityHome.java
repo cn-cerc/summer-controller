@@ -206,9 +206,9 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             this.insert(obj);
         else {
             if (entity.getEntityHome() != this || entity.getClass() != this.clazz) {
-                InvalidEntityException exception = new InvalidEntityException(
+                InvalidEntityException e = new InvalidEntityException(
                         String.format("%s 不是 %s 亲自创建的类对象，不允许跨子类修改 %s", entity.getClass(), this, query.sqlText()));
-                log.warn(exception.getMessage(), exception);
+                log.warn(e.getMessage(), e);
             }
             save(recNo - 1, obj);
             query.current().saveToEntity(obj);
