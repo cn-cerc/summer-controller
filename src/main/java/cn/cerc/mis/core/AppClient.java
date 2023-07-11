@@ -63,7 +63,7 @@ public class AppClient implements Serializable {
         phone_devices.add(AppClient.wechat);
     }
 
-    private static final List<String> browsers = new ArrayList<String>();
+    private static final List<String> browsers = new ArrayList<>();
     static {
         browsers.add("chrome");
         browsers.add("edge");
@@ -83,7 +83,7 @@ public class AppClient implements Serializable {
 
     private final HttpServletRequest request;
 
-    private String cookieId = "";
+    private final String cookieId;
 
     private final String key;
 
