@@ -112,7 +112,6 @@ public class AppClient implements Serializable {
             return;
         if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase())))
             return;
-        log.info(userAgent);
 
         Cookie[] cookies = request.getCookies();
         try (Jedis redis = JedisFactory.getJedis()) {
