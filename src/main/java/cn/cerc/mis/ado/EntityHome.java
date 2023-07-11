@@ -207,8 +207,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         else {
             try {
                 if (entity.getEntityHome() != this || entity.getClass() != this.clazz) {
-                    throw new InvalidEntityException(String.format("%s 不是EntityHome %s 亲自创建的类对象，不允许跨子类修改 %s",
-                            entity.getClass(), this.clazz, query.sqlText()));
+                    throw new InvalidEntityException(
+                            String.format("%s 不是 %s 亲自创建的类对象，不允许跨子类修改 %s", entity.getClass(), this, query.sqlText()));
                 }
             } catch (InvalidEntityException e) {
                 log.warn(e.getMessage(), e);
