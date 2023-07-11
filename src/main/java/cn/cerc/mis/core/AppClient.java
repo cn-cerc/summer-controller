@@ -1,5 +1,6 @@
 package cn.cerc.mis.core;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import redis.clients.jedis.Jedis;
 public class AppClient implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(AppClient.class);
 
+    @Serial
     private static final long serialVersionUID = -3593077761901636920L;
 
     // 缓存版本
@@ -59,6 +61,15 @@ public class AppClient implements Serializable {
         phone_devices.add(AppClient.android);
         phone_devices.add(AppClient.iphone);
         phone_devices.add(AppClient.wechat);
+    }
+
+    private static final List<String> browsers = new ArrayList<String>();
+    static {
+        browsers.add("chrome");
+        browsers.add("edge");
+        browsers.add("mozilla");
+        browsers.add("firefox");
+        browsers.add("safari");
     }
 
     // 平板
@@ -94,6 +105,14 @@ public class AppClient implements Serializable {
         this.cookieId = variant.getString();
 
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
+
+        // 如果是非浏览器请求（CUrl接口）则不生成缓存信息
+        String userAgent = request.getHeader("User-Agent");
+        if (Utils.isEmpty(userAgent))
+            return;
+        if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase())))
+            return;
+        log.info(userAgent);
 
         Cookie[] cookies = request.getCookies();
         try (Jedis redis = JedisFactory.getJedis()) {
