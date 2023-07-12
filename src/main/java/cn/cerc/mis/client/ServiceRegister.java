@@ -69,7 +69,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         }
 
         // 取得内网节点信息
-        String port = config.getProperty("application.port", ApplicationEnvironment.hostPort());
+        String port = config.getProperty("application.port", ApplicationEnvironment.hostPort().get());
         String ip = ApplicationEnvironment.hostIP();
         String host = String.format("http://%s:%s", ip, port);
         String intranet = config.getString("application.intranet", host);
