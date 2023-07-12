@@ -10,6 +10,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.CacheLevelEnum;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.EntityHelper;
@@ -36,7 +39,7 @@ import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
 
 public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
-//    private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityHome.class);
     private static final ConcurrentHashMap<Class<?>, ISqlDatabase> buff = new ConcurrentHashMap<>();
 
     // 构建 Lua 脚本，批量写入 redis 缓存
@@ -202,6 +205,11 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         if (recNo == 0)
             this.insert(obj);
         else {
+            if (entity.getEntityHome() != this || entity.getClass() != this.clazz) {
+                InvalidEntityException e = new InvalidEntityException(
+                        String.format("%s 不是 %s 亲自创建的类对象，不允许跨子类修改 %s", entity.getClass(), this, query.sqlText()));
+                log.warn(e.getMessage(), e);
+            }
             save(recNo - 1, obj);
             query.current().saveToEntity(obj);
         }
