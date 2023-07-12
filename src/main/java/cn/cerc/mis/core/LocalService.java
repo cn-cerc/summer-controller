@@ -1,5 +1,8 @@
 package cn.cerc.mis.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
@@ -10,6 +13,7 @@ import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
 
 public class LocalService extends ServiceProxy {
+    private static final Logger log = LoggerFactory.getLogger(LocalService.class);
     private String service;
 
     public LocalService(IHandle handle) {
@@ -92,8 +96,10 @@ public class LocalService extends ServiceProxy {
             IService bean = Application.getService(handle, service, function);
             return bean._call(handle, dataIn, function);
         } catch (ClassNotFoundException e) {
+            log.warn(e.getMessage(), e);
             return new DataSet().setMessage("not find service: " + service);
         } catch (ServiceException e) {
+            log.warn(e.getMessage(), e);
             return new DataSet().setMessage(e.getMessage());
         }
     }

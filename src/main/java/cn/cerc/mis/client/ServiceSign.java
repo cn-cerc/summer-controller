@@ -2,9 +2,6 @@ package cn.cerc.mis.client;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,7 +22,6 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.mis.ado.EntityQuery;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
@@ -35,26 +31,15 @@ import cn.cerc.mis.core.ServiceState;
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
     private final String id;
-    private int version;
     private Set<String> properties;
-    private ServiceServerImpl server;
-
-    private Class<?> headStructure;
-    private Class<?> bodyStructure;
+    private ServerOptionImpl server;
 
     public ServiceSign(String id) {
         super();
         this.id = id;
     }
 
-    /**
-     * 请改用 RemoteToken 方式调用
-     * 
-     * @param id
-     * @param server
-     */
-    @Deprecated
-    public ServiceSign(String id, ServiceServerImpl server) {
+    public ServiceSign(String id, ServerOptionImpl server) {
         super();
         this.id = id;
         this.server = server;
@@ -64,17 +49,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return id;
     }
 
-    public ServiceServerImpl server() {
+    public ServerOptionImpl server() {
         return this.server;
-    }
-
-    public int version() {
-        return version;
-    }
-
-    public ServiceSign setVersion(int version) {
-        this.version = version;
-        return this;
     }
 
     public Set<String> properties() {
@@ -91,23 +67,37 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         return this;
     }
 
+    @Deprecated
+    public ServiceSign call(IHandle handle) {
+        return callLocal(handle);
+    }
+
+    @Deprecated
+    public ServiceSign call(IHandle handle, DataRow headIn) {
+        return callLocal(handle, headIn);
+    }
+
+    @Deprecated
+    public ServiceSign call(IHandle handle, DataSet dataIn) {
+        return callLocal(handle, dataIn);
+    }
+
+    public ServiceSign callLocal(IHandle handle) {
+        return callLocal(handle, new DataSet());
+    }
+
+    public ServiceSign callLocal(IHandle handle, DataRow headIn) {
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return callLocal(handle, dataIn);
+    }
+
     @Override
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
-        DataSet dataOut = null;
-        try {
-            if (server == null)
-                dataOut = LocalService.call(this.id, handle, dataIn);
-            else {
-                log.warn("请改使用callRemote调用: {}", this.id);
-                dataOut = server.call(this, handle, dataIn);
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
-            dataOut = new DataSet().setMessage(e.getMessage());
-        }
+        var dataOut = LocalService.call(this.id, handle, dataIn);
         sign.setDataOut(dataOut);
         return sign;
     }
@@ -116,28 +106,33 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     protected ServiceSign clone() {
         ServiceSign sign = new ServiceSign(this.id, this.server);
         sign.setSession(this.getSession());
-        sign.version = this.version;
-        sign.headStructure = this.headStructure;
-        sign.bodyStructure = this.bodyStructure;
         sign.properties = this.properties;
         return sign;
     }
 
+    public ServiceSign callRemote(CorpConfigImpl config) {
+        return callRemote(config, new DataSet());
+    }
+
+    public ServiceSign callRemote(CorpConfigImpl config, DataRow headIn) {
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return callRemote(config, dataIn);
+    }
+
     @Override
-    public ServiceSign callRemote(TokenConfigImpl config, DataSet dataIn) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(config.getSession());
-        this.setSession(config.getSession());
-        // 优先使用RemoteTokenConfig中的Server
-        config.getServer().ifPresent(value -> this.server = value);
-        Objects.requireNonNull(this.server);
+    public ServiceSign callRemote(CorpConfigImpl corpConfig, DataSet dataIn) {
+        Objects.requireNonNull(corpConfig);
+        Objects.requireNonNull(corpConfig.getSession());
+        this.setSession(corpConfig.getSession());
         // 返回一个新的sign
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
         DataSet dataOut = null;
         try {
-            dataOut = this.server.call(this, config, dataIn);
+            dataOut = RemoteService.call(this, corpConfig, id(), dataIn, sign.server());
         } catch (Throwable e) {
+            log.error(e.getMessage(), e);
             e.printStackTrace();
             dataOut = new DataSet().setMessage(e.getMessage());
         }
@@ -154,22 +149,6 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         sign.setSession(handle.getSession());
         sign.setDataIn(dataIn);
         return sign;
-    }
-
-    @Override
-    public Object head() {
-        if (this.headStructure == null)
-            throw new RuntimeException("not define interface: headStructure");
-        return dataOut().head().asRecord(headStructure);
-    }
-
-    @Override
-    public List<Object> body() {
-        if (this.bodyStructure == null)
-            throw new RuntimeException("not define interface: bodyStructure");
-        List<Object> result = new ArrayList<>();
-        dataOut().forEach(item -> result.add(item.asRecord(bodyStructure)));
-        return result;
     }
 
     public String getExportKey() {
@@ -222,17 +201,16 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
                 if (svc.version().ordinal() > 0)
                     System.out.println(String.format(
-                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d).setProperties(Set.of(%s));",
-                            function, clazz.getSimpleName(), function, svc.version().ordinal(), builder.toString()));
+                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setProperties(Set.of(%s));",
+                            function, clazz.getSimpleName(), function, builder.toString()));
                 else
                     System.out.println(String.format(
                             "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setProperties(Set.of(%s));",
                             function, clazz.getSimpleName(), function, builder.toString()));
             } else {
                 if (svc.version().ordinal() > 0)
-                    System.out.println(String.format(
-                            "public static final ServiceSign %s = new ServiceSign(\"%s.%s\").setVersion(%d);", function,
-                            clazz.getSimpleName(), function, svc.version().ordinal()));
+                    System.out.println(String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\");",
+                            function, clazz.getSimpleName(), function));
                 else
                     System.out.println(String.format("public static final ServiceSign %s = new ServiceSign(\"%s.%s\");",
                             function, clazz.getSimpleName(), function));
@@ -254,21 +232,17 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      */
     @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
-        if (this.server() == null || this.server().isLocal(handle, this))
-            return EntityQuery.findOne(handle, clazz, values);
-        else {
-            EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
-            DataSet dataIn = new DataSet();
-            DataRow headIn = dataIn.head();
-            int site = entityKey.corpNo() ? 1 : 0;
-            String[] fields = entityKey.fields();
-            for (int i = site; i < fields.length; i++)
-                headIn.setValue(fields[i], values[i - site]);
-            DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
-            if (dataOut.state() == ServiceState.OK)
-                return Optional.of(dataOut.current().asEntity(clazz));
-            return Optional.empty();
-        }
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        DataSet dataIn = new DataSet();
+        DataRow headIn = dataIn.head();
+        int site = entityKey.corpNo() ? 1 : 0;
+        String[] fields = entityKey.fields();
+        for (int i = site; i < fields.length; i++)
+            headIn.setValue(fields[i], values[i - site]);
+        DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
+        if (dataOut.state() == ServiceState.OK)
+            return Optional.of(dataOut.current().asEntity(clazz));
+        return Optional.empty();
     }
 
     /**
@@ -276,26 +250,22 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      */
     @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        if (this.server() == null || this.server().isLocal(handle, this))
-            return EntityQuery.findMany(handle, clazz, values);
-        else {
-            Set<T> set = new LinkedHashSet<>();
-            EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
-            DataSet dataIn = new DataSet();
-            DataRow headIn = dataIn.head();
-            int site = entityKey.corpNo() ? 1 : 0;
-            String[] fields = entityKey.fields();
-            if (values != null && values.length > 0) {
-                for (int i = site; i < fields.length; i++)
-                    headIn.setValue(fields[i], values[i - site]);
-            }
-            DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
-            if (dataOut.state() != ServiceState.OK)
-                return set;
-
-            dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
-            return set;
+        Set<T> set = new LinkedHashSet<>();
+        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        DataSet dataIn = new DataSet();
+        DataRow headIn = dataIn.head();
+        int site = entityKey.corpNo() ? 1 : 0;
+        String[] fields = entityKey.fields();
+        if (values != null && values.length > 0) {
+            for (int i = site; i < fields.length; i++)
+                headIn.setValue(fields[i], values[i - site]);
         }
+        DataSet dataOut = this.callLocal(handle, dataIn).dataOut();
+        if (dataOut.state() != ServiceState.OK)
+            return set;
+
+        dataOut.records().stream().map(item -> item.asEntity(clazz)).forEach(set::add);
+        return set;
     }
 
     @Override
@@ -304,48 +274,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
             return this.sign();
         else if (method.getName().equals("call"))
             return method.invoke(this, args);
-        else if (method.getName().equals("head"))
-            return this.head();
-        else if (method.getName().equals("body"))
-            return this.body();
         else
             throw new RuntimeException("not support method: " + method.getName());
-    }
-
-    public static ServiceSignImpl build(String id) {
-        return build(id, null, ServiceSignImpl.class);
-    }
-
-    public static ServiceSignImpl build(String id, ServiceServerImpl server) {
-        return build(id, server, ServiceSignImpl.class);
-    }
-
-    public static <T> T build(String id, Class<T> clazz) {
-        return build(id, null, clazz);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T build(String id, ServiceServerImpl server, Class<T> clazz) {
-        ServiceSign sign = new ServiceSign(id, server);
-        try {
-            Method head = clazz.getMethod("head");
-            if (head != null && head.getReturnType() != Object.class)
-                sign.headStructure = head.getReturnType();
-        } catch (NoSuchMethodException | SecurityException e) {
-        }
-        try {
-            Method body = clazz.getMethod("body");
-            if (body != null) {
-                if (body.getReturnType() != List.class)
-                    throw new RuntimeException("only support List<Body>");
-                Type genericReturnType = body.getGenericReturnType();
-                ParameterizedType pt = (ParameterizedType) genericReturnType;
-                if (!"?".equals(pt.getActualTypeArguments()[0].getTypeName()))
-                    sign.bodyStructure = (Class<?>) pt.getActualTypeArguments()[0];
-            }
-        } catch (NoSuchMethodException | SecurityException e) {
-        }
-        return (T) Proxy.newProxyInstance(ServiceSign.class.getClassLoader(), new Class[] { clazz }, sign);
     }
 
 }
