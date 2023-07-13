@@ -241,24 +241,10 @@ public class SecurityPolice {
                     result = sb.toString();
                 }
             }
-            // 追加菜单/服务标记的版本号
-            Versions versions = bean.getClass().getDeclaredAnnotation(Versions.class);
-            StringBuilder builder = new StringBuilder();
-            if (versions != null) {
-                int[] value = versions.value();
-                for (int i : value) {
-                    builder.append(i).append(",");
-                }
-                result = result + "#" + builder.toString();
-            }
         } else if (handle != null) {
             if (bean instanceof IForm) {
                 IForm form = (IForm) bean;
-                String verlist = form.getParam("verlist", "");// TODO: 2021/11/19 增加独立方法获取，扫描注解、xml、mysql
                 result = form.getPermission();
-                if (!Utils.isEmpty(verlist)) {
-                    result = result + "#" + verlist;
-                }
             }
             if ("".equals(result)) {
                 String beanId;
