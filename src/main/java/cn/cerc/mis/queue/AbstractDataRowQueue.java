@@ -8,9 +8,12 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
-import cn.cerc.mis.client.TokenConfigImpl;
+import cn.cerc.mis.client.CorpConfigImpl;
+import cn.cerc.mis.client.RemoteService;
+import cn.cerc.mis.core.Application;
 
 @Deprecated
 public abstract class AbstractDataRowQueue extends AbstractQueue {
@@ -37,16 +40,17 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         return super.push(dataRow.json());
     }
 
-    protected String pushToRemote(IHandle handle, TokenConfigImpl config, DataRow dataRow) {
+    protected String pushToRemote(IHandle handle, CorpConfigImpl config, DataRow dataRow) {
         Objects.requireNonNull(config);
-        config.setSession(handle.getSession());
-        config.getOriginal().ifPresent(value -> this.setOriginal(value));
-        config.getToken().ifPresent(token -> {
-            if (token.equals(handle.getSession().getToken()))
-                throw new RuntimeException(
-                        String.format("%s 远程token不得与当前token一致 %s", token, handle.getSession().getToken()));
-            dataRow.setValue("token", token);
-        });
+        if (!Utils.isEmpty(config.getCorpNo())) {
+            var serviceConfig = RemoteService.getServerConfig(Application.getContext());
+            if (serviceConfig.isPresent()) {
+                var remoteToken = serviceConfig.get().getToken(handle, config.getCorpNo());
+                if (remoteToken.isPresent())
+                    dataRow.setValue("token", remoteToken.get());
+            }
+        }
+
         if (!dataRow.hasValue("corp_no_"))
             dataRow.setValue("corp_no_", handle.getSession().getCorpNo());
         if (!dataRow.hasValue("user_code_"))
@@ -82,10 +86,5 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
     }
 
     public abstract boolean execute(IHandle handle, DataRow data);
-
-//    public boolean receive(OnMessageDataRow event) {
-//        QueueConsumer consumer = new QueueConsumer();
-//        return consumer.receive("tempGroup", this.getTopic(), this.getTag(), data -> event.execute(new DataRow().setJson(data)));
-//    }
 
 }
