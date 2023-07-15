@@ -70,6 +70,8 @@ public class AppClient implements Serializable {
         browsers.add("mozilla");
         browsers.add("firefox");
         browsers.add("safari");
+        browsers.add("apicloud");
+        browsers.add("DitengApp");
     }
 
     // 平板
@@ -110,8 +112,10 @@ public class AppClient implements Serializable {
         String userAgent = request.getHeader("User-Agent");
         if (Utils.isEmpty(userAgent))
             return;
-        if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase())))
+        if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase()))) {
+            log.warn("User-Agent -> {}", userAgent);
             return;
+        }
 
         Cookie[] cookies = request.getCookies();
         try (Jedis redis = JedisFactory.getJedis()) {
