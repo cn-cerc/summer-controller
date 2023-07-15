@@ -63,16 +63,9 @@ public class AppClient implements Serializable {
         phone_devices.add(AppClient.wechat);
     }
 
+    // 浏览器黑名单，不需要创建这么多设备缓存
     private static final List<String> browsers = new ArrayList<>();
     static {
-        browsers.add("chrome");
-        browsers.add("edge");
-        browsers.add("mozilla");
-        browsers.add("firefox");
-        browsers.add("safari");
-        browsers.add("apicloud");
-        browsers.add("DitengApp");
-        browsers.add("DitengAppPad");
     }
 
     // 平板
@@ -113,7 +106,7 @@ public class AppClient implements Serializable {
         String userAgent = request.getHeader("User-Agent");
         if (Utils.isEmpty(userAgent))
             return;
-        if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase()))) {
+        if (browsers.stream().anyMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase()))) {
             log.warn("User-Agent -> {}", userAgent);
             return;
         }
