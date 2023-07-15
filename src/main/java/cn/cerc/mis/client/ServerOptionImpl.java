@@ -2,9 +2,6 @@ package cn.cerc.mis.client;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.IHandle;
 
 /**
@@ -14,7 +11,6 @@ import cn.cerc.db.core.IHandle;
  *
  */
 public interface ServerOptionImpl {
-    Logger log = LoggerFactory.getLogger(ServerOptionImpl.class);
 
     /**
      * 
