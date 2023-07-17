@@ -132,9 +132,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         try {
             dataOut = RemoteService.call(this, corpConfig, id(), dataIn, sign.server());
         } catch (Throwable e) {
-            log.error(e.getMessage(), e);
-            e.printStackTrace();
-            dataOut = new DataSet().setMessage(e.getMessage());
+            log.error("{}, {}, {}, {} -> {}", corpConfig.getClass(), id(), corpConfig.getCorpNo(), dataIn.json(),
+                    e.getMessage(), e);
+            dataOut = new DataSet().setError().setMessage(e.getMessage());
         }
         sign.setDataOut(dataOut);
         return sign;
