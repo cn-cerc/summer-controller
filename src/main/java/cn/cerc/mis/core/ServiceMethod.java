@@ -55,9 +55,10 @@ public final class ServiceMethod {
             }
         }
         // 执行权限检查
-        if (!SecurityPolice.check(handle, method, owner)) {
-            return new DataSet().setMessage(SecurityStopException.getAccessDisabled())
-                    .setState(ServiceState.ACCESS_DISABLED);
+        try {
+            SecurityPolice.check(handle, method, owner);
+        } catch (SecurityStopException e) {
+            return new DataSet().setMessage(e.getMessage()).setState(ServiceState.ACCESS_DISABLED);
         }
 
         // 执行具体的服务函数
