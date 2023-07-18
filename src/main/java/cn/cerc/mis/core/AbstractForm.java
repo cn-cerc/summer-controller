@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
-import cn.cerc.mis.security.SecurityStopException;
 import cn.cerc.mis.security.Webform;
 
 //@Component
@@ -150,9 +149,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class);
                 }
-                if (!SecurityPolice.check(this, method, this)) {
-                    throw new SecurityStopException(method, this);
-                }
+                SecurityPolice.check(this, method, this);
                 result = method.invoke(this, this.pathVariables[0]);
                 break;
             }
@@ -166,9 +163,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class, String.class);
                 }
-                if (!SecurityPolice.check(this, method, this)) {
-                    throw new SecurityStopException(method, this);
-                }
+                SecurityPolice.check(this, method, this);
                 result = method.invoke(this, this.pathVariables[0], this.pathVariables[1]);
                 break;
             }
@@ -183,9 +178,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                 } else {
                     method = this.getClass().getMethod(funcCode, String.class, String.class, String.class);
                 }
-                if (!SecurityPolice.check(this, method, this)) {
-                    throw new SecurityStopException(method, this);
-                }
+                SecurityPolice.check(this, method, this);
                 result = method.invoke(this, this.pathVariables[0], this.pathVariables[1], this.pathVariables[2]);
                 break;
             }
@@ -199,8 +192,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                 }
                 if (method == null)
                     throw new RuntimeException(String.format("找不到目标可执行函数 %s", funcCode));
-                if (!SecurityPolice.check(this, method, this))
-                    throw new SecurityStopException(method, this);
+                SecurityPolice.check(this, method, this);
                 if (method.getParameterCount() > 0) {
                     Object[] args = new Object[method.getParameterCount()];
                     List<String> list = new ArrayList<>();

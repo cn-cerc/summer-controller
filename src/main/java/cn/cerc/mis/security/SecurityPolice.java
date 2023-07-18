@@ -36,7 +36,7 @@ public class SecurityPolice {
         return result;
     }
 
-    public static boolean check(IHandle handle, Method method, Object bean) {
+    public static void check(IHandle handle, Method method, Object bean) throws SecurityStopException {
         Class<?> clazz = bean.getClass();
         Permission permission = findPermission(method.getAnnotations(), clazz.getAnnotations());
         Operators operators = findOperators(method.getAnnotations(), clazz.getAnnotations());
@@ -53,7 +53,8 @@ public class SecurityPolice {
                 beanId = ((SupportBeanName) bean).getBeanName();
             log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
-        return result;
+        if (!result)
+            throw new SecurityStopException(method, bean, value);
     }
 
     public static boolean check(IHandle handle, Enum<?> clazz, String operator) {
