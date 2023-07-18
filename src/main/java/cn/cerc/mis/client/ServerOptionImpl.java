@@ -34,8 +34,6 @@ public interface ServerOptionImpl {
      * 
      * @return 指定访问 token
      */
-    default Optional<String> getToken() {
-        return Optional.empty();
-    }
+    public Optional<String> getToken();
 
 }

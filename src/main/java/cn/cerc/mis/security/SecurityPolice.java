@@ -25,7 +25,7 @@ public class SecurityPolice {
         Operators operators = findOperators(clazz.getAnnotations());
 
         String value = getValue(handle, bean, permission, operators);
-        boolean result = validate(handle.getSession().getPermissions(), value);
+        boolean result = validate(handle.getCorpNo(), handle.getSession().getPermissions(), value);
 
         if (log.isDebugEnabled()) {
             String beanId = path[path.length - 1];
@@ -45,7 +45,7 @@ public class SecurityPolice {
                     handle.getSession().getPermissions());
         }
         String value = getValue(handle, bean, permission, operators);
-        boolean result = validate(handle.getSession().getPermissions(), value);
+        boolean result = validate(handle.getCorpNo(), handle.getSession().getPermissions(), value);
         if (log.isDebugEnabled()) {
             String[] path = clazz.getName().split("\\.");
             String beanId = path[path.length - 1];
@@ -67,7 +67,7 @@ public class SecurityPolice {
     }
 
     public static boolean check(IHandle handle, OperatorData data) {
-        boolean result = validate(handle.getSession().getPermissions(), data.toString());
+        boolean result = validate(handle.getCorpNo(), handle.getSession().getPermissions(), data.toString());
         if (log.isDebugEnabled()) {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             StackTraceElement el = stackTrace[2];
@@ -79,6 +79,10 @@ public class SecurityPolice {
     }
 
     public static boolean validate(String permissions, String value) {
+        return validate("", permissions, value);
+    }
+
+    public static boolean validate(String corpNo, String permissions, String value) {
         if (value == null || "".equals(value))
             return true;
         if (value.startsWith(Permission.GUEST))
@@ -128,8 +132,13 @@ public class SecurityPolice {
             return !values.equals(Permission.GUEST);
 
         // 授权了ADMIN权限
-        if (values.equals(Permission.ADMIN))
-            return true;
+        // FIXME 先暂时用公司别进行判断，平台管理的权限，admin权限也不能访问
+        if (values.equals(Permission.ADMIN)) {
+            if (!text.startsWith("service"))
+                return true;
+            if ("000000".equals(corpNo))
+                return true;
+        }
 
         // 授权与要求的权限相同
         if (values.equals(text))
@@ -138,9 +147,9 @@ public class SecurityPolice {
         // 如果出现被限制的权限（以减号开头），反向检查
         for (String item : values.split(";")) {
             if (item.startsWith("-")) {
-                if (compareMaster(text, item.substring(1)))
+                if (compareMaster(corpNo, text, item.substring(1)))
                     return false;
-                if (compareDetail(text, item.substring(1)))
+                if (compareDetail(corpNo, text, item.substring(1)))
                     return false;
             }
         }
@@ -148,9 +157,9 @@ public class SecurityPolice {
         // 正常检查
         for (String item : values.split(";")) {
             if (!item.startsWith("-")) {
-                if (compareMaster(item, text))
+                if (compareMaster(corpNo, item, text))
                     return true;
-                if (compareDetail(item, text))
+                if (compareDetail(corpNo, item, text))
                     return true;
             }
         }
@@ -158,9 +167,14 @@ public class SecurityPolice {
         return false;
     }
 
-    private static boolean compareMaster(String master, String request) {
-        if (master.equals(Permission.ADMIN))
-            return true;
+    private static boolean compareMaster(String corpNo, String master, String request) {
+        // FIXME 先暂时用公司别进行判断，平台管理的权限，admin权限也不能访问
+        if (master.equals(Permission.ADMIN)) {
+            if (!request.startsWith("service"))
+                return true;
+            if ("000000".equals(corpNo))
+                return true;
+        }
 
         if (request.equals(Permission.GUEST) || request.equals(Permission.USERS) || request.equals(master))
             return true;
@@ -175,7 +189,7 @@ public class SecurityPolice {
         return false;
     }
 
-    private static boolean compareDetail(String master, String request) {
+    private static boolean compareDetail(String corpNo, String master, String request) {
         // 检查是否存在[]
         String masterText = master;
         int masterStart = master.indexOf("[");
@@ -193,7 +207,7 @@ public class SecurityPolice {
         }
 
         // 主体比较通过则继续比较
-        if (compareMaster(masterText, childText)) {
+        if (compareMaster(corpNo, masterText, childText)) {
             // 有任一方没有内容均视为通过
             if ((masterDetail.length == 0) || (childDetail.length == 0))
                 return true;
