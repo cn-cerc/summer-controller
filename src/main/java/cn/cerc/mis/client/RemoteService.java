@@ -108,7 +108,7 @@ public class RemoteService extends ServiceProxy {
         // 防止本地调用
         if (targetConfig.isLocal()) {
             if (!"000000".equals(targetConfig.getCorpNo()))
-                log.warn("调用逻辑错误，发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", service);
+                log.warn("调用逻辑错误，{} 发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", handle.getCorpNo(), service);
             return LocalService.call(service, handle, dataIn);
         } else if (serviceOption != null) {
             // 处理特殊的业务场景，创建帐套、钓友商城

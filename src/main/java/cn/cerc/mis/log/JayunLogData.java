@@ -78,9 +78,7 @@ public class JayunLogData {
             this.level = info;
         this.message = event.getRenderedMessage();
         ThrowableInformation throwableInfo = event.getThrowableInformation();
-        if (throwableInfo == null)
-            this.stack = null;
-        else
+        if (throwableInfo != null)
             this.stack = Arrays.asList(throwableInfo.getThrowableStrRep());
         this.timestamp = event.getTimeStamp();
         this.hostname = ApplicationEnvironment.hostname();
