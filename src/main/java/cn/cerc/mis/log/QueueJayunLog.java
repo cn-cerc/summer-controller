@@ -3,8 +3,6 @@ package cn.cerc.mis.log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -18,8 +16,6 @@ import cn.cerc.db.queue.QueueServiceEnum;
 
 @Component
 public class QueueJayunLog extends AbstractQueue {
-    private static final Logger log = LoggerFactory.getLogger(QueueJayunLog.class);
-    // FIXME 如果记录INFO日志，会导致循环调用
     private static final ClassConfig config = new ClassConfig();
     public static final String prefix = "qc";
 
@@ -46,13 +42,16 @@ public class QueueJayunLog extends AbstractQueue {
         String site = config.getString(key("api.log.site"), "");
         if (Utils.isEmpty(site))
             return true;
+
         JayunLogData data = new Gson().fromJson(message, JayunLogData.class);
-        String token = config.getString(key(String.format("%s.log.token", data.getProject())), "");
+        String profile = key(String.format("%s.log.token", data.getProject()));
+        String token = config.getString(profile, "");
         if (Utils.isEmpty(token)) {
-            log.warn("项目 {} 获取日志等级 {} token为空", data.getProject(), data.getLevel());
+            System.err.println(String.format("%s 项目日志配置 %s 为空", data.getProject(), profile));
             return true;
         }
         data.setToken(token);
+
         String json = new Gson().toJson(data);
         pool.submit(() -> {
             try {
