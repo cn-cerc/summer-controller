@@ -1,6 +1,5 @@
 package cn.cerc.mis.log;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,9 +78,7 @@ public class JayunLogData {
             this.level = info;
         this.message = event.getRenderedMessage();
         ThrowableInformation throwableInfo = event.getThrowableInformation();
-        if (throwableInfo == null)
-            this.stack = new ArrayList<>();
-        else
+        if (throwableInfo != null)
             this.stack = Arrays.asList(throwableInfo.getThrowableStrRep());
         this.timestamp = event.getTimeStamp();
         this.hostname = ApplicationEnvironment.hostname();

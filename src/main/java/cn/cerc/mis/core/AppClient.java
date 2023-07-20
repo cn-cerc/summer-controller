@@ -114,7 +114,7 @@ public class AppClient implements Serializable {
         if (Utils.isEmpty(userAgent))
             return;
         if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase()))) {
-            log.warn("User-Agent -> {}", userAgent);
+            log.info("User-Agent -> {}", userAgent);
             return;
         }
 
