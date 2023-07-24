@@ -97,10 +97,10 @@ public class LocalService extends ServiceProxy {
             return bean._call(handle, dataIn, function);
         } catch (ClassNotFoundException e) {
             log.warn(e.getMessage(), e);
-            return new DataSet().setMessage("not find service: " + service);
+            return new DataSet().setError().setMessage("not find service: " + service);
         } catch (ServiceException e) {
             log.warn(e.getMessage(), e);
-            return new DataSet().setMessage(e.getMessage());
+            return new DataSet().setError().setMessage(e.getMessage());
         }
     }
 
