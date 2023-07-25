@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 
-@Deprecated
 public class BookHandle implements IHandle {
     private ISession session;
     private Map<String, Object> params = new HashMap<>();

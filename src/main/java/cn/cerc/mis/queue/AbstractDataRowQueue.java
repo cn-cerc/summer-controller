@@ -15,7 +15,6 @@ import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.core.Application;
 
-@Deprecated
 public abstract class AbstractDataRowQueue extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractDataRowQueue.class);
 
