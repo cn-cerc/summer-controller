@@ -27,6 +27,7 @@ import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.ServerConfig;
+import cn.cerc.db.core.Utils;
 import cn.cerc.db.zk.ZkNode;
 import cn.cerc.db.zk.ZkServer;
 import cn.cerc.mis.SummerMIS;
@@ -105,6 +106,10 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     @Override
     public void process(WatchedEvent event) {
         String path = event.getPath();
+        if (Utils.isEmpty(path)) {
+            log.warn("zookeeper 出现事件推送 path 为空的现象");
+            return;
+        }
         try {
             ZkServer server = ZkNode.get().server();
             ZooKeeper client = server.client();
