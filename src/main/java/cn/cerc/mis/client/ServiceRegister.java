@@ -185,6 +185,13 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         return path;
     }
 
+    /**
+     * 获取当前主机内存缓存中的内网节点信息
+     */
+    public Map<String, Map<String, String>> listNodes() {
+        return intranets;
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
         this.context = context;
