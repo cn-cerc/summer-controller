@@ -86,7 +86,7 @@ public class RemoteService extends ServiceProxy {
         curl.put("dataIn", dataIn.json());
         try {
             String response = curl.doPost(endpoint + service);
-            return new DataSet().setOk().setJson(response);
+            return new DataSet().setJson(response);
         } catch (IOException | JsonSyntaxException e) {
             log.error("{}{} , {} -> {}", endpoint, service, curl.getParameters(), e.getMessage(), e);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
