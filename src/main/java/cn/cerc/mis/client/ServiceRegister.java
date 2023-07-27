@@ -69,13 +69,11 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String intranet = config.getString("application.intranet", host);
 
         // 建立永久父级结点
-        ZooKeeper client = ZkServer.get().client();
-
         String root = buildPath(ServerConfig.getAppOriginal());
         ZkNode.get().getNodeValue(root, () -> extranet);
-
         try {
             // 注册Watcher，监听目录节点的子节点变化
+            ZooKeeper client = ZkServer.get().client();
             client.getChildren(root, this);
 
             // 即使自己不注册节点也要监听根目录的变化
@@ -108,9 +106,8 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
 
     @Override
     public void process(WatchedEvent event) {
-        String path = event.getPath();
-
         ZooKeeper client = ZkServer.get().client();
+        String path = event.getPath();
         if (Utils.isEmpty(path)) {
             log.warn("zookeeper 出现事件推送 path 为空的现象");
             // 注册Watcher，继续监听目录节点的子节点变化
