@@ -69,13 +69,14 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String intranet = config.getString("application.intranet", host);
 
         // 建立永久父级结点
-        ZkServer server = ZkNode.get().server();
+        ZooKeeper client = ZkServer.get().client();
+
         String root = buildPath(ServerConfig.getAppOriginal());
         ZkNode.get().getNodeValue(root, () -> extranet);
 
         try {
             // 注册Watcher，监听目录节点的子节点变化
-            server.client().getChildren(root, this);
+            client.getChildren(root, this);
 
             // 即使自己不注册节点也要监听根目录的变化
             if (ServerConfig.isServerGray()) {
@@ -97,7 +98,9 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             String hostname = ApplicationEnvironment.hostname();
             String groupPath = root + "/" + myGroup + "-";
             DataRow node = DataRow.of("intranet", intranet, "hostname", hostname, "time", new Datetime());
-            server.create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
+            ZkServer.get().create(groupPath, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
+            // 注册Watcher，继续监听目录节点的子节点变化
+            client.getChildren(root, this);
         } catch (KeeperException | InterruptedException e) {
             log.error("内网节点注册失败 {}", e.getMessage(), e);
         }
@@ -106,21 +109,28 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     @Override
     public void process(WatchedEvent event) {
         String path = event.getPath();
+
+        ZooKeeper client = ZkServer.get().client();
         if (Utils.isEmpty(path)) {
             log.warn("zookeeper 出现事件推送 path 为空的现象");
+            // 注册Watcher，继续监听目录节点的子节点变化
+            try {
+                client.getChildren(path, this);
+            } catch (KeeperException | InterruptedException e) {
+                log.error(e.getMessage(), e);
+            }
             return;
         }
+
         try {
-            ZkServer server = ZkNode.get().server();
-            ZooKeeper client = server.client();
             if (event.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
                 Stat stat = client.exists(path, false);
                 if (stat != null) {
-                    List<String> list = server.client().getChildren(path, false);
+                    List<String> list = client.getChildren(path, false);
                     Map<String, String> map = new ConcurrentHashMap<>();
                     for (String nodeKey : list) {
                         if (nodeKey.startsWith(myGroup)) {
-                            String nodeValue = server.getValue(path + "/" + nodeKey);
+                            String nodeValue = ZkServer.get().getValue(path + "/" + nodeKey);
                             if (nodeValue != null)
                                 map.put(nodeKey, nodeValue);
                         }
@@ -134,7 +144,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             }
             log.info("节点内存缓存 {}", new Gson().toJson(intranets));
             // 注册Watcher，继续监听目录节点的子节点变化
-            server.client().getChildren(path, this);
+            client.getChildren(path, this);
         } catch (KeeperException | InterruptedException e) {
             log.error(e.getMessage(), e);
         }
