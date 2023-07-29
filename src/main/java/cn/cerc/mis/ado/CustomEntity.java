@@ -7,7 +7,7 @@ import cn.cerc.db.core.EntityImpl;
 
 public class CustomEntity implements EntityImpl {
     private transient EntityHomeImpl entityHome;
-    private boolean locked = true;
+    private transient boolean locked = true;
 
     /**
      * 设置EntityQuery

@@ -39,6 +39,15 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
     }
 
+    /**
+     * 主要用于测试环境
+     * 
+     * @param class1
+     */
+    public EntityMany(Class<T> class1) {
+        super(null, class1, null, false, false);
+    }
+
     @Override
     public <X extends Throwable> EntityMany<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
         super.isEmptyThrow(exceptionSupplier);

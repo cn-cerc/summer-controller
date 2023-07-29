@@ -11,24 +11,17 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 
-import cn.cerc.db.core.SqlText;
-
 public class EntityManyTest {
-    private Consumer<SampleEntity> doInsert = (item) -> {
+    private Consumer<StubEntity> doInsert = (item) -> {
         item.setUID_(1l);
         item.setCode_("a02");
     };
 
-    private EntityMany<SampleEntity> findAll() {
-        SqlText sql = null;
-        return new EntityMany<SampleEntity>(null, SampleEntity.class, sql, false, false);
-    }
-
     @Test
     public void test_findRecNo() {
-        SampleEntity entity = new SampleEntity();
+        StubEntity entity = new StubEntity();
         assertEquals(entity.findRecNo(), -1);
-        EntityMany<SampleEntity> query = findAll();
+        var query = new EntityMany<StubEntity>(StubEntity.class);
         entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
         query.deleteAll();
@@ -37,9 +30,9 @@ public class EntityManyTest {
 
     @Test
     public void test_QueryAll() {
-        EntityMany<SampleEntity> query = findAll();
+        var query = new EntityMany<StubEntity>(StubEntity.class);
         assertTrue(query.isEmpty());
-        SampleEntity entity = query.insert(doInsert);
+        StubEntity entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
         assertEquals("000000", entity.getCorpNo_());
         assertTrue(query.isPresent());
@@ -56,17 +49,17 @@ public class EntityManyTest {
 
     @Test
     public void test_insert() {
-        EntityMany<SampleEntity> query = findAll();
-        List<SampleEntity> list = new ArrayList<>();
-        SampleEntity entity1 = new SampleEntity();
+        var query = new EntityMany<StubEntity>(StubEntity.class);
+        List<StubEntity> list = new ArrayList<>();
+        StubEntity entity1 = new StubEntity();
         entity1.setUID_(1l);
         entity1.setCode_("a01");
         list.add(entity1);
-        SampleEntity entity2 = new SampleEntity();
+        StubEntity entity2 = new StubEntity();
         entity2.setUID_(2l);
         entity2.setCode_("a02");
         list.add(entity2);
-        SampleEntity entity3 = new SampleEntity();
+        StubEntity entity3 = new StubEntity();
         entity3.setUID_(3l);
         entity3.setCode_("a03");
         list.add(entity3);
