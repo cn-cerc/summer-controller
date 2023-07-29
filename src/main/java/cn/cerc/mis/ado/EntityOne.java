@@ -52,6 +52,15 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         }
     }
 
+    /**
+     * 主要用于测试环境
+     * 
+     * @param class1
+     */
+    public EntityOne(Class<T> class1) {
+        super(null, class1, null, false, false);
+    }
+
     @Override
     public <X extends Throwable> EntityOne<T> isEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
         super.isEmptyThrow(exceptionSupplier);

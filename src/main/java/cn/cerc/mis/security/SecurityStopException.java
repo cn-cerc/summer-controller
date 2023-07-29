@@ -36,7 +36,7 @@ public class SecurityStopException extends SecurityException {
         if (bean instanceof SupportBeanName)
             beanId = ((SupportBeanName) bean).getBeanName();
 
-        this.message = String.format("%s [%s.%s]您未授权此权限代码：%s", getAccessDisabled(), beanId, method.getName(),
+        this.message = String.format("%s [%s.%s] 您未授权此权限代码：%s", getAccessDisabled(), beanId, method.getName(),
                 value);
     }
 

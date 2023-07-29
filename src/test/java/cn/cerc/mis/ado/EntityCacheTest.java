@@ -29,8 +29,8 @@ public class EntityCacheTest {
 
     @Test
     public void test_buildKeys() {
-        EntityCache<SampleEntity> ec = new EntityCache<SampleEntity>(null, SampleEntity.class);
-        String clazzName = SampleEntity.class.getSimpleName();
+        EntityCache<StubEntity> ec = new EntityCache<StubEntity>(null, StubEntity.class);
+        String clazzName = StubEntity.class.getSimpleName();
         assertEquals(clazzName + ".a.0", String.join(".", ec.buildKeys("a", "0")));
         assertEquals(clazzName + ".a.null", String.join(".", ec.buildKeys("a", null)));
         DataRow row = new DataRow();
@@ -41,8 +41,8 @@ public class EntityCacheTest {
 
     @Test
     public void test_getVirtualEntity() {
-        EntityCache<SampleEntity> ec = new EntityCache<SampleEntity>(null, SampleEntity.class);
-        SampleEntity entity = ec.getVirtualEntity("a", "1");
+        EntityCache<StubEntity> ec = new EntityCache<StubEntity>(null, StubEntity.class);
+        StubEntity entity = ec.getVirtualEntity("a", "1");
         assertTrue(entity == null);
     }
 

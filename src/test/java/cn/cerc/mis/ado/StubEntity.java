@@ -21,8 +21,8 @@ import cn.cerc.mis.ado.EntityCache.VirtualEntityImpl;
 
 @Entity
 @EntityKey(fields = { "corpNo_", "enanble_" })
-public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
-    private static final Logger log = LoggerFactory.getLogger(SampleEntity.class);
+public class StubEntity extends CustomEntity implements VirtualEntityImpl {
+    private static final Logger log = LoggerFactory.getLogger(StubEntity.class);
     @Id
     private Long UID_;
     @Column(nullable = false)
@@ -36,11 +36,11 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
     @Column(nullable = false)
     private Double amount_;
 
-    public SampleEntity() {
+    public StubEntity() {
         super();
     }
 
-    public SampleEntity(String code) {
+    public StubEntity(String code) {
         super();
         this.Code_ = code;
     }
@@ -96,7 +96,7 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
     }
 
     public static void main(String[] args) {
-        EntityOne<SampleEntity> loadOne = EntityOne.open(null, SampleEntity.class, new SqlText(SqlServerType.Mysql));
+        EntityOne<StubEntity> loadOne = EntityOne.open(null, StubEntity.class, new SqlText(SqlServerType.Mysql));
         // 找不到就抛错，否则就执行更新
         loadOne.isEmptyThrow(() -> new RuntimeException("找不到相应的记录"));
         // 找到就抛错，否则就执行插入
@@ -110,7 +110,7 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
         // 找不到就抛错，否则予以删除
         loadOne.isEmptyThrow(() -> new RuntimeException("找不到相应的记录")).delete();
         // 能删除就删除，删除后打印日志
-        SampleEntity entity = loadOne.delete();
+        StubEntity entity = loadOne.delete();
         if (entity != null)
             log.info("删除了记录：" + entity.getCode_());
         // 取出entity并修改，找不到就抛错
@@ -119,7 +119,7 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
         entity.post();
 
         // 对于多条记录的处理
-        EntityMany<SampleEntity> loadAll = EntityMany.open(null, SampleEntity.class, new SqlText(SqlServerType.Mysql));
+        EntityMany<StubEntity> loadAll = EntityMany.open(null, StubEntity.class, new SqlText(SqlServerType.Mysql));
         // 插入一条件
         loadAll.insert(item -> {
             item.setCode_("a01");
@@ -131,13 +131,13 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
             });
         }
         // 一次性插入3条记录
-        List<SampleEntity> list = new ArrayList<>();
-        list.add(new SampleEntity("a01"));
-        list.add(new SampleEntity("a02"));
-        list.add(new SampleEntity("a03"));
+        List<StubEntity> list = new ArrayList<>();
+        list.add(new StubEntity("a01"));
+        list.add(new StubEntity("a02"));
+        list.add(new StubEntity("a03"));
         loadAll.insert(list);
         // 如果返回值为真则更新记录：
-        for (SampleEntity item : loadAll) {
+        for (StubEntity item : loadAll) {
             if (item.getAmount_() < 100) {
                 item.setAmount_(item.getAmount_() + 1);
                 item.post();
@@ -145,7 +145,7 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
         }
         // 如果返回值为真则更新记录，传统写法:
         for (int i = 0; i < loadAll.size(); i++) {
-            SampleEntity item = loadAll.get(i);
+            StubEntity item = loadAll.get(i);
             if (item.getAmount_() < 100) {
                 item.setAmount_(item.getAmount_() + 1);
                 item.post();
@@ -160,8 +160,8 @@ public class SampleEntity extends CustomEntity implements VirtualEntityImpl {
         loadAll.deleteAll();
 
         // 修改一部分，删除一部分
-        List<SampleEntity> delList = new ArrayList<>();
-        for (SampleEntity item : loadAll) {
+        List<StubEntity> delList = new ArrayList<>();
+        for (StubEntity item : loadAll) {
             if (item.getAmount_() < 100) {
                 item.setAmount_(item.getAmount_() + 1);
                 item.post();
