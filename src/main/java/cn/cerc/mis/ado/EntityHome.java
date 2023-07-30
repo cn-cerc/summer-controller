@@ -1,5 +1,6 @@
 package cn.cerc.mis.ado;
 
+import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -143,10 +144,31 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         registerCacheListener(query, clazz, writeCacheAtOpen);
         if (sql != null) {
             query.setSql(sql);
-            if (useSlaveServer)
-                query.openReadonly();
-            else
-                query.open();
+            try {
+                if (useSlaveServer)
+                    query.openReadonly();
+                else
+                    query.open();
+            } catch (RuntimeException e) {
+                if (!(e.getCause() instanceof SQLSyntaxErrorException))
+                    throw e;
+
+                if (helper.sqlServerType() != SqlServerType.Mysql)
+                    throw e;
+
+                var msg = ((SQLSyntaxErrorException) e.getCause()).getMessage();
+                if (!msg.startsWith("Table ") || !msg.endsWith(" doesn't exist"))
+                    throw e;
+
+                log.warn("数据表 {} 没有建立，尝试自动建立", helper.table());
+                var db = new MysqlDatabase(this, clazz);
+                db.createTable(false);
+                // 尝试再次执行
+                if (useSlaveServer)
+                    query.openReadonly();
+                else
+                    query.open();
+            }
         }
         query.setReadonly(true);
     }
