@@ -44,8 +44,8 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
      * 
      * @param class1
      */
-    public EntityMany(Class<T> class1) {
-        super(null, class1, null, false, false);
+    public EntityMany(IHandle handle, Class<T> class1) {
+        super(handle, class1, null, false, false);
     }
 
     @Override
