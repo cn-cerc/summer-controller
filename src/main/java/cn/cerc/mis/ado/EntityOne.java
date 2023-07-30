@@ -57,8 +57,8 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
      * 
      * @param class1
      */
-    public EntityOne(Class<T> class1) {
-        super(null, class1, null, false, false);
+    public EntityOne(IHandle handle, Class<T> class1) {
+        super(handle, class1, null, false, false);
     }
 
     @Override

@@ -11,6 +11,9 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 
+import cn.cerc.db.core.Handle;
+import cn.cerc.db.core.StubSession;
+
 public class EntityManyTest {
     private Consumer<StubEntity> doInsert = (item) -> {
         item.setUID_(1l);
@@ -21,7 +24,7 @@ public class EntityManyTest {
     public void test_findRecNo() {
         StubEntity entity = new StubEntity();
         assertEquals(entity.findRecNo(), -1);
-        var query = new EntityMany<StubEntity>(StubEntity.class);
+        var query = new EntityMany<StubEntity>(new Handle(new StubSession()), StubEntity.class);
         entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
         query.deleteAll();
@@ -30,7 +33,7 @@ public class EntityManyTest {
 
     @Test
     public void test_QueryAll() {
-        var query = new EntityMany<StubEntity>(StubEntity.class);
+        var query = new EntityMany<StubEntity>(new Handle(new StubSession()), StubEntity.class);
         assertTrue(query.isEmpty());
         StubEntity entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
@@ -49,7 +52,7 @@ public class EntityManyTest {
 
     @Test
     public void test_insert() {
-        var query = new EntityMany<StubEntity>(StubEntity.class);
+        var query = new EntityMany<StubEntity>(new Handle(new StubSession()), StubEntity.class);
         List<StubEntity> list = new ArrayList<>();
         StubEntity entity1 = new StubEntity();
         entity1.setUID_(1l);

@@ -9,6 +9,9 @@ import org.junit.Test;
 
 import com.google.gson.Gson;
 
+import cn.cerc.db.core.Handle;
+import cn.cerc.db.core.StubSession;
+
 public class EntityOneTest {
     private Consumer<StubEntity> doInsert = (item) -> {
         item.setUID_(1l);
@@ -19,7 +22,7 @@ public class EntityOneTest {
     public void test_findRecNo() {
         StubEntity entity = new StubEntity();
         assertEquals(entity.findRecNo(), -1);
-        var query = new EntityOne<StubEntity>(StubEntity.class);
+        var query = new EntityOne<StubEntity>(new Handle(new StubSession()), StubEntity.class);
         entity = query.insert(doInsert);
         assertEquals(entity.findRecNo(), 1);
         query.delete();
@@ -28,7 +31,7 @@ public class EntityOneTest {
 
     @Test
     public void test_QueryOne() {
-        var query = new EntityOne<StubEntity>(StubEntity.class);
+        var query = new EntityOne<StubEntity>(new Handle(new StubSession()), StubEntity.class);
         assertTrue(query.isEmpty());
         StubEntity entity = query.orElseInsert(doInsert);
         assertEquals(entity.findRecNo(), 1);
