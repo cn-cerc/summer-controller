@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import cn.cerc.db.core.Handle;
-import cn.cerc.db.core.StubSession;
 import cn.cerc.db.testsql.TestsqlServer;
 
 public class EntityOneTestMysql {
@@ -18,7 +17,7 @@ public class EntityOneTestMysql {
         db.onSelect(UserTest.Table, (query, sql) -> {
             query.setJson(jsonText);
         });
-        var query = EntityOne.open(new Handle(new StubSession()), UserTest.class);
+        var query = EntityOne.open(Handle.getStub(), UserTest.class);
         assertEquals(1, db.tables().size());
         assertEquals(jsonText, db.tables().get(UserTest.Table).toString());
         assertEquals(jsonText, query.dataSet().toString());
