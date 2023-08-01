@@ -36,6 +36,7 @@ import cn.cerc.db.mysql.MysqlDatabase;
 import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.redis.Redis;
 import cn.cerc.db.sqlite.SqliteDatabase;
+import cn.cerc.db.testsql.TestsqlServer;
 import cn.cerc.mis.core.Application;
 import redis.clients.jedis.Jedis;
 
@@ -59,6 +60,8 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         if (database == null) {
             SqlServer server = clazz.getAnnotation(SqlServer.class);
             SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
+            if (TestsqlServer.enabled())
+                sqlServerType = SqlServerType.Testsql;
             if (sqlServerType == SqlServerType.Mysql)
                 database = new MysqlDatabase(handle, clazz);
             else if (sqlServerType == SqlServerType.Mssql)
