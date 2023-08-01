@@ -25,6 +25,7 @@ import cn.cerc.db.core.SqlServer;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
+import cn.cerc.db.testsql.TestsqlServer;
 import cn.cerc.db.zk.ZkNode;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.ado.AdoTable;
@@ -311,8 +312,10 @@ public class Application implements ApplicationContextAware {
                 @SuppressWarnings("unchecked")
                 Class<? extends AdoTable> clazz = (Class<? extends AdoTable>) bean.getClass();
                 SqlServer server = clazz.getDeclaredAnnotation(SqlServer.class);
-                SqlServerType sst = server != null ? server.type() : SqlServerType.Mysql;
-                if (sst == sqlServerType) {
+                SqlServerType serverType = server != null ? server.type() : SqlServerType.Mysql;
+                if (TestsqlServer.enabled())
+                    serverType = SqlServerType.Testsql;
+                if (serverType == sqlServerType) {
                     Entity entity = clazz.getDeclaredAnnotation(Entity.class);
                     if (entity != null && !"".equals(entity.name()))
                         entityItems.put(entity.name(), clazz);
