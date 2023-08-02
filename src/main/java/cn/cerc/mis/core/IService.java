@@ -77,7 +77,7 @@ public interface IService {
             String msg = err.getMessage() == null ? "error is null" : err.getMessage();
             DataSet dataOut = new DataSet().setMessage(msg);
             if (!(err instanceof ServiceException))
-                _log.error(msg, err);
+                _log.error("{} {}", function.key(), msg, err);
             return dataOut.setState(ServiceState.ERROR);
         }
     }
