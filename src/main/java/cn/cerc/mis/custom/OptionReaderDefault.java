@@ -27,20 +27,6 @@ public class OptionReaderDefault implements IOptionReader, IHandle {
     private ISession session;
 
     @Override
-    public String getCorpValue(String corpNo, String optionKey, String defaultValue) {
-        if (Utils.isEmpty(optionKey))
-            throw new RuntimeException("corp optionKey is null");
-
-        MysqlQuery query = new MysqlQuery(this);
-        query.add("select Value_ from %s", systemTable.getBookOptions());
-        query.add("where CorpNo_='%s'", corpNo);
-        query.add("and Code_='%s'", Utils.safeString(optionKey));
-        query.open();
-
-        return query.eof() ? defaultValue : query.getString("Value_");
-    }
-
-    @Override
     public String getUserValue(String userCode, String optionKey, String defaultValue) {
         if (Utils.isEmpty(optionKey))
             throw new RuntimeException("user optionKey is null");
