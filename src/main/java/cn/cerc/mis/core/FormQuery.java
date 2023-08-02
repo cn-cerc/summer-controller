@@ -5,11 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.ServletException;
 
+import cn.cerc.mis.client.ServiceExecuteException;
+
 public class FormQuery {
 
     public static String call(AbstractForm owner, String id, String... pathVariables)
             throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException, ServletException, IOException {
+            InvocationTargetException, ServletException, IOException, ServiceExecuteException {
         FormSign sv = new FormSign(id);
         String formId = sv.getId();
         String funcCode = sv.getValue();

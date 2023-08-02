@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import cn.cerc.db.core.ISession;
+import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.Webform;
@@ -124,8 +125,9 @@ public abstract class AbstractForm implements IForm, InitializingBean {
 
     // 执行指定函数，并返回jsp文件名，若自行处理输出则直接返回null
     @Override
-    public String _call(String funcCode) throws NoSuchMethodException, SecurityException, IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException, ServletException, IOException {
+    public String _call(String funcCode)
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, ServletException, IOException, ServiceExecuteException {
         HttpServletResponse response = getResponse();
         if ("excel".equals(funcCode)) {
             response.setContentType("application/vnd.ms-excel; charset=UTF-8");
