@@ -1,6 +1,5 @@
 package cn.cerc.mis.core;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
@@ -14,7 +13,7 @@ import cn.cerc.db.core.Variant;
 import cn.cerc.mis.security.Permission;
 
 public interface IService {
-    static final Logger _log = LoggerFactory.getLogger(IService.class);
+    public static final Logger log = LoggerFactory.getLogger(IService.class);
 
     /**
      * 
@@ -72,12 +71,10 @@ public interface IService {
                 service.setServiceId(function);
             }
             return sm.call(this, handle, dataIn);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            Throwable err = e.getCause() != null ? e.getCause() : e;
-            String msg = err.getMessage() == null ? "error is null" : err.getMessage();
-            DataSet dataOut = new DataSet().setMessage(msg);
-            if (!(err instanceof ServiceException))
-                _log.error("{} {}", function.key(), msg, err);
+        } catch (Exception e) {
+            log.error("service {}, corpNo {}, dataIn {}, message {}", function.key(), handle.getCorpNo(), dataIn.json(),
+                    e.getMessage(), e);
+            DataSet dataOut = new DataSet().setMessage(e.getMessage());
             return dataOut.setState(ServiceState.ERROR);
         }
     }
