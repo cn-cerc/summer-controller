@@ -133,13 +133,13 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                         }
                     }
                     intranets.put(path, map);
-                    log.info("{} 子节点变化 {}", path, new Gson().toJson(map));
+                    log.debug("{} 子节点变化 {}", path, new Gson().toJson(map));
                 } else {
                     intranets.remove(path);
-                    log.info("{} 子节点移除", path);
+                    log.debug("{} 子节点移除", path);
                 }
             }
-            log.info("节点内存缓存 {}", new Gson().toJson(intranets));
+            log.debug("节点内存缓存 {}", new Gson().toJson(intranets));
             // 注册Watcher，继续监听目录节点的子节点变化
             client.getChildren(path, this);
         } catch (KeeperException | InterruptedException e) {

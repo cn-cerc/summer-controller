@@ -121,13 +121,8 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         return entity;
     }
 
-    /**
-     * 
-     * @return 请改使用 dataSet 函数
-     */
-    @Deprecated
     public DataRow current() {
-        return query.current();
+        return dataSet().current();
     }
 
     /**
