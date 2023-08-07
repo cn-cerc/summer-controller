@@ -2,7 +2,11 @@ package cn.cerc.mis.register.center;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,7 +37,7 @@ public class ApplicationEnvironment {
     /**
      * 获取虚拟机 系统属性
      */
-    public static Properties properteis() {
+    public static Properties properties() {
         return System.getProperties();
     }
 
@@ -66,12 +70,45 @@ public class ApplicationEnvironment {
             return hostip;
 
         try {
-            InetAddress inet = InetAddress.getLocalHost();
-            hostip = inet.getHostAddress();
-        } catch (UnknownHostException e) {
+            InetAddress address = ApplicationEnvironment.getExtranetAddress();
+            hostip = address.getHostAddress();
+        } catch (UnknownHostException | SocketException e) {
             log.error(e.getMessage(), e);
         }
         return hostip;
+    }
+
+    /**
+     * 获取本机IP的对外的网卡信息
+     */
+    public static InetAddress getExtranetAddress() throws UnknownHostException, SocketException {
+        InetAddress address = null;
+        Enumeration<NetworkInterface> faces = NetworkInterface.getNetworkInterfaces();
+        for (NetworkInterface face : Collections.list(faces)) {
+            // 过滤调 docker 生成的网卡
+            if (face.getName().toLowerCase().startsWith("docker"))
+                continue;
+
+            // 获取该网卡接口下的所有IP地址列表
+            Enumeration<InetAddress> items = face.getInetAddresses();
+            while (items.hasMoreElements()) {
+                InetAddress element = items.nextElement();
+                // 排除 loopback 回环类型地址
+                if (element.isLoopbackAddress())
+                    continue;
+
+                // 如果是 site-local 地址，它就是我们要找的地址
+                if (element.isSiteLocalAddress())
+                    return element;
+
+                // 若不是site-local地址 那就记录下该地址当作候选
+                if (address == null)
+                    address = element;
+            }
+        }
+
+        // 如果排除回环地之外无其它地址了，那就回退到原始方案吧
+        return address == null ? InetAddress.getLocalHost() : address;
     }
 
     /**
@@ -101,7 +138,7 @@ public class ApplicationEnvironment {
             for (int i = 0; i < connectors.getLength(); i++) {
                 Element connector = (Element) connectors.item(i);
                 String protocol = connector.getAttribute("protocol");
-                if (protocol != null && protocol.startsWith("HTTP")) {
+                if (protocol.startsWith("HTTP")) {
                     httpPort = connector.getAttribute("port");
                     break;
                 }
@@ -109,7 +146,7 @@ public class ApplicationEnvironment {
             return httpPort;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return "unknow";
+            return "unknown";
         }
     }
 

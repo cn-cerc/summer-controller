@@ -72,10 +72,10 @@ public interface IService {
             }
             return sm.call(this, handle, dataIn);
         } catch (Exception e) {
-            Throwable e1 = e.getCause() != null ? e.getCause() : e;
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
             log.error("service {}, corpNo {}, dataIn {}, message {}", function.key(), handle.getCorpNo(), dataIn.json(),
-                    e1.getMessage(), e1);
-            DataSet dataOut = new DataSet().setMessage(e1.getMessage());
+                    cause.getMessage(), cause);
+            DataSet dataOut = new DataSet().setMessage(cause.getMessage());
             return dataOut.setState(ServiceState.ERROR);
         }
     }
