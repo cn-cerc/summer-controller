@@ -176,7 +176,8 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
                 return new ServiceSiteRecord(true, industry, node.getString("intranet"));
             } else {
                 String extranet = ZkNode.get().getNodeValue(root, () -> "");
-                log.warn("{} 行业未找到可用节点，改使用外网调用 {}", industry, extranet);
+                if (!ServerConfig.isServerDevelop())
+                    log.warn("{} 行业未找到可用节点，改使用外网调用 {}", industry, extranet);
                 return new ServiceSiteRecord(false, industry, extranet);
             }
         } catch (KeeperException | InterruptedException e) {

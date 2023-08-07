@@ -73,8 +73,9 @@ public interface IService {
             return sm.call(this, handle, dataIn);
         } catch (Exception e) {
             Throwable cause = e.getCause() != null ? e.getCause() : e;
-            log.error("service {}, corpNo {}, dataIn {}, message {}", function.key(), handle.getCorpNo(), dataIn.json(),
-                    cause.getMessage(), cause);
+            if (cause instanceof ServiceException)
+                log.error("service {}, corpNo {}, dataIn {}, message {}", function.key(), handle.getCorpNo(),
+                        dataIn.json(), cause.getMessage(), cause);
             DataSet dataOut = new DataSet().setMessage(cause.getMessage());
             return dataOut.setState(ServiceState.ERROR);
         }
