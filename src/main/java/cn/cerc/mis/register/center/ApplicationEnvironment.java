@@ -86,7 +86,8 @@ public class ApplicationEnvironment {
         Enumeration<NetworkInterface> faces = NetworkInterface.getNetworkInterfaces();
         for (NetworkInterface face : Collections.list(faces)) {
             // 过滤调 docker 生成的网卡
-            if (face.getName().toLowerCase().startsWith("docker"))
+            String name = face.getName().toLowerCase();
+            if (name.startsWith("docker") || name.startsWith("br-"))
                 continue;
 
             // 获取该网卡接口下的所有IP地址列表
