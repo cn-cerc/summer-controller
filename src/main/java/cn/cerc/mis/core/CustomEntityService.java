@@ -44,15 +44,15 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return getEntityMeta(this.getHeadInClass());
     }
 
-    public DataSet getMetaBodyIn(IHandle handle, DataSet dataIn) {
+    public final DataSet getMetaBodyIn(IHandle handle, DataSet dataIn) {
         return getEntityMeta(this.getBodyInClass());
     }
 
-    public DataSet getMetaHeadOut(IHandle handle, DataSet dataIn) {
+    public final DataSet getMetaHeadOut(IHandle handle, DataSet dataIn) {
         return getEntityMeta(this.getHeadOutClass());
     }
 
-    public DataSet getMetaBodyOut(IHandle handle, DataSet dataIn) {
+    public final DataSet getMetaBodyOut(IHandle handle, DataSet dataIn) {
         return getEntityMeta(this.getBodyOutClass());
     }
 
