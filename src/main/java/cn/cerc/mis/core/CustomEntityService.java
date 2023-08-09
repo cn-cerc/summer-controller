@@ -1,5 +1,6 @@
 package cn.cerc.mis.core;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,13 +64,25 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
     /** 检验传入参数的 body 值 */
     protected abstract void validateBodyIn(BI body) throws DataValidateException;
 
-    protected abstract Class<HI> getHeadInClass();
+    @SuppressWarnings("unchecked")
+    protected final Class<HI> getHeadInClass() {
+        return (Class<HI>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+    }
 
-    protected abstract Class<BI> getBodyInClass();
+    @SuppressWarnings("unchecked")
+    protected final Class<BI> getBodyInClass() {
+        return (Class<BI>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+    }
 
-    protected abstract Class<HO> getHeadOutClass();
+    @SuppressWarnings("unchecked")
+    protected final Class<HO> getHeadOutClass() {
+        return (Class<HO>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[2];
+    }
 
-    protected abstract Class<BO> getBodyOutClass();
+    @SuppressWarnings("unchecked")
+    protected final Class<BO> getBodyOutClass() {
+        return (Class<BO>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[3];
+    }
 
     private DataSet getEntityMeta(Class<? extends CustomEntity> clazz) {
         DataSet dataOut = new DataSet();

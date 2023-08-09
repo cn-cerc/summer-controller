@@ -14,6 +14,21 @@ import cn.cerc.mis.core.StubEntityService.BodyInEntity;
 import cn.cerc.mis.core.StubEntityService.HeadInEntity;
 
 public class StubEntityService extends CustomEntityService<HeadInEntity, BodyInEntity, EmptyEntity, EmptyEntity> {
+
+    public class HeadInEntity extends CustomEntity {
+        @Column
+        @Describe(name = "单号", width = 20)
+        private String tbNo_;
+
+        public String getTbNo_() {
+            return tbNo_;
+        }
+
+        public void setTbNo_(String tbNo_) {
+            this.tbNo_ = tbNo_;
+        }
+    }
+
     public class BodyInEntity extends CustomEntity {
         @Column
         @Describe(name = "单号", width = 20)
@@ -40,20 +55,6 @@ public class StubEntityService extends CustomEntityService<HeadInEntity, BodyInE
 
     }
 
-    public class HeadInEntity extends CustomEntity {
-        @Column
-        @Describe(name = "单号", width = 20)
-        private String tbNo_;
-
-        public String getTbNo_() {
-            return tbNo_;
-        }
-
-        public void setTbNo_(String tbNo_) {
-            this.tbNo_ = tbNo_;
-        }
-    }
-
     @Override
     public DataSet process(IHandle handle, HeadInEntity headIn, List<BodyInEntity> bodyIn) {
 //        headIn.getTbNo_();
@@ -73,26 +74,6 @@ public class StubEntityService extends CustomEntityService<HeadInEntity, BodyInE
     protected void validateBodyIn(BodyInEntity body) throws DataValidateException {
         DataValidateException.stopRun("单身单号不允许为空", Utils.isEmpty(body.getTbNo_()));
         DataValidateException.stopRun("单身单序不允许为零", body.getIt_() == 0);
-    }
-
-    @Override
-    protected Class<HeadInEntity> getHeadInClass() {
-        return HeadInEntity.class;
-    }
-
-    @Override
-    protected Class<BodyInEntity> getBodyInClass() {
-        return BodyInEntity.class;
-    }
-
-    @Override
-    protected Class<EmptyEntity> getHeadOutClass() {
-        return null;
-    }
-
-    @Override
-    protected Class<EmptyEntity> getBodyOutClass() {
-        return null;
     }
 
 }
