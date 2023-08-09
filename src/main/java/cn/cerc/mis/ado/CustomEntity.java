@@ -5,7 +5,7 @@ import java.util.Objects;
 import cn.cerc.db.core.EntityHomeImpl;
 import cn.cerc.db.core.EntityImpl;
 
-public class CustomEntity implements EntityImpl {
+public abstract class CustomEntity implements EntityImpl {
     private transient EntityHomeImpl entityHome;
     private transient boolean locked = true;
 

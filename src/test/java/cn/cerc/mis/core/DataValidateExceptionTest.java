@@ -2,7 +2,7 @@ package cn.cerc.mis.core;
 
 import org.junit.Test;
 
-public class DataValidateExceptioniTest {
+public class DataValidateExceptionTest {
 
     @Test(expected = DataValidateException.class)
     public void test_stop_1() throws DataValidateException {
