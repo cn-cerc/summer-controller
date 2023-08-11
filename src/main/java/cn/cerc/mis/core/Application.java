@@ -120,10 +120,13 @@ public class Application implements ApplicationContextAware {
      * @return ApplicationContext context
      */
     public static ApplicationContext initOnlyFramework() {
+        return init(SummerSpringConfiguration.class);
+    }
+
+    public static ApplicationContext init(Class<?>... annotatedClasses) {
         if (context == null) {
             // FIXME: 自定义作用域，临时解决 request, session 问题
-            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-                    SummerSpringConfiguration.class);
+            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(annotatedClasses);
             RequestScope scope = new RequestScope();
             context.getBeanFactory().registerScope(RequestScope.REQUEST_SCOPE, scope);
             context.getBeanFactory().registerScope(RequestScope.SESSION_SCOPE, scope);
