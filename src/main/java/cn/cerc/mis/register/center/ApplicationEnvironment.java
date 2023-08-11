@@ -1,6 +1,7 @@
 package cn.cerc.mis.register.center;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -131,9 +132,14 @@ public class ApplicationEnvironment {
             String serverXmlPath = catalinaHome + File.separator + "conf" + File.separator + "server.xml";
 
             // 创建DOM解析器
+            Document doc;
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            Document doc = factory.newDocumentBuilder().parse(serverXmlPath);
-
+            try {
+                doc = factory.newDocumentBuilder().parse(serverXmlPath);
+            } catch (FileNotFoundException e) {
+                log.error(e.getMessage());
+                return null;
+            }
             // 查找Connector元素
             NodeList connectors = doc.getElementsByTagName("Connector");
             for (int i = 0; i < connectors.getLength(); i++) {

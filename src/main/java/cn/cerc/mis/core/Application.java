@@ -156,7 +156,8 @@ public class Application implements ApplicationContextAware {
 
     public static <T> T getBean(Class<T> requiredType) {
         if (context == null) {
-            log.error("context is null, getBean return null");
+            var e = new RuntimeException("context is null, getBean return null: " + requiredType.getSimpleName());
+            log.error(e.getMessage(), e);
             return null;
         }
         String[] beans = context.getBeanNamesForType(requiredType);
