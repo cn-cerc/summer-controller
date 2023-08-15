@@ -1,14 +1,16 @@
 package cn.cerc.mis.core;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.context.annotation.Description;
+import javax.persistence.Id;
+import javax.persistence.Version;
 
+import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
-import cn.cerc.db.core.Describe;
-import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.ado.CustomEntity;
 import cn.cerc.mis.ado.EmptyEntity;
@@ -40,19 +42,19 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return this.process(handle, headIn, bodyIn);
     }
 
-    public final DataSet getMetaHeadIn(IHandle handle, DataSet dataIn) {
+    public final List<Field> getMetaHeadIn() {
         return getEntityMeta(this.getHeadInClass());
     }
 
-    public final DataSet getMetaBodyIn(IHandle handle, DataSet dataIn) {
+    public final List<Field> getMetaBodyIn() {
         return getEntityMeta(this.getBodyInClass());
     }
 
-    public final DataSet getMetaHeadOut(IHandle handle, DataSet dataIn) {
+    public final List<Field> getMetaHeadOut() {
         return getEntityMeta(this.getHeadOutClass());
     }
 
-    public final DataSet getMetaBodyOut(IHandle handle, DataSet dataIn) {
+    public final List<Field> getMetaBodyOut() {
         return getEntityMeta(this.getBodyOutClass());
     }
 
@@ -84,28 +86,23 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return (Class<BO>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[3];
     }
 
-    private DataSet getEntityMeta(Class<? extends CustomEntity> clazz) {
-        DataSet dataOut = new DataSet();
-        if (clazz == null)
-            return dataOut;
+    private List<Field> getEntityMeta(Class<? extends CustomEntity> clazz) {
+        var list = new ArrayList<Field>();
         if (clazz == EmptyEntity.class)
-            return dataOut;
-        var helper = EntityHelper.create(clazz);
-        for (var code : helper.fields().keySet()) {
-            var field = helper.fields().get(code);
-            dataOut.append();
-            dataOut.setValue("code", code);
-            dataOut.setValue("name", field.getName());
-            var desc = field.getAnnotation(Description.class);
-            if (desc != null)
-                dataOut.setValue("name", desc.value());
-            var desc2 = field.getAnnotation(Describe.class);
-            if (desc2 != null) {
-                dataOut.setValue("name", desc2.name());
-                dataOut.setValue("remark", desc2.remark());
-                dataOut.setValue("width", desc2.width());
-            }
+            return list;
+        for (var field : clazz.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers()))
+                continue;
+            // 开放读取权限
+            if (field.getModifiers() == ClassData.DEFAULT || field.getModifiers() == ClassData.PRIVATE
+                    || field.getModifiers() == ClassData.PROTECTED)
+                field.setAccessible(true);
+            if (field.getAnnotation(Version.class) != null)
+                continue;
+            if (field.getAnnotation(Id.class) != null)
+                continue;
+            list.add(field);
         }
-        return dataOut;
+        return list;
     }
 }
