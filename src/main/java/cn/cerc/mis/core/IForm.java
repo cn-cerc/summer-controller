@@ -6,7 +6,6 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.security.Permission;
 
 public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBeanName {
-
     // 页面代码
     void setId(String formId);
 
@@ -49,6 +48,14 @@ public interface IForm extends IHandle, IResponseOwner, IPermission, SupportBean
     default boolean _isAllowGuest() {
         Permission ps = this.getClass().getAnnotation(Permission.class);
         return ps != null && Permission.GUEST.equals(ps.value());
+    }
+
+    default void writeExecuteTime(String funcCode, long startTime) {
+        var context = Application.getContext();
+        if (context.getBeanNamesForType(IPerformanceMonitor.class).length == 0)
+            return;
+        var bean = context.getBean(IPerformanceMonitor.class);
+        bean.writeFormExecuteTime(this, funcCode, startTime);
     }
 
 }

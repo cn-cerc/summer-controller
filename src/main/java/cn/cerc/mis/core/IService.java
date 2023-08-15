@@ -46,38 +46,43 @@ public interface IService {
     }
 
     default DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws ServiceException {
-        if (function == null || Utils.isEmpty(function.getString()))
-            return new DataSet().setMessage("function is null");
-        if ("_call".equals(function.getString()))
-            return new DataSet().setMessage("function is call");
-        if ("_list".equals(function.getString())) {
-            return _list();
-        }
-
-        String funcCode = function.getString();
-        ServiceMethod sm = ServiceMethod.build(this.getClass(), funcCode);
-        if (sm == null) {
-            DataSet dataOut = new DataSet();
-            dataOut.setMessage(String.format("%s.%s not find！", this.getClass().getName(), funcCode));
-            return dataOut.setState(ServiceState.NOT_FIND_SERVICE);
-        }
-
-        // 执行具体的服务函数
+        long startTime = System.currentTimeMillis();
         try {
-            if (this instanceof ServiceNameAwareImpl service) {
-                String key = function.key();
-                if (key != null && key.endsWith(".execute"))
-                    function.setKey(key.substring(0, key.lastIndexOf(".execute")));
-                service.setServiceId(function);
+            if (function == null || Utils.isEmpty(function.getString()))
+                return new DataSet().setMessage("function is null");
+            if ("_call".equals(function.getString()))
+                return new DataSet().setMessage("function is call");
+            if ("_list".equals(function.getString())) {
+                return _list();
             }
-            return sm.call(this, handle, dataIn);
-        } catch (Exception e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            if (cause instanceof ServiceException)
-                log.error("service {}, corpNo {}, dataIn {}, message {}", function.key(), handle.getCorpNo(),
-                        dataIn.json(), cause.getMessage(), cause);
-            DataSet dataOut = new DataSet().setMessage(cause.getMessage());
-            return dataOut.setState(ServiceState.ERROR);
+
+            String funcCode = function.getString();
+            ServiceMethod sm = ServiceMethod.build(this.getClass(), funcCode);
+            if (sm == null) {
+                DataSet dataOut = new DataSet();
+                dataOut.setMessage(String.format("%s.%s not find！", this.getClass().getName(), funcCode));
+                return dataOut.setState(ServiceState.NOT_FIND_SERVICE);
+            }
+
+            // 执行具体的服务函数
+            try {
+                if (this instanceof ServiceNameAwareImpl service) {
+                    String key = function.key();
+                    if (key != null && key.endsWith(".execute"))
+                        function.setKey(key.substring(0, key.lastIndexOf(".execute")));
+                    service.setServiceId(function);
+                }
+                return sm.call(this, handle, dataIn);
+            } catch (Exception e) {
+                Throwable cause = e.getCause() != null ? e.getCause() : e;
+                if (cause instanceof ServiceException)
+                    log.error("service {}, corpNo {}, dataIn {}, message {}", function.key(), handle.getCorpNo(),
+                            dataIn.json(), cause.getMessage(), cause);
+                DataSet dataOut = new DataSet().setMessage(cause.getMessage());
+                return dataOut.setState(ServiceState.ERROR);
+            }
+        } finally {
+            writeExecuteTime(handle, dataIn, function.key(), startTime);
         }
     }
 
@@ -85,6 +90,14 @@ public interface IService {
     @Deprecated
     default String getJSON(DataSet dataOut) {
         return String.format("[%s]", dataOut.json());
+    }
+
+    default void writeExecuteTime(IHandle handle, DataSet dataIn, String funcCode, long startTime) {
+        var context = Application.getContext();
+        if (context.getBeanNamesForType(IPerformanceMonitor.class).length == 0)
+            return;
+        var bean = context.getBean(IPerformanceMonitor.class);
+        bean.writeServiceExecuteTime(handle, this, dataIn, funcCode, startTime);
     }
 
 }

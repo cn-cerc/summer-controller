@@ -128,6 +128,8 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     public String _call(String funcCode)
             throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, ServletException, IOException, ServiceExecuteException {
+        long start = System.currentTimeMillis();
+        try {
         HttpServletResponse response = getResponse();
         if ("excel".equals(funcCode)) {
             response.setContentType("application/vnd.ms-excel; charset=UTF-8");
@@ -240,6 +242,9 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         } catch (PageException e) {
             this.setParam("message", e.getMessage());
             return e.getViewFile();
+        }
+        } finally {
+            writeExecuteTime(funcCode, start);
         }
     }
 
