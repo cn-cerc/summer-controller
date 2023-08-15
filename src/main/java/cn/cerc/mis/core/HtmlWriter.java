@@ -19,7 +19,7 @@ public final class HtmlWriter {
     public HtmlWriter println(String value) {
         builder.append(value);
         if (ServerConfig.isServerDevelop()) {
-            builder.append(Utils.vbCrLf);
+            builder.append(Utils.separtor);
         }
         return this;
     }
@@ -27,7 +27,7 @@ public final class HtmlWriter {
     public HtmlWriter println(String format, Object... args) {
         builder.append(String.format(format, args));
         if (ServerConfig.isServerDevelop()) {
-            builder.append(Utils.vbCrLf);
+            builder.append(Utils.separtor);
         }
         return this;
     }
