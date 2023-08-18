@@ -110,7 +110,6 @@ public class FormFactory implements ApplicationContextAware {
                 return null;
             }
         } catch (Exception e) {
-            e.getCause().printStackTrace();
             IErrorPage error = context.getBean(IErrorPage.class);
             error.output(req, resp, e);
             return null;
