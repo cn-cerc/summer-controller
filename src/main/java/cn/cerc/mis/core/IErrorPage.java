@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.mis.other.PageNotFoundException;
-import cn.cerc.mis.security.SecurityStopException;
 
 public interface IErrorPage {
     Logger log = LoggerFactory.getLogger(IErrorPage.class);
@@ -19,12 +18,13 @@ public interface IErrorPage {
         String clientIP = AppClient.getClientIP(request);
         String message = throwable.getMessage();
 
+        if (throwable.getCause() != null)
+            throwable = throwable.getCause();
+
         if (throwable instanceof PageNotFoundException)
             log.info("client ip {}, page not found {}", clientIP, message, throwable);
         else if (throwable instanceof UserRequestException)
             log.info("client ip {}, user request error {}", clientIP, message, throwable);
-        else if (throwable instanceof SecurityStopException)
-            log.warn("client ip {}, {}", clientIP, message, throwable);
         else
             log.warn("client ip {}, {}", clientIP, message, throwable);
 
