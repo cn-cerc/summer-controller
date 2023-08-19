@@ -12,17 +12,18 @@ import javax.persistence.Version;
 import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.mis.ado.CustomEntity;
 import cn.cerc.mis.ado.EmptyEntity;
 
 public abstract class CustomEntityService<HI extends CustomEntity, BI extends CustomEntity, HO extends CustomEntity, BO extends CustomEntity>
         implements IService {
 
-    public final DataSet execute(IHandle handle, DataSet dataIn) throws DataValidateException {
+    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         HI headIn = null;
         List<BI> bodyIn = null;
         // 检验数据单头与单身
-        if (dataIn.fields().size() > 0)
+        if (dataIn.head().fields().size() > 0)
             headIn = dataIn.head().asEntity(getHeadInClass());
         if (dataIn.size() > 0) {
             bodyIn = new ArrayList<BI>();
@@ -32,7 +33,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return this.call(handle, headIn, bodyIn);
     }
 
-    public final DataSet call(IHandle handle, HI headIn, List<BI> bodyIn) throws DataValidateException {
+    public final DataSet call(IHandle handle, HI headIn, List<BI> bodyIn) throws ServiceException {
         if (headIn != null)
             validateHeadIn(headIn);
         if (bodyIn != null) {
@@ -58,7 +59,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return getEntityMeta(this.getBodyOutClass());
     }
 
-    protected abstract DataSet process(IHandle handle, HI headIn, List<BI> bodyIn);
+    protected abstract DataSet process(IHandle handle, HI headIn, List<BI> bodyIn) throws ServiceException;
 
     /** 检验传入参数的 head 值 */
     protected abstract void validateHeadIn(HI head) throws DataValidateException;
