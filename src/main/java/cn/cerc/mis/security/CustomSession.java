@@ -17,6 +17,7 @@ import cn.cerc.db.mysql.MysqlServerMaster;
 import cn.cerc.db.mysql.MysqlServerSlave;
 import cn.cerc.db.oss.OssConnection;
 import cn.cerc.db.redis.Redis;
+import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
@@ -174,6 +175,7 @@ public class CustomSession implements ISession {
                 if (value == null) {
                     value = security.getPermissions(this);
                     redis.hset(key, SystemBuffer.UserObject.Permissions.name(), value);
+                    redis.expire(key, RedisRecord.TIMEOUT);
                 }
                 this.permissions = value;
             }
