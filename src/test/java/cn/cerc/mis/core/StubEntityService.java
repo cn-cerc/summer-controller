@@ -16,8 +16,8 @@ import cn.cerc.mis.core.StubEntityService.HeadInEntity;
 public class StubEntityService extends CustomEntityService<HeadInEntity, BodyInEntity, EmptyEntity, EmptyEntity> {
 
     public class HeadInEntity extends CustomEntity {
-        @Column
-        @Describe(name = "单号", width = 20)
+        @Column(name = "单号")
+        @Describe(width = 20)
         private String tbNo_;
 
         public String getTbNo_() {
@@ -30,11 +30,11 @@ public class StubEntityService extends CustomEntityService<HeadInEntity, BodyInE
     }
 
     public class BodyInEntity extends CustomEntity {
-        @Column
-        @Describe(name = "单号", width = 20)
+        @Column(name = "单号")
+        @Describe(width = 20)
         private String tbNo_;
-        @Column
-        @Describe(name = "单序", width = 4)
+        @Column(name = "单序")
+        @Describe(width = 4)
         private Integer it_;
 
         public String getTbNo_() {
