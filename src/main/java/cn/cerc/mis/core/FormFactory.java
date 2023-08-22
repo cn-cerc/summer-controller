@@ -56,8 +56,8 @@ public class FormFactory implements ApplicationContextAware {
             }
             if (form == null) {
                 try {
-                    var supplier = context.getBean(ISupplierForm.class);
-                    if (supplier != null && supplier.findForm(beanId, funcCode))
+                    ISupplierForm supplier = context.getBean(ISupplierForm.class);
+                    if (supplier != null && supplier.findForm(formId, funcCode))
                         form = supplier.getForm();
                 } catch (NoSuchBeanDefinitionException e) {
                     log.error(e.getMessage());
