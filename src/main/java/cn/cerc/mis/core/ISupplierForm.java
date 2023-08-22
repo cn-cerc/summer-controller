@@ -2,6 +2,8 @@ package cn.cerc.mis.core;
 
 public interface ISupplierForm {
 
-    IForm getForm(String beanId);
+    boolean findForm(String beanId, String funcCode);
+
+    IForm getForm();
 
 }
