@@ -248,7 +248,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         }
     }
 
-    private Method findMethod(Class<? extends AbstractForm> clazz, String funcCode) {
+    protected Method findMethod(Class<? extends AbstractForm> clazz, String funcCode) {
         for (Method item : clazz.getMethods()) {
             if (funcCode.equals(item.getName()))
                 return item;
