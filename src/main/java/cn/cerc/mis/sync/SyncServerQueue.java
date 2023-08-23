@@ -1,16 +1,11 @@
 package cn.cerc.mis.sync;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer.SyncServer;
 
 public class SyncServerQueue implements ISyncServer {
-    private static final Logger log = LoggerFactory.getLogger(SyncServerQueue.class);
-
     private SyncServer pushFrom;
     private SyncServer pushTo;
 

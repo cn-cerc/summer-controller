@@ -13,7 +13,7 @@ public class EntityOneTestMysql {
     public void test_testsql() {
         var jsonText = """
                 {"body":[["UID_","corpNo_","Code_","enanble_","amount_"],[1,"000000","001",true,0]]}""";
-        var db = TestsqlServer.get(true);
+        var db = TestsqlServer.build();
         db.onSelect(UserTest.Table, (query, sql) -> {
             query.setJson(jsonText);
         });
