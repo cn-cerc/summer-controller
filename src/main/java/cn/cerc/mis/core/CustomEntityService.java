@@ -106,10 +106,14 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
     protected abstract DataSet process(IHandle handle, HI headIn, List<BI> bodyIn) throws ServiceException;
 
     /** 检验传入参数的 head 值 */
-    protected abstract void validateHeadIn(HI head) throws DataValidateException;
+    protected void validateHeadIn(HI head) throws DataValidateException {
+
+    }
 
     /** 检验传入参数的 body 值 */
-    protected abstract void validateBodyIn(BI body) throws DataValidateException;
+    protected void validateBodyIn(BI body) throws DataValidateException {
+
+    }
 
     @SuppressWarnings("unchecked")
     protected final Class<HI> getHeadInClass() {
