@@ -1,22 +1,27 @@
 package cn.cerc.mis.core;
 
+import org.apache.xmlbeans.impl.common.IOUtil;
+
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 
-public final class HtmlWriter {
+public final class HtmlWriter extends IOUtil implements IWriter {
     private final StringBuilder builder = new StringBuilder();
 
-    public HtmlWriter print(String value) {
+    @Override
+    public HtmlWriter print(Object value) {
         builder.append(value);
         return this;
     }
 
+    @Override
     public HtmlWriter print(String format, Object... args) {
         builder.append(String.format(format, args));
         return this;
     }
 
-    public HtmlWriter println(String value) {
+    @Override
+    public HtmlWriter println(Object value) {
         builder.append(value);
         if (ServerConfig.isServerDevelop()) {
             builder.append(Utils.separtor);
@@ -24,6 +29,7 @@ public final class HtmlWriter {
         return this;
     }
 
+    @Override
     public HtmlWriter println(String format, Object... args) {
         builder.append(String.format(format, args));
         if (ServerConfig.isServerDevelop()) {
