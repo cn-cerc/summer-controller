@@ -4,8 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
@@ -23,12 +26,30 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         HI headIn = null;
         List<BI> bodyIn = null;
         // 检验数据单头与单身
-        if (dataIn.head().fields().size() > 0)
+        if (dataIn.head().fields().size() > 0) {
+            var map = this.getMetaHeadIn();
+            for (var field : map.keySet()) {
+                var column = map.get(field);
+                if (!column.nullable()) {
+                    if (!dataIn.head().hasValue(field.getName()))
+                        throw new DataValidateException(String.format("输入单头参数 %s 必须存在", field.getName()));
+                }
+            }
             headIn = dataIn.head().asEntity(getHeadInClass());
+        }
         if (dataIn.size() > 0) {
+            var map = this.getMetaBodyIn();
             bodyIn = new ArrayList<BI>();
-            for (var row : dataIn)
+            for (var row : dataIn) {
+                for (var field : map.keySet()) {
+                    var column = map.get(field);
+                    if (!column.nullable()) {
+                        if (!row.hasValue(field.getName()))
+                            throw new DataValidateException(String.format("输入单身参数 %s 必须存在", field.getName()));
+                    }
+                }
                 bodyIn.add(row.asEntity(getBodyInClass()));
+            }
         }
         return this.call(handle, headIn, bodyIn);
     }
@@ -40,22 +61,45 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
             for (var body : bodyIn)
                 validateBodyIn(body);
         }
-        return this.process(handle, headIn, bodyIn);
+        var dataOut = this.process(handle, headIn, bodyIn);
+        if (dataOut.head().fields().size() > 0) {
+            var map = this.getMetaHeadOut();
+            for (var field : map.keySet()) {
+                var column = map.get(field);
+                if (!column.nullable()) {
+                    if (!dataOut.head().hasValue(field.getName()))
+                        throw new DataValidateException(String.format("输出单头数据 %s 必须存在", field.getName()));
+                }
+            }
+        }
+        if (dataOut.size() > 0) {
+            var map = this.getMetaBodyOut();
+            for (var row : dataOut) {
+                for (var field : map.keySet()) {
+                    var column = map.get(field);
+                    if (!column.nullable()) {
+                        if (!row.hasValue(field.getName()))
+                            throw new DataValidateException(String.format("输出单头数据 %s 必须存在", field.getName()));
+                    }
+                }
+            }
+        }
+        return dataOut;
     }
 
-    public final List<Field> getMetaHeadIn() {
+    public final Map<Field, Column> getMetaHeadIn() {
         return getEntityMeta(this.getHeadInClass());
     }
 
-    public final List<Field> getMetaBodyIn() {
+    public final Map<Field, Column> getMetaBodyIn() {
         return getEntityMeta(this.getBodyInClass());
     }
 
-    public final List<Field> getMetaHeadOut() {
+    public final Map<Field, Column> getMetaHeadOut() {
         return getEntityMeta(this.getHeadOutClass());
     }
 
-    public final List<Field> getMetaBodyOut() {
+    public final Map<Field, Column> getMetaBodyOut() {
         return getEntityMeta(this.getBodyOutClass());
     }
 
@@ -87,23 +131,26 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return (Class<BO>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[3];
     }
 
-    private List<Field> getEntityMeta(Class<? extends CustomEntity> clazz) {
-        var list = new ArrayList<Field>();
+    private Map<Field, Column> getEntityMeta(Class<? extends CustomEntity> clazz) {
+        var map = new LinkedHashMap<Field, Column>();
         if (clazz == EmptyEntity.class)
-            return list;
+            return Map.of();
         for (var field : clazz.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers()))
                 continue;
-            // 开放读取权限
-            if (field.getModifiers() == ClassData.DEFAULT || field.getModifiers() == ClassData.PRIVATE
-                    || field.getModifiers() == ClassData.PROTECTED)
-                field.setAccessible(true);
-            if (field.getAnnotation(Version.class) != null)
-                continue;
-            if (field.getAnnotation(Id.class) != null)
-                continue;
-            list.add(field);
+            Column column = field.getAnnotation(Column.class);
+            if (column != null) {
+                // 开放读取权限
+                if (field.getModifiers() == ClassData.DEFAULT || field.getModifiers() == ClassData.PRIVATE
+                        || field.getModifiers() == ClassData.PROTECTED)
+                    field.setAccessible(true);
+                if (field.getAnnotation(Version.class) != null)
+                    continue;
+                if (field.getAnnotation(Id.class) != null)
+                    continue;
+                map.put(field, column);
+            }
         }
-        return list;
+        return map;
     }
 }
