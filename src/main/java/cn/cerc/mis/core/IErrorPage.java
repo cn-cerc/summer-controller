@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.db.core.IAppConfig;
 import cn.cerc.mis.other.PageNotFoundException;
 import cn.cerc.mis.security.SecurityStopException;
 
@@ -37,7 +38,7 @@ public interface IErrorPage {
 
         String errorPage = this.getErrorPage(request, response, throwable);
         if (errorPage != null) {
-            String path = String.format("/WEB-INF/%s/%s", Application.getConfig().getFormsPath(), errorPage);
+            String path = String.format("/WEB-INF/%s/%s", Application.getBean(IAppConfig.class).getFormsPath(), errorPage);
             try {
                 request.getServletContext().getRequestDispatcher(path).forward(request, response);
             } catch (ServletException | IOException e) {

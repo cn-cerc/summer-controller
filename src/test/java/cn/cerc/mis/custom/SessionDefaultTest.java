@@ -24,14 +24,14 @@ public class SessionDefaultTest {
     @Ignore
     public void test() {
         System.out.println(handle);
-        System.out.println(Application.getSession());
-        System.out.println(Application.getSession());
-        System.out.println(Application.getSession());
+        System.out.println(Application.getBean(ISession.class));
+        System.out.println(Application.getBean(ISession.class));
+        System.out.println(Application.getBean(ISession.class));
     }
 
     public static void main(String[] args) {
         Application.initOnlyFramework();
-        System.out.println(Application.getSession());
-        System.out.println(Application.getSession());
+        System.out.println(Application.getBean(ISession.class));
+        System.out.println(Application.getBean(ISession.class));
     }
 }

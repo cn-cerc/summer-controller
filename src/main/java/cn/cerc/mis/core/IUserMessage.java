@@ -3,6 +3,7 @@ package cn.cerc.mis.core;
 import java.util.List;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.IHandle;
 import cn.cerc.mis.message.MessageLevel;
 import cn.cerc.mis.message.MessageProcess;
 
@@ -12,7 +13,7 @@ import cn.cerc.mis.message.MessageProcess;
  * @author ZhangGong
  *
  */
-public interface IUserMessage {
+public interface IUserMessage extends IHandle {
     /**
      * @return 取出所有的等待处理的消息列表
      */

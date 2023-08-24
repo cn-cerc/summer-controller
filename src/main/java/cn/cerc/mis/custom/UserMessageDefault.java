@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.Datetime;
-import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.mysql.MysqlQuery;
 import cn.cerc.db.redis.Redis;
@@ -23,7 +22,7 @@ import cn.cerc.mis.other.MemoryBuffer;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UserMessageDefault implements IHandle, IUserMessage {
+public class UserMessageDefault implements IUserMessage {
 
     @Autowired
     private ISystemTable systemTable;

@@ -17,7 +17,7 @@ public class DirectoryTest extends Handle {
 
     @Before
     public void setUp() throws Exception {
-        ISession session = Application.getSession();
+        ISession session = Application.getBean(ISession.class);
         setSession(session);
     }
 

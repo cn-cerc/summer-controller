@@ -25,7 +25,7 @@ public class BasicHandle implements IHandle, AutoCloseable {
     @Override
     public ISession getSession() {
         if (session == null)
-            session = Application.getSession();
+            session = Application.getBean(ISession.class);
         return session;
     }
 

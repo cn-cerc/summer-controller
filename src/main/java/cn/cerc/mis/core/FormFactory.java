@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.db.core.ClassResource;
+import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
@@ -104,7 +105,7 @@ public class FormFactory implements ApplicationContextAware {
                 log.debug("{}.{}", formId, funcCode);
                 return form._call(funcCode);
             case CHECK:
-                return "redirect:" + Application.getConfig().getVerifyDevicePage();
+                return "redirect:" + Application.getBean(IAppConfig.class).getVerifyDevicePage();
             case LOGIN:
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
@@ -139,7 +140,7 @@ public class FormFactory implements ApplicationContextAware {
         }
 
         // 输出jsp文件
-        String jspFile = String.format("/WEB-INF/%s/%s", Application.getConfig().getFormsPath(), url);
+        String jspFile = String.format("/WEB-INF/%s/%s", Application.getBean(IAppConfig.class).getFormsPath(), url);
         request.getServletContext().getRequestDispatcher(jspFile).forward(request, response);
     }
 

@@ -1,10 +1,5 @@
 package cn.cerc.mis.core;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.persistence.Entity;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -15,36 +10,20 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
 import cn.cerc.db.core.ClassConfig;
-import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.ServerConfig;
-import cn.cerc.db.core.SqlServer;
-import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
-import cn.cerc.db.testsql.TestsqlServer;
 import cn.cerc.db.zk.ZkNode;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.ado.AdoTable;
-import cn.cerc.mis.ado.EntityQuery;
 
 @Component
 public class Application implements ApplicationContextAware {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     private static final ClassConfig config = new ClassConfig(Application.class, SummerMIS.ID);
-    private static ConcurrentMap<String, Class<? extends AdoTable>> entityItems = new ConcurrentHashMap<>();
-//    public static final String TOKEN = ISession.TOKEN;
-//    public static final String bookNo = ISession.CORP_NO;
-//    public static final String userCode = ISession.USER_CODE;
-//    public static final String userName = ISession.USER_NAME;
-    // tomcat JSESSION.ID
-//    public static final String SessionId = "sessionId"; 改为 ISession.Cookie_ID
-    // FIXME 如下2个常量需要取消其引用，改为直接使用ISession
-//    @Deprecated
-//    public static final String UserId = "UserID";
     // 签核代理用户列表，代理多个用户以半角逗号隔开
     public static final String ProxyUsers = "ProxyUsers";
     // 客户端代码
@@ -67,12 +46,6 @@ public class Application implements ApplicationContextAware {
     public static final String roleCode = "roleCode";
     @Deprecated
     public static final String userCode = ISession.USER_CODE;
-//    @Deprecated
-//    public static final String userId = UserId;
-//    @Deprecated
-//    public static final String token = ISession.TOKEN;
-//    @Deprecated
-//    public static final String bookNo = ISession.CORP_NO;
 
     static {
         productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
@@ -154,6 +127,19 @@ public class Application implements ApplicationContextAware {
         return context;
     }
 
+    @Deprecated
+    public static Object getBean(String beanId) {
+        if (!context.containsBean(beanId))
+            return null;
+        return context.getBean(beanId);
+    }
+
+    public static <T> T getBean(String beanId, Class<T> requiredType) {
+        if (!context.containsBean(beanId))
+            return null;
+        return context.getBean(beanId, requiredType);
+    }
+
     public static <T> T getBean(Class<T> requiredType) {
         if (context == null) {
             var e = new RuntimeException("context is null, getBean return null: " + requiredType.getSimpleName());
@@ -185,42 +171,28 @@ public class Application implements ApplicationContextAware {
         }
     }
 
-    public static Object getBean(String beanId) {
-        if (!context.containsBean(beanId))
-            return null;
-        return context.getBean(beanId);
-    }
-
+    @Deprecated
     public static ISession getSession() {
-        return context.getBean(ISession.class);
+        return getBean(ISession.class);
     }
 
+    @Deprecated
     public static IAppConfig getConfig() {
-        return context.getBean(IAppConfig.class);
+        return getBean(IAppConfig.class);
     }
 
     public static ISystemTable getSystemTable() {
-        return context.getBean(ISystemTable.class);
+        return getBean(ISystemTable.class);
     }
 
     public static <T> T getBean(IHandle handle, Class<T> requiredType) {
-        if (context.getBeanNamesForType(requiredType).length == 0)
-            return null;
-        T bean = context.getBean(requiredType);
-        if ((handle != null) && (bean instanceof IHandle))
-            ((IHandle) bean).setSession(handle.getSession());
+        T bean = getBean(requiredType);
+        if (bean instanceof IHandle temp)
+            temp.setSession(handle.getSession());
         return bean;
     }
 
-    public static Object getBean(IHandle handle, String beanId) {
-        if (!context.containsBean(beanId))
-            return null;
-        Object bean = context.getBean(beanId);
-        if ((handle != null) && (bean instanceof IHandle))
-            ((IHandle) bean).setSession(handle.getSession());
-        return bean;
-    }
-
+    @Deprecated
     public static <T> T getBean(ISession session, Class<T> requiredType) {
         if (context.getBeanNamesForType(requiredType).length == 0)
             return null;
@@ -230,12 +202,11 @@ public class Application implements ApplicationContextAware {
         return bean;
     }
 
-    public static Object getBean(ISession session, String beanId) {
-        if (!context.containsBean(beanId))
-            return null;
-        Object bean = context.getBean(beanId);
-        if ((session != null) && (bean instanceof IHandle))
-            ((IHandle) bean).setSession(session);
+    @Deprecated
+    public static Object getBean(IHandle handle, String beanId) {
+        Object bean = getBean(beanId);
+        if (bean instanceof IHandle temp)
+            temp.setSession(handle.getSession());
         return bean;
     }
 
@@ -254,7 +225,7 @@ public class Application implements ApplicationContextAware {
             throw new ClassNotFoundException("serviceCode is null.");
 
         // 读取xml中的配置
-        Object bean = null;
+        IService bean = null;
         if (context.containsBean(serviceCode)) {
             bean = context.getBean(serviceCode, IService.class);
         } else {
@@ -263,18 +234,25 @@ public class Application implements ApplicationContextAware {
             // 支持指定执行函数
             if (params.length > 1)
                 function.setValue(params[1]);
-
-            String beanId = params[0];
-            if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
-                beanId = beanId.substring(0, 1).toLowerCase() + beanId.substring(1);
+            String beanId = getBeanIdOfClassCode(params[0]);
             if (context.containsBean(beanId))
                 bean = context.getBean(beanId, IService.class);
             else
                 throw new ClassNotFoundException(String.format("bean %s not find", serviceCode));
         }
-        if (bean instanceof IHandle)
-            ((IHandle) bean).setSession(handle.getSession());
-        return (IService) bean;
+        if (bean instanceof IHandle temp)
+            temp.setSession(handle.getSession());
+        return bean;
+    }
+
+    private static String getBeanIdOfClassCode(String classCode) {
+        if (classCode.length() < 2)
+            return classCode.toLowerCase();
+        var temp = classCode;
+        var first = classCode.substring(0, 2);
+        if (!first.toUpperCase().equals(first))
+            temp = classCode.substring(0, 1).toLowerCase() + classCode.substring(1);
+        return temp;
     }
 
     /**
@@ -295,41 +273,6 @@ public class Application implements ApplicationContextAware {
 
     public static String getServicePath() {
         return servicePath;
-    }
-
-    @Deprecated
-    public static IHandle getHandle() {
-        return new Handle(getSession());
-    }
-
-    @Deprecated
-    public static Class<? extends AdoTable> searchClass(String table, SqlServerType sqlServerType) {
-        ApplicationContext context = Application.getContext();
-        if (context == null)
-            return null;
-        if (entityItems != null)
-            return entityItems.get(table);
-
-        synchronized (EntityQuery.class) {
-            for (String beanId : context.getBeanNamesForType(AdoTable.class)) {
-                Object bean = context.getBean(beanId);
-                @SuppressWarnings("unchecked")
-                Class<? extends AdoTable> clazz = (Class<? extends AdoTable>) bean.getClass();
-                SqlServer server = clazz.getDeclaredAnnotation(SqlServer.class);
-                SqlServerType serverType = server != null ? server.type() : SqlServerType.Mysql;
-                if (TestsqlServer.enabled())
-                    serverType = SqlServerType.Testsql;
-                if (serverType == sqlServerType) {
-                    Entity entity = clazz.getDeclaredAnnotation(Entity.class);
-                    if (entity != null && !"".equals(entity.name()))
-                        entityItems.put(entity.name(), clazz);
-                    else
-                        entityItems.put(clazz.getSimpleName(), clazz);
-                }
-            }
-        }
-
-        return entityItems.get(table);
     }
 
     public static boolean enableTaskService() {

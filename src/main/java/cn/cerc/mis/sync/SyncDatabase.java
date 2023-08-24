@@ -37,10 +37,9 @@ public class SyncDatabase implements IPopProcesser {
         record.remove("__opera");
         record.remove("__error");
 
-        IPushProcesser processer = (IPushProcesser) Application.getBean(session, "sync_" + tableCode);
-        if (processer == null) {
+        IPushProcesser processer = Application.getBean("sync_" + tableCode, IPushProcesser.class);
+        if (processer == null)
             processer = new PushTableDefault().setTableCode(tableCode);
-        }
         processer.setSession(session);
 
         boolean result = false;

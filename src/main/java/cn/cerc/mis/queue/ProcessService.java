@@ -26,7 +26,7 @@ public class ProcessService extends AbstractTask {
     // 手动执行所有的预约服务
     public static void main(String[] args) {
         Application.initOnlyFramework();
-        ISession session = Application.getSession();
+        ISession session = Application.getBean(ISession.class);
 
         ProcessService ps = new ProcessService();
         ps.setSession(session);
