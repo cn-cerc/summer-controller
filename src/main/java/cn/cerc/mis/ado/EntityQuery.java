@@ -38,7 +38,7 @@ public class EntityQuery {
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
 
-        FindOneSupplierImpl<Optional<T>> supplier;
+        ISupplierFindOne<Optional<T>> supplier;
         if (entityKey.smallTable())
             supplier = (values) -> findOneForSmallTable(handle, clazz, null, values);
         else

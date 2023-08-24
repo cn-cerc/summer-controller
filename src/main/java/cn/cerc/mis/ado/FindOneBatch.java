@@ -13,14 +13,14 @@ import cn.cerc.db.core.Utils;
 
 public class FindOneBatch<T> implements IHandle {
     private Map<String, Optional<T>> buffer = new HashMap<>();
-    private FindOneSupplierImpl<Optional<T>> findOne;
-    private FindAllSupplierImpl<T> findAll;
+    private ISupplierFindOne<Optional<T>> findOne;
+    private ISupplierFindAll<T> findAll;
     private List<Object[]> keys;
     private int keysSize;
     private ISession session;
     private boolean active;
 
-    public FindOneBatch(IHandle handle, FindOneSupplierImpl<Optional<T>> findOne) {
+    public FindOneBatch(IHandle handle, ISupplierFindOne<Optional<T>> findOne) {
         this.setSession(handle.getSession());
         this.findOne = findOne;
     }
@@ -85,7 +85,7 @@ public class FindOneBatch<T> implements IHandle {
         active = true;
     }
 
-    public void onInit(FindAllSupplierImpl<T> findAll) {
+    public void onInit(ISupplierFindAll<T> findAll) {
         this.findAll = findAll;
     }
 

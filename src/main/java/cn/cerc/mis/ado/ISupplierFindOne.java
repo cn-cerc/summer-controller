@@ -1,5 +1,5 @@
 package cn.cerc.mis.ado;
 
-public interface FindOneSupplierImpl<T> {
+public interface ISupplierFindOne<T> {
     T get(String... values);
 }

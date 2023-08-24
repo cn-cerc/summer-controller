@@ -1,6 +1,6 @@
 package cn.cerc.mis.ado;
 
-public interface FindAllSupplierImpl<T> {
+public interface ISupplierFindAll<T> {
 
     void load(FindOneBatch<T> findOneBatch);
 
