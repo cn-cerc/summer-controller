@@ -202,9 +202,8 @@ public class Application implements ApplicationContextAware {
         return bean;
     }
 
-    @Deprecated
     public static Object getBean(IHandle handle, String beanId) {
-        Object bean = getBean(beanId);
+        Object bean = getBean(beanId, Object.class);
         if (bean instanceof IHandle temp)
             temp.setSession(handle.getSession());
         return bean;
