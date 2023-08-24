@@ -8,20 +8,22 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
 
-public class FindOneBatch<T> implements IHandle {
+public class FindOneBatch<T> {
     private Map<String, Optional<T>> buffer = new HashMap<>();
     private ISupplierFindOne<Optional<T>> findOne;
     private ISupplierFindAll<T> findAll;
     private List<Object[]> keys;
     private int keysSize;
-    private ISession session;
     private boolean active;
 
+    public FindOneBatch(ISupplierFindOne<Optional<T>> findOne) {
+        this.findOne = findOne;
+    }
+
+    @Deprecated
     public FindOneBatch(IHandle handle, ISupplierFindOne<Optional<T>> findOne) {
-        this.setSession(handle.getSession());
         this.findOne = findOne;
     }
 
@@ -87,16 +89,6 @@ public class FindOneBatch<T> implements IHandle {
 
     public void onInit(ISupplierFindAll<T> findAll) {
         this.findAll = findAll;
-    }
-
-    @Override
-    public ISession getSession() {
-        return session;
-    }
-
-    @Override
-    public void setSession(ISession session) {
-        this.session = session;
     }
 
 }

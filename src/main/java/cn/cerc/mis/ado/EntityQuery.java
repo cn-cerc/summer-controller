@@ -44,7 +44,7 @@ public class EntityQuery {
         else
             supplier = (values) -> findOne(handle, clazz, values);
 
-        return new FindOneBatch<T>(handle, supplier);
+        return new FindOneBatch<T>(supplier);
     }
 
     /**
