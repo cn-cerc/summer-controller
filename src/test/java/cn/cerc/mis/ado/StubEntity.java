@@ -25,13 +25,13 @@ public class StubEntity extends CustomEntity implements VirtualEntityImpl {
     private static final Logger log = LoggerFactory.getLogger(StubEntity.class);
     @Id
     private Long UID_;
-    @Column(nullable = false)
-    @Describe(name = "公司别", def = "000000")
+    @Column(name = "公司别", nullable = false)
+    @Describe(def = "000000")
     private String corpNo_;
     @Column
     private String Code_;
-    @Column
-    @Describe(name = "状态", def = "1")
+    @Column(name = "状态")
+    @Describe(def = "1")
     private Boolean enanble_;
     @Column(nullable = false)
     private Double amount_;
