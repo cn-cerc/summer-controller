@@ -22,6 +22,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
@@ -69,17 +70,24 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
     @Deprecated
     public ServiceSign call(IHandle handle) {
-        return callLocal(handle);
+        return call(handle, new DataSet());
     }
 
     @Deprecated
     public ServiceSign call(IHandle handle, DataRow headIn) {
-        return callLocal(handle, headIn);
+        DataSet dataIn = new DataSet();
+        dataIn.head().copyValues(headIn);
+        return call(handle, dataIn);
     }
 
     @Deprecated
     public ServiceSign call(IHandle handle, DataSet dataIn) {
-        return callLocal(handle, dataIn);
+        this.setSession(handle.getSession());
+        ServiceSign sign = this.clone();
+        sign.setDataIn(dataIn);
+        var dataOut = LocalService.call(this.id, handle, dataIn);
+        sign.setDataOut(dataOut);
+        return sign;
     }
 
     public ServiceSign callLocal(IHandle handle) {
@@ -94,6 +102,10 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
     @Override
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
+        if (handle instanceof BookHandle) {
+            var e = new RuntimeException("bookhandle不得使用 callLocal调用");
+            log.error(e.getMessage(), e);
+        }
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
