@@ -32,7 +32,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
                 var column = map.get(field);
                 if (!column.nullable()) {
                     if (!dataIn.head().hasValue(field.getName()))
-                        throw new DataValidateException(String.format("输入单头参数 %s 必须存在", field.getName()));
+                        throw new DataValidateException(String.format("输入单头参数 %s 必须有值", field.getName()));
                 }
             }
             headIn = dataIn.head().asEntity(getHeadInClass());
@@ -45,7 +45,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
                     var column = map.get(field);
                     if (!column.nullable()) {
                         if (!row.hasValue(field.getName()))
-                            throw new DataValidateException(String.format("输入单身参数 %s 必须存在", field.getName()));
+                            throw new DataValidateException(String.format("输入单身参数 %s 必须有值", field.getName()));
                     }
                 }
                 bodyIn.add(row.asEntity(getBodyInClass()));
@@ -68,20 +68,32 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
                 var column = map.get(field);
                 if (!column.nullable()) {
                     if (!dataOut.head().hasValue(field.getName()))
-                        throw new DataValidateException(String.format("输出单头数据 %s 必须存在", field.getName()));
+                        throw new DataValidateException(String.format("输出单头数据 %s 必须有值", field.getName()));
                 }
             }
         }
         if (dataOut.size() > 0) {
             var map = this.getMetaBodyOut();
+            for (var field : map.keySet()) {
+                var column = map.get(field);
+                if (!column.nullable()) {
+                    if (!dataOut.exists(field.getName()))
+                        throw new DataValidateException(String.format("输出单身字段 %s 必须存在", field.getName()));
+                }
+            }
+            var flag = false;
             for (var row : dataOut) {
                 for (var field : map.keySet()) {
                     var column = map.get(field);
                     if (!column.nullable()) {
-                        if (!row.hasValue(field.getName()))
-                            throw new DataValidateException(String.format("输出单头数据 %s 必须存在", field.getName()));
+                        if (!row.hasValue(field.getName())) {
+                            log.warn("{} 输出单身数据 {} 必须有值", this.getClass().getSimpleName(), field.getName());
+                            flag = true;
+                        }
                     }
                 }
+                if (flag)
+                    break;
             }
         }
         return dataOut;
