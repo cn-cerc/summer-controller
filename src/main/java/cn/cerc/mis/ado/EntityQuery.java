@@ -33,7 +33,7 @@ public class EntityQuery {
             return new EntityCache<T>(handle, clazz).get(values);
     }
 
-    public static <T extends EntityImpl> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
+    public static <T extends EntityImpl> FindBatch<T> findBatch(IHandle handle, Class<T> clazz) {
         EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
@@ -44,7 +44,20 @@ public class EntityQuery {
         else
             supplier = (values) -> findOne(handle, clazz, values);
 
-        return new FindOneBatch<T>(supplier);
+        return new FindBatch<T>(supplier);
+    }
+
+    /**
+     * 请改使用 findBatch
+     * 
+     * @param <T>
+     * @param handle
+     * @param clazz
+     * @return
+     */
+    @Deprecated
+    public static <T extends EntityImpl> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
+        return (FindOneBatch<T>) findBatch(handle, clazz);
     }
 
     /**
@@ -55,7 +68,7 @@ public class EntityQuery {
      * @param values       查找参数
      * @return 用于小表，取其中一笔数据，若找不到就将整个表数据全载入缓存，下次调用时可直接读取缓存数据，减少sql的开销
      */
-    public static <T extends EntityImpl> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz,
+    private static <T extends EntityImpl> Optional<T> findOneForSmallTable(IHandle handle, Class<T> clazz,
             Consumer<T> actionInsert, String... values) {
         EntityCache<T> cache = new EntityCache<>(handle, clazz);
         String key = EntityCache.buildKey(cache.buildKeys(values));
