@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
@@ -24,7 +25,7 @@ public class EntityQuery {
     private static final Logger log = LoggerFactory.getLogger(EntityQuery.class);
 
     public static <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
-        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
         if (entityKey.smallTable())
@@ -34,7 +35,7 @@ public class EntityQuery {
     }
 
     public static <T extends EntityImpl> BatchCache<T> findBatch(IHandle handle, Class<T> clazz) {
-        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
 
@@ -45,19 +46,6 @@ public class EntityQuery {
             supplier = (values) -> findOne(handle, clazz, values);
 
         return new BatchCache<T>(supplier);
-    }
-
-    /**
-     * 请改使用 findBatch
-     * 
-     * @param <T>
-     * @param handle
-     * @param clazz
-     * @return
-     */
-    @Deprecated
-    public static <T extends EntityImpl> FindOneBatch<T> findOneBatch(IHandle handle, Class<T> clazz) {
-        return (FindOneBatch<T>) findBatch(handle, clazz);
     }
 
     /**
@@ -87,7 +75,7 @@ public class EntityQuery {
             }
         }
 
-        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
         if (entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
         int offset = entityKey.corpNo() ? 1 : 0;

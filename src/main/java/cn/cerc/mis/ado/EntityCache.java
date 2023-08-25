@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.CacheLevelEnum;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.FieldDefs;
@@ -35,7 +36,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         super();
         if (handle != null)
             this.session = handle.getSession();
-        this.entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        this.entityKey = EntityHelper.get(clazz).entityKey();
         if (this.entityKey == null)
             throw new RuntimeException("entityKey not define: " + clazz.getSimpleName());
         this.clazz = clazz;

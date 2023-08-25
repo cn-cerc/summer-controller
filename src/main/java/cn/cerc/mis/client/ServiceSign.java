@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Description;
 
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
@@ -244,7 +245,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
      */
     @Deprecated
     public <T extends EntityImpl> Optional<T> findOne(IHandle handle, Class<T> clazz, String... values) {
-        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
         DataSet dataIn = new DataSet();
         DataRow headIn = dataIn.head();
         int site = entityKey.corpNo() ? 1 : 0;
@@ -263,7 +264,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     @Deprecated
     public <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
         Set<T> set = new LinkedHashSet<>();
-        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
         DataSet dataIn = new DataSet();
         DataRow headIn = dataIn.head();
         int site = entityKey.corpNo() ? 1 : 0;

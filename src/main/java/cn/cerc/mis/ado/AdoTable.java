@@ -38,7 +38,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
 
             EntityHelper<? extends AdoTable> helper = EntityHelper.create(this.getClass());
             // 保存对数据表的修改
-            query.operator().setTable(helper.table());
+            query.operator().setTable(helper.tableName());
             query.operator().setOid(helper.idFieldCode());
             query.operator().setVersionField(helper.versionFieldCode());
             // 先删除，再修改，最后增加，次序不要错
@@ -56,13 +56,13 @@ public abstract class AdoTable extends CustomEntity implements IService {
 
     public SqlQuery buildQuery(IHandle handle) {
         Class<? extends AdoTable> clazz = this.getClass();
-        SqlServer sqlServer = clazz.getAnnotation(SqlServer.class);
+        SqlServer sqlServer = EntityHelper.get(clazz).sqlServer();
         if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
 
         EntityHelper<? extends AdoTable> helper = EntityHelper.create(clazz);
         SqlQuery query = new SqlQuery(handle, helper.sqlServerType());
-        query.operator().setTable(helper.table());
+        query.operator().setTable(helper.tableName());
         query.operator().setOid(helper.idFieldCode());
         query.operator().setVersionField(helper.versionFieldCode());
         EntityHome.registerCacheListener(query, clazz, true);
@@ -144,7 +144,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
     }
 
     public String table() {
-        return EntityHelper.create(this.getClass()).table();
+        return EntityHelper.create(this.getClass()).tableName();
     }
 
 }
