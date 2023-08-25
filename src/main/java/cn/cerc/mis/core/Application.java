@@ -146,28 +146,11 @@ public class Application implements ApplicationContextAware {
             log.error(e.getMessage(), e);
             return null;
         }
-        String[] beans = context.getBeanNamesForType(requiredType);
-        if (beans.length == 0)
-            return null;
-        else if (beans.length == 1)
+        try {
             return context.getBean(requiredType);
-        else {
-            String[] path = requiredType.getName().split("\\.");
-            String beanId = path[path.length - 1];
-            if (context.containsBean(beanId)) // 优先XML中注册的：id一般与类名相同
-                return context.getBean(beanId, requiredType);
-            else {
-                beanId = null;
-                for (String item : beans) {
-                    if (!item.endsWith("Default"))
-                        beanId = item;
-                }
-                if (beanId == null) {
-                    log.error("getBean 执行错误：接口 {} 存在多个的实现，必须改进！", requiredType.getName());
-                    beanId = beans[0];
-                }
-                return context.getBean(beanId, requiredType);
-            }
+        } catch (BeansException e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
