@@ -22,10 +22,6 @@ import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.SystemBuffer;
 import cn.cerc.mis.other.MemoryBuffer;
 
-//@Component
-//@Scope(WebApplicationContext.SCOPE_SESSION)
-//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-//@Scope(WebApplicationContext.SCOPE_REQUEST)
 public class CustomSession implements ISession {
     private static final Logger log = LoggerFactory.getLogger(CustomSession.class);
     protected Map<String, Object> connections = new HashMap<>();

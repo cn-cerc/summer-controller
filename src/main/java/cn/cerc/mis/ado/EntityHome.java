@@ -58,7 +58,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
     public static ISqlDatabase findDatabase(IHandle handle, Class<? extends EntityImpl> clazz) {
         ISqlDatabase database = buff.get(clazz);
         if (database == null) {
-            SqlServer server = clazz.getAnnotation(SqlServer.class);
+            SqlServer server = EntityHelper.get(clazz).sqlServer();
             SqlServerType sqlServerType = (server != null) ? server.type() : SqlServerType.Mysql;
             if (TestsqlServer.enabled())
                 sqlServerType = SqlServerType.Testsql;
@@ -70,11 +70,6 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
                 database = new SqliteDatabase(handle, clazz);
             else
                 throw new SqlServerTypeException();
-//            if (ServerConfig.isServerDevelop()) {
-//                EntityKey ekey = clazz.getDeclaredAnnotation(EntityKey.class);
-//                if (ekey == null || !ekey.virtual())
-//                    database.createTable(false);
-//            }
             buff.put(clazz, database);
         }
         return database;
@@ -85,7 +80,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             boolean writeCacheAtOpen) {
         // 在open时，读入字段定义
         target.onAfterOpen(self -> self.fields().readDefine(clazz));
-        EntityKey entityKey = clazz.getDeclaredAnnotation(EntityKey.class);
+        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
         if (entityKey == null || entityKey.cache() == CacheLevelEnum.Disabled)
             return;
 
@@ -141,7 +136,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         this.clazz = clazz;
         this.helper = EntityHelper.create(clazz);
         query = new SqlQuery(this, helper.sqlServerType());
-        query.operator().setTable(helper.table());
+        query.operator().setTable(helper.tableName());
         query.operator().setOid(helper.idFieldCode());
         query.operator().setVersionField(helper.versionFieldCode());
         registerCacheListener(query, clazz, writeCacheAtOpen);
@@ -163,7 +158,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
                 if (!msg.startsWith("Table ") || !msg.endsWith(" doesn't exist"))
                     throw e;
 
-                log.warn("数据表 {} 没有建立，尝试自动建立", helper.table());
+                log.warn("数据表 {} 没有建立，尝试自动建立", helper.tableName());
                 var db = new MysqlDatabase(this, clazz);
                 db.createTable(false);
                 // 尝试再次执行
