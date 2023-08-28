@@ -127,6 +127,18 @@ public class Application implements ApplicationContextAware {
         return context;
     }
 
+    public static boolean containsBean(Class<?> clazz) {
+        if (context == null)
+            return false;
+        return context.getBeanNamesForType(clazz).length > 0;
+    }
+
+    public static boolean containsBean(String name) {
+        if (context == null)
+            return false;
+        return context.containsBean(name);
+    }
+
     @Deprecated
     public static Object getBean(String beanId) {
         if (!context.containsBean(beanId))
