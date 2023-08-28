@@ -110,7 +110,7 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
         query.setReadonly(false);
         T entity = null;
         try {
-            var field = EntityHelper.create(clazz).lockedField();
+            var field = EntityHelper.get(clazz).lockedField();
             entity = query.asEntity(clazz).orElseThrow();
             if (field.isPresent() && query.getBoolean(field.get().getName()))
                 throw new RuntimeException("record is locked");

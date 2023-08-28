@@ -92,7 +92,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     }
 
     public void deleteAll() {
-        var field = EntityHelper.create(clazz).lockedField();
+        var field = EntityHelper.get(clazz).lockedField();
         query.setReadonly(false);
         try {
             query.first();
@@ -109,7 +109,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
     public void deleteAll(List<T> list) {
         query.setReadonly(false);
         try {
-            var field = EntityHelper.create(clazz).lockedField();
+            var field = EntityHelper.get(clazz).lockedField();
             for (T entity : list) {
                 if (entity.findRecNo() < 0)
                     throw new RuntimeException("delete fail, entity not in query");

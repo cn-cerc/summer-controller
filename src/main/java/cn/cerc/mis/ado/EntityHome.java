@@ -134,7 +134,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
     public EntityHome(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle);
         this.clazz = clazz;
-        this.helper = EntityHelper.create(clazz);
+        this.helper = EntityHelper.get(clazz);
         query = new SqlQuery(this, helper.sqlServerType());
         query.operator().setTable(helper.tableName());
         query.operator().setOid(helper.idFieldCode());
@@ -254,7 +254,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             return 0;
         query.setReadonly(false);
         try {
-            var field = EntityHelper.create(clazz).lockedField();
+            var field = EntityHelper.get(clazz).lockedField();
             int result = 0;
             query.first();
             while (!query.eof()) {
@@ -315,7 +315,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
-            var field = EntityHelper.create(clazz).lockedField();
+            var field = EntityHelper.get(clazz).lockedField();
             if (field.isPresent() && entity.isLocked() && query.getBoolean(field.get().getName()))
                 throw new RuntimeException("record is locked, please unlock first");
             helper.onUpdatePostDefault(entity);

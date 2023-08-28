@@ -36,7 +36,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
             for (FieldMeta meta : dataIn.fields())
                 meta.setKind(FieldKind.Storage);
 
-            EntityHelper<? extends AdoTable> helper = EntityHelper.create(this.getClass());
+            EntityHelper<? extends AdoTable> helper = EntityHelper.get(this.getClass());
             // 保存对数据表的修改
             query.operator().setTable(helper.tableName());
             query.operator().setOid(helper.idFieldCode());
@@ -60,7 +60,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
         if (sqlServer == null)
             throw new RuntimeException("unknow sql server");
 
-        EntityHelper<? extends AdoTable> helper = EntityHelper.create(clazz);
+        EntityHelper<? extends AdoTable> helper = EntityHelper.get(clazz);
         SqlQuery query = new SqlQuery(handle, helper.sqlServerType());
         query.operator().setTable(helper.tableName());
         query.operator().setOid(helper.idFieldCode());
@@ -104,7 +104,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
     }
 
     protected void saveUpdate(DataSet dataIn, SqlQuery query) {
-        String uid = EntityHelper.create(this.getClass()).idFieldCode();
+        String uid = EntityHelper.get(this.getClass()).idFieldCode();
         for (DataRow row : dataIn) {
             if (DataRowState.Update == row.state()) {
                 DataRow history = row.history();
@@ -144,7 +144,7 @@ public abstract class AdoTable extends CustomEntity implements IService {
     }
 
     public String table() {
-        return EntityHelper.create(this.getClass()).tableName();
+        return EntityHelper.get(this.getClass()).tableName();
     }
 
 }
