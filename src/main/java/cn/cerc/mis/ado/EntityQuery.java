@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataRow;
+import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
@@ -125,6 +126,14 @@ public class EntityQuery {
         consumer.accept(where);
         return new EntityMany<T>(handle, clazz, where.build(), true, true).stream()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public static <T extends EntityImpl> DataSet findDataSet(IHandle handle, Class<T> clazz,
+            Consumer<SqlWhere> consumer) {
+        Objects.requireNonNull(consumer);
+        SqlWhere where = SqlWhere.create(handle, clazz);
+        consumer.accept(where);
+        return new EntityMany<T>(handle, clazz, where.build(), true, true).dataSet();
     }
 
 }
