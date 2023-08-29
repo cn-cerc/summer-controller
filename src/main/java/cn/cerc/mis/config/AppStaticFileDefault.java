@@ -25,7 +25,7 @@ public enum AppStaticFileDefault {
 
         // apple universal link
         suffix.add("apple-app-site-association");
-        
+
         // 图片文件
         suffix.add(".jpg");
         suffix.add(".png");
@@ -51,14 +51,6 @@ public enum AppStaticFileDefault {
 
     public boolean isStaticFile(String uri) {
         return suffix.stream().anyMatch(uri::endsWith);
-    }
-
-    public static void main(String[] args) {
-        for (int i = 0; i < 5555; i++) {
-            new Thread(() -> {
-                AppStaticFileDefault.getInstance().isStaticFile(".ico");
-            }).start();
-        }
     }
 
 }
