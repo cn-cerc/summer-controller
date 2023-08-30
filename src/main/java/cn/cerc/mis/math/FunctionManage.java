@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 
 public class FunctionManage implements IHandle {
@@ -37,11 +38,22 @@ public class FunctionManage implements IHandle {
         return funcItems;
     }
 
-    public String process(String text) {
+    public Variant parse(String text) {
         log.debug("------process text: {} ------", text);
         String result = this.process(new FunctionData(text));
         log.debug("result: {}", result);
-        return result;
+        return new Variant(result);
+    }
+
+    /**
+     * 请改使用 parse
+     * 
+     * @param text
+     * @return
+     */
+    @Deprecated
+    public String process(String text) {
+        return parse(text).getString();
     }
 
     private String process(FunctionData data) {
