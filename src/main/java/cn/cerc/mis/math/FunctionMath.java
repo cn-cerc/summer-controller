@@ -9,6 +9,7 @@ import cn.cerc.db.core.Utils;
 @Component
 public class FunctionMath implements IFunction {
     private static final Logger log = LoggerFactory.getLogger(FunctionMath.class);
+
     @Override
     public String name() {
         return "math";

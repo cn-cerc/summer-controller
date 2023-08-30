@@ -9,7 +9,7 @@ public class FunctionIfTest {
     @Test
     public void test() {
         FunctionIf ff = new FunctionIf();
-        assertEquals("11", ff.process(null, "true?11:2"));
+        assertEquals("11", ff.process(null, "true,11,2"));
     }
 
 }

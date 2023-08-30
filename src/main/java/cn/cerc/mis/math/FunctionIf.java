@@ -20,15 +20,18 @@ public class FunctionIf implements IFunction {
 
     @Override
     public String process(FunctionManage manage, String text) {
-        if (!text.contains("?") || !text.contains(":")) {
+        if (!text.contains(",")) {
             log.error("无法解析：{}", text);
             return text;
         }
-        String ifResult = text.split("\\?")[0];
-        // 取结果
-        var temp = text.split("\\?")[1];
-        var s1 = temp.split(":")[0].trim();
-        var s2 = temp.split(":")[1].trim();
+        var args = text.split(",");
+        if (args.length != 3) {
+            log.error("无法解析：{}", text);
+            return text;
+        }
+        String ifResult = args[0];
+        var s1 = args[1];
+        var s2 = args[2];
         if (manage != null) {
             ifResult = manage.childProcess(ifResult);
             if ("true".equals(ifResult)) {

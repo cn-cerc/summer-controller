@@ -23,7 +23,7 @@ public class FunctionManageTest {
         FunctionManage fm = new FunctionManage();
         fm.addFunction(new FunctionMath());
         fm.addFunction(new FunctionIf());
-        assertEquals("11", fm.process("if(true?11:2)"));
+        assertEquals("11", fm.process("if(true,11,2)"));
     }
 
 }
