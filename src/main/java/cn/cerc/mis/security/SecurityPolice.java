@@ -44,8 +44,8 @@ public class SecurityPolice {
             log.debug("{}.{}[permissions]={}", handle.getCorpNo(), handle.getUserCode(),
                     handle.getSession().getPermissions());
         }
-        String value = getValue(handle, bean, permission, operators);
-        boolean result = validate(handle.getCorpNo(), handle.getSession().getPermissions(), value);
+        String value = getValue(handle, bean, permission, operators);// 菜单要求权限
+        boolean result = validate(handle.getCorpNo(), handle.getSession().getPermissions(), value);// 用户当前权限
         if (log.isDebugEnabled()) {
             String[] path = clazz.getName().split("\\.");
             String beanId = path[path.length - 1];
@@ -53,8 +53,12 @@ public class SecurityPolice {
                 beanId = ((SupportBeanName) bean).getBeanName();
             log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
-        if (!result)
+        if (!result) {
+            log.error("token {}, corpNo {}, userCode {}, permissions {}; {} required {}",
+                    handle.getSession().getToken(), handle.getCorpNo(), handle.getUserCode(),
+                    handle.getSession().getPermissions(), method.getDeclaringClass().getName(), value);
             throw new SecurityStopException(method, bean, value);
+        }
     }
 
     public static boolean check(IHandle handle, Enum<?> clazz, String operator) {
