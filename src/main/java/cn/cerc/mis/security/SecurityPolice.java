@@ -53,8 +53,12 @@ public class SecurityPolice {
                 beanId = ((SupportBeanName) bean).getBeanName();
             log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
-        if (!result)
+        if (!result) {
+            log.error("token {}, corpNo {}, userCode {}, permissions {}; {} required {}",
+                    handle.getSession().getToken(), handle.getCorpNo(), handle.getUserCode(),
+                    handle.getSession().getPermissions(), method.getDeclaringClass().getName(), value);
             throw new SecurityStopException(method, bean, value);
+        }
     }
 
     public static boolean check(IHandle handle, Enum<?> clazz, String operator) {
