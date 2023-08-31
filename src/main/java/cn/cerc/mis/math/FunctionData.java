@@ -1,36 +1,45 @@
 package cn.cerc.mis.math;
 
-public class FunctionData {
-    private String name = "";
-    private String param = "";
+import java.util.ArrayList;
+import java.util.List;
 
-    public FunctionData(String text) {
-        super();
+public class FunctionData implements IFunctionNode {
+    public List<IFunctionNode> items = new ArrayList<>();
+    private String text;
+    private String name;
+    private String param;
+    private boolean onlyText;
 
-        int start = text.indexOf("(");
-        int end = text.lastIndexOf(")");
-        if (start > -1 && end == text.length() - 1) {
-            int flag = 0;
-            for (int i = start + 1; i < end; i++) {
-                if (text.substring(i, i + 1).equals("("))
-                    flag++;
-                if (text.substring(i, i + 1).equals(")"))
-                    flag--;
-                if (flag < 0)
-                    return;
-            }
-
-            this.name = text.substring(0, start);
-            this.param = text.substring(start + 1, end);
+    public FunctionData(FunctionManager manager, String text) {
+        this.text = text;
+        var v1 = text.indexOf('(');
+        if (v1 > -1 && text.endsWith(")")) {
+            this.name = text.substring(0, v1);
+            this.param = text.substring(v1 + 1, text.length() - 1);
+            this.items = manager.createNodes(param);
+        } else {
+            this.onlyText = true;
         }
     }
 
+    @Override
+    public String text() {
+        return text;
+    }
+
+    public int size() {
+        return items.size();
+    }
+
+    public IFunctionNode get(int index) {
+        return items.get(index);
+    }
+
     public String name() {
-        return this.name;
+        return name;
     }
 
     public String param() {
-        return this.param;
+        return param;
     }
-
 }

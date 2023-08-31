@@ -32,15 +32,15 @@ public class FuctionUtilsTest {
         assertEquals("b(a(c(2)+1))", nodes.get(1).text());
         assertEquals("+3", nodes.get(2).text());
         //
-        FunctionValue node1 = (FunctionValue) nodes.get(1);
+        FunctionData node1 = (FunctionData) nodes.get(1);
         assertEquals("a(c(2)+1)", node1.get(0).text());
         assertEquals(1, node1.size());
         //
-        FunctionValue node2 = (FunctionValue) node1.get(0);
+        FunctionData node2 = (FunctionData) node1.get(0);
         assertEquals(1, node2.size());
         assertEquals("c(2)+1", node2.get(0));
         //
-        FunctionValue node3 = (FunctionValue) node2.get(0);
+        FunctionData node3 = (FunctionData) node2.get(0);
         assertEquals(2, node3.size());
         assertEquals("c(2)", node3.get(0));
         assertEquals("+1", node3.get(1));

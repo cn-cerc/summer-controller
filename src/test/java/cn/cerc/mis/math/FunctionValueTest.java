@@ -8,7 +8,7 @@ public class FunctionValueTest {
 
     @Test
     public void test() {
-        FunctionValue fv = new FunctionValue("a(2)");
+        FunctionData fv = new FunctionData("a(2)");
         assertEquals("a", fv.name());
         assertEquals("2", fv.param());
         assertEquals("a(2)", fv.text());
