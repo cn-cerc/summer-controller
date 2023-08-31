@@ -11,16 +11,17 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 
-public class FunctionManage implements IHandle {
-    private static final Logger log = LoggerFactory.getLogger(FunctionManage.class);
+public class FunctionManager implements IHandle {
+    private static final Logger log = LoggerFactory.getLogger(FunctionManager.class);
     private List<IFunction> funcItems = new ArrayList<>();
     private ISession session;
+    private ArrayList<IFunctionNode> items;
 
-    public FunctionManage() {
+    public FunctionManager() {
         super();
     }
 
-    public FunctionManage(IHandle handle) {
+    public FunctionManager(IHandle handle) {
         super();
         for (var bean : Application.getContext().getBeansOfType(IFunction.class).values()) {
             if (bean instanceof IHandle item)
@@ -29,7 +30,7 @@ public class FunctionManage implements IHandle {
         }
     }
 
-    public FunctionManage addFunction(IFunction func) {
+    public FunctionManager addFunction(IFunction func) {
         funcItems.add(func);
         return this;
     }
@@ -40,9 +41,10 @@ public class FunctionManage implements IHandle {
 
     public Variant parse(String text) {
         log.debug("------process text: {} ------", text);
-        String result = this.process(new FunctionData(text));
-        log.debug("result: {}", result);
-        return new Variant(result);
+        this.items = this.createNodes(text);
+//        String result = this.process(new FunctionData(text));
+//        log.debug("result: {}", result);
+        return new Variant(1);
     }
 
     /**
@@ -136,4 +138,56 @@ public class FunctionManage implements IHandle {
         this.session = session;
     }
 
+    /**
+     * 
+     * @param templateText
+     * @return 根据模版创建 ssr 节点
+     */
+    public ArrayList<IFunctionNode> createNodes(String value) {
+        var text = value;
+        var items = new ArrayList<IFunctionNode>();
+        if (value.indexOf('(') == -1) {
+            items.add(new FunctionValue(this, value));
+            return items;
+        }
+        var temp = text;
+        for (var func : this.funcItems) {
+            var name = func.name() + "(";
+            var start = temp.indexOf(name);
+            if (start > 0) {
+                var find = 1;
+                var s2 = temp.substring(start, temp.length());
+                for (var i = name.length(); i <= s2.length(); i++) {
+                    var flag = s2.charAt(i);
+                    if ('(' == flag)
+                        find++;
+                    if (')' == flag)
+                        find--;
+                    if (find == 0) {
+                        var funcText = temp.substring(start, start + i + 1);
+                        if (start > 0) {
+                            items.add(new FunctionValue(this, temp.substring(0, start)));
+                        }
+                        items.add(new FunctionValue(this, funcText));
+                        if (start + i + 1 < temp.length())
+                            items.add(new FunctionValue(this, temp.substring(start + i + 1, temp.length())));
+                        break;
+                    }
+                }
+                if (find != 0)
+                    throw new RuntimeException("error text: " + text);
+                break;
+            }
+        }
+        System.out.println("++++++++++: " + value);
+        for (var item : items)
+            System.out.println(item.text());
+        return items;
+    }
+
+    public static void main(String[] args) {
+        FunctionManager fm = new FunctionManager();
+        fm.addFunction(new FunctionIf());
+        fm.parse("1+if(a,b,c())+2");
+    }
 }

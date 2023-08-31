@@ -21,7 +21,7 @@ public class FunctionMath implements IFunction {
     }
 
     @Override
-    public String process(FunctionManage manage, String text) {
+    public String process(FunctionManager manage, String text) {
         String result = text;
         try {
             result = Utils.formatFloat("#.##", MathUtil.arithmetic(text.replaceAll(" ", "")).doubleValue());

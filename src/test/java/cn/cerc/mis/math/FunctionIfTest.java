@@ -14,7 +14,7 @@ public class FunctionIfTest {
 
     @Test
     public void test_ifAndMath() {
-        FunctionManage manage = new FunctionManage();
+        FunctionManager manage = new FunctionManager();
         manage.addFunction(new FunctionIf());
         manage.addFunction(new FunctionMath());
         assertEquals(1, manage.parse("if(true,1,math(0/0*100))").getInt());

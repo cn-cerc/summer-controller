@@ -19,7 +19,7 @@ public class FunctionIf implements IFunction {
     }
 
     @Override
-    public String process(FunctionManage manage, String text) {
+    public String process(FunctionManager manage, String text) {
         if (!text.contains(",")) {
             log.error("无法解析：{}", text);
             return text;
