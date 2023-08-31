@@ -67,33 +67,42 @@ public class FunctionManager implements IHandle {
             return items;
         }
         var temp = text;
+        IFunction selected = null;
+        var minStart = -1;
         for (var func : this.funcItems) {
             var name = func.name() + "(";
             var start = temp.indexOf(name);
             if (start > 0) {
-                var find = 1;
-                var s2 = temp.substring(start, temp.length());
-                for (var i = name.length(); i <= s2.length(); i++) {
-                    var flag = s2.charAt(i);
-                    if ('(' == flag)
-                        find++;
-                    if (')' == flag)
-                        find--;
-                    if (find == 0) {
-                        var funcText = temp.substring(start, start + i + 1);
-                        if (start > 0) {
-                            items.add(new FunctionData(this, temp.substring(0, start)));
-                        }
-                        items.add(new FunctionData(this, funcText));
-                        if (start + i + 1 < temp.length())
-                            items.add(new FunctionData(this, temp.substring(start + i + 1, temp.length())));
-                        break;
-                    }
+                if (selected == null || start < minStart) {
+                    selected = func;
+                    minStart = start;
                 }
-                if (find != 0)
-                    throw new RuntimeException("error text: " + text);
-                break;
             }
+        }
+        // 先找出函数值最小的一个
+        var name = selected.name() + "(";
+        if (selected != null) {
+            var find = 1;
+            var s2 = temp.substring(minStart, temp.length());
+            for (var i = name.length(); i <= s2.length(); i++) {
+                var flag = s2.charAt(i);
+                if ('(' == flag)
+                    find++;
+                if (')' == flag)
+                    find--;
+                if (find == 0) {
+                    var funcText = temp.substring(minStart, minStart + i + 1);
+                    if (minStart > 0) {
+                        items.add(new FunctionData(this, temp.substring(0, minStart)));
+                    }
+                    items.add(new FunctionData(this, funcText));
+                    if (minStart + i + 1 < temp.length())
+                        items.add(new FunctionData(this, temp.substring(minStart + i + 1, temp.length())));
+                    break;
+                }
+            }
+            if (find != 0)
+                throw new RuntimeException("error text: " + text);
         }
         System.out.println("parse: " + value);
         for (var item : items)
@@ -105,6 +114,16 @@ public class FunctionManager implements IHandle {
         FunctionManager fm = new FunctionManager();
         fm.addFunction(new FunctionIf());
         fm.addFunction(new FunctionMath());
-        fm.parse("1+if(a,b,c())+2");
+        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3),if(true,a(),math(1+1),math((1+2)*3)))");
+    }
+
+    public String childProcess(String s1) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Object process(String string) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
