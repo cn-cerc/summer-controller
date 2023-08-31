@@ -15,7 +15,7 @@ public class FunctionIf implements IFunction {
 
     @Override
     public String description() {
-        return "IF运算，调用范例：if(a1()?a2(200):b1(1...100))";
+        return "IF运算，调用范例：if(a1(),a2(200),b1(1...100))";
     }
 
     @Override
