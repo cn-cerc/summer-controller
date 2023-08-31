@@ -40,7 +40,7 @@ public class FunctionManager implements IHandle {
     }
 
     public Variant parse(String text) {
-        this.items = this.createNodes(text);
+        this.items = this.createNodes(text); // a() + b(d() + e()) + c()
         return new Variant(1);
     }
 
@@ -72,7 +72,7 @@ public class FunctionManager implements IHandle {
         for (var func : this.funcItems) {
             var name = func.name() + "(";
             var start = temp.indexOf(name);
-            if (start > 0) {
+            if (start > -1) {
                 if (selected == null || start < minStart) {
                     selected = func;
                     minStart = start;
@@ -80,11 +80,11 @@ public class FunctionManager implements IHandle {
             }
         }
         // 先找出函数值最小的一个
-        var name = selected.name() + "(";
         if (selected != null) {
+            var name = selected.name() + "(";
             var find = 1;
             var s2 = temp.substring(minStart, temp.length());
-            for (var i = name.length(); i <= s2.length(); i++) {
+            for (var i = name.length(); i < s2.length(); i++) {
                 var flag = s2.charAt(i);
                 if ('(' == flag)
                     find++;
@@ -114,7 +114,7 @@ public class FunctionManager implements IHandle {
         FunctionManager fm = new FunctionManager();
         fm.addFunction(new FunctionIf());
         fm.addFunction(new FunctionMath());
-        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3),if(true,a(),math(1+1),math((1+2)*3)))");
+        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))");
     }
 
     public String childProcess(String s1) {
