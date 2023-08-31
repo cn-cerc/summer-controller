@@ -54,10 +54,12 @@ public class SecurityPolice {
             log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
         if (!result) {
-            log.error("token {}, corpNo {}, userCode {}, permissions {}; {} required {}",
+            SecurityStopException exception = new SecurityStopException(method, bean, value);
+            log.error("token {}, corpNo {}, userCode {}, permissions {}; {}.{} required {}",
                     handle.getSession().getToken(), handle.getCorpNo(), handle.getUserCode(),
-                    handle.getSession().getPermissions(), method.getDeclaringClass().getName(), value);
-            throw new SecurityStopException(method, bean, value);
+                    handle.getSession().getPermissions(), method.getDeclaringClass().getName(), method.getName(), value,
+                    exception);
+            throw exception;
         }
     }
 
