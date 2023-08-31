@@ -46,9 +46,7 @@ public class FunctionIfTest {
                 String method = cal.substring(opreaIndex == 0 ? 0 : opreaIndex + 1, index);
                 methods.push(method);
                 index += parse(cal.substring(index + 1)) + 1;
-            }
-            index++;
-            if (index < cal.length()) {
+            } else if (index < cal.length()) {
                 if (cal.charAt(index) == ')') {
                     String content = cal.substring(0, index);
                     String method = methods.poll();
@@ -56,12 +54,13 @@ public class FunctionIfTest {
                     return index;
                 }
             }
+            index++;
         }
         return 0;
     }
 
     public static void main(String[] args) {
-        String cal = "if(true,math(1+if(true,1,0)*2*(1+3)),if(true,math(1+1),math((1+2)*3)))";
+        String cal = "if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))";
         parse(cal);
         System.out.println(datas.size());
         for (int i = 0; i < datas.size(); i++) {
