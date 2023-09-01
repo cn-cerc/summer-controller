@@ -60,7 +60,7 @@ public class FunctionIfTest {
     }
 
     public static void main(String[] args) {
-        String cal = "if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))";
+        String cal = "if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))+math(1+2*3)";
         parse(cal);
         System.out.println(datas.size());
         for (int i = 0; i < datas.size(); i++) {
