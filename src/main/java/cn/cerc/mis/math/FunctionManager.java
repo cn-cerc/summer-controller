@@ -58,7 +58,7 @@ public class FunctionManager implements IHandle {
         var text = value;
         var items = new ArrayList<IFunctionNode>();
         if (value.indexOf('(') == -1) {
-            items.add(new FunctionData(this, value));
+            items.add(new FunctionNode(this, value));
             return items;
         }
         var temp = text;
@@ -88,11 +88,11 @@ public class FunctionManager implements IHandle {
                     if (find == 0) {
                         var funcText = temp.substring(minStart, minStart + i + 1);
                         if (minStart > 0) {
-                            items.add(new FunctionData(this, temp.substring(0, minStart)));
+                            items.add(new FunctionNode(this, temp.substring(0, minStart)));
                         }
-                        items.add(new FunctionData(this, funcText));
+                        items.add(new FunctionNode(this, funcText));
                         if (minStart + i + 1 < temp.length())
-                            items.add(new FunctionData(this, temp.substring(minStart + i + 1, temp.length())));
+                            items.add(new FunctionNode(this, temp.substring(minStart + i + 1, temp.length())));
                         break;
                     }
                 }
@@ -117,15 +117,6 @@ public class FunctionManager implements IHandle {
         return this.nodes;
     }
 
-    public static void main(String[] args) {
-        FunctionManager fm = new FunctionManager();
-        fm.addFunction(new FunctionIf());
-        fm.addFunction(new FunctionMath());
-//        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))");
-        fm.parse("math() + if(math() + math()) + math()");
-//        fm.parse(" + if(math() + math()) + math()");
-    }
-
     public String childProcess(String s1) {
         // TODO Auto-generated method stub
         return null;
@@ -135,4 +126,15 @@ public class FunctionManager implements IHandle {
         // TODO Auto-generated method stub
         return null;
     }
+    
+
+    public static void main(String[] args) {
+        FunctionManager fm = new FunctionManager();
+        fm.addFunction(new FunctionIf());
+        fm.addFunction(new FunctionMath());
+//        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))");
+        fm.parse("math() + if(math() + math()) + math()");
+//        fm.parse(" + if(math() + math()) + math()");
+    }
+
 }

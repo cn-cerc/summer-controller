@@ -3,14 +3,14 @@ package cn.cerc.mis.math;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionData implements IFunctionNode {
+public class FunctionNode implements IFunctionNode {
     public List<IFunctionNode> items = new ArrayList<>();
     private String text;
     private String name;
     private String param;
     private boolean onlyText;
 
-    public FunctionData(FunctionManager manager, String text) {
+    public FunctionNode(FunctionManager manager, String text) {
         this.text = text;
         var v1 = text.indexOf('(');
         if (v1 > -1) {
