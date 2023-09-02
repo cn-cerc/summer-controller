@@ -10,7 +10,8 @@ public class FuctionUtilsTest {
 
 //    @Test
     public void test_1() {
-        var items = FuctionUtils.createNodes("a+b()");
+        FunctionManager fm = new FunctionManager();
+        var items = fm.createNodes("a+b()");
         assertEquals(2, items.size());
         assertEquals("a+", items.get(0).text());
         assertEquals("b()", items.get(1).text());
@@ -18,7 +19,8 @@ public class FuctionUtilsTest {
 
     @Test
     public void test_2() {
-        var items = FuctionUtils.createNodes("c(2)+1");
+        FunctionManager fm = new FunctionManager();
+        var items = fm.createNodes("c(2)+1");
         assertEquals(2, items.size());
         assertEquals("c(2)", items.get(0).text());
         assertEquals("+1", items.get(1).text());
@@ -26,7 +28,8 @@ public class FuctionUtilsTest {
 
 //    @Test
     public void test() {
-        ArrayList<IFunctionNode> nodes = FuctionUtils.createNodes("a+b(a(c(2)+1))+3");
+        FunctionManager fm = new FunctionManager();
+        ArrayList<IFunctionNode> nodes = fm.createNodes("a+b(a(c(2)+1))+3");
         assertEquals(3, nodes.size());
         assertEquals("a+", nodes.get(0).text());
         assertEquals("b(a(c(2)+1))", nodes.get(1).text());
