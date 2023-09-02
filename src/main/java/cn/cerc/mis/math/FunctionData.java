@@ -13,10 +13,8 @@ public class FunctionData implements IFunctionNode {
     public FunctionData(FunctionManager manager, String text) {
         this.text = text;
         var v1 = text.indexOf('(');
-        if (v1 > -1 && text.endsWith(")")) {
-            this.name = text.substring(0, v1);
-            this.param = text.substring(v1 + 1, text.length() - 1);
-            this.items = manager.createNodes(param);
+        if (v1 > -1) {
+            this.items = manager.createNodes(text);
         } else {
             this.onlyText = true;
         }
@@ -41,5 +39,16 @@ public class FunctionData implements IFunctionNode {
 
     public String param() {
         return param;
+    }
+
+    @Override
+    public void echo(int level) {
+        if (items.size() > 0) {
+            System.out.println("level: " + level + ", name: " + this.name);
+            for (var item : this.items)
+                System.out.println(item.text());
+            for (var item : this.items)
+                item.echo(level + 1);
+        }
     }
 }

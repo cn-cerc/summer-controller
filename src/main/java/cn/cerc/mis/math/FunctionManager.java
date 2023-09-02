@@ -15,7 +15,7 @@ public class FunctionManager implements IHandle {
     private static final Logger log = LoggerFactory.getLogger(FunctionManager.class);
     private List<IFunction> funcItems = new ArrayList<>();
     private ISession session;
-    private ArrayList<IFunctionNode> items;
+    private ArrayList<IFunctionNode> nodes;
 
     public FunctionManager() {
         super();
@@ -37,11 +37,6 @@ public class FunctionManager implements IHandle {
 
     public List<IFunction> items() {
         return funcItems;
-    }
-
-    public Variant parse(String text) {
-        this.items = this.createNodes(text); // a() + b(d() + e()) + c()
-        return new Variant(1);
     }
 
     @Override
@@ -88,33 +83,47 @@ public class FunctionManager implements IHandle {
                 var flag = s2.charAt(i);
                 if ('(' == flag)
                     find++;
-                if (')' == flag)
+                else if (')' == flag) {
                     find--;
-                if (find == 0) {
-                    var funcText = temp.substring(minStart, minStart + i + 1);
-                    if (minStart > 0) {
-                        items.add(new FunctionData(this, temp.substring(0, minStart)));
+                    if (find == 0) {
+                        var funcText = temp.substring(minStart, minStart + i + 1);
+                        if (minStart > 0) {
+                            items.add(new FunctionData(this, temp.substring(0, minStart)));
+                        }
+                        items.add(new FunctionData(this, funcText));
+                        if (minStart + i + 1 < temp.length())
+                            items.add(new FunctionData(this, temp.substring(minStart + i + 1, temp.length())));
+                        break;
                     }
-                    items.add(new FunctionData(this, funcText));
-                    if (minStart + i + 1 < temp.length())
-                        items.add(new FunctionData(this, temp.substring(minStart + i + 1, temp.length())));
-                    break;
                 }
             }
             if (find != 0)
-                throw new RuntimeException("error text: " + text);
+                throw new RuntimeException("公式错误，左右括号不配套: " + text);
         }
-        System.out.println("parse: " + value);
-        for (var item : items)
-            System.out.println(item.text());
         return items;
+    }
+
+    public Variant parse(String text) {
+        this.nodes = this.createNodes(text); // a() + b(d() + e()) + c()
+        System.out.println("level 0: " + nodes.size());
+        for (var item : nodes)
+            System.out.println(item.text());
+        for (var item : nodes)
+            item.echo(1);
+        return new Variant(1);
+    }
+
+    public ArrayList<IFunctionNode> nodes() {
+        return this.nodes;
     }
 
     public static void main(String[] args) {
         FunctionManager fm = new FunctionManager();
         fm.addFunction(new FunctionIf());
         fm.addFunction(new FunctionMath());
-        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))");
+//        fm.parse("if(true,math(1+if(true,1,0)*2*(1+3)),if(true,a(),math(1+1),math((1+2)*3)))");
+        fm.parse("math() + if(math() + math()) + math()");
+//        fm.parse(" + if(math() + math()) + math()");
     }
 
     public String childProcess(String s1) {
