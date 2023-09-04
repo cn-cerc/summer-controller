@@ -3,24 +3,23 @@ package cn.cerc.mis.math;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 
-public class FunctionManage implements IHandle {
-    private static final Logger log = LoggerFactory.getLogger(FunctionManage.class);
+public class FunctionManager implements IHandle {
+//    private static final Logger log = LoggerFactory.getLogger(FunctionManager.class);
     private List<IFunction> funcItems = new ArrayList<>();
+    private List<FunctionNode> items;
     private ISession session;
+    private FunctionReader reader = new FunctionReader();
 
-    public FunctionManage() {
+    public FunctionManager() {
         super();
     }
 
-    public FunctionManage(IHandle handle) {
+    public FunctionManager(IHandle handle) {
         super();
         for (var bean : Application.getContext().getBeansOfType(IFunction.class).values()) {
             if (bean instanceof IHandle item)
@@ -29,7 +28,7 @@ public class FunctionManage implements IHandle {
         }
     }
 
-    public FunctionManage addFunction(IFunction func) {
+    public FunctionManager addFunction(IFunction func) {
         funcItems.add(func);
         return this;
     }
@@ -39,23 +38,44 @@ public class FunctionManage implements IHandle {
     }
 
     public Variant parse(String text) {
-        log.debug("------process text: {} ------", text);
-        String result = this.process(new FunctionData(text));
-        log.debug("result: {}", result);
-        return new Variant(result);
+        if (text.startsWith("="))
+            this.items = createNodes("math(" + text.substring(1, text.length()) + ")");
+        else
+            this.items = createNodes(text);
+        StringBuffer sb = new StringBuffer();
+        for (var item : items)
+            sb.append(item.value());
+        return new Variant(sb.toString());
     }
 
-    /**
-     * 请改使用 parse
-     * 
-     * @param text
-     * @return
-     */
+    protected List<FunctionNode> createNodes(String text) {
+        var items = new ArrayList<FunctionNode>();
+        reader.onText(value -> {
+            var item = new FunctionNode(this, value);
+            items.add(item);
+            for (var func : this.funcItems) {
+                if (func.isName(value)) {
+                    item.function(func);
+                    break;
+                }
+            }
+
+        });
+        reader.onFunction(value -> {
+            var item = new FunctionExpression(this, value);
+            items.add(item);
+            for (var func : this.funcItems) {
+                if (func.isName(item.name())) {
+                    item.function(func);
+                    break;
+                }
+            }
+        });
+        reader.parse(text);
+        return items;
+    }
+
     @Deprecated
-    public String process(String text) {
-        return parse(text).getString();
-    }
-
     private String process(FunctionData data) {
         String result = "";
         for (IFunction func : funcItems) {
@@ -74,6 +94,7 @@ public class FunctionManage implements IHandle {
      * @param text 表达式
      * @return 表达式
      */
+    @Deprecated
     public String childProcess(String text) {
         FunctionData one = new FunctionData(text);
         if (!"".equals(one.name()))
@@ -134,6 +155,10 @@ public class FunctionManage implements IHandle {
     @Override
     public void setSession(ISession session) {
         this.session = session;
+    }
+
+    public FunctionReader reader() {
+        return reader;
     }
 
 }

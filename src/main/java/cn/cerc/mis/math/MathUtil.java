@@ -126,8 +126,12 @@ public class MathUtil {
         } else if ("*".equals(operator)) {
             result = number1.multiply(number2);
         } else if ("/".equals(operator)) {
-            // 第二个参数为精度，第三个为四色五入的模式
-            result = number1.divide(number2, 4, RoundingMode.HALF_UP);
+            // 除数为0时直接返回0，防止报错
+            if (number2.doubleValue() == 0)
+                result = new BigDecimal(0);
+            else
+                // 第二个参数为精度，第三个为四色五入的模式
+                result = number1.divide(number2, 4, RoundingMode.HALF_UP);
         }
 
         return result != null ? result.toString() : null;

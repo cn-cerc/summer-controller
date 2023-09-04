@@ -19,7 +19,7 @@ public class FunctionIf implements IFunction {
     }
 
     @Override
-    public String process(FunctionManage manage, String text) {
+    public String process(FunctionManager manage, String text) {
         if (!text.contains(",")) {
             log.error("无法解析：{}", text);
             return text;
@@ -32,20 +32,15 @@ public class FunctionIf implements IFunction {
         String ifResult = args[0];
         var s1 = args[1];
         var s2 = args[2];
-        if (manage != null) {
-            ifResult = manage.childProcess(ifResult);
-            if ("true".equals(ifResult)) {
-                return manage.childProcess(s1);
-            } else {
-                return manage.childProcess(s2);
-            }
-        } else {
-            if ("true".equals(ifResult)) {
-                return s1;
-            } else {
-                return s2;
-            }
-        }
+        //
+        if ("true".equals(ifResult))
+            return s1;
+        else if (ifResult.split("==").length == 2) {
+            var v1 = ifResult.split("==")[0];
+            var v2 = ifResult.split("==")[1];
+            return v1.compareTo(v2) == 0 ? s1.trim() : s2.trim();
+        } else
+            return s2;
     }
 
 }
