@@ -29,6 +29,8 @@ public class FunctionManager implements IHandle {
     }
 
     public FunctionManager addFunction(IFunction func) {
+        if (func instanceof FunctionField)
+            reader.setLetterOption(true);
         funcItems.add(func);
         return this;
     }

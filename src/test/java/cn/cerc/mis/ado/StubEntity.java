@@ -17,11 +17,10 @@ import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlServerType;
 import cn.cerc.db.core.SqlText;
-import cn.cerc.mis.ado.EntityCache.VirtualEntityImpl;
 
 @Entity
 @EntityKey(fields = { "corpNo_", "enanble_" })
-public class StubEntity extends CustomEntity implements VirtualEntityImpl {
+public class StubEntity extends CustomEntity implements IVirtualEntity<StubEntity> {
     private static final Logger log = LoggerFactory.getLogger(StubEntity.class);
     @Id
     private Long UID_;
@@ -83,11 +82,6 @@ public class StubEntity extends CustomEntity implements VirtualEntityImpl {
 
     public void setAmount_(Double amount_) {
         this.amount_ = amount_;
-    }
-
-    @Override
-    public boolean fillItem(IHandle handle, Object entity, DataRow headIn) {
-        return false;
     }
 
     @Override

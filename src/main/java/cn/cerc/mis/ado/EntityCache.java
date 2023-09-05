@@ -154,7 +154,12 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
             headIn.setValue(entityKey.fields()[i], keys[i + diff]);
         //
         T obj = headIn.asEntity(clazz);
-        VirtualEntityImpl impl = (VirtualEntityImpl) obj;
+        if (!(obj instanceof IVirtualEntity)) {
+            log.error("{} 没有实现 IVirtualEntity", clazz.getSimpleName());
+            return null;
+        }
+        @SuppressWarnings("unchecked")
+        IVirtualEntity<T> impl = (IVirtualEntity<T>) obj;
         if (impl.fillItem(this, obj, headIn)) {
             DataRow row = new DataRow();
             row.loadFromEntity(obj);
@@ -276,23 +281,9 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
         return keys;
     }
 
-    public interface VirtualEntityImpl {
-        /**
-         * @param handle IHandle
-         * @param entity Entity Object
-         * @param headIn 要赋值的内容
-         * @return 直接给 entity 赋值 values 是否成功
-         */
-        boolean fillItem(IHandle handle, Object entity, DataRow headIn);
+    @Deprecated
+    public static interface VirtualEntityImpl<T> extends IVirtualEntity<T> {
 
-        /**
-         * 先调用fillEntity，在其返回false时，再调用此函数
-         * 
-         * @param handle IHandle
-         * @param headIn headIn 标识字段的值
-         * @return 返回载入的数据，允许返回null
-         */
-        DataSet loadItems(IHandle handle, DataRow headIn);
     }
 
     @Override

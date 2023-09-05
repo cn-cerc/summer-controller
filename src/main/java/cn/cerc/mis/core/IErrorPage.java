@@ -32,7 +32,7 @@ public interface IErrorPage {
         else if (throwable instanceof SecurityStopException)
             log.warn("client ip {}, security check error {}", clientIP, message, throwable);
         else if (throwable instanceof RuntimeException)
-            log.warn("client ip {}, {}", clientIP, message, throwable);
+            log.error("client ip {}, {}", clientIP, message, throwable);
         else
             log.error("client ip {}, {}", clientIP, message, throwable);
 
