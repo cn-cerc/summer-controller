@@ -13,11 +13,17 @@ import java.lang.annotation.Target;
 public @interface DataValidate {
     public static String DefaultErrorMessage = "%s cannot be empty";
 
+    /**
+     * 字段代码
+     */
     String value();
 
-    String message() default DefaultErrorMessage;
-
+    /**
+     * 字段名称
+     */
     String name() default "";
+
+    String message() default DefaultErrorMessage;
 
     /* sample:$value > 0 */
     String allow() default "";
