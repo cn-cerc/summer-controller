@@ -1,5 +1,6 @@
 package cn.cerc.mis.math;
 
+import java.math.BigDecimal;
 import java.util.function.BiFunction;
 
 import org.slf4j.Logger;
@@ -12,14 +13,40 @@ import cn.cerc.db.core.Utils;
 public class FunctionIf implements IFunction {
     private static final Logger log = LoggerFactory.getLogger(FunctionIf.class);
 
-    private static final BiFunction<String, String, Boolean> EQUALS_FUNC = (v1, v2) -> {
+    /** 比较两个字符串是否相等：v1 == v2 */
+    public static final BiFunction<String, String, Boolean> EQ = (v1, v2) -> {
         if ("null".equals(v1))
             return Utils.isEmpty(v2);
         else if ("null".equals(v2))
             return Utils.isEmpty(v1);
         return v1.equals(v2);
     };
-    private static final BiFunction<String, String, Boolean> NO_EQUALS_FUNC = (v1, v2) -> !EQUALS_FUNC.apply(v1, v2);
+    /** 比较两个字符串是否不相等：v1 != v2 */
+    public static final BiFunction<String, String, Boolean> NEQ = (v1, v2) -> !EQ.apply(v1, v2);
+    /** 比较 v1 是否大于等于 v2：v1 >= v2 */
+    public static final BiFunction<String, String, Boolean> GTE = (v1, v2) -> {
+        if (Utils.isNumeric(v1) && Utils.isNumeric(v2))
+            return new BigDecimal(v1).compareTo(new BigDecimal(v2)) >= 0;
+        return v1.compareTo(v2) >= 0;
+    };
+    /** 比较 v1 是否大于 v2：v1 > v2 */
+    public static final BiFunction<String, String, Boolean> GT = (v1, v2) -> {
+        if (Utils.isNumeric(v1) && Utils.isNumeric(v2))
+            return new BigDecimal(v1).compareTo(new BigDecimal(v2)) > 0;
+        return v1.compareTo(v2) > 0;
+    };
+    /** 比较 v1 是否小于等于 v2：v1 <= v2 */
+    public static final BiFunction<String, String, Boolean> LTE = (v1, v2) -> {
+        if (Utils.isNumeric(v1) && Utils.isNumeric(v2))
+            return new BigDecimal(v1).compareTo(new BigDecimal(v2)) <= 0;
+        return v1.compareTo(v2) <= 0;
+    };
+    /** 比较 v1 是否小于 v2：v1 < v2 */
+    public static final BiFunction<String, String, Boolean> LT = (v1, v2) -> {
+        if (Utils.isNumeric(v1) && Utils.isNumeric(v2))
+            return new BigDecimal(v1).compareTo(new BigDecimal(v2)) < 0;
+        return v1.compareTo(v2) < 0;
+    };
 
     @Override
     public String name() {
@@ -49,12 +76,9 @@ public class FunctionIf implements IFunction {
         CompareResult compare = null;
         if ("true".equals(ifResult))
             return s1;
-        else if ((compare = compare(ifResult, "==", EQUALS_FUNC)).match()
-                || (compare = compare(ifResult, "!=", NO_EQUALS_FUNC)).match()
-                || (compare = compare(ifResult, ">=", (v1, v2) -> v1.compareTo(v2) >= 0)).match()
-                || (compare = compare(ifResult, "<=", (v1, v2) -> v1.compareTo(v2) <= 0)).match()
-                || (compare = compare(ifResult, ">", (v1, v2) -> v1.compareTo(v2) > 0)).match()
-                || (compare = compare(ifResult, "<", (v1, v2) -> v1.compareTo(v2) < 0)).match()) {
+        else if ((compare = compare(ifResult, "==", EQ)).match() || (compare = compare(ifResult, "!=", NEQ)).match()
+                || (compare = compare(ifResult, ">=", GTE)).match() || (compare = compare(ifResult, "<=", LTE)).match()
+                || (compare = compare(ifResult, ">", GT)).match() || (compare = compare(ifResult, "<", LT)).match()) {
             return compare.result() ? s1.trim() : s2.trim();
         } else
             return s2;

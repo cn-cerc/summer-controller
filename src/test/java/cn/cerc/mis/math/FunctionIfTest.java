@@ -66,4 +66,13 @@ public class FunctionIfTest {
         assertEquals(0, manager.parse("if(value_!=null,1,0)").getInt());
     }
 
+    @Test
+    public void test_10() {
+        FunctionManager manager = new FunctionManager();
+        manager.addFunction(new FunctionIf());
+        manager.addFunction(new FunctionMath());
+        manager.addFunction(new FunctionField(DataRow.of("empty_km_", 20, "total_km_", 217)));
+        assertEquals("yellow", manager.parse("if(math(empty_km_/total_km_*100)>15,red,yellow)").getString());
+    }
+
 }
