@@ -110,23 +110,27 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
 
         // 在post(insert、update)时，写入redis等缓存
         target.onAfterPost(row -> {
-            EntityCache<T> ec2 = new EntityCache<T>(target, clazz);
-            String[] keys = ec2.buildKeys(row);
-            try (Jedis jedis = JedisFactory.getJedis()) {
-                jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
-                if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                    SessionCache.set(keys, row);
+            for (var class1 : getFamily(clazz)) {
+                EntityCache<?> ec2 = new EntityCache<>(target, class1);
+                String[] keys = ec2.buildKeys(row);
+                try (Jedis jedis = JedisFactory.getJedis()) {
+                    jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        SessionCache.set(keys, row);
+                }
             }
         });
 
         // 在delete时，清除redis等缓存
         target.onAfterDelete(row -> {
-            EntityCache<T> ec3 = new EntityCache<T>(target, clazz);
-            String[] keys = ec3.buildKeys(row);
-            try (Jedis jedis = JedisFactory.getJedis()) {
-                jedis.del(EntityCache.buildKey(keys));
-                if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
-                    SessionCache.del(keys);
+            for (var class1 : getFamily(clazz)) {
+                EntityCache<?> ec3 = new EntityCache<>(target, class1);
+                String[] keys = ec3.buildKeys(row);
+                try (Jedis jedis = JedisFactory.getJedis()) {
+                    jedis.del(EntityCache.buildKey(keys));
+                    if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
+                        SessionCache.del(keys);
+                }
             }
         });
     }
@@ -395,4 +399,29 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         return this.query.sqlText();
     }
 
+    @SuppressWarnings("unchecked")
+    private static List<Class<? extends EntityImpl>> getFamily(Class<?> clazz) {
+        var items = new ArrayList<Class<?>>();
+        var classz = clazz;
+        if (classz.getSuperclass().isAnnotationPresent(EntityKey.class))
+            classz = classz.getSuperclass();
+        items.add(classz);
+        for (var item : classz.getDeclaredClasses())
+            items.add(item);
+        //
+        var result = new ArrayList<Class<? extends EntityImpl>>();
+        for (var item : items) {
+            if (item.isAnnotationPresent(EntityKey.class)) {
+                var find = new ArrayList<>();
+                for (var intf : item.getInterfaces()) {
+                    find.add(intf);
+                    for (var child : intf.getInterfaces())
+                        find.add(child);
+                }
+                if (find.contains(EntityImpl.class))
+                    result.add((Class<? extends EntityImpl>) classz);
+            }
+        }
+        return result;
+    }
 }
