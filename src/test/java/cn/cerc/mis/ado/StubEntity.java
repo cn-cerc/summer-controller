@@ -21,6 +21,7 @@ import cn.cerc.db.core.SqlText;
 @Entity
 @EntityKey(fields = { "corpNo_", "enanble_" })
 public class StubEntity extends CustomEntity implements IVirtualEntity<StubEntity> {
+
     private static final Logger log = LoggerFactory.getLogger(StubEntity.class);
     @Id
     private Long UID_;

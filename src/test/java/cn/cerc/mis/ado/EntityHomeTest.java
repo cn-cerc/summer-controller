@@ -1,15 +1,21 @@
 package cn.cerc.mis.ado;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 
+import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.mis.ado.MockFamilyEntity.IX_1;
+import cn.cerc.mis.ado.MockFamilyEntity.IX_2;
 import redis.clients.jedis.Jedis;
 
 public class EntityHomeTest {
@@ -41,4 +47,23 @@ public class EntityHomeTest {
         stop.stop();
         log.info("写入耗时 {} ms", stop.getTotalTimeMillis());// 1305ms
     }
+
+    @Test
+    public void test_getFamily() {
+        Set<Class<? extends EntityImpl>> set1 = EntityHome.getFamily(MockFamilyEntity.class);
+        assertEquals(2, set1.size());
+        assertEquals(true, set1.contains(MockFamilyEntity.class));
+        assertEquals(true, set1.contains(IX_1.class));
+
+        Set<Class<? extends EntityImpl>> set2 = EntityHome.getFamily(IX_1.class);
+        assertEquals(2, set2.size());
+        assertEquals(true, set2.contains(MockFamilyEntity.class));
+        assertEquals(true, set2.contains(IX_1.class));
+
+        Set<Class<? extends EntityImpl>> set3 = EntityHome.getFamily(IX_2.class);
+        assertEquals(2, set3.size());
+        assertEquals(true, set3.contains(MockFamilyEntity.class));
+        assertEquals(true, set3.contains(IX_1.class));
+    }
+
 }
