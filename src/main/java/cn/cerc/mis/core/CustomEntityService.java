@@ -20,7 +20,7 @@ import cn.cerc.mis.ado.CustomEntity;
 import cn.cerc.mis.ado.EmptyEntity;
 
 public abstract class CustomEntityService<HI extends CustomEntity, BI extends CustomEntity, HO extends CustomEntity, BO extends CustomEntity>
-        implements IService {
+        implements IService, IEntityServiceFields {
 
     public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
         HI headIn = null;
@@ -99,18 +99,22 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return dataOut;
     }
 
+    @Override
     public final Map<Field, Column> getMetaHeadIn() {
         return getEntityMeta(this.getHeadInClass());
     }
 
+    @Override
     public final Map<Field, Column> getMetaBodyIn() {
         return getEntityMeta(this.getBodyInClass());
     }
 
+    @Override
     public final Map<Field, Column> getMetaHeadOut() {
         return getEntityMeta(this.getHeadOutClass());
     }
 
+    @Override
     public final Map<Field, Column> getMetaBodyOut() {
         return getEntityMeta(this.getBodyOutClass());
     }
