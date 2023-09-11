@@ -3,9 +3,11 @@ package cn.cerc.mis.ado;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -110,7 +112,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
 
         // 在post(insert、update)时，写入redis等缓存
         target.onAfterPost(row -> {
-            for (var class1 : getFamily(clazz)) {
+            for (var class1 : EntityHome.getFamily(clazz)) {
                 EntityCache<?> ec2 = new EntityCache<>(target, class1);
                 String[] keys = ec2.buildKeys(row);
                 try (Jedis jedis = JedisFactory.getJedis()) {
@@ -123,7 +125,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
 
         // 在delete时，清除redis等缓存
         target.onAfterDelete(row -> {
-            for (var class1 : getFamily(clazz)) {
+            for (var class1 : EntityHome.getFamily(clazz)) {
                 EntityCache<?> ec3 = new EntityCache<>(target, class1);
                 String[] keys = ec3.buildKeys(row);
                 try (Jedis jedis = JedisFactory.getJedis()) {
@@ -399,29 +401,30 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         return this.query.sqlText();
     }
 
-    @SuppressWarnings("unchecked")
-    private static List<Class<? extends EntityImpl>> getFamily(Class<?> clazz) {
-        var items = new ArrayList<Class<?>>();
+    /**
+     * 获取 EntityImpl 接口的所有实体实现类
+     * 
+     * @param clazz EntityImpl`接口的实现类
+     * @return entity类家族
+     */
+    public static Set<Class<? extends EntityImpl>> getFamily(Class<?> clazz) {
+        var items = new ArrayList<Class<? extends EntityImpl>>(); // 使用通配符泛型
         var classz = clazz;
         if (classz.getSuperclass().isAnnotationPresent(EntityKey.class))
             classz = classz.getSuperclass();
-        items.add(classz);
-        for (var item : classz.getDeclaredClasses())
-            items.add(item);
-        //
-        var result = new ArrayList<Class<? extends EntityImpl>>();
+        items.add(classz.asSubclass(EntityImpl.class));
+
+        for (var item : classz.getDeclaredClasses()) {
+            if (EntityImpl.class.isAssignableFrom(item))
+                items.add(item.asSubclass(EntityImpl.class));
+        }
+
+        var result = new HashSet<Class<? extends EntityImpl>>();
         for (var item : items) {
-            if (item.isAnnotationPresent(EntityKey.class)) {
-                var find = new ArrayList<>();
-                for (var intf : item.getInterfaces()) {
-                    find.add(intf);
-                    for (var child : intf.getInterfaces())
-                        find.add(child);
-                }
-                if (find.contains(EntityImpl.class))
-                    result.add((Class<? extends EntityImpl>) classz);
-            }
+            if (item.isAnnotationPresent(EntityKey.class))
+                result.add(item);
         }
         return result;
     }
+
 }
