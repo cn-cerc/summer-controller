@@ -8,6 +8,7 @@ import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
+import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.register.center.ApplicationEnvironment;
 
 public class JayunLogData {
@@ -63,6 +64,16 @@ public class JayunLogData {
      */
     private long timestamp;
 
+    /**
+     * 修改人
+     */
+    private String name;
+
+    /**
+     * 修改时间
+     */
+    private String date;
+
     public JayunLogData() {
     }
 
@@ -80,6 +91,19 @@ public class JayunLogData {
         ThrowableInformation throwableInfo = event.getThrowableInformation();
         if (throwableInfo != null)
             this.stack = Arrays.asList(throwableInfo.getThrowableStrRep());
+
+        try {
+            String trigger = event.getLoggerName();
+            Class<?> clazz = Class.forName(trigger);
+            LastModified modified = clazz.getAnnotation(LastModified.class);
+            if (modified != null) {
+                this.name = modified.name();
+                this.date = modified.date();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         this.timestamp = event.getTimeStamp();
         this.hostname = ApplicationEnvironment.hostname();
         this.ip = ApplicationEnvironment.hostIP();
@@ -180,6 +204,22 @@ public class JayunLogData {
 
     public void setPort(String port) {
         this.port = port;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
 }
