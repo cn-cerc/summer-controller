@@ -1,18 +1,15 @@
 package cn.cerc.mis.core;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
-import javax.persistence.Column;
+import java.util.List;
 
 public interface IEntityServiceFields {
 
-    public Map<Field, Column> getMetaHeadIn();
+    public List<EntityServiceField> getHeadInFields();
 
-    public Map<Field, Column> getMetaBodyIn();
+    public List<EntityServiceField> getBodyInFields();
 
-    public Map<Field, Column> getMetaHeadOut();
+    public List<EntityServiceField> getHeadOutFields();
 
-    public Map<Field, Column> getMetaBodyOut();
+    public List<EntityServiceField> getBodyOutFields();
 
 }
