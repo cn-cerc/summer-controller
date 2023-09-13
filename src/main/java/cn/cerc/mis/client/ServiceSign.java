@@ -104,7 +104,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     @Override
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
         if (handle instanceof BookHandle) {
-            var e = new RuntimeException("bookhandle不得使用 callLocal调用");
+            RuntimeException e = new RuntimeException(
+                    String.format("bookhandle 不得使用 callLocal 调用 %s, dataIn %s", this.id(), dataIn.json()));
             log.error(e.getMessage(), e);
         }
         this.setSession(handle.getSession());
