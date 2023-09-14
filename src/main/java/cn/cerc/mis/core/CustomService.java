@@ -1,17 +1,17 @@
 package cn.cerc.mis.core;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.Handle;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
+import cn.cerc.mis.log.JayunLogParser;
 
 //@Component
 //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -36,7 +36,7 @@ public abstract class CustomService extends Handle implements IService {
     }
 
     @Override
-    public DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws ServiceException {
+    public DataSet _call(IHandle handle, DataSet dataIn, Variant function) {
         if (function == null || Utils.isEmpty(function.getString()))
             return new DataSet().setMessage("function is null");
         if ("_list".equals(function.getString()))
@@ -68,15 +68,23 @@ public abstract class CustomService extends Handle implements IService {
         try {
             this.dataOut = sm.call(this, handle, dataIn);
             return dataOut;
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            Throwable err = e.getCause() != null ? e.getCause() : e;
-            String msg = err.getMessage() == null ? "error is null" : err.getMessage();
-            if ((err instanceof ServiceException)) {
-                return dataOut.setState(ServiceState.ERROR).setMessage(msg);
+        } catch (Exception e) {
+            Throwable throwable = e.getCause() != null ? e.getCause() : e;
+            String msg = throwable.getMessage() == null ? "error is null" : throwable.getMessage();
+            if (throwable instanceof ServiceException || throwable instanceof RuntimeException
+                    || throwable instanceof Error) {
+                String serviceCode = this.getClass().getName();
+                String message = String.format("service %s, corpNo %s, dataIn %s, message %s", function.key(),
+                        handle.getCorpNo(), dataIn.json(), throwable.getMessage(), throwable);
+                LastModified modified = this.getClass().getAnnotation(LastModified.class);
+                // 自定义日志异常信息
+                JayunLogParser.analyze(handle, serviceCode, modified, throwable, message);
+                log.info("{}", message, throwable);
             } else {
-                log.error(msg, err);
-                return dataOut.setState(ServiceState.ERROR).setMessage(msg);
+                if (!(throwable instanceof DataException))
+                    log.error(msg, throwable);
             }
+            return dataOut.setState(ServiceState.ERROR).setMessage(msg);
         }
     }
 

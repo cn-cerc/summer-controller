@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Version;
 
 import cn.cerc.db.core.ClassData;
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
@@ -22,7 +23,7 @@ import cn.cerc.mis.ado.EmptyEntity;
 public abstract class CustomEntityService<HI extends CustomEntity, BI extends CustomEntity, HO extends CustomEntity, BO extends CustomEntity>
         implements IService {
 
-    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException {
+    public DataSet execute(IHandle handle, DataSet dataIn) throws ServiceException, DataException {
         HI headIn = null;
         List<BI> bodyIn = null;
         // 检验数据单头与单身
@@ -54,7 +55,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return this.call(handle, headIn, bodyIn);
     }
 
-    public final DataSet call(IHandle handle, HI headIn, List<BI> bodyIn) throws ServiceException {
+    public final DataSet call(IHandle handle, HI headIn, List<BI> bodyIn) throws ServiceException, DataException {
         if (headIn != null)
             validateHeadIn(headIn);
         if (bodyIn != null) {
@@ -115,7 +116,8 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         return getEntityMeta(this.getBodyOutClass());
     }
 
-    protected abstract DataSet process(IHandle handle, HI headIn, List<BI> bodyIn) throws ServiceException;
+    protected abstract DataSet process(IHandle handle, HI headIn, List<BI> bodyIn)
+            throws ServiceException, DataException;
 
     /** 检验传入参数的 head 值 */
     protected void validateHeadIn(HI head) throws DataValidateException {

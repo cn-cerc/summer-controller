@@ -4,9 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import cn.cerc.db.core.ClassData;
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.mis.security.SecurityPolice;
 import cn.cerc.mis.security.SecurityStopException;
 
@@ -36,8 +38,8 @@ public final class ServiceMethod {
         return version;
     }
 
-    public DataSet call(Object owner, IHandle handle, DataSet dataIn)
-            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, DataValidateException {
+    public DataSet call(Object owner, IHandle handle, DataSet dataIn) throws IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, ServiceException, DataException {
         // 调用数据校验
         DataValidate[] validates = method.getDeclaredAnnotationsByType(DataValidate.class);
         if (validates.length > 0) {

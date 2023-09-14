@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
@@ -98,9 +97,6 @@ public class LocalService extends ServiceProxy {
         } catch (ClassNotFoundException e) {
             log.warn(e.getMessage(), e);
             return new DataSet().setError().setMessage("not find service: " + service);
-        } catch (ServiceException e) {
-            log.warn(e.getMessage(), e);
-            return new DataSet().setError().setMessage(e.getMessage());
         }
     }
 

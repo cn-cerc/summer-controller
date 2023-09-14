@@ -1,8 +1,5 @@
 package cn.cerc.mis.log;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
@@ -12,9 +9,9 @@ import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.register.center.ApplicationEnvironment;
 
 public class JayunLogData {
-    public static String info = "info";
-    public static String warn = "warn";
-    public static String error = "error";
+    public static final String info = "info";
+    public static final String warn = "warn";
+    public static final String error = "error";
     /**
      * 主机名
      */
@@ -42,7 +39,7 @@ public class JayunLogData {
     /**
      * 行号
      */
-    private int line;
+    private String line;
     /**
      * 日志等级 (info\warn\error)
      */
@@ -54,7 +51,7 @@ public class JayunLogData {
     /**
      * 堆栈信息
      */
-    private List<String> stack;
+    private String[] stack;
     /**
      * 参数
      */
@@ -80,7 +77,7 @@ public class JayunLogData {
     public JayunLogData(LoggingEvent event) {
         LocationInfo locationInfo = event.getLocationInformation();
         this.id = locationInfo.getClassName();
-        this.line = Integer.parseInt(locationInfo.getLineNumber());
+        this.line = locationInfo.getLineNumber();
         if (event.getLevel() == Level.ERROR)
             this.level = error;
         else if (event.getLevel() == Level.WARN)
@@ -90,7 +87,7 @@ public class JayunLogData {
         this.message = event.getRenderedMessage();
         ThrowableInformation throwableInfo = event.getThrowableInformation();
         if (throwableInfo != null)
-            this.stack = Arrays.asList(throwableInfo.getThrowableStrRep());
+            this.stack = throwableInfo.getThrowableStrRep();
 
         try {
             String trigger = event.getLoggerName();
@@ -126,11 +123,11 @@ public class JayunLogData {
         this.id = id;
     }
 
-    public int getLine() {
+    public String getLine() {
         return this.line;
     }
 
-    public void setLine(int line) {
+    public void setLine(String line) {
         this.line = line;
     }
 
@@ -150,11 +147,11 @@ public class JayunLogData {
         this.message = message;
     }
 
-    public List<String> getStack() {
+    public String[] getStack() {
         return this.stack;
     }
 
-    public void setStack(List<String> stack) {
+    public void setStack(String[] stack) {
         this.stack = stack;
     }
 

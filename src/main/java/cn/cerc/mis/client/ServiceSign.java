@@ -23,12 +23,16 @@ import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.Variant;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
+import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
+import cn.cerc.mis.log.JayunLogParser;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
@@ -104,10 +108,21 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     @Override
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
         if (handle instanceof BookHandle) {
-            RuntimeException e = new RuntimeException(
+            RuntimeException exception = new RuntimeException(
                     String.format("bookhandle 不得使用 callLocal 调用 %s, dataIn %s", this.id(), dataIn.json()));
-            log.error(e.getMessage(), e);
+            try {
+                Variant function = new Variant("execute").setKey(this.id());
+                IService service = Application.getService(handle, this.id(), function);
+                if (service != null) {
+                    Class<? extends IService> clazz = service.getClass();
+                    LastModified modified = clazz.getAnnotation(LastModified.class);
+                    JayunLogParser.analyze(handle, clazz.getName(), modified, exception, exception.getMessage());
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
+
         this.setSession(handle.getSession());
         ServiceSign sign = this.clone();
         sign.setDataIn(dataIn);
