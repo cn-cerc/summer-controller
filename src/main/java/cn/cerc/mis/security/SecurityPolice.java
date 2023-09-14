@@ -12,7 +12,9 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IForm;
+import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.core.SupportBeanName;
+import cn.cerc.mis.log.JayunLogParser;
 
 @Component
 public class SecurityPolice {
@@ -55,10 +57,11 @@ public class SecurityPolice {
         }
         if (!result) {
             SecurityStopException exception = new SecurityStopException(method, bean, value);
-            log.error("token {}, corpNo {}, userCode {}, permissions {}; {}.{} required {}",
+            String message = String.format("token %s, corpNo %s, userCode %s, permissions %s; %s",
                     handle.getSession().getToken(), handle.getCorpNo(), handle.getUserCode(),
-                    handle.getSession().getPermissions(), method.getDeclaringClass().getName(), method.getName(), value,
-                    exception);
+                    handle.getSession().getPermissions(), exception.getMessage());
+            LastModified modified = clazz.getAnnotation(LastModified.class);
+            JayunLogParser.analyze(handle, clazz.getName(), modified, exception, message);
             throw exception;
         }
     }
