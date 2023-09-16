@@ -12,7 +12,6 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
-import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
@@ -40,7 +39,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         }
         if (dataIn.size() > 0) {
             var map = this.getMetaBodyIn();
-            bodyIn = new ArrayList<BI>();
+            bodyIn = new ArrayList<>();
             for (var row : dataIn) {
                 for (var field : map.keySet()) {
                     var column = map.get(field);
@@ -159,8 +158,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
             Column column = field.getAnnotation(Column.class);
             if (column != null) {
                 // 开放读取权限
-                if (field.getModifiers() == ClassData.DEFAULT || field.getModifiers() == ClassData.PRIVATE
-                        || field.getModifiers() == ClassData.PROTECTED)
+                if (field.getModifiers() == Modifier.PRIVATE || field.getModifiers() == Modifier.PROTECTED)
                     field.setAccessible(true);
                 if (field.getAnnotation(Version.class) != null)
                     continue;

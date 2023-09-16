@@ -2,15 +2,14 @@ package cn.cerc.mis.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-import cn.cerc.db.core.ClassData;
 import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.mis.security.SecurityPolice;
-import cn.cerc.mis.security.SecurityStopException;
 
 public final class ServiceMethod {
     private final Method method;
@@ -39,29 +38,23 @@ public final class ServiceMethod {
     }
 
     public DataSet call(Object owner, IHandle handle, DataSet dataIn) throws IllegalAccessException,
-            IllegalArgumentException, InvocationTargetException, ServiceException, DataException {
+            IllegalArgumentException, InvocationTargetException, ServiceException, DataException, SecurityException {
         // 调用数据校验
         DataValidate[] validates = method.getDeclaredAnnotationsByType(DataValidate.class);
-        if (validates.length > 0) {
-            for (DataValidate validate : validates) {
-                DataRow headIn = dataIn.head();
-                String errorMsg = validate.message();
-                String fieldCode = validate.value();
-                if (!headIn.hasValue(fieldCode)) {
-                    if (errorMsg.contains("%s")) {
-                        String message = "".equals(validate.name()) ? fieldCode : validate.name();
-                        throw new DataValidateException(String.format(errorMsg, message));
-                    } else
-                        throw new DataValidateException(errorMsg);
-                }
+        for (DataValidate validate : validates) {
+            DataRow headIn = dataIn.head();
+            String errorMsg = validate.message();
+            String fieldCode = validate.value();
+            if (!headIn.hasValue(fieldCode)) {
+                if (errorMsg.contains("%s")) {
+                    String message = "".equals(validate.name()) ? fieldCode : validate.name();
+                    throw new DataValidateException(String.format(errorMsg, message));
+                } else
+                    throw new DataValidateException(errorMsg);
             }
         }
         // 执行权限检查
-        try {
-            SecurityPolice.check(handle, method, owner);
-        } catch (SecurityStopException e) {
-            return new DataSet().setMessage(e.getMessage()).setState(ServiceState.ACCESS_DISABLED);
-        }
+        SecurityPolice.check(handle, method, owner);
 
         // 执行具体的服务函数
         DataSet dataOut;
@@ -118,7 +111,7 @@ public final class ServiceMethod {
         // 第1代版本：不支持单例
         try {
             Method method = clazz.getMethod(funcCode);
-            if (method.getModifiers() != ClassData.PUBLIC)
+            if (method.getModifiers() != Modifier.PUBLIC)
                 return null;
             if (method.getReturnType() != boolean.class)
                 return null;
@@ -129,7 +122,7 @@ public final class ServiceMethod {
         // 第2代版本：不支持单例
         try {
             Method method = clazz.getMethod(funcCode, DataSet.class, DataSet.class);
-            if (method.getModifiers() != ClassData.PUBLIC)
+            if (method.getModifiers() != Modifier.PUBLIC)
                 return null;
             if (method.getReturnType() != IStatus.class)
                 return null;
@@ -141,7 +134,7 @@ public final class ServiceMethod {
         // 第3代版本：支持单例
         try {
             Method method = clazz.getMethod(funcCode, IHandle.class, DataSet.class);
-            if (method.getModifiers() != ClassData.PUBLIC)
+            if (method.getModifiers() != Modifier.PUBLIC)
                 return null;
             if (method.getReturnType() == DataSet.class)
                 return new ServiceMethod(method, ServiceMethodVersion.ResultDataSetByDataIn);
@@ -155,7 +148,7 @@ public final class ServiceMethod {
         // 第4代版本：支持单例
         try {
             Method method = clazz.getMethod(funcCode, IHandle.class, DataRow.class);
-            if (method.getModifiers() != ClassData.PUBLIC)
+            if (method.getModifiers() != Modifier.PUBLIC)
                 return null;
             if (method.getReturnType() == DataSet.class)
                 return new ServiceMethod(method, ServiceMethodVersion.ResultDataSetByHeadIn);

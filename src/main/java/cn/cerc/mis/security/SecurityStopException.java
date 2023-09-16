@@ -1,5 +1,6 @@
 package cn.cerc.mis.security;
 
+import java.io.Serial;
 import java.lang.reflect.Method;
 
 import cn.cerc.db.core.ClassResource;
@@ -7,6 +8,7 @@ import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.SupportBeanName;
 
 public class SecurityStopException extends SecurityException {
+    @Serial
     private static final long serialVersionUID = -970178466412571534L;
     private static final ClassResource res = new ClassResource(SecurityStopException.class, SummerMIS.ID);
     private final String message;
@@ -30,12 +32,10 @@ public class SecurityStopException extends SecurityException {
 
     public SecurityStopException(Method method, Object bean, String value) {
         super(getAccessDisabled());
-
         String[] path = method.getDeclaringClass().getName().split("\\.");
         String beanId = path[path.length - 1];
         if (bean instanceof SupportBeanName)
             beanId = ((SupportBeanName) bean).getBeanName();
-
         this.message = String.format("%s [%s.%s] 您未授权此权限代码：%s", getAccessDisabled(), beanId, method.getName(),
                 value);
     }

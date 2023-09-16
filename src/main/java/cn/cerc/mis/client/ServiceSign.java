@@ -116,7 +116,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
                 if (service != null) {
                     Class<? extends IService> clazz = service.getClass();
                     LastModified modified = clazz.getAnnotation(LastModified.class);
-                    JayunLogParser.analyze(handle, clazz.getName(), modified, exception, exception.getMessage());
+                    JayunLogParser.analyze(clazz.getName(), modified, exception, exception.getMessage());
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();

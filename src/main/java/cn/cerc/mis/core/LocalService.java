@@ -1,16 +1,24 @@
 package cn.cerc.mis.core;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
+import cn.cerc.mis.log.JayunLogParser;
 
+/**
+ * 提供本地服务访问
+ */
 public class LocalService extends ServiceProxy {
     private static final Logger log = LoggerFactory.getLogger(LocalService.class);
     private String service;
@@ -90,13 +98,29 @@ public class LocalService extends ServiceProxy {
     }
 
     public static DataSet call(String service, IHandle handle, DataSet dataIn) {
+        DataSet dataOut = new DataSet();
+        IService clazz;
+        Variant function = new Variant("execute").setKey(service);
         try {
-            Variant function = new Variant("execute").setKey(service);
-            IService bean = Application.getService(handle, service, function);
-            return bean._call(handle, dataIn, function);
+            clazz = Application.getService(handle, service, function);
         } catch (ClassNotFoundException e) {
             log.warn(e.getMessage(), e);
-            return new DataSet().setError().setMessage("not find service: " + service);
+            return dataOut.setError().setMessage("not find service: " + service);
+        }
+
+        try {
+            return clazz._call(handle, dataIn, function);
+        } catch (RuntimeException | IllegalAccessException | InvocationTargetException | ServiceException
+                | DataException e) {
+            Throwable throwable = e.getCause() != null ? e.getCause() : e;
+            String serviceCode = clazz.getClass().getName();
+            String message = String.format("service %s, corpNo %s, dataIn %s, message %s", service, handle.getCorpNo(),
+                    dataIn.json(), throwable.getMessage());
+            LastModified modified = clazz.getClass().getAnnotation(LastModified.class);
+            JayunLogParser.analyze(serviceCode, modified, throwable, message);
+            log.info("{}", message, throwable);
+            dataOut.setError().setMessage(throwable.getMessage());
+            return dataOut;
         }
     }
 

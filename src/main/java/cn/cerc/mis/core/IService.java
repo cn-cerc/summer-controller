@@ -1,5 +1,6 @@
 package cn.cerc.mis.core;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.slf4j.Logger;
@@ -11,11 +12,10 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
-import cn.cerc.mis.log.JayunLogParser;
 import cn.cerc.mis.security.Permission;
 
 public interface IService {
-    public static final Logger log = LoggerFactory.getLogger(IService.class);
+    Logger log = LoggerFactory.getLogger(IService.class);
 
     /**
      * 
@@ -47,7 +47,8 @@ public interface IService {
         return dataOut.setState(ServiceState.OK);
     }
 
-    default DataSet _call(IHandle handle, DataSet dataIn, Variant function) {
+    default DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws IllegalAccessException,
+            InvocationTargetException, ServiceException, DataException, RuntimeException {
         long startTime = System.currentTimeMillis();
         try {
             if (function == null || Utils.isEmpty(function.getString()))
@@ -67,32 +68,13 @@ public interface IService {
             }
 
             // 执行具体的服务函数
-            try {
-                if (this instanceof ServiceNameAwareImpl service) {
-                    String key = function.key();
-                    if (key != null && key.endsWith(".execute"))
-                        function.setKey(key.substring(0, key.lastIndexOf(".execute")));
-                    service.setServiceId(function);
-                }
-                return sm.call(this, handle, dataIn);
-            } catch (Exception e) {
-                Throwable throwable = e.getCause() != null ? e.getCause() : e;
-                if (throwable instanceof ServiceException || throwable instanceof RuntimeException
-                        || throwable instanceof Error) {
-                    String serviceCode = this.getClass().getName();
-                    String message = String.format("service %s, corpNo %s, dataIn %s, message %s", function.key(),
-                            handle.getCorpNo(), dataIn.json(), throwable.getMessage(), throwable);
-                    LastModified modified = this.getClass().getAnnotation(LastModified.class);
-                    // 自定义日志异常信息
-                    JayunLogParser.analyze(handle, serviceCode, modified, throwable, message);
-                    log.info("{}", message, throwable);
-                } else {
-                    if (!(throwable instanceof DataException))
-                        log.error(throwable.getMessage(), throwable);
-                }
-                DataSet dataOut = new DataSet().setMessage(throwable.getMessage());
-                return dataOut.setState(ServiceState.ERROR);
+            if (this instanceof ServiceNameAwareImpl service) {
+                String key = function.key();
+                if (key != null && key.endsWith(".execute"))
+                    function.setKey(key.substring(0, key.lastIndexOf(".execute")));
+                service.setServiceId(function);
             }
+            return sm.call(this, handle, dataIn);
         } finally {
             writeExecuteTime(handle, dataIn, function.key(), startTime);
         }

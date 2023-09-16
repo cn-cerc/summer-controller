@@ -9,7 +9,7 @@ import org.apache.log4j.DefaultThrowableRenderer;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.core.LastModified;
@@ -26,8 +26,8 @@ public class JayunLogParser {
         String loggerName = "";
         PropertyConfigurator.configure(ServiceSign.class.getClassLoader().getResource("log4j.properties"));
         Logger logger = Logger.getRootLogger();
-        Enumeration<?> allAppenders = logger.getAllAppenders();
-        Iterator<?> asIterator = allAppenders.asIterator();
+        Enumeration<?> allAppends = logger.getAllAppenders();
+        Iterator<?> asIterator = allAppends.asIterator();
         while (asIterator.hasNext()) {
             if (asIterator.next() instanceof JayunLog jayun) {
                 loggerName = jayun.getName();
@@ -54,9 +54,13 @@ public class JayunLogParser {
         return instance.getLoggerName();
     }
 
-    public static void analyze(IHandle handle, String serviceCode, LastModified modified, Throwable throwable,
-            String message) {
+    public static void analyze(String serviceCode, LastModified modified, Throwable throwable,
+                               String message) {
         if (throwable == null)
+            return;
+
+        // 数据集异常不采集
+        if (throwable instanceof DataException)
             return;
 
         if (Utils.isEmpty(JayunLogParser.loggerName()))

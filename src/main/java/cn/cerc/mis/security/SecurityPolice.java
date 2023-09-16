@@ -12,9 +12,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IForm;
-import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.core.SupportBeanName;
-import cn.cerc.mis.log.JayunLogParser;
 
 @Component
 public class SecurityPolice {
@@ -55,15 +53,8 @@ public class SecurityPolice {
                 beanId = ((SupportBeanName) bean).getBeanName();
             log.debug("checkMethod:{}.{} ${}={}", beanId, method.getName(), value, result ? "pass" : "stop");
         }
-        if (!result) {
-            SecurityStopException exception = new SecurityStopException(method, bean, value);
-            String message = String.format("token %s, corpNo %s, userCode %s, permissions %s; %s",
-                    handle.getSession().getToken(), handle.getCorpNo(), handle.getUserCode(),
-                    handle.getSession().getPermissions(), exception.getMessage());
-            LastModified modified = clazz.getAnnotation(LastModified.class);
-            JayunLogParser.analyze(handle, clazz.getName(), modified, exception, message);
-            throw exception;
-        }
+        if (!result)
+            throw new SecurityStopException(method, bean, value);
     }
 
     public static boolean check(IHandle handle, Enum<?> clazz, String operator) {
@@ -92,7 +83,7 @@ public class SecurityPolice {
     }
 
     public static boolean validate(String corpNo, String permissions, String value) {
-        if (value == null || "".equals(value))
+        if (value == null || value.isEmpty())
             return true;
         if (value.startsWith(Permission.GUEST))
             return true;
@@ -121,7 +112,7 @@ public class SecurityPolice {
             String versions = value.substring(point + 1).trim();
             if (version.length() > 0 && versions.length() > 0) {
                 boolean pass = false;
-                for (String item : versions.split("\\,")) {
+                for (String item : versions.split(",")) {
                     if (version.equals(item.trim())) {
                         pass = true;
                         break;
@@ -266,8 +257,7 @@ public class SecurityPolice {
                 }
             }
         } else if (handle != null) {
-            if (bean instanceof IForm) {
-                IForm form = (IForm) bean;
+            if (bean instanceof IForm form) {
                 result = form.getPermission();
             }
             if ("".equals(result)) {
