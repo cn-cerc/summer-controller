@@ -22,6 +22,7 @@ import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
+import cn.cerc.mis.log.JayunLogParser;
 
 public class RemoteService extends ServiceProxy {
     private static final Logger log = LoggerFactory.getLogger(RemoteService.class);
@@ -107,8 +108,13 @@ public class RemoteService extends ServiceProxy {
         Objects.requireNonNull(targetConfig);
         // 防止本地调用
         if (targetConfig.isLocal()) {
-            if (!"000000".equals(targetConfig.getCorpNo()))
-                log.warn("调用逻辑错误，{} 发起帐套和目标帐套相同，应改使用 callLocal 来调用 {}", handle.getCorpNo(), service);
+            if (!"000000".equals(targetConfig.getCorpNo())) {
+                String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", service, handle.getCorpNo(),
+                        dataIn.json());
+                RuntimeException exception = new RuntimeException(message);
+                JayunLogParser.analyze(service, null, exception, message);
+                log.info("{}", message, exception);
+            }
             return LocalService.call(service, handle, dataIn);
         } else if (serviceOption != null) {
             // 处理特殊的业务场景，创建帐套、钓友商城

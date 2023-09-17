@@ -54,7 +54,7 @@ public class JayunLogParser {
         return instance.getLoggerName();
     }
 
-    public static void analyze(String serviceCode, LastModified modified, Throwable throwable,
+    public static void analyze(String className, LastModified modified, Throwable throwable,
                                String message) {
         if (throwable == null)
             return;
@@ -67,7 +67,7 @@ public class JayunLogParser {
             return;
 
         JayunLogData data = new JayunLogData();
-        data.setId(serviceCode);
+        data.setId(className);
         data.setLine("?");
         data.setLevel(JayunLogData.error);
         data.setMessage(message);
