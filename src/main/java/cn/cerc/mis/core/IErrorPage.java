@@ -35,7 +35,7 @@ public interface IErrorPage {
             log.warn("client ip {}, security check error {}", clientIP, error, throwable);
         else {
             message = String.format("clientIP %s, %s", clientIP, error);
-            JayunLogParser.analyze(IErrorPage.class.getName(), null, throwable, message);
+            JayunLogParser.error(IErrorPage.class.getName(), null, throwable, message);
             log.info("{}", message, throwable);
         }
 

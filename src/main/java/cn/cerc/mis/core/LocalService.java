@@ -117,7 +117,7 @@ public class LocalService extends ServiceProxy {
             String message = String.format("service %s, corpNo %s, dataIn %s, message %s", service, handle.getCorpNo(),
                     dataIn.json(), throwable.getMessage());
             LastModified modified = clazz.getClass().getAnnotation(LastModified.class);
-            JayunLogParser.analyze(serviceCode, modified, throwable, message);
+            JayunLogParser.error(serviceCode, modified, throwable, message);
             log.info("{}", message, throwable);
             dataOut.setError().setMessage(throwable.getMessage());
             return dataOut;

@@ -109,10 +109,10 @@ public class RemoteService extends ServiceProxy {
         // 防止本地调用
         if (targetConfig.isLocal()) {
             if (!"000000".equals(targetConfig.getCorpNo())) {
-                String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", service, handle.getCorpNo(),
-                        dataIn.json());
+                String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", service,
+                        handle.getCorpNo(), dataIn.json());
                 RuntimeException exception = new RuntimeException(message);
-                JayunLogParser.analyze(service, null, exception, message);
+                JayunLogParser.warn(service, null, exception, message);
                 log.info("{}", message, exception);
             }
             return LocalService.call(service, handle, dataIn);

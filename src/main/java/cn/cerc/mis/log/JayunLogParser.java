@@ -14,6 +14,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.register.center.ApplicationEnvironment;
+import cn.cerc.mis.security.SecurityStopException;
 
 /**
  * 异常解析器用于读取堆栈的异常对象信息
@@ -54,8 +55,22 @@ public class JayunLogParser {
         return instance.getLoggerName();
     }
 
-    public static void analyze(String className, LastModified modified, Throwable throwable,
-                               String message) {
+    /**
+     * 警告类日志
+     */
+    public static void warn(String className, LastModified modified, Throwable throwable, String message) {
+        JayunLogParser.analyze(className, modified, throwable, message, JayunLogData.warn);
+    }
+
+    /**
+     * 错误类日志
+     */
+    public static void error(String className, LastModified modified, Throwable throwable, String message) {
+        JayunLogParser.analyze(className, modified, throwable, message, JayunLogData.error);
+    }
+
+    private static void analyze(String className, LastModified modified, Throwable throwable, String message,
+            String level) {
         if (throwable == null)
             return;
 
@@ -69,7 +84,12 @@ public class JayunLogParser {
         JayunLogData data = new JayunLogData();
         data.setId(className);
         data.setLine("?");
-        data.setLevel(JayunLogData.error);
+
+        // 权限不足设为警告
+        if (throwable instanceof SecurityStopException)
+            data.setLevel(JayunLogData.warn);
+        else
+            data.setLevel(level);
         data.setMessage(message);
 
         String[] stack = DefaultThrowableRenderer.render(throwable);
