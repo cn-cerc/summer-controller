@@ -21,9 +21,7 @@ public class SecurityStopException extends SecurityException {
     public SecurityStopException(Class<?> clazz) {
         super(getAccessDisabled());
 
-        String[] path = clazz.getName().split("\\.");
-        String beanId = path[path.length - 1];
-        this.message = String.format("[%s]", beanId) + getAccessDisabled();
+        this.message = String.format("[%s]", clazz.getSimpleName()) + getAccessDisabled();
     }
 
     public SecurityStopException(Method method) {
@@ -32,8 +30,7 @@ public class SecurityStopException extends SecurityException {
 
     public SecurityStopException(Method method, Object bean, String value) {
         super(getAccessDisabled());
-        String[] path = method.getDeclaringClass().getName().split("\\.");
-        String beanId = path[path.length - 1];
+        String beanId = bean.getClass().getSimpleName();
         if (bean instanceof SupportBeanName)
             beanId = ((SupportBeanName) bean).getBeanName();
         this.message = String.format("%s [%s.%s] 您未授权此权限代码：%s", getAccessDisabled(), beanId, method.getName(),
