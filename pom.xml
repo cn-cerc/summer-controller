@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.cerc</groupId>
         <artifactId>summer-framework</artifactId>
-        <version>17.2.30</version>
+        <version>17.2.31</version>
     </parent>
     <artifactId>summer-mis</artifactId>
     <packaging>jar</packaging>
