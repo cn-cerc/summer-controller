@@ -29,7 +29,11 @@ public class QueueJayunLog extends AbstractQueue {
     }
 
     public String push(JayunLogData logData) {
-        return super.push(new Gson().toJson(logData));
+        try {
+            return super.push(new Gson().toJson(logData));
+        } catch (Exception e) {
+            return "error";
+        }
     }
 
     @Override
@@ -58,7 +62,7 @@ public class QueueJayunLog extends AbstractQueue {
                 Curl curl = new Curl();
                 curl.doPost(site, json);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println(e.getMessage());
             }
         });
         return true;
