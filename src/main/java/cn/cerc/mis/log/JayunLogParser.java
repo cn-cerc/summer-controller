@@ -74,7 +74,7 @@ public class JayunLogParser {
         if (throwable == null)
             return;
 
-        // 数据集异常不采集
+        // 数据类异常不采集
         if (throwable instanceof DataException)
             return;
 
