@@ -99,7 +99,8 @@ public class SystemBuffer {
 
     public enum Token implements IBufferKey {
         DeviceInfo,
-        SessionBase,
+        @Deprecated
+        SessionBase, // 早期 Redis 使用 String 类型存储用户信息
         UserMessage,
         Map,
         ReLive;
@@ -125,7 +126,7 @@ public class SystemBuffer {
      * key = UserCode + DeviceId / ExportKey
      */
     public enum User implements IBufferKey {
-        SessionInfo,
+        SessionInfo, // 保存用户设备校验状态
         ExportKey,
         BackUrl,
         /**
