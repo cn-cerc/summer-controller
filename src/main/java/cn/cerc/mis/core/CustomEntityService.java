@@ -65,7 +65,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         if (dataOut.head().fields().size() > 0) {
             var map = this.getMetaHeadOut();
             for (var field : map.keySet()) {
-                var column = map.get(field);
+                Column column = map.get(field);
                 if (!column.nullable()) {
                     if (!dataOut.head().hasValue(field.getName()))
                         throw new DataValidateException(String.format("输出单头数据 %s 必须有值", field.getName()));
@@ -75,7 +75,7 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         if (dataOut.size() > 0) {
             var map = this.getMetaBodyOut();
             for (var field : map.keySet()) {
-                var column = map.get(field);
+                Column column = map.get(field);
                 if (!column.nullable()) {
                     if (!dataOut.exists(field.getName()))
                         throw new DataValidateException(String.format("输出单身字段 %s 必须存在", field.getName()));
@@ -84,9 +84,9 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
             var flag = false;
             for (var row : dataOut) {
                 for (var field : map.keySet()) {
-                    var column = map.get(field);
+                    Column column = map.get(field);
                     if (!column.nullable()) {
-                        if (!row.hasValue(field.getName())) {
+                        if (row.getValue(field.getName()) == null) {
                             log.warn("{} 输出单身数据 {} 必须有值", this.getClass().getSimpleName(), field.getName());
                             flag = true;
                         }
