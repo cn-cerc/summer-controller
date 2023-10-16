@@ -13,6 +13,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
+import cn.cerc.local.tool.JsonTool;
 import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.client.ServerConfigImpl;
@@ -34,8 +35,10 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
             log.warn("{}.appendToLocal 代码编写不符合规范，请予改进", this.getClass().getName());
         else
             data.setToken(handle.getSession().getToken());
-        if (!data.validate())
-            throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
+        if (!data.validate()) {
+            throw new RuntimeException(String.format("[%s] 数据不符合消息队列要求，无法发送！ [corpNo] %s, [data] %s",
+                    this.getClazz().getSimpleName(), handle.getCorpNo(), JsonTool.toJson(data)));
+        }
         return super.push(new Gson().toJson(data));
     }
 
@@ -57,8 +60,10 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
             }
         }
 
-        if (!data.validate())
-            throw new RuntimeException(String.format("[%s]数据不符合消息队列要求，无法发送！", this.getClazz().getSimpleName()));
+        if (!data.validate()) {
+            throw new RuntimeException(String.format("[%s] 数据不符合消息队列要求，无法发送！ [corpNo] %s, [data] %s",
+                    this.getClazz().getSimpleName(), handle.getCorpNo(), JsonTool.toJson(data)));
+        }
         return super.push(new Gson().toJson(data));
     }
 
