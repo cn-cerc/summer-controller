@@ -15,6 +15,8 @@ import cn.cerc.db.core.HistoryTypeEnum;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
+import cn.cerc.mis.core.LastModified;
+import cn.cerc.mis.log.JayunLogParser;
 
 public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
     private static final Logger log = LoggerFactory.getLogger(EntityOne.class);
@@ -46,10 +48,13 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
     public EntityOne(IHandle handle, Class<T> clazz, SqlText sql, boolean useSlaveServer, boolean writeCacheAtOpen) {
         super(handle, clazz, sql, useSlaveServer, writeCacheAtOpen);
         if (query.size() > 1) {
-            RuntimeException e = new RuntimeException(
-                    String.format("There are too many records. Entity %s sqlText %s", clazz.getName(), sql.text()));
-            log.error(e.getMessage(), e);
-            throw e;
+            String message = String.format("There are too many records. Entity %s ,sqlText %s", clazz.getName(),
+                    sql.text());
+            RuntimeException throwable = new RuntimeException(message);
+            LastModified modified = clazz.getClass().getAnnotation(LastModified.class);
+            JayunLogParser.error(clazz.getName(), modified, throwable, message);
+            log.info("{}", message, throwable);
+            throw throwable;
         }
     }
 
