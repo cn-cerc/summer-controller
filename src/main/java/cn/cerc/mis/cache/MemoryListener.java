@@ -16,6 +16,7 @@ import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BasicHandle;
 import cn.cerc.mis.core.SystemBuffer;
+import cn.cerc.mis.log.JayunLogParser;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
 
@@ -72,6 +73,8 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
                 }
             }
         }
+        // 关闭品控日志解析器
+        JayunLogParser.close();
     }
 
     @Override

@@ -18,6 +18,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.mis.ado.CustomEntity;
 import cn.cerc.mis.ado.EmptyEntity;
+import cn.cerc.mis.log.JayunLogParser;
 
 public abstract class CustomEntityService<HI extends CustomEntity, BI extends CustomEntity, HO extends CustomEntity, BO extends CustomEntity>
         implements IService {
@@ -87,7 +88,10 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
                     Column column = map.get(field);
                     if (!column.nullable()) {
                         if (row.getValue(field.getName()) == null) {
-                            log.warn("{} 输出单身数据 {} 必须有值", this.getClass().getSimpleName(), field.getName());
+                            String message = String.format("%s 输出单身数据字段 %s 必须有值", this.getClass().getSimpleName(),
+                                    field.getName());
+                            RuntimeException exception = new RuntimeException(message);
+                            JayunLogParser.warn(this.getClass(), exception);
                             flag = true;
                         }
                     }

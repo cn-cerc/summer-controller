@@ -28,7 +28,6 @@ import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
-import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
@@ -109,14 +108,13 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
         if (handle instanceof BookHandle) {
             RuntimeException exception = new RuntimeException(
-                    String.format("bookhandle 不得使用 callLocal 调用 %s, dataIn %s", this.id(), dataIn.json()));
+                    String.format("BookHandle 不得使用 callLocal 调用 %s, dataIn %s", this.id(), dataIn.json()));
             try {
                 Variant function = new Variant("execute").setKey(this.id());
                 IService service = Application.getService(handle, this.id(), function);
                 if (service != null) {
                     Class<? extends IService> clazz = service.getClass();
-                    LastModified modified = clazz.getAnnotation(LastModified.class);
-                    JayunLogParser.warn(clazz.getName(), modified, exception, exception.getMessage());
+                    JayunLogParser.warn(clazz, exception);
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -161,8 +159,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         try {
             dataOut = RemoteService.call(this, corpConfig, id(), dataIn, sign.server());
         } catch (Throwable e) {
-            log.error("代理类型 {}, 服务名称 {}, 目标帐套{}, 服务入参 {} -> {}", corpConfig.getClass(), id(),
-                    corpConfig.getCorpNo(), dataIn.json(), e.getMessage(), e);
+            log.error("代理类型 {}, 服务名称 {}, 目标帐套{}, 服务入参 {} -> {}", corpConfig.getClass(), id(), corpConfig.getCorpNo(),
+                    dataIn.json(), e.getMessage(), e);
             dataOut = new DataSet().setError().setMessage(e.getMessage());
         }
         sign.setDataOut(dataOut);

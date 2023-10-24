@@ -97,27 +97,28 @@ public class LocalService extends ServiceProxy {
         return message();
     }
 
-    public static DataSet call(String service, IHandle handle, DataSet dataIn) {
+    public static DataSet call(String key, IHandle handle, DataSet dataIn) {
         DataSet dataOut = new DataSet();
-        IService clazz;
-        Variant function = new Variant("execute").setKey(service);
+        IService service;
+        Variant function = new Variant("execute").setKey(key);
         try {
-            clazz = Application.getService(handle, service, function);
+            service = Application.getService(handle, key, function);
         } catch (ClassNotFoundException e) {
             log.warn(e.getMessage(), e);
-            return dataOut.setError().setMessage("not find service: " + service);
+            return dataOut.setError().setMessage("not find service: " + key);
         }
 
         try {
-            return clazz._call(handle, dataIn, function);
+            return service._call(handle, dataIn, function);
         } catch (RuntimeException | IllegalAccessException | InvocationTargetException | ServiceException
                 | DataException e) {
             Throwable throwable = e.getCause() != null ? e.getCause() : e;
-            String serviceCode = clazz.getClass().getName();
-            String message = String.format("service %s, corpNo %s, dataIn %s, message %s", service, handle.getCorpNo(),
+            String message = String.format("service %s, corpNo %s, dataIn %s, message %s", key, handle.getCorpNo(),
                     dataIn.json(), throwable.getMessage());
-            LastModified modified = clazz.getClass().getAnnotation(LastModified.class);
-            JayunLogParser.error(serviceCode, modified, throwable, message);
+
+            Class<? extends IService> clazz = service.getClass();
+            JayunLogParser.error(clazz, throwable);
+
             log.info("{}", message, throwable);
             dataOut.setError().setMessage(throwable.getMessage());
             return dataOut;

@@ -23,7 +23,6 @@ public class SecurityStopException extends SecurityException {
 
     public SecurityStopException(Class<?> clazz) {
         super(getAccessDisabled());
-
         this.message = String.format("[%s]", clazz.getSimpleName()) + getAccessDisabled();
     }
 

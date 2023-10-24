@@ -18,8 +18,11 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.core.Variant;
+import cn.cerc.local.tool.JsonTool;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.log.JayunLogParser;
@@ -89,7 +92,11 @@ public class RemoteService extends ServiceProxy {
             String response = curl.doPost(endpoint + service);
             return new DataSet().setJson(response);
         } catch (IOException | JsonSyntaxException e) {
-            log.error("{}{} , {} -> {}", endpoint, service, curl.getParameters(), e.getMessage(), e);
+            String message = String.format("请求地址 %s%s, 入参信息 %s -> 返回异常 %s", endpoint, service,
+                    JsonTool.toJson(curl.getParameters()), e.getMessage());
+            RuntimeException exception = new RuntimeException(message);
+            JayunLogParser.error(RemoteService.class, exception);
+            log.info(exception.getMessage(), exception);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
         }
     }
@@ -99,27 +106,38 @@ public class RemoteService extends ServiceProxy {
      * 
      * @param handle
      * @param targetCorpNo 根据被调用目标帐套，获取 endpoint 与 token 并调用
-     * @param service
+     * @param key
      * @param dataIn
      * @return
      */
-    public static DataSet call(IHandle handle, CorpConfigImpl targetConfig, String service, DataSet dataIn,
+    public static DataSet call(IHandle handle, CorpConfigImpl targetConfig, String key, DataSet dataIn,
             ServerOptionImpl serviceOption) {
         Objects.requireNonNull(targetConfig);
         // 防止本地调用
         if (targetConfig.isLocal()) {
             if (!"000000".equals(targetConfig.getCorpNo())) {
-                String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", service,
+                Variant function = new Variant("execute").setKey(key);
+                IService service;
+                try {
+                    service = Application.getService(handle, key, function);
+                } catch (ClassNotFoundException e) {
+                    log.error(e.getMessage(), e);
+                    DataSet dataOut = new DataSet();
+                    return dataOut.setError().setMessage("not find service: " + key);
+                }
+                String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", key,
                         handle.getCorpNo(), dataIn.json());
                 RuntimeException exception = new RuntimeException(message);
-                JayunLogParser.warn(service, null, exception, message);
+
+                Class<? extends IService> clazz = service.getClass();
+                JayunLogParser.warn(clazz, exception);
                 log.info("{}", message, exception);
             }
-            return LocalService.call(service, handle, dataIn);
+            return LocalService.call(key, handle, dataIn);
         } else if (serviceOption != null) {
             // 处理特殊的业务场景，创建帐套、钓友商城
             // 获取指定的目标机节点
-            var endpoint = serviceOption.getEndpoint(handle, service).orElse(null);
+            var endpoint = serviceOption.getEndpoint(handle, key).orElse(null);
             // 获取指定的目标机授权
             var token = serviceOption.getToken().orElse(null);
             if (endpoint == null || token == null) {
@@ -136,14 +154,14 @@ public class RemoteService extends ServiceProxy {
             }
             if (Utils.isEmpty(endpoint))
                 throw new RuntimeException("endpoint 不允许为空");
-            return RemoteService.call(endpoint, token, service, dataIn);
+            return RemoteService.call(endpoint, token, key, dataIn);
         } else {
             var server = RemoteService.getServerConfig(Application.getContext())
                     .orElseThrow(() -> new RuntimeException("无法获取到有效的微服务配置"));
             String endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
                     .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
             String token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
-            return call(endpoint, token, service, dataIn);
+            return call(endpoint, token, key, dataIn);
         }
     }
 

@@ -31,7 +31,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.zk.ZkNode;
 import cn.cerc.db.zk.ZkServer;
 import cn.cerc.mis.SummerMIS;
-import cn.cerc.mis.register.center.ApplicationEnvironment;
+import cn.cerc.mis.log.ApplicationEnvironment;
 
 @Component
 public class ServiceRegister implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Watcher {
