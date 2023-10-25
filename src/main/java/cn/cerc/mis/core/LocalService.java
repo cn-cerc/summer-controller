@@ -115,9 +115,7 @@ public class LocalService extends ServiceProxy {
             Throwable throwable = e.getCause() != null ? e.getCause() : e;
             String message = String.format("service %s, corpNo %s, dataIn %s, message %s", key, handle.getCorpNo(),
                     dataIn.json(), throwable.getMessage());
-
-            Class<? extends IService> clazz = service.getClass();
-            JayunLogParser.error(clazz, throwable);
+            JayunLogParser.error(LocalService.class, throwable);
 
             log.info("{}", message, throwable);
             dataOut.setError().setMessage(throwable.getMessage());

@@ -23,8 +23,6 @@ import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.EntityKey;
 import cn.cerc.db.core.IHandle;
-import cn.cerc.db.core.Variant;
-import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.BookHandle;
 import cn.cerc.mis.core.DataValidate;
 import cn.cerc.mis.core.IService;
@@ -109,16 +107,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         if (handle instanceof BookHandle) {
             RuntimeException exception = new RuntimeException(
                     String.format("BookHandle 不得使用 callLocal 调用 %s, dataIn %s", this.id(), dataIn.json()));
-            try {
-                Variant function = new Variant("execute").setKey(this.id());
-                IService service = Application.getService(handle, this.id(), function);
-                if (service != null) {
-                    Class<? extends IService> clazz = service.getClass();
-                    JayunLogParser.warn(clazz, exception);
-                }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            JayunLogParser.warn(ServiceSign.class, exception);
+            log.info(exception.getMessage(), exception);
         }
 
         this.setSession(handle.getSession());

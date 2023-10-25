@@ -18,11 +18,9 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Utils;
-import cn.cerc.db.core.Variant;
 import cn.cerc.local.tool.JsonTool;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
-import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
 import cn.cerc.mis.log.JayunLogParser;
@@ -116,21 +114,10 @@ public class RemoteService extends ServiceProxy {
         // 防止本地调用
         if (targetConfig.isLocal()) {
             if (!"000000".equals(targetConfig.getCorpNo())) {
-                Variant function = new Variant("execute").setKey(key);
-                IService service;
-                try {
-                    service = Application.getService(handle, key, function);
-                } catch (ClassNotFoundException e) {
-                    log.error(e.getMessage(), e);
-                    DataSet dataOut = new DataSet();
-                    return dataOut.setError().setMessage("not find service: " + key);
-                }
                 String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", key,
                         handle.getCorpNo(), dataIn.json());
                 RuntimeException exception = new RuntimeException(message);
-
-                Class<? extends IService> clazz = service.getClass();
-                JayunLogParser.warn(clazz, exception);
+                JayunLogParser.warn(RemoteService.class, exception);
                 log.info("{}", message, exception);
             }
             return LocalService.call(key, handle, dataIn);
