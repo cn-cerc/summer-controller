@@ -15,6 +15,7 @@ import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
 import cn.cerc.mis.log.JayunLogParser;
+import cn.cerc.mis.security.SecurityStopException;
 
 /**
  * 提供本地服务访问
@@ -115,8 +116,10 @@ public class LocalService extends ServiceProxy {
             Throwable throwable = e.getCause() != null ? e.getCause() : e;
             String message = String.format("service %s, corpNo %s, dataIn %s, message %s", key, handle.getCorpNo(),
                     dataIn.json(), throwable.getMessage());
-            JayunLogParser.error(LocalService.class, throwable);
-
+            if (e instanceof SecurityStopException)
+                JayunLogParser.warn(LocalService.class, throwable, message);// 用户权限不足，记入警告类日志
+            else
+                JayunLogParser.error(LocalService.class, throwable, message);
             log.info("{}", message, throwable);
             dataOut.setError().setMessage(throwable.getMessage());
             return dataOut;

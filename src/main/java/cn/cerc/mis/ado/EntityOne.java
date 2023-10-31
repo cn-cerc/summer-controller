@@ -89,7 +89,9 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
     public <X extends Throwable> T getElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (query.size() == 0)
             throw exceptionSupplier.get();
-        return query.records().get(0).asEntity(clazz);
+        T entity = query.records().get(0).asEntity(clazz);
+        entity.setEntityHome(this);
+        return entity;
     }
 
     // update.orElseInsert: 更新entity，若为空无法更新就执行插入

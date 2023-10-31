@@ -82,7 +82,13 @@ public class SecurityPolice {
         return validate("", permissions, value);
     }
 
-    public static boolean validate(String corpNo, String permissions, String value) {
+    /**
+     * 
+     * @param corpNo      用户当前帐套
+     * @param permissions 用户权限列表
+     * @param value       要校验的权限
+     */
+    public static boolean validate(String corpNo, final String permissions, String value) {
         if (value == null || value.isEmpty())
             return true;
         if (value.startsWith(Permission.GUEST))

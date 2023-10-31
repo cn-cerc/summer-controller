@@ -26,4 +26,5 @@ public @interface Webform {
 
     // 是否需要自动帮助中心
     boolean autoHelper() default true;
+
 }
