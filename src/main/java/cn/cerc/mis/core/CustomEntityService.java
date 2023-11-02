@@ -171,6 +171,13 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
                 map.put(field, column);
             }
         }
+        if (clazz.getSuperclass() != CustomEntity.class) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (CustomEntity.class.isAssignableFrom(superclass)) {
+                Class<? extends CustomEntity> subclass = superclass.asSubclass(CustomEntity.class);
+                map.putAll(getEntityMeta(subclass));
+            }
+        }
         return map;
     }
 }
