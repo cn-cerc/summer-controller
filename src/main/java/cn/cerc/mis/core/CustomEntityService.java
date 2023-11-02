@@ -13,9 +13,11 @@ import javax.persistence.Id;
 import javax.persistence.Version;
 
 import cn.cerc.db.core.DataException;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.ado.CustomEntity;
 import cn.cerc.mis.ado.EmptyEntity;
 import cn.cerc.mis.log.JayunLogParser;
@@ -28,25 +30,29 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         List<BI> bodyIn = null;
         // 检验数据单头与单身
         if (dataIn.head().fields().size() > 0) {
-            var map = this.getMetaHeadIn();
-            for (var field : map.keySet()) {
-                var column = map.get(field);
+            Map<Field, Column> map = this.getMetaHeadIn();
+            for (Field field : map.keySet()) {
+                Column column = map.get(field);
                 if (!column.nullable()) {
-                    if (!dataIn.head().hasValue(field.getName()))
-                        throw new DataValidateException(String.format("输入单头参数 %s 必须有值", field.getName()));
+                    if (!dataIn.head().hasValue(field.getName())) {
+                        String name = Utils.isEmpty(column.name()) ? field.getName() : column.name();
+                        throw new DataValidateException(String.format("输入单头参数 %s 必须有值", name));
+                    }
                 }
             }
             headIn = dataIn.head().asEntity(getHeadInClass());
         }
         if (dataIn.size() > 0) {
-            var map = this.getMetaBodyIn();
+            Map<Field, Column> map = this.getMetaBodyIn();
             bodyIn = new ArrayList<>();
-            for (var row : dataIn) {
-                for (var field : map.keySet()) {
-                    var column = map.get(field);
+            for (DataRow row : dataIn) {
+                for (Field field : map.keySet()) {
+                    Column column = map.get(field);
                     if (!column.nullable()) {
-                        if (!row.hasValue(field.getName()))
-                            throw new DataValidateException(String.format("输入单身参数 %s 必须有值", field.getName()));
+                        if (!row.hasValue(field.getName())) {
+                            String name = Utils.isEmpty(column.name()) ? field.getName() : column.name();
+                            throw new DataValidateException(String.format("输入单身参数 %s 必须有值", name));
+                        }
                     }
                 }
                 bodyIn.add(row.asEntity(getBodyInClass()));
@@ -59,37 +65,42 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
         if (headIn != null)
             validateHeadIn(headIn);
         if (bodyIn != null) {
-            for (var body : bodyIn)
+            for (BI body : bodyIn)
                 validateBodyIn(body);
         }
-        var dataOut = this.process(handle, headIn, bodyIn);
+        DataSet dataOut = this.process(handle, headIn, bodyIn);
         if (dataOut.head().fields().size() > 0) {
-            var map = this.getMetaHeadOut();
-            for (var field : map.keySet()) {
+            Map<Field, Column> map = this.getMetaHeadOut();
+            for (Field field : map.keySet()) {
                 Column column = map.get(field);
                 if (!column.nullable()) {
-                    if (!dataOut.head().hasValue(field.getName()))
-                        throw new DataValidateException(String.format("输出单头数据 %s 必须有值", field.getName()));
+                    if (!dataOut.head().hasValue(field.getName())) {
+                        String name = Utils.isEmpty(column.name()) ? field.getName() : column.name();
+                        throw new DataValidateException(String.format("输出单头数据 %s 必须有值", name));
+                    }
                 }
             }
         }
         if (dataOut.size() > 0) {
-            var map = this.getMetaBodyOut();
-            for (var field : map.keySet()) {
+            Map<Field, Column> map = this.getMetaBodyOut();
+            for (Field field : map.keySet()) {
                 Column column = map.get(field);
                 if (!column.nullable()) {
-                    if (!dataOut.exists(field.getName()))
-                        throw new DataValidateException(String.format("输出单身字段 %s 必须存在", field.getName()));
+                    if (!dataOut.exists(field.getName())) {
+                        String name = Utils.isEmpty(column.name()) ? field.getName() : column.name();
+                        throw new DataValidateException(String.format("输出单身字段 %s 必须存在", name));
+                    }
                 }
             }
-            var flag = false;
-            for (var row : dataOut) {
-                for (var field : map.keySet()) {
+            boolean flag = false;
+            for (DataRow row : dataOut) {
+                for (Field field : map.keySet()) {
                     Column column = map.get(field);
                     if (!column.nullable()) {
                         if (row.getValue(field.getName()) == null) {
+                            String name = Utils.isEmpty(column.name()) ? field.getName() : column.name();
                             String message = String.format("%s 输出单身数据字段 %s 必须有值", this.getClass().getSimpleName(),
-                                    field.getName());
+                                    name);
                             RuntimeException exception = new RuntimeException(message);
                             JayunLogParser.warn(this.getClass(), exception);
                             flag = true;
