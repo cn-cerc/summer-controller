@@ -149,8 +149,9 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         try {
             dataOut = RemoteService.call(this, corpConfig, id(), dataIn, sign.server());
         } catch (Throwable e) {
-            log.error("代理类型 {}, 服务名称 {}, 目标帐套{}, 服务入参 {} -> {}", corpConfig.getClass(), id(), corpConfig.getCorpNo(),
-                    dataIn.json(), e.getMessage(), e);
+            String message = String.format("代理类型 %s, 远程服务 %s, 目标帐套 %s, 服务入参 %s -> 异常消息 %s", corpConfig.getClass(), id(),
+                    corpConfig.getCorpNo(), dataIn.json(), e.getMessage());
+            JayunLogParser.error(ServiceSign.class, e, message);
             dataOut = new DataSet().setError().setMessage(e.getMessage());
         }
         sign.setDataOut(dataOut);

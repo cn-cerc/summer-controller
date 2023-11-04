@@ -162,21 +162,26 @@ public class CustomSession implements ISession {
     }
 
     @Override
-    public void loadToken(String token) {
-        SecurityService security = Application.getBean(SecurityService.class);
-        if (security != null && security.initSession(this, token)) {
-            String key = MemoryBuffer.buildKey(SystemBuffer.Token.Map, token);
-            try (Redis redis = new Redis()) {
-                String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
-                if (value == null) {
-                    value = security.getPermissions(this);
-                    redis.hset(key, SystemBuffer.UserObject.Permissions.name(), value);
-                    redis.expire(key, RedisRecord.TIMEOUT);
-                }
-                this.permissions = value;
+    public boolean loadToken(String token) {
+        ISecurityService security = Application.getBean(ISecurityService.class);
+        if (security == null)
+            return false;
+
+        if (!security.initSession(this, token))
+            return false;
+
+        String key = MemoryBuffer.buildKey(SystemBuffer.Token.UserInfoHash, token);
+        try (Redis redis = new Redis()) {
+            String value = redis.hget(key, SystemBuffer.UserObject.Permissions.name());
+            if (value == null) {
+                value = security.getPermissions(this);
+                redis.hset(key, SystemBuffer.UserObject.Permissions.name(), value);
+                redis.expire(key, RedisRecord.TIMEOUT);
             }
+            this.permissions = value;
         }
         log.debug("{}.{}[permissions]={}", this.getCorpNo(), this.getUserCode(), this.permissions);
+        return true;
     }
 
     @Override
@@ -206,7 +211,7 @@ public class CustomSession implements ISession {
 
     @Override
     public void atSystemUser() {
-        SecurityService security = Application.getBean(SecurityService.class);
+        ISecurityService security = Application.getBean(ISecurityService.class);
         String token = security.getSystemUserToken(new Handle(this), this.getCorpNo(), machineCode);
         this.loadToken(token);
     }

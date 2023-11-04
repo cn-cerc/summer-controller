@@ -126,7 +126,7 @@ public class DatabaseDictionary extends TMainForm implements IHandle {
                 }
 
                 @Override
-                public void loadToken(String token) {
+                public boolean loadToken(String token) {
                     throw new RuntimeException("not support loadToken");
                 }
 

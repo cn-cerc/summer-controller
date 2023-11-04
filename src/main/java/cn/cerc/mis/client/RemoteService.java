@@ -17,6 +17,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.local.tool.JsonTool;
 import cn.cerc.mis.SummerMIS;
@@ -106,10 +107,11 @@ public class RemoteService extends ServiceProxy {
      * @param targetCorpNo 根据被调用目标帐套，获取 endpoint 与 token 并调用
      * @param key
      * @param dataIn
+     * @throws ServiceException
      * @return
      */
     public static DataSet call(IHandle handle, CorpConfigImpl targetConfig, String key, DataSet dataIn,
-            ServerOptionImpl serviceOption) {
+            ServerOptionImpl serviceOption) throws ServiceException {
         Objects.requireNonNull(targetConfig);
         // 防止本地调用
         if (targetConfig.isLocal()) {
@@ -124,7 +126,7 @@ public class RemoteService extends ServiceProxy {
         } else if (serviceOption != null) {
             // 处理特殊的业务场景，创建帐套、钓友商城
             // 获取指定的目标机节点
-            var endpoint = serviceOption.getEndpoint(handle, key).orElse(null);
+            String endpoint = serviceOption.getEndpoint(handle, key).orElse(null);
             // 获取指定的目标机授权
             var token = serviceOption.getToken().orElse(null);
             if (endpoint == null || token == null) {
@@ -132,9 +134,7 @@ public class RemoteService extends ServiceProxy {
                 var server = RemoteService.getServerConfig(Application.getContext());
                 if (server.isPresent()) {
                     if (endpoint == null)
-                        endpoint = server.get()
-                                .getEndpoint(handle, targetConfig.getCorpNo())
-                                .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+                        endpoint = server.get().getEndpoint(handle, targetConfig.getCorpNo()).orElse(null);
                     if (token == null)
                         token = server.get().getToken(handle, targetConfig.getCorpNo()).orElse(null);
                 }
@@ -144,9 +144,8 @@ public class RemoteService extends ServiceProxy {
             return RemoteService.call(endpoint, token, key, dataIn);
         } else {
             var server = RemoteService.getServerConfig(Application.getContext())
-                    .orElseThrow(() -> new RuntimeException("无法获取到有效的微服务配置"));
-            String endpoint = server.getEndpoint(handle, targetConfig.getCorpNo())
-                    .orElseThrow(() -> new RuntimeException("无法获取到有效的访问节点"));
+                    .orElseThrow(() -> new RuntimeException("无法获取到有效的微服务配置 ServerConfigImpl"));
+            String endpoint = server.getEndpoint(handle, targetConfig.getCorpNo()).orElse(null);
             String token = server.getToken(handle, targetConfig.getCorpNo()).orElse(null);
             return call(endpoint, token, key, dataIn);
         }

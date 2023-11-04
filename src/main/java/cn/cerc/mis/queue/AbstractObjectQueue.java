@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
@@ -18,6 +19,7 @@ import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.client.ServerConfigImpl;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.log.JayunLogParser;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
@@ -48,13 +50,24 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
 
         if (!config.isLocal()) {
             ServerConfigImpl serverConfig = Application.getBean(ServerConfigImpl.class);
-            if (serverConfig != null)
-                serverConfig.getIndustry(handle, config.getCorpNo()).ifPresent(value -> this.setOriginal(value));
+            if (serverConfig != null) {
+                try {
+                    serverConfig.getIndustry(handle, config.getCorpNo()).ifPresent(value -> this.setOriginal(value));
+                } catch (ServiceException e) {
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
         }
+
         if (!Utils.isEmpty(config.getCorpNo())) {
             Optional<ServerConfigImpl> serviceConfig = RemoteService.getServerConfig(Application.getContext());
             if (serviceConfig.isPresent()) {
-                Optional<String> remoteToken = serviceConfig.get().getToken(handle, config.getCorpNo());
+                Optional<String> remoteToken;
+                try {
+                    remoteToken = serviceConfig.get().getToken(handle, config.getCorpNo());
+                } catch (ServiceException e) {
+                    throw new RuntimeException(e.getMessage());
+                }
                 if (remoteToken.isPresent())
                     data.setToken(remoteToken.get());
             }
@@ -73,8 +86,15 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
         if (data == null)
             return true;
         try (TaskHandle handle = new TaskHandle()) {
-            if (!Utils.isEmpty(data.getToken()))
-                handle.getSession().loadToken(data.getToken());
+            if (!Utils.isEmpty(data.getToken())) {
+                boolean loadToken = handle.getSession().loadToken(data.getToken());
+                if (!loadToken) {
+                    String error = String.format("已失效 %s，执行类 %s，消息体 %s", data.getToken(), this.getClass(), message);
+                    JayunLogParser.error(this.getClass(), new RuntimeException(error));
+                    log.info(error);
+                    return true;
+                }
+            }
             var result = this.execute(handle, data);
             // 非Sqlmq队列执行失败后，将其插入到Sqlmq中继续执行
             if (repushOnError && !result && this.getDelayTime() > 0 && this.getService() != QueueServiceEnum.Sqlmq) {

@@ -5,7 +5,7 @@ import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.IService;
 
-public interface SecurityService extends IService {
+public interface ISecurityService extends IService {
 
     /**
      * 根据token，初始化session

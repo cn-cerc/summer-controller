@@ -8,12 +8,14 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataCell;
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
 import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.core.Application;
+import cn.cerc.mis.log.JayunLogParser;
 
 public abstract class AbstractDataRowQueue extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractDataRowQueue.class);
@@ -39,7 +41,7 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         return super.push(dataRow.json());
     }
 
-    protected String pushToRemote(IHandle handle, CorpConfigImpl config, DataRow dataRow) {
+    protected String pushToRemote(IHandle handle, CorpConfigImpl config, DataRow dataRow) throws ServiceException {
         Objects.requireNonNull(config);
         if (!Utils.isEmpty(config.getCorpNo())) {
             var serviceConfig = RemoteService.getServerConfig(Application.getContext());
@@ -64,13 +66,20 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
             if (data.hasValue("token")) {
                 // 临时恢复token，由队列自己实现此方法，设置Redis缓存
                 this.repairToken(data.getString("token"));
-                handle.getSession().loadToken(data.getString("token"));
+                boolean loadToken = handle.getSession().loadToken(data.getString("token"));
+                if (!loadToken) {
+                    String error = String.format("已失效 %s，执行类 %s，消息体 %s", data.getString("token"), this.getClass(),
+                            message);
+                    JayunLogParser.error(this.getClass(), new RuntimeException(error));
+                    log.info(error);
+                    return true;
+                }
                 DataCell corpNo = data.bind("corp_no_");// 执行器的目标帐套
                 DataCell userCode = data.bind("user_code_");
                 if (corpNo.hasValue())
                     handle.buildSession(corpNo.getString(), userCode.getString());
             }
-            var result = this.execute(handle, data);
+            boolean result = this.execute(handle, data);
             // 非Sqlmq队列执行失败后，将其插入到Sqlmq中继续执行
             if (repushOnError && !result && this.getDelayTime() > 0 && this.getService() != QueueServiceEnum.Sqlmq) {
                 super.pushToSqlmq(message);
