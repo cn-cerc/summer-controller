@@ -1,5 +1,6 @@
 package cn.cerc.mis.ado;
 
+import java.lang.reflect.Field;
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -323,9 +325,11 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             throw new RuntimeException("recNo error, refuse update");
         query.setReadonly(false);
         try {
-            var field = EntityHelper.get(clazz).lockedField();
+            Optional<Field> field = EntityHelper.get(clazz).lockedField();
             if (field.isPresent() && entity.isLocked() && query.getBoolean(field.get().getName()))
                 throw new RuntimeException("record is locked, please unlock first");
+            if (!isDataChanges(entity))
+                return this;
             helper.onUpdatePostDefault(entity);
             entity.onUpdatePost(query);
             query.edit();
@@ -336,6 +340,24 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             query.setReadonly(true);
         }
         return this;
+    }
+
+    protected boolean isDataChanges(T entity) {
+        if (!isCurrentRow(entity))
+            throw new RuntimeException("recNo error, refuse update");
+        Map<String, Field> fields = helper.fields();
+        T oldEntity = query.current().asEntity(clazz);
+        for (String fieldCode : fields.keySet()) {
+            try {
+                Object newValue = fields.get(fieldCode).get(entity);
+                Object oldValue = fields.get(fieldCode).get(oldEntity);
+                if (!Objects.equals(newValue, oldValue))
+                    return true; // 字段出现变更返回true
+            } catch (IllegalAccessException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return false; // 字段没有发生变更返回false
     }
 
     protected void saveHistory(SqlQuery query, T entity, HistoryTypeEnum historyType) {
