@@ -4,11 +4,11 @@ public class FormSign {
     private String id;
     private String value;
 
-    public FormSign(String text) {
-        String items[] = text.split("\\.");
+    public FormSign(String id) {
+        String items[] = id.split("\\.");
         switch (items.length) {
         case 1: {
-            this.id = text;
+            this.id = id;
             this.value = "execute";
             break;
         }
@@ -18,7 +18,7 @@ public class FormSign {
             break;
         }
         default:
-            throw new RuntimeException("error value: " + text);
+            throw new RuntimeException("error value: " + id);
         }
     }
 

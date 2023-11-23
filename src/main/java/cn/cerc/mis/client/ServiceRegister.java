@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -17,8 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -31,10 +33,12 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.zk.ZkNode;
 import cn.cerc.db.zk.ZkServer;
 import cn.cerc.mis.SummerMIS;
+import cn.cerc.mis.core.Application;
 import cn.cerc.mis.log.ApplicationEnvironment;
 
 @Component
-public class ServiceRegister implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Watcher {
+@WebListener
+public class ServiceRegister implements ApplicationContextAware, ServletContextListener, Watcher {
     private static final Logger log = LoggerFactory.getLogger(ServiceRegister.class);
     private static final ClassConfig config = new ClassConfig(ServiceRegister.class, SummerMIS.ID);
     private ApplicationContext context;
@@ -53,8 +57,9 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     private static final Map<String, Map<String, String>> intranets = new ConcurrentHashMap<>();
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext().getParent() != null) {
+    public void contextInitialized(ServletContextEvent event) {
+        log.info("开始注册内网节点");
+        if (Application.getContext().getParent().getParent() != null) {
             return;
         }
         if (context == null) {
@@ -205,4 +210,8 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         this.context = context;
     }
 
+    @Override
+    public void contextDestroyed(ServletContextEvent event) {
+        event.getServletContext().log("service is broken ...");
+    }
 }
