@@ -89,10 +89,6 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
         }
     }
 
-    protected void repairToken(String token) {
-
-    }
-
     public abstract boolean execute(IHandle handle, DataRow data);
 
 }

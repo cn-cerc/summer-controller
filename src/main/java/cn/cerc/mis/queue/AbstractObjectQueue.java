@@ -87,6 +87,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
             return true;
         try (TaskHandle handle = new TaskHandle()) {
             if (!Utils.isEmpty(data.getToken())) {
+                this.repairToken(data.getToken());
                 boolean loadToken = handle.getSession().loadToken(data.getToken());
                 if (!loadToken) {
                     String error = String.format("已失效 %s，执行类 %s，消息体 %s", data.getToken(), this.getClass(), message);
