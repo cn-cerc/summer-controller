@@ -34,36 +34,41 @@ public abstract class CustomService extends Handle implements IService {
     @Override
     public DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws IllegalAccessException,
             InvocationTargetException, ServiceException, DataException, RuntimeException {
-        if (function == null || Utils.isEmpty(function.getString()))
-            return new DataSet().setMessage("function is null");
-        if ("_list".equals(function.getString()))
-            return this._list();
-        if ("_call".equals(function.getString()))
-            return new DataSet().setMessage("function is call");
-        if (Utils.isEmpty(this.funcCode))
-            this.funcCode = function.getString();
+        long startTime = System.currentTimeMillis();
+        try {
+            if (function == null || Utils.isEmpty(function.getString()))
+                return new DataSet().setMessage("function is null");
+            if ("_list".equals(function.getString()))
+                return this._list();
+            if ("_call".equals(function.getString()))
+                return new DataSet().setMessage("function is call");
+            if (Utils.isEmpty(this.funcCode))
+                this.funcCode = function.getString();
 
-        this.setSession(handle.getSession());
-        this.dataIn = dataIn;
-        String funcCode = dataIn.head().getString("_function_");
-        if (Utils.isEmpty(funcCode))
-            funcCode = this.funcCode;
-        else
-            this.funcCode = funcCode;
+            this.setSession(handle.getSession());
+            this.dataIn = dataIn;
+            String funcCode = dataIn.head().getString("_function_");
+            if (Utils.isEmpty(funcCode))
+                funcCode = this.funcCode;
+            else
+                this.funcCode = funcCode;
 
-        this.dataOut = new DataSet();
-        if (Utils.isEmpty(funcCode))
-            return dataOut.setMessage("function is null");
+            this.dataOut = new DataSet();
+            if (Utils.isEmpty(funcCode))
+                return dataOut.setMessage("function is null");
 
-        Class<?> self = this.getClass();
-        ServiceMethod sm = ServiceMethod.build(self, funcCode);
-        if (sm == null) {
-            dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
-            dataOut.setState(ServiceState.NOT_FIND_SERVICE);
+            Class<?> self = this.getClass();
+            ServiceMethod sm = ServiceMethod.build(self, funcCode);
+            if (sm == null) {
+                dataOut.setMessage(String.format("not find service: %s.%s ！", this.getClass().getName(), funcCode));
+                dataOut.setState(ServiceState.NOT_FIND_SERVICE);
+                return dataOut;
+            }
+            this.dataOut = sm.call(this, handle, dataIn);
             return dataOut;
+        } finally {
+            writeExecuteTime(handle, dataIn, function.key(), startTime);
         }
-        this.dataOut = sm.call(this, handle, dataIn);
-        return dataOut;
     }
 
     public DataSet dataIn() {
