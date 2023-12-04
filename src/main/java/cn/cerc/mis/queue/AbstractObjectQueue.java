@@ -91,7 +91,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
                 boolean loadToken = handle.getSession().loadToken(data.getToken());
                 if (!loadToken) {
                     String error = String.format("已失效 %s，执行类 %s，消息体 %s", data.getToken(), this.getClass(), message);
-                    JayunLogParser.error(this.getClass(), new RuntimeException(error));
+                    JayunLogParser.warn(this.getClass(), new RuntimeException(error));
                     log.info(error);
                     return true;
                 }

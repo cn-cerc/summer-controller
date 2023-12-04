@@ -47,6 +47,11 @@ public class FormFactory implements ApplicationContextAware {
 
             IForm form = null;
             String beanId = formId;
+            if (beanId == null || beanId.length() == 1) {
+                // Frm不支持1个字符串长度的菜单
+                throw new PageNotFoundException(req.getServletPath());
+            }
+
             if (!Utils.isEmpty(beanId) && !"service".equals(beanId)) {
                 if (!context.containsBean(beanId)) {
                     if (!beanId.substring(0, 2).toUpperCase().equals(beanId.substring(0, 2)))
