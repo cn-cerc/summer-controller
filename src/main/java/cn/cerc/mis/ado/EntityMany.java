@@ -1,5 +1,6 @@
 package cn.cerc.mis.ado;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.EntityHelper;
 import cn.cerc.db.core.EntityImpl;
 import cn.cerc.db.core.IHandle;
@@ -88,6 +90,16 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
 
     public EntityMany<T> updateAll(Consumer<T> action) {
         super.update(action);
+        return this;
+    }
+
+    public EntityMany<T> setSort(String... fields) {
+        query.setSort(fields);
+        return this;
+    }
+
+    public EntityMany<T> setSort(Comparator<DataRow> func) {
+        query.setSort(func);
         return this;
     }
 

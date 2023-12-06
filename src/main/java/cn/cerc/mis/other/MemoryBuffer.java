@@ -11,17 +11,17 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
 
     private static final ClassResource res = new ClassResource(MemoryBuffer.class, SummerMIS.ID);
 
-    public MemoryBuffer(Enum<?> bufferType, String... keys) {
+    public MemoryBuffer(Enum<? extends IBufferKey> bufferType, String... keys) {
         super();
         this.setKey(buildKey(bufferType, keys));
     }
 
-    public static void delete(Enum<?> bufferType, String... keys) {
+    public static void delete(Enum<? extends IBufferKey> bufferType, String... keys) {
         RedisRecord buffer = new RedisRecord(buildKey(bufferType, keys));
         buffer.clear();
     }
 
-    public static String buildKey(Enum<?> bufferType, String... keys) {
+    public static String buildKey(Enum<? extends IBufferKey> bufferType, String... keys) {
         if (!(bufferType instanceof IBufferKey)) {
             throw new RuntimeException(res.getString(1, "错误的初始化参数！"));
         }
@@ -36,13 +36,22 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
         }
 
         StringBuilder result = new StringBuilder();
-        result.append(bufferKey.getStartingPoint() + bufferType.ordinal());
+        result.append(prefix(bufferType));
         for (String key : keys) {
             if (key == null)
                 throw new RuntimeException(res.getString(2, "传值有误！"));
             result.append(".").append(key);
         }
         return result.toString();
+    }
+
+    /**
+     * 获取缓存类型的前缀
+     */
+    public static int prefix(Enum<? extends IBufferKey> bufferType) {
+        IBufferKey bufferKey = (IBufferKey) bufferType;
+        int prefix = bufferKey.getStartingPoint() + bufferType.ordinal();
+        return prefix;
     }
 
     public static String buildObjectKey(Class<?> class1) {
