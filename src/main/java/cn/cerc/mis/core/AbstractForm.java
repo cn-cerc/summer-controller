@@ -139,7 +139,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
         }
 
         Object result;
-        Method method = null;
+        Method method;
         try {
             // 支持路径参数调用，最多3个字符串参数
             switch (this.pathVariables.length) {
@@ -296,7 +296,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Webform obj = this.getClass().getAnnotation(Webform.class);
         if (obj != null) {
             this.name = obj.name();

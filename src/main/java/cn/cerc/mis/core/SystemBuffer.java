@@ -131,7 +131,11 @@ public class SystemBuffer {
         /**
          * 调用频次
          */
-        Frequency;
+        Frequency,
+        /**
+         * 用户列表
+         */
+        UserList;
 
         @Override
         public int getStartingPoint() {
