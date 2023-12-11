@@ -103,7 +103,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
         return this;
     }
 
-    public void deleteAll() {
+    public EntityMany<T> deleteAll() {
         var field = EntityHelper.get(clazz).lockedField();
         query.setReadonly(false);
         try {
@@ -116,9 +116,10 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
         } finally {
             query.setReadonly(true);
         }
+        return this;
     }
 
-    public void deleteAll(List<T> list) {
+    public EntityMany<T> deleteAll(List<T> list) {
         query.setReadonly(false);
         try {
             var field = EntityHelper.get(clazz).lockedField();
@@ -132,6 +133,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
         } finally {
             query.setReadonly(true);
         }
+        return this;
     }
 
     public Stream<T> stream() {
