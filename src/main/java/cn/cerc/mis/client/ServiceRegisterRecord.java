@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
@@ -28,13 +27,9 @@ public class ServiceRegisterRecord {
         this.rootPath = ServiceRegister.buildRootPath(industry);
         this.groupPath = ServiceRegister.buildGroupPath(industry);
         this.refreshIntranets();// 初始化
-        try {
-            // 注册监听节点
-            ZkServer.get().client().getChildren(rootPath, new RootChildrenNodeWatcher(this));
-            ZkServer.get().watch(groupPath, new GroupNodeWatcher(this));
-        } catch (KeeperException | InterruptedException e) {
-            log.error(e.getMessage(), e);
-        }
+        // 注册监听节点
+        ZkServer.get().watchRoot(rootPath, new RootChildrenNodeWatcher(this));
+        ZkServer.get().watch(groupPath, new GroupNodeWatcher(this));
     }
 
     /**
@@ -46,15 +41,13 @@ public class ServiceRegisterRecord {
         @Override
         public void process(WatchedEvent event) {
             String path = event.getPath();
+            if (path == null)
+                return;
             if (event.getType() == EventType.NodeChildrenChanged) {
                 log.debug("分组节点发生变更 {}", path);
                 registerRecord.refreshIntranets();
             }
-            try {
-                ZkServer.get().client().getChildren(registerRecord.rootPath, this);
-            } catch (KeeperException | InterruptedException e) {
-                log.error(e.getMessage(), e);
-            }
+            ZkServer.get().watchRoot(registerRecord.rootPath, this);
         }
     }
 
@@ -66,13 +59,14 @@ public class ServiceRegisterRecord {
     private record GroupNodeWatcher(ServiceRegisterRecord registerRecord) implements Watcher {
         @Override
         public void process(WatchedEvent event) {
-            ZkServer server = ZkServer.get();
             String path = event.getPath();
+            if (path == null)
+                return;
             if (event.getType() == EventType.NodeDataChanged) {
                 log.debug("分组节点发生变更 {}", path);
                 registerRecord.refreshIntranets();
             }
-            server.watch(path, this);
+            ZkServer.get().watch(path, this);
         }
     }
 
@@ -84,10 +78,12 @@ public class ServiceRegisterRecord {
     private record IntranetsNodeWatcher(ServiceRegisterRecord registerRecord) implements Watcher {
         @Override
         public void process(WatchedEvent event) {
+            String path = event.getPath();
+            if (path == null)
+                return;
             registerRecord.refreshing = true;
             try {
                 ZkServer server = ZkServer.get();
-                String path = event.getPath();
                 String nodeKey = path.substring(registerRecord.rootPath.length() + 1);
                 if (event.getType() == EventType.NodeDataChanged) {
                     if (registerRecord.intranets.containsKey(nodeKey)) {
