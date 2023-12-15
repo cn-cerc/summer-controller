@@ -232,8 +232,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
             if (result == null)
                 return null;
 
-            if (result instanceof IPage) {
-                IPage output = (IPage) result;
+            if (result instanceof IPage output) {
                 return output.execute();
             } else {
                 log.warn(String.format("%s pageOutput is not IView: %s", funcCode, result));
