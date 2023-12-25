@@ -85,12 +85,13 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             boolean writeCacheAtOpen) {
         // 在open时，读入字段定义
         target.onAfterOpen(self -> self.fields().readDefine(clazz));
-        EntityKey entityKey = EntityHelper.get(clazz).entityKey();
-        if (entityKey == null || entityKey.cache() == CacheLevelEnum.Disabled)
-            return;
 
         // 在open时，写入redis等缓存
         if (writeCacheAtOpen) {
+            EntityKey entityKey = EntityHelper.get(clazz).entityKey();
+            if (entityKey == null || entityKey.cache() == CacheLevelEnum.Disabled)
+                return;
+
             target.onAfterOpen(query -> {
                 int count = 0;
                 EntityCache<T> ec1 = new EntityCache<T>(query, clazz);
@@ -113,11 +114,20 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             });
         }
 
+        // 增删改时，需要刷新多重key，排除不启用缓存的类，然后刷新缓存
+        List<Class<? extends EntityImpl>> family = EntityHome.getFamily(clazz)
+                .stream()
+                .filter(item -> EntityHelper.get(item).entityKey().cache() != CacheLevelEnum.Disabled)
+                .toList();
+        if (family.size() == 0)
+            return;
+
         // 在post(insert、update)时，写入redis等缓存
         target.onAfterPost(row -> {
-            for (var class1 : EntityHome.getFamily(clazz)) {
+            for (var class1 : family) {
                 EntityCache<?> ec2 = new EntityCache<>(target, class1);
                 String[] keys = ec2.buildKeys(row);
+                EntityKey entityKey = EntityHelper.get(class1).entityKey();
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.setex(EntityCache.buildKey(keys), entityKey.expire(), row.json());
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
@@ -128,9 +138,10 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
 
         // 在delete时，清除redis等缓存
         target.onAfterDelete(row -> {
-            for (var class1 : EntityHome.getFamily(clazz)) {
+            for (var class1 : family) {
                 EntityCache<?> ec3 = new EntityCache<>(target, class1);
                 String[] keys = ec3.buildKeys(row);
+                EntityKey entityKey = EntityHelper.get(class1).entityKey();
                 try (Jedis jedis = JedisFactory.getJedis()) {
                     jedis.del(EntityCache.buildKey(keys));
                     if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
