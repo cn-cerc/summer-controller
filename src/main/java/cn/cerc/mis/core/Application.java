@@ -55,7 +55,7 @@ public class Application implements ApplicationContextAware {
     // 图片静态路径
     public static String getStaticPath() {
         // zookeeper 路径 /diteng/main/common/cdn
-        return "123.60.84.10:8088/static";
+        return "123.60.84.10/static";
     }
 
     // aui静态资源路径
