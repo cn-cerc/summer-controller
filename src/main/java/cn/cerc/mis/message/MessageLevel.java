@@ -2,29 +2,29 @@ package cn.cerc.mis.message;
 
 public enum MessageLevel {
 
-    // 通用消息-3个月
-    General(3 * 33),
+    // 通用消息-1个月
+    General(30),
 
     // 重要消息，需要在首页予滚动展示-永久
     Forever(0),
 
     // 紧急消息，需要弹窗提示-3年
-    Grave(3 * 12 * 33),
+    Grave(3 * 365),
 
     // 日志类消息，默认为已读-1年
-    Logger(12 * 33),
+    Logger(365),
 
-    // 后台任务-33天
-    Service(33),
+    // 后台任务-7天
+    Service(7),
 
     // 打印任务-3天
     Printer(3),
 
-    // 导出消息-2天
-    Export(2),
+    // 导出消息-1天
+    Export(1),
 
     // 用户普通消息
-    User(30);
+    User(15);
 
     private int day;
 
