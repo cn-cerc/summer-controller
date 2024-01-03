@@ -6,7 +6,7 @@ public enum MessageLevel {
     General(3 * 33),
 
     // 重要消息，需要在首页予滚动展示-永久
-    Great(0),
+    Forever(0),
 
     // 紧急消息，需要弹窗提示-3年
     Grave(3 * 12 * 33),
@@ -28,7 +28,7 @@ public enum MessageLevel {
 
     private int day;
 
-    private MessageLevel(int day) {
+    MessageLevel(int day) {
         this.day = day;
     }
 
