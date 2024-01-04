@@ -244,7 +244,7 @@ public class Application implements ApplicationContextAware {
         return bean;
     }
 
-    private static String getBeanIdOfClassCode(String classCode) {
+    public static String getBeanIdOfClassCode(String classCode) {
         if (classCode.length() < 2)
             return classCode.toLowerCase();
         var temp = classCode;
