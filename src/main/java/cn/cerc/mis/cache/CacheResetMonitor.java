@@ -1,20 +1,31 @@
 package cn.cerc.mis.cache;
 
-import cn.cerc.db.redis.Redis;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import cn.cerc.db.redis.JedisFactory;
+import redis.clients.jedis.Jedis;
 
 public class CacheResetMonitor extends Thread {
-    private SubCacheEvent monitor = new SubCacheEvent();
+    private final SubCacheEvent monitor = new SubCacheEvent();
+    private final AtomicBoolean isStop = new AtomicBoolean(false);
 
     @Override
     public void run() {
-        try (Redis jedis = new Redis()) {
-            if (jedis != null)
-                jedis.subscribe(monitor, MemoryListener.CacheChannel);
+        try (Jedis redis = JedisFactory.getJedis()) {
+            redis.subscribe(monitor, MemoryListener.CacheChannel);
         }
     }
 
     public void requestStop() {
-        if (monitor.isSubscribed())
+        // 经过测试 monitor.isSubscribed() 方法的状态更新不及时，会导致重复执行 monitor.unsubscribe() 引起报错
+        if (isStop.get())
+            return;
+        synchronized (this) {
+            if (isStop.get())
+                return;
             monitor.unsubscribe();
+            isStop.set(true);
+        }
     }
+
 }

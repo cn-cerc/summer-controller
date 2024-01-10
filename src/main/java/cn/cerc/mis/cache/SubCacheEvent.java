@@ -17,7 +17,7 @@ public class SubCacheEvent extends JedisPubSub {
             return;
         }
         try {
-            String args[] = message.split(":");
+            String[] args = message.split(":");
             String beanId = args[0];
             if (MemoryListener.context.containsBean(beanId) && MemoryListener.context.isSingleton(beanId)) {
                 String param = null;
@@ -32,7 +32,6 @@ public class SubCacheEvent extends JedisPubSub {
                 log.warn("not find beanId: {}", message);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage(), e);
         }
     }
