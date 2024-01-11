@@ -22,7 +22,10 @@ public class MessageRecord extends CustomMessageData {
     public static final String UIClass_Subscribe = "MVSubscribe"; // 订阅消息 需要读取subject和content
     public static final String UIClass_Image = "MVImage"; // 图片消息
     public static final String UIClass_Audio = "MVAudio"; // 语音消息
-    public static final String UIClass_AICommand = "MVAiCommand"; // AI指令消息
+
+    public static final String UIAI_TextAudioCommand = "MVAiTextAudioCommand"; // AI指令消息
+    public static final String UIAI_OpenMenuCommand = "MVAiOpenMenuCommand"; // AI指令消息
+
     private String corpNo;
     private String userCode;
     private String subject;
