@@ -52,7 +52,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
             ServerConfigImpl serverConfig = Application.getBean(ServerConfigImpl.class);
             if (serverConfig != null) {
                 try {
-                    serverConfig.getIndustry(handle, config.getCorpNo()).ifPresent(value -> this.setOriginal(value));
+                    serverConfig.getIndustry(handle, config.getCorpNo()).ifPresent(this::setOriginal);
                 } catch (ServiceException e) {
                     throw new RuntimeException(e.getMessage());
                 }
@@ -68,8 +68,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
                 } catch (ServiceException e) {
                     throw new RuntimeException(e.getMessage());
                 }
-                if (remoteToken.isPresent())
-                    data.setToken(remoteToken.get());
+                remoteToken.ifPresent(data::setToken);
             }
         }
 
@@ -112,8 +111,7 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
             result = getClazz().getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return result;
     }
@@ -121,8 +119,6 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
     /**
      * 执行消息消费
      * 
-     * @param handle
-     * @param entity
      * @return 消息消费成功否
      */
     public abstract boolean execute(IHandle handle, T entity);

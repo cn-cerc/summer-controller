@@ -70,7 +70,7 @@ public class EntityQuery {
                     DataRow row = new DataRow().setJson(json);
                     return Optional.of(row.asEntity(clazz));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                     jedis.del(key);
                 }
             }
@@ -111,12 +111,12 @@ public class EntityQuery {
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, String... values) {
-        return new EntityMany<T>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
+        return new EntityMany<>(handle, clazz, SqlWhere.create(handle, clazz, values).build(), true, true).stream()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static <T extends EntityImpl> Set<T> findMany(IHandle handle, Class<T> clazz, SqlText sqlText) {
-        return new EntityMany<T>(handle, clazz, sqlText, true, true).stream()
+        return new EntityMany<>(handle, clazz, sqlText, true, true).stream()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -124,7 +124,7 @@ public class EntityQuery {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), true, true).stream()
+        return new EntityMany<>(handle, clazz, where.build(), true, true).stream()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -133,7 +133,7 @@ public class EntityQuery {
         Objects.requireNonNull(consumer);
         SqlWhere where = SqlWhere.create(handle, clazz);
         consumer.accept(where);
-        return new EntityMany<T>(handle, clazz, where.build(), true, true).dataSet();
+        return new EntityMany<>(handle, clazz, where.build(), true, true).dataSet();
     }
 
 }

@@ -16,7 +16,7 @@ public class CDN {
         return file + "?v=" + config.getString(BROWSER_CACHE_VERSION, "1.0.0.0");
     }
 
-    public static final String getSite() {
+    public static String getSite() {
         String site = config.getProperty("cdn.site", "");
         if (Utils.isEmpty(site))
             throw new RuntimeException("CDN 地址没有配置");

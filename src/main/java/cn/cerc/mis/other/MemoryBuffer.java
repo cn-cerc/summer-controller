@@ -22,11 +22,10 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
     }
 
     public static String buildKey(Enum<? extends IBufferKey> bufferType, String... keys) {
-        if (!(bufferType instanceof IBufferKey)) {
+        if (!(bufferType instanceof IBufferKey bufferKey)) {
             throw new RuntimeException(res.getString(1, "错误的初始化参数！"));
         }
 
-        IBufferKey bufferKey = (IBufferKey) bufferType;
         if (keys.length < bufferKey.getMinimumNumber()) {
             throw new RuntimeException(res.getString(3, "参数数量不足！"));
         }
@@ -50,8 +49,7 @@ public class MemoryBuffer extends RedisRecord implements AutoCloseable {
      */
     public static int prefix(Enum<? extends IBufferKey> bufferType) {
         IBufferKey bufferKey = (IBufferKey) bufferType;
-        int prefix = bufferKey.getStartingPoint() + bufferType.ordinal();
-        return prefix;
+        return bufferKey.getStartingPoint() + bufferType.ordinal();
     }
 
     public static String buildObjectKey(Class<?> class1) {

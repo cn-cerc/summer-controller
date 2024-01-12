@@ -244,7 +244,7 @@ public class SecurityPolice {
 
     private static String getValue(IHandle handle, Object bean, Permission permission, Operators operators) {
         String result = "";
-        String defaultValue = Permission.USERS;
+        final String defaultValue = Permission.USERS;
         if (permission != null) {
             result = permission.value();
             if (!"".equals(result)) {
@@ -263,15 +263,14 @@ public class SecurityPolice {
                 }
             }
         } else if (handle != null) {
-            if (bean instanceof IForm form) {
+            if (bean instanceof IForm form)
                 result = form.getPermission();
-            }
-            if ("".equals(result)) {
+            if (Utils.isEmpty(result)) {
                 String beanId;
                 if (bean instanceof SupportBeanName) {
                     beanId = ((SupportBeanName) bean).getBeanName();
-                    defaultValue = Permission.ADMIN;
                     ISecurityService security = Application.getBean(ISecurityService.class);
+                    // 读取数据库的菜单权限
                     if (security != null) {
                         Variant outParam = new Variant().setKey(beanId);
                         security.loadPermission(handle, outParam);
