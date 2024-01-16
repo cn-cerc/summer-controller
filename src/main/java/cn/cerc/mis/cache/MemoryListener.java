@@ -1,5 +1,7 @@
 package cn.cerc.mis.cache;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -28,16 +30,16 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
     private static final Logger log = LoggerFactory.getLogger(MemoryListener.class);
     public static final String CacheChannel = MemoryBuffer.buildKey(SystemBuffer.Global.CacheReset);
     public static ApplicationContext context;
-    private CacheResetMonitor subthread;
-    private int count = 0;
+    private CacheResetMonitor monitor;
+    private static final AtomicInteger atomic = new AtomicInteger();
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         context = WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext());
 
-        subthread = new CacheResetMonitor();
-        subthread.setName("CacheReset-monitor");
-        subthread.start();
+        monitor = new CacheResetMonitor();
+        monitor.setName("CacheReset-monitor");
+        monitor.start();
 
         ApplicationContext context = WebApplicationContextUtils
                 .getRequiredWebApplicationContext(sce.getServletContext());
@@ -50,52 +52,46 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        if (subthread != null) {
-            subthread.requestStop();
-            subthread = null;
+        if (monitor != null) {
+            monitor.requestStop();
+            monitor = null;
         }
 
         // 通知所有的单例重启缓存
-        if (context != null) {
-            Application.setContext(context);
-            for (String beanId : context.getBeanDefinitionNames()) {
-                if (context.isSingleton(beanId)) {
-                    Object bean = context.getBean(beanId);
-                    if (bean instanceof IShutdown) {
-                        ((IShutdown) bean).shutdown();
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+        if (context == null)
+            return;
+
+        Application.setContext(context);
+        for (String beanId : context.getBeanDefinitionNames()) {
+            if (context.isSingleton(beanId)) {
+                Object bean = context.getBean(beanId);
+                if (bean instanceof IShutdown shutdown) {
+                    shutdown.shutdown();
                 }
             }
         }
-        // 关闭品控日志解析器
-//        JayunLogParser.close();
     }
 
     @Override
-    public synchronized void sessionCreated(HttpSessionEvent se) {
-        ++count;
-        if (count % 10 == 0)
-            log.info("session current size: {}", count);
-        log.debug("session MaxInactiveInterval: {}", se.getSession().getMaxInactiveInterval());
-        log.debug("session: {}", se.getSession());
+    public synchronized void sessionCreated(HttpSessionEvent event) {
+        atomic.incrementAndGet();
+        if (atomic.get() % 10 == 0)
+            log.info("session current size: {}", atomic.get());
+        log.debug("session MaxInactiveInterval: {}", event.getSession().getMaxInactiveInterval());
+        log.debug("session: {}", event.getSession());
         // 过期时间设置，单位为秒
-//        se.getSession().setMaxInactiveInterval(30);
+//        event.getSession().setMaxInactiveInterval(30);
     }
 
     @Override
     public synchronized void sessionDestroyed(HttpSessionEvent se) {
         log.debug("session: {}", se.getSession());
         log.debug("session MaxInactiveInterval: {}", se.getSession().getMaxInactiveInterval());
-        --count;
-        if (count % 10 == 0)
-            log.info("session current size: {}", count);
+        atomic.decrementAndGet();
+        if (atomic.get() % 10 == 0)
+            log.info("session current size: {}", atomic);
 
-        if (count != 0)
+        if (atomic.get() != 0)
             return;
 
         ApplicationContext context = WebApplicationContextUtils
@@ -114,9 +110,9 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
             for (String beanId : context.getBeanDefinitionNames()) {
                 if (context.isSingleton(beanId)) {
                     Object bean = context.getBean(beanId);
-                    if (bean instanceof IMemoryCache) {
+                    if (bean instanceof IMemoryCache cache) {
+                        cache.resetCache(handle, resetType, null);
                         log.debug("{}.resetCache", beanId);
-                        ((IMemoryCache) bean).resetCache(handle, resetType, null);
                     }
                 }
             }
@@ -125,6 +121,8 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
 
     public static void refresh(Class<? extends IMemoryCache> clazz, String param) {
         IMemoryCache cache = Application.getBean(clazz);
+        if (cache == null)
+            return;
         final String beanId = cache.getBeanName();
         try (Jedis jedis = JedisFactory.getJedis()) {
             if (jedis != null)
