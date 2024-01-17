@@ -73,6 +73,7 @@ public class AppClient implements Serializable {
         browsers.add("apicloud");
         browsers.add("DitengApp");
         browsers.add("DitengAppPad");
+        browsers.add("FourPL");
     }
 
     // 平板
