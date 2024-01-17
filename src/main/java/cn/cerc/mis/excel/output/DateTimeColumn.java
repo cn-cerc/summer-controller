@@ -4,6 +4,6 @@ public class DateTimeColumn extends Column {
 
     @Override
     public Object getValue() {
-        return getRecord().getDatetime(getCode()).asBaseDate();
+        return getRecord().hasValue(getCode()) ? getRecord().getDatetime(getCode()) : "";
     }
 }

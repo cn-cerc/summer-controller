@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import com.obs.services.model.TemporarySignatureRequest;
 import com.obs.services.model.TemporarySignatureResponse;
 
 import cn.cerc.db.core.DataSet;
+import cn.cerc.db.core.Datetime;
 import cn.cerc.db.core.FastDate;
 import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.Utils;
@@ -138,13 +138,20 @@ public class ExcelTemplate {
                 Label item = new Label(col, row, value.toString());
                 sheet.addCell(item);
             } else {
-                FastDate day = (FastDate) column.getValue();
+                FastDate day = (FastDate) value;
                 DateTime item = new DateTime(col, row, day.asBaseDate(), new WritableCellFormat(df1));
                 sheet.addCell(item);
             }
         } else if (column instanceof DateTimeColumn) {
-            DateTime item = new DateTime(col, row, (Date) column.getValue(), new WritableCellFormat(df2));
-            sheet.addCell(item);
+            Object value = column.getValue();
+            if (value instanceof String) {
+                Label item = new Label(col, row, value.toString());
+                sheet.addCell(item);
+            } else {
+                Datetime time = (Datetime) value;
+                DateTime item = new DateTime(col, row, time.asBaseDate(), new WritableCellFormat(df2));
+                sheet.addCell(item);
+            }
         } else if (column instanceof ImageColumn) {
             if (!Utils.isEmpty(column.getValue().toString())) {
                 String imageUrl = column.getValue().toString();
