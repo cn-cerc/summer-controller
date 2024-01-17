@@ -1,10 +1,10 @@
 package cn.cerc.mis.ado;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
      * @return 从Session缓存读取，若没有开通，则从Redis读取
      */
     public Optional<T> get(String... values) {
-        if (List.of(values).stream().allMatch(IsEmptyArrayString))
+        if (Stream.of(values).allMatch(IsEmptyArrayString))
             return Optional.empty();
 
         log.debug("getSession: {}.{}", clazz.getSimpleName(), String.join(".", values));
@@ -75,8 +75,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
                 try {
                     return Optional.of(row.asEntity(clazz));
                 } catch (Exception e) {
-                    log.error("asEntity {} error: {}", clazz.getSimpleName(), row.json());
-                    e.printStackTrace();
+                    log.error("asEntity {}, json {}, error {}", clazz.getSimpleName(), row.json(), e.getMessage(), e);
                     SessionCache.del(keys);
                 }
             }
@@ -103,8 +102,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
                             SessionCache.set(keys, row);
                         return Optional.of(row.asEntity(clazz));
                     } catch (Exception e) {
-                        log.error("asEntity {} error: {}", clazz.getSimpleName(), json);
-                        e.printStackTrace();
+                        log.error("asEntity {}, json {}, error: {}", clazz.getSimpleName(), json, e.getMessage(), e);
                         jedis.del(EntityCache.buildKey(keys));
                         if (entityKey.cache() == CacheLevelEnum.RedisAndSession)
                             SessionCache.del(keys);
@@ -130,7 +128,7 @@ public class EntityCache<T extends EntityImpl> implements IHandle {
             EntityMany<T> query = new EntityMany<T>(this, clazz, SqlWhere.create(this, clazz, values).build(), true,
                     true);
             if (query.size() > 1)
-                throw new RuntimeException("There're too many records.");
+                throw new RuntimeException("There are too many records.");
             if (query.size() > 0)
                 entity = query.get(0);
         }
