@@ -2,6 +2,7 @@ package cn.cerc.mis.security;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.IForm;
+import cn.cerc.mis.core.IUserMenuCheck;
 import cn.cerc.mis.core.SupportBeanName;
 
 @Component
@@ -55,6 +57,15 @@ public class SecurityPolice {
         }
         if (!result)
             throw new SecurityStopException(method, bean, value);
+
+        // 业务菜单扩展校验
+        Optional.ofNullable(Application.getBean(IUserMenuCheck.class)).ifPresent(item -> {
+            if (bean instanceof IForm form) {
+                IUserMenuCheck.MenuCheckRecord record = item.permit(form);
+                if (!record.result())
+                    throw new SecurityStopException(record.message());
+            }
+        });
     }
 
     public static boolean check(IHandle handle, Enum<?> clazz, String operator) {
