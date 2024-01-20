@@ -125,13 +125,13 @@ public class SystemBuffer {
      * key = UserCode + DeviceId / ExportKey
      */
     public enum User implements IBufferKey {
-        SessionInfo, // 保存用户设备校验状态
+        device, // 保存用户设备校验状态
         ExportKey,
         BackUrl,
         /**
          * 调用频次
          */
-        Frequency,
+        frequency,
         /**
          * 用户列表
          */

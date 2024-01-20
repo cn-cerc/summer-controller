@@ -124,7 +124,7 @@ public class CustomSession implements ISession {
                     ((AutoCloseable) sess).close();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
         connections.clear();
@@ -212,8 +212,10 @@ public class CustomSession implements ISession {
     @Override
     public void atSystemUser() {
         ISecurityService security = Application.getBean(ISecurityService.class);
-        String token = security.getSystemUserToken(new Handle(this), this.getCorpNo(), machineCode);
-        this.loadToken(token);
+        if (security != null) {
+            String token = security.getSystemUserToken(new Handle(this), this.getCorpNo(), machineCode);
+            this.loadToken(token);
+        }
     }
 
 }

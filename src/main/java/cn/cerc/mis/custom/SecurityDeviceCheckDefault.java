@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import cn.cerc.db.core.ISession;
 import cn.cerc.mis.core.IForm;
 import cn.cerc.mis.core.ISecurityDeviceCheck;
-import cn.cerc.mis.core.PassportResult;
+import cn.cerc.mis.core.SecurityDevice;
 
 @Component
 public class SecurityDeviceCheckDefault implements ISecurityDeviceCheck {
@@ -23,8 +23,8 @@ public class SecurityDeviceCheckDefault implements ISecurityDeviceCheck {
     }
 
     @Override
-    public PassportResult pass(IForm form) {
-        return PassportResult.PASS;
+    public SecurityDevice pass(IForm form) {
+        return SecurityDevice.permit;
     }
 
 }

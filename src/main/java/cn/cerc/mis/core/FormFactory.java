@@ -39,7 +39,6 @@ public class FormFactory implements ApplicationContextAware {
             String funcCode, String... pathVariables) {
         // 设置登录开关
         req.setAttribute("logon", false);
-
         // 建立数据库资源
         try {
             ISession session = handle.getSession();
@@ -106,12 +105,14 @@ public class FormFactory implements ApplicationContextAware {
 
             ISecurityDeviceCheck deviceCheck = Application.getBean(form, ISecurityDeviceCheck.class);
             switch (deviceCheck.pass(form)) {
-            case PASS:
+            case permit:
                 log.debug("{}.{}", formId, funcCode);
                 return form._call(funcCode);
-            case CHECK:
-                return "redirect:" + Application.getBean(IAppConfig.class).getVerifyDevicePage();
-            case LOGIN:
+            case check:
+                IAppConfig config = Application.getBean(IAppConfig.class);
+                if (config != null)
+                    return "redirect:" + config.getVerifyDevicePage();
+            case login:
                 // 登录验证
                 IAppLogin appLogin = Application.getBean(form, IAppLogin.class);
                 String loginView = appLogin.getLoginView(form);

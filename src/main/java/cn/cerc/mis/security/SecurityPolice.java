@@ -116,7 +116,7 @@ public class SecurityPolice {
         if (index > -1 && point > -1) {
             // 取出授权版本列表，值如：1,3,
             String versions = value.substring(point + 1).trim();
-            if (version.length() > 0 && versions.length() > 0) {
+            if (!version.isEmpty() && !versions.isEmpty()) {
                 boolean pass = false;
                 for (String item : versions.split(",")) {
                     if (version.equals(item.trim())) {

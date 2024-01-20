@@ -4,5 +4,5 @@ import cn.cerc.db.core.IHandle;
 
 public interface ISecurityDeviceCheck extends IHandle {
 
-    PassportResult pass(IForm form);
+    SecurityDevice pass(IForm form);
 }

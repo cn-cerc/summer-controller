@@ -63,19 +63,6 @@ public class AppClient implements Serializable {
         phone_devices.add(AppClient.wechat);
     }
 
-    private static final List<String> browsers = new ArrayList<>();
-    static {
-        browsers.add("chrome");
-        browsers.add("edge");
-        browsers.add("mozilla");
-        browsers.add("firefox");
-        browsers.add("safari");
-        browsers.add("apicloud");
-        browsers.add("DitengApp");
-        browsers.add("DitengAppPad");
-        browsers.add("FourPL");
-    }
-
     // 平板
     public static final String pad = "pad";
     // 电脑
@@ -110,15 +97,6 @@ public class AppClient implements Serializable {
 
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
 
-        // 如果是非浏览器请求（CUrl接口）则不生成缓存信息
-        String userAgent = request.getHeader("User-Agent");
-        if (Utils.isEmpty(userAgent))
-            return;
-        if (browsers.stream().noneMatch(item -> userAgent.toLowerCase().contains(item.toLowerCase()))) {
-            log.info("User-Agent -> {}", userAgent);
-            return;
-        }
-
         Cookie[] cookies = request.getCookies();
         try (Jedis redis = JedisFactory.getJedis()) {
             this.device = request.getParameter(ISession.CLIENT_DEVICE);
@@ -126,10 +104,8 @@ public class AppClient implements Serializable {
                 redis.hset(key, ISession.CLIENT_DEVICE, device);
             else {
                 this.device = redis.hget(key, ISession.CLIENT_DEVICE);
-                if (Utils.isEmpty(device)) {
+                if (Utils.isEmpty(device))
                     device = pc;
-                    redis.hset(key, ISession.CLIENT_DEVICE, device);
-                }
             }
 
             this.deviceId = request.getParameter(ISession.CLIENT_ID);
@@ -161,10 +137,8 @@ public class AppClient implements Serializable {
                 redis.hset(key, ISession.LANGUAGE_ID, language);
             else {
                 this.language = redis.hget(key, ISession.LANGUAGE_ID);
-                if (Utils.isEmpty(language)) {
-                    language = LanguageResource.appLanguage;
-                    redis.hset(key, ISession.LANGUAGE_ID, language);
-                }
+                if (Utils.isEmpty(language))
+                    this.language = LanguageResource.appLanguage;
             }
 
             this.token = request.getParameter(ISession.TOKEN);
@@ -173,6 +147,15 @@ public class AppClient implements Serializable {
             else
                 this.token = redis.hget(key, ISession.TOKEN);
 
+            // token 建立则绑定 cookie
+            if (Utils.isNotEmpty(this.token)) {
+                String userKey = MemoryBuffer.buildKey(SystemBuffer.Token.UserInfoHash, token);
+                if (redis.exists(userKey)) {
+                    redis.hset(userKey, ISession.COOKIE_ID, cookieId);
+                    redis.hset(userKey, ISession.LANGUAGE_ID, this.language);
+                    redis.expire(userKey, RedisRecord.TIMEOUT);
+                }
+            }
             redis.expire(key, RedisRecord.TIMEOUT);// 每次取值延长生命值
         } catch (IllegalStateException e) {
             log.error(e.getMessage(), e);
@@ -194,6 +177,7 @@ public class AppClient implements Serializable {
         }
 
         if (!variant.isModified()) {
+            // 默认域是登录访问网址，过期时间是浏览器关闭
             String cookieId = Utils.getGuid();
             Cookie cookie = new Cookie(ISession.COOKIE_ID, cookieId);
             cookie.setPath(COOKIE_ROOT_PATH);
@@ -318,15 +302,15 @@ public class AppClient implements Serializable {
             return "";
         try {
             String ip = request.getHeader("x-forwarded-for");
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip))
                 ip = request.getHeader("Proxy-Client-IP");
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip))
                 ip = request.getHeader("WL-Proxy-Client-IP");
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip))
                 ip = request.getHeader("HTTP_CLIENT_IP");
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip))
                 ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip))
+            if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip))
                 ip = request.getRemoteAddr();
             if ("0:0:0:0:0:0:0:1".equals(ip))
                 ip = "0.0.0.0";
@@ -335,7 +319,7 @@ public class AppClient implements Serializable {
             ip = Arrays.stream(arr).findFirst().orElse("").trim();
             return ip;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return "";
         }
     }
