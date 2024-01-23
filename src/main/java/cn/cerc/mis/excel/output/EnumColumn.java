@@ -5,13 +5,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 仅支持使用枚举下标储存的数据
- * 
+ * <p>
  * 使导出Excel文件支持枚举类型 在导出模板中加上
- * 
+ * <p>
  * class:
- * 
+ * <p>
  * 独立枚举请使用 package.ClassName
- * 
+ * <p>
  * 实体内部枚举使用 package.ClassName$InnerClass
  */
 public class EnumColumn extends Column {

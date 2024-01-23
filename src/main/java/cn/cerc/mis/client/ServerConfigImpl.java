@@ -12,8 +12,6 @@ public interface ServerConfigImpl {
      * 
      * @param handle 句柄
      * @param corpNo 被调用的帐套代码
-     * @return
-     * @throws WorkingException
      */
     Optional<String> getIndustry(IHandle handle, String corpNo) throws ServiceException;
 
@@ -23,7 +21,6 @@ public interface ServerConfigImpl {
      * @param handle 句柄
      * @param corpNo 被调用的帐套代码
      * @return 返回对方授权 token
-     * @throws WorkingException
      */
     Optional<String> getEndpoint(IHandle handle, String corpNo) throws ServiceException;
 
@@ -33,7 +30,6 @@ public interface ServerConfigImpl {
      * @param handle 句柄
      * @param corpNo 被调用的帐套代码
      * @return 返回可授权的 token
-     * @throws WorkingException
      */
     Optional<String> getToken(IHandle handle, String corpNo) throws ServiceException;
 }

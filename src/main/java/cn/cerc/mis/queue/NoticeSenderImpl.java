@@ -7,7 +7,6 @@ public interface NoticeSenderImpl {
     /**
      * 发送消息
      * 
-     * @param data
      * @return 是否发送成功
      */
     boolean send(IHandle handle, NoticeMessageData data);

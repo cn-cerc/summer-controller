@@ -21,9 +21,6 @@ public interface ServerOptionImpl {
     }
 
     /**
-     * 
-     * @param handle
-     * @param service
      * @return 指定访问网址
      */
     default Optional<String> getEndpoint(IHandle handle, String service) {

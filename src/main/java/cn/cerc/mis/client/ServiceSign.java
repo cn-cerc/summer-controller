@@ -239,7 +239,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
 
     /**
      * 业务对象建议使用 asRecord
-     * 
+     * <p>
      * 服务返回结果转换为指定的业务对象
      *
      * @param <T>    业务对象实体类

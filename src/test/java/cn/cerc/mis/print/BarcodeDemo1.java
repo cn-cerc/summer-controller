@@ -1,12 +1,10 @@
 package cn.cerc.mis.print;
 
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.pdf.Barcode128;
-import com.itextpdf.text.pdf.BarcodeEAN;
-import com.itextpdf.text.pdf.BarcodePDF417;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
@@ -16,6 +14,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
+
+import javax.imageio.ImageIO;
+
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.pdf.Barcode128;
+import com.itextpdf.text.pdf.BarcodeEAN;
+import com.itextpdf.text.pdf.BarcodePDF417;
 
 public class BarcodeDemo1 {
     private static final String codeString = "9780201615883X";
@@ -36,7 +41,7 @@ public class BarcodeDemo1 {
         // g.drawImage(codeImg, 0, 0, codeImg.getWidth(null),
         // codeImg.getHeight(null), Color.white, null);
 
-        /**** 为图片添加条形码（文字），位置为条形码图片的下部居中 ****/
+        // 为图片添加条形码（文字），位置为条形码图片的下部居中
         Font font = new java.awt.Font("", java.awt.Font.PLAIN, 30);
         AttributedString ats = new AttributedString(codeString);
         ats.addAttribute(TextAttribute.FONT, font, 0, codeString.length());
@@ -47,7 +52,7 @@ public class BarcodeDemo1 {
         FontRenderContext fontRenderContext = ((Graphics2D) g).getFontRenderContext();
         int codeWidth = (int) font.getStringBounds(codeString, fontRenderContext).getWidth();
         g.drawString(iter, 25 + (400 - codeWidth) / 2, 235);
-        /*************/
+
         OutputStream os = new BufferedOutputStream(new FileOutputStream("d:/code128.png"));
         ImageIO.write(img, "PNG", os);
     }

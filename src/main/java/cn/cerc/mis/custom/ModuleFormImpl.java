@@ -11,7 +11,7 @@ public interface ModuleFormImpl extends CustomFormImpl {
 
     /**
      * 设置菜单排序列表
-     * 
+     * <p>
      * 实际可用菜单比这个少的，删除这个列表<br>
      * 实际可用菜单比这个多的，显示在这个返回值的后面
      * 

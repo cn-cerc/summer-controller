@@ -73,12 +73,12 @@ public class RemoteService extends ServiceProxy {
 
     /**
      * 调用远程服务
-     * 
+     *
      * @param endpoint 远程服务器 url
      * @param token    远程服务器访问 token
-     * @param service
-     * @param dataIn
-     * @return
+     * @param service  服务签名 SvrUserInfo.search
+     * @param dataIn   服务参数
+     * @return 服务返回值
      */
     public static DataSet call(String endpoint, String token, String service, DataSet dataIn) {
         Curl curl = new Curl();
@@ -102,13 +102,6 @@ public class RemoteService extends ServiceProxy {
 
     /**
      * 根据帐套配置，调用相应的机群服务
-     * 
-     * @param handle
-     * @param targetCorpNo 根据被调用目标帐套，获取 endpoint 与 token 并调用
-     * @param key
-     * @param dataIn
-     * @throws ServiceException
-     * @return
      */
     public static DataSet call(IHandle handle, CorpConfigImpl targetConfig, String key, DataSet dataIn,
             ServerOptionImpl serviceOption) throws ServiceException {

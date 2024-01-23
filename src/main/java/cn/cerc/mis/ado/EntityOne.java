@@ -58,8 +58,6 @@ public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
 
     /**
      * 主要用于测试环境
-     * 
-     * @param class1
      */
     public EntityOne(IHandle handle, Class<T> class1) {
         super(handle, class1, null, false, false);
