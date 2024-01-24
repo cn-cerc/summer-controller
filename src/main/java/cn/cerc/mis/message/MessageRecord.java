@@ -27,6 +27,7 @@ public class MessageRecord extends CustomMessageData {
 
     public static final String UIAI_TextAudioCommand = "MVAiTextAudioCommand"; // AI指令消息
     public static final String UIAI_OpenMenuCommand = "MVAiOpenMenuCommand"; // AI指令消息
+    public static final String UIAI_TextChartCommand = "MVAiTextChartCommand"; // AI指令消息
 
     private String corpNo;
     private String userCode;
