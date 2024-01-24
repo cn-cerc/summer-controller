@@ -9,7 +9,12 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Mail {
+    private static final Logger log = LoggerFactory.getLogger(Mail.class);
+
     private SmtpServer server;
     private InternetAddress to;
     private String subject;
@@ -21,7 +26,7 @@ public class Mail {
         try {
             this.to = new InternetAddress(toEmailAddress);
         } catch (AddressException e) {
-            e.printStackTrace();
+            log.error("{} -> error {}", toEmailAddress, e.getMessage(), e);
         }
     }
 
@@ -30,7 +35,7 @@ public class Mail {
         try {
             this.to = new InternetAddress(toEmailAddress, toPersonalName);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("{} -> error {}", toEmailAddress, e.getMessage(), e);
         }
     }
 
@@ -39,7 +44,7 @@ public class Mail {
             server.send(this);
             return true;
         } catch (UnsupportedEncodingException | MessagingException | GeneralSecurityException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }

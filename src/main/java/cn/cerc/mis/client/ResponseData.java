@@ -120,7 +120,7 @@ public class ResponseData {
             PrintWriter writer = getResponse().getWriter();
             writer.print(this.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

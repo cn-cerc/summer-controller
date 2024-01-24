@@ -3,12 +3,17 @@ package cn.cerc.mis.vcl;
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 用于建立客户端窗口
  *
  * @author 张弓
  */
 public class TApplication {
+    private static final Logger log = LoggerFactory.getLogger(TApplication.class);
+
     private TCustomForm mainForm;
 
     public TCustomForm createForm(Class<?> clazz) {
@@ -16,7 +21,7 @@ public class TApplication {
             mainForm = (TCustomForm) clazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return mainForm;
     }

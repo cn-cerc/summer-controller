@@ -90,7 +90,7 @@ public class SyncServerRedis implements ISyncServer {
                     popProcesser.popRecord(session, record, false);
                 } catch (Exception e) {
                     log.error(record.toString());
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         }

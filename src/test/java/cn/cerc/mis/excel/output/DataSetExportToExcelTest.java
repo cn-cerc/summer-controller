@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
@@ -14,6 +16,7 @@ import cn.cerc.db.core.FieldMeta;
 import jxl.write.WriteException;
 
 public class DataSetExportToExcelTest {
+    private static final Logger log = LoggerFactory.getLogger(DataSetExportToExcelTest.class);
 
     @Test
     public void test_export() {
@@ -24,7 +27,7 @@ public class DataSetExportToExcelTest {
             DataSetExportToExcel.output(dataSet, outputStream);
             outputStream.close();
         } catch (IOException | WriteException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

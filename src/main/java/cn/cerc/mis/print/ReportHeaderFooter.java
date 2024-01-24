@@ -2,6 +2,9 @@ package cn.cerc.mis.print;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -19,6 +22,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import cn.cerc.db.core.ClassResource;
 
 public class ReportHeaderFooter extends PdfPageEventHelper {
+    private static final Logger log = LoggerFactory.getLogger(ReportHeaderFooter.class);
+
     private static final ClassResource res = new ClassResource(ReportHeaderFooter.class, "summer-mvc");
 
     /**
@@ -77,9 +82,9 @@ public class ReportHeaderFooter extends PdfPageEventHelper {
                 f8 = new Font(bf, 8);
             }
         } catch (DocumentException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
         // 1.写入页眉

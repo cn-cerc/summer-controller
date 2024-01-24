@@ -75,7 +75,7 @@ public class ProcessService extends AbstractTask {
             async.dataOut().head().setValue("_message_", auto.dataOut().message());
             updateTaskprocess(async, taskId, subject);
         } catch (Throwable e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             async.setProcess(MessageProcess.error);
             async.dataOut().head().setValue("_message_", e.getMessage());
             updateTaskprocess(async, taskId, subject);

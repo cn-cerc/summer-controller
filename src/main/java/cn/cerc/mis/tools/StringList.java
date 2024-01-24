@@ -11,7 +11,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class StringList {
+    private static final Logger log = LoggerFactory.getLogger(StringList.class);
+
     private List<String> items = new ArrayList<>();
     private String message;
 
@@ -46,7 +51,7 @@ public class StringList {
             return true;
         } catch (Exception e) {
             this.message = e.getMessage();
-            e.printStackTrace();
+            log.error("{} -> error {}", fileName, e.getMessage(), e);
             return false;
         }
     }
@@ -64,7 +69,7 @@ public class StringList {
             return true;
         } catch (IOException e) {
             this.message = e.getMessage();
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return false;
         }
     }

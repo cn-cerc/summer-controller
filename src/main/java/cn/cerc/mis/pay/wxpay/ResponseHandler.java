@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 微信支付服务器签名支付请求应答类 api说明： getKey()/setKey(),获取/设置密钥
@@ -24,6 +26,7 @@ import org.dom4j.Element;
  * isTenpaySign(),是否财付通签名,true:是 false:否 getDebugInfo(),获取debug信息
  */
 public class ResponseHandler {
+    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
 
     /**
      * 密钥
@@ -83,7 +86,7 @@ public class ResponseHandler {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
     }

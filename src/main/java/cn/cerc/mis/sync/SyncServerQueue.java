@@ -36,7 +36,7 @@ public class SyncServerQueue implements ISyncServer {
 //            queue.append(record.toString(), Duration.ZERO);
 //        } catch (ClientException e) {
 //            log.error(e.getMessage());
-//            e.printStackTrace();
+//            log.error(e.getMessage(), e);
 //        }
     }
 

@@ -65,7 +65,7 @@ public class ExportChinese {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
     }

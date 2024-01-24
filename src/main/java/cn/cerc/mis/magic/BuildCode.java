@@ -46,7 +46,7 @@ public class BuildCode {
             fw = new FileWriter(file, true);
             bw = new BufferedWriter(fw);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -57,7 +57,7 @@ public class BuildCode {
             fw.close();
             file = null;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

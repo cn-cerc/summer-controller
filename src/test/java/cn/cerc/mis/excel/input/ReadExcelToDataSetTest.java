@@ -13,10 +13,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.DataSet;
 
 public class ReadExcelToDataSetTest {
+    private static final Logger log = LoggerFactory.getLogger(ReadExcelToDataSetTest.class);
 
     public static String[] colHead = new String[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
             "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG",
@@ -75,7 +78,7 @@ public class ReadExcelToDataSetTest {
 
 //            System.out.println(dataOut.json());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

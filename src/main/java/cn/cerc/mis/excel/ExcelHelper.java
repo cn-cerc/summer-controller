@@ -33,7 +33,7 @@ public abstract class ExcelHelper implements AutoCloseable {
             // 获取Excel文件对象
             workbook = Workbook.getWorkbook(file);
         } catch (BiffException | IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -67,7 +67,7 @@ public abstract class ExcelHelper implements AutoCloseable {
             //
             log.info("已生成：{}", fileName);
         } catch (WriteException | IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 

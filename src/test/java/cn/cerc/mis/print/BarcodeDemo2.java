@@ -26,7 +26,12 @@ import com.itextpdf.text.pdf.PdfWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BarcodeDemo2 {
+    private static final Logger log = LoggerFactory.getLogger(BarcodeDemo2.class);
+
     public static void main(String[] args) throws IOException, DocumentException {
         new BarcodeDemo2().createPdf("d:/barcodes.pdf");
     }
@@ -45,9 +50,9 @@ public class BarcodeDemo2 {
             // BaseFont.IDENTITY_H,BaseFont.NOT_EMBEDDED);
             fontChinese = new Font(bf, 12, Font.NORMAL);
         } catch (DocumentException e) {
-            e.printStackTrace();
+            log.error("{} -> error {}", filename, e.getMessage(), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("{} -> error {}", filename, e.getMessage(), e);
         }
 
         // step 1

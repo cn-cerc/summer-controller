@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.obs.services.model.HttpMethodEnum;
 import com.obs.services.model.TemporarySignatureRequest;
 import com.obs.services.model.TemporarySignatureResponse;
@@ -32,6 +35,8 @@ import jxl.write.WritableSheet;
 import jxl.write.WriteException;
 
 public class ExcelTemplate {
+    private static final Logger log = LoggerFactory.getLogger(ExcelTemplate.class);
+
     private String fileName;
     private List<Column> columns;
     private IAccreditManager accreditManager;
@@ -194,7 +199,7 @@ public class ExcelTemplate {
                     inputStream.close();
                     output.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                     // 图片解析错误默认输出空白，保证正常导出
                     Label item = new Label(col, row, "");
                     sheet.addCell(item);

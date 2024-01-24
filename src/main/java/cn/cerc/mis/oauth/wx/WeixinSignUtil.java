@@ -4,10 +4,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 请求校验工具类
  */
 public class WeixinSignUtil {
+    private static final Logger log = LoggerFactory.getLogger(WeixinSignUtil.class);
 
     // 验证签名
     public static boolean checkSignature(String token, String signature, String timestamp, String nonce) {
@@ -26,7 +30,7 @@ public class WeixinSignUtil {
             byte[] digest = md.digest(content.toString().getBytes());
             tmpStr = byteToStr(digest);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
 
         // 将sha1加密后的字符串可与signature对比，标识该请求来源于微信

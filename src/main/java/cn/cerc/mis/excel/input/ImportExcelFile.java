@@ -29,7 +29,7 @@ public class ImportExcelFile {
         try {
             uploadFiles = upload.parseRequest(request);
         } catch (FileUploadException e) {
-            // e.printStackTrace();
+            // log.error(e.getMessage(), e);
             uploadFiles = null;
             return 0;
         }
