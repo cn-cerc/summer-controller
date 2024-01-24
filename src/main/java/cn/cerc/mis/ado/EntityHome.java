@@ -371,7 +371,7 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
         return false; // 字段没有发生变更返回false
     }
 
-    protected void saveHistory(SqlQuery query, T entity, HistoryTypeEnum historyType) {
+    protected void saveHistory(SqlQuery query, final T entity, HistoryTypeEnum historyType) {
         boolean enableHistory = false;
         for (FieldMeta meta : this.query.fields()) {
             if (meta.history() != null && meta.history().master()) {
