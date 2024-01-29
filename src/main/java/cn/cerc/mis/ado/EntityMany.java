@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import cn.cerc.db.core.DataRow;
@@ -144,7 +143,7 @@ public class EntityMany<T extends EntityImpl> extends EntityHome<T> implements I
 
     @Override
     public Iterator<T> iterator() {
-        return this.stream().collect(Collectors.toList()).iterator();
+        return this.stream().toList().iterator();
     }
 
     public <K> LinkedHashMap<K, T> map(Function<T, K> mapper) {
