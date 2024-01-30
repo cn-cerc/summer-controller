@@ -28,9 +28,18 @@ public interface ServerOptionImpl {
     }
 
     /**
-     * 
      * @return 指定访问 token
      */
-    public Optional<String> getToken();
+    @Deprecated
+    default Optional<String> getToken() {
+        return Optional.empty();
+    }
+
+    /**
+     * @return 指定访问 token
+     */
+    default Optional<String> getToken(IHandle handle) {
+        return getToken();
+    }
 
 }

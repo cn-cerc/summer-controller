@@ -121,7 +121,7 @@ public class RemoteService extends ServiceProxy {
             // 获取指定的目标机节点
             String endpoint = serviceOption.getEndpoint(handle, key).orElse(null);
             // 获取指定的目标机授权
-            var token = serviceOption.getToken().orElse(null);
+            var token = serviceOption.getToken(handle).orElse(null);
             if (endpoint == null || token == null) {
                 // 用于自建的私服企业
                 var server = RemoteService.getServerConfig(Application.getContext());
