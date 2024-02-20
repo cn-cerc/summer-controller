@@ -78,6 +78,7 @@ public class SmtpServer {
         // 使用SSL发送
         properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         properties.put("mail.smtp.socketFactory.port", smtpPort);
+        properties.put("mail.smtp.ssl.protocols", "TLSv1.2");
     }
 
     public void send(Mail mail) throws MessagingException, UnsupportedEncodingException, GeneralSecurityException {
