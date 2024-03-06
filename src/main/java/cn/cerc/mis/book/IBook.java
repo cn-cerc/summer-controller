@@ -1,5 +1,6 @@
 package cn.cerc.mis.book;
 
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.ServiceException;
 
 public interface IBook extends IBookEnroll {
@@ -10,5 +11,5 @@ public interface IBook extends IBookEnroll {
     void ready() throws ServiceException;
 
     // 将帐本的更新，保存到数据库中
-    void save() throws ServiceException;
+    void save() throws ServiceException, DataException;
 }
