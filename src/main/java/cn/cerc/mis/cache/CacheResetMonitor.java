@@ -11,9 +11,9 @@ public class CacheResetMonitor extends Thread {
 
     @Override
     public void run() {
-        try (Jedis redis = JedisFactory.getJedis()) {
-            redis.subscribe(monitor, MemoryListener.CacheChannel);
-        }
+        Jedis redis = JedisFactory.getJedis();
+        // 此方法是线程阻塞的，所以按照原来的 try-resources 的逻辑也同样是独占一个Redis连接
+        redis.subscribe(monitor, MemoryListener.CacheChannel);
     }
 
     public void requestStop() {
