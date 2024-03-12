@@ -2,6 +2,7 @@ package cn.cerc.mis.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +10,12 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
+import cn.cerc.db.core.MD5;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
+import cn.cerc.db.redis.Redis;
+import cn.cerc.mis.other.MemoryBuffer;
 import cn.cerc.mis.security.Permission;
 
 public interface IService {
@@ -50,6 +54,26 @@ public interface IService {
     default DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws IllegalAccessException,
             InvocationTargetException, ServiceException, DataException, RuntimeException {
         long startTime = System.currentTimeMillis();
+        String redisKey = null;
+        ServiceCache cacheConfig = this.getClass().getAnnotation(ServiceCache.class);
+        if (cacheConfig != null) {
+            String level = switch (cacheConfig.level()) {
+            case user -> handle.getUserCode();
+            case corp -> handle.getCorpNo();
+            case system -> "";
+            default -> handle.getSession().getToken();
+            };
+            String md5 = MD5.get(level + function.getString() + dataIn.json());
+            int prefix = MemoryBuffer.prefix(SystemBuffer.Service.Cache);
+            redisKey = String.join(".", String.valueOf(prefix), this.getClass().getSimpleName(), md5);
+            try (Redis redis = new Redis()) {
+                String json = redis.get(redisKey);
+                if (Utils.isNotEmpty(json)) {
+                    return new DataSet().setJson(json);
+                }
+            }
+        }
+
         try {
             if (function == null || Utils.isEmpty(function.getString()))
                 return new DataSet().setMessage("function is null");
@@ -74,7 +98,22 @@ public interface IService {
                     function.setKey(key.substring(0, key.lastIndexOf(".execute")));
                 service.setServiceId(function);
             }
-            return sm.call(this, handle, dataIn);
+            DataSet dataSet = sm.call(this, handle, dataIn);
+            if (cacheConfig != null) {
+                try (Redis redis = new Redis()) {
+                    long seconds = cacheConfig.expire();
+                    if (seconds < 3) {
+                        seconds = 3L;
+                        log.warn("{} 服务缓存过期时间不允许小于3秒，强制改为3秒", this.getClass().getSimpleName());
+                    }
+                    if (seconds > TimeUnit.HOURS.toSeconds(24)) {
+                        seconds = TimeUnit.HOURS.toSeconds(24);
+                        log.warn("{} 服务缓存过期时间不允许大于24小时，强制改为24小时", this.getClass().getSimpleName());
+                    }
+                    redis.setex(redisKey, seconds, dataSet.json());
+                }
+            }
+            return dataSet;
         } finally {
             writeExecuteTime(handle, dataIn, function.key(), startTime);
         }

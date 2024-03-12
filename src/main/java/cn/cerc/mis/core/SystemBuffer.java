@@ -180,7 +180,8 @@ public class SystemBuffer {
      * key = sessionId + MD5(dataIn)
      */
     public enum Service implements IBufferKey {
-        BigData;
+        BigData,
+        Cache;
 
         @Override
         public int getStartingPoint() {
