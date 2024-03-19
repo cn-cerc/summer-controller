@@ -48,7 +48,8 @@ public class Application implements ApplicationContextAware {
     public static final String userCode = ISession.USER_CODE;
 
     static {
-        productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
+        // TODO 改为 /product/version/oss/host
+        productStatic = String.format("/%s/%s/oss/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
         servicePath = config.getString("app.service.path", "");
     }
 
