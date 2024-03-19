@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
@@ -58,15 +57,6 @@ public class FormFactory implements ApplicationContextAware {
                 }
                 if (context.containsBean(beanId))
                     form = context.getBean(beanId, IForm.class);
-            }
-            if (form == null) {
-                try {
-                    ISupplierForm supplier = context.getBean(ISupplierForm.class);
-                    if (supplier != null && supplier.findForm(formId, funcCode))
-                        form = supplier.getForm();
-                } catch (NoSuchBeanDefinitionException e) {
-                    log.error(e.getMessage());
-                }
             }
             if (form == null)
                 throw new PageNotFoundException(req.getServletPath());
