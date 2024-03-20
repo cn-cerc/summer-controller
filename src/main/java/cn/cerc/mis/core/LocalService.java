@@ -116,9 +116,7 @@ public class LocalService extends ServiceProxy {
             Throwable throwable = e.getCause() != null ? e.getCause() : e;
             String message = String.format("service %s, corpNo %s, dataIn %s, message %s", key, handle.getCorpNo(),
                     dataIn.json(), throwable.getMessage());
-            if (e instanceof SecurityStopException)
-                JayunLogParser.warn(LocalService.class, throwable, message);// 用户权限不足，记入警告类日志
-            else
+            if (!(e instanceof SecurityStopException)) // 权限不足类警告写入 info
                 JayunLogParser.error(LocalService.class, throwable, message);
             log.info("{}", message, throwable);
             dataOut.setError().setMessage(throwable.getMessage());
