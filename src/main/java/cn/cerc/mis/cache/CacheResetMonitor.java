@@ -2,16 +2,15 @@ package cn.cerc.mis.cache;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import cn.cerc.db.redis.JedisFactory;
-import redis.clients.jedis.Jedis;
+import cn.cerc.db.redis.Redis;
 
 public class CacheResetMonitor extends Thread {
     private final SubCacheEvent monitor = new SubCacheEvent();
     private final AtomicBoolean isStop = new AtomicBoolean(false);
+    private final Redis redis = new Redis();
 
     @Override
     public void run() {
-        Jedis redis = JedisFactory.getJedis();
         // 此方法是线程阻塞的，所以按照原来的 try-resources 的逻辑也同样是独占一个Redis连接
         redis.subscribe(monitor, MemoryListener.CacheChannel);
     }

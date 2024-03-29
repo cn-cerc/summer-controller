@@ -25,6 +25,7 @@ import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
 import cn.cerc.db.redis.JedisFactory;
+import cn.cerc.db.redis.Redis;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
 import redis.clients.jedis.Jedis;
@@ -98,7 +99,7 @@ public class AppClient implements Serializable {
         this.key = MemoryBuffer.buildObjectKey(AppClient.class, this.cookieId, AppClient.Version);
 
         Cookie[] cookies = request.getCookies();
-        try (Jedis redis = JedisFactory.getJedis()) {
+        try (Redis redis = new Redis()) {
             this.device = request.getParameter(ISession.CLIENT_DEVICE);
             if (!Utils.isEmpty(device))
                 redis.hset(key, ISession.CLIENT_DEVICE, device);
