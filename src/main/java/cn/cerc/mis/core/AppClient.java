@@ -24,11 +24,9 @@ import cn.cerc.db.core.LanguageResource;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.core.Variant;
-import cn.cerc.db.redis.JedisFactory;
 import cn.cerc.db.redis.Redis;
 import cn.cerc.db.redis.RedisRecord;
 import cn.cerc.mis.other.MemoryBuffer;
-import redis.clients.jedis.Jedis;
 
 @Component
 @Scope(WebApplicationContext.SCOPE_REQUEST)
@@ -208,7 +206,7 @@ public class AppClient implements Serializable {
     }
 
     public void delete(String field) {
-        try (Jedis redis = JedisFactory.getJedis()) {
+        try (Redis redis = new Redis()) {
             redis.hdel(key, field);
         }
     }
@@ -220,7 +218,7 @@ public class AppClient implements Serializable {
     public void setId(String value) {
         this.deviceId = value == null ? "" : value;
         request.setAttribute(ISession.CLIENT_ID, deviceId);
-        try (Jedis redis = JedisFactory.getJedis()) {
+        try (Redis redis = new Redis()) {
             redis.hset(key, ISession.CLIENT_ID, deviceId);
         }
         if (value != null && value.length() == 28)// 微信openid的长度
@@ -238,7 +236,7 @@ public class AppClient implements Serializable {
         this.device = Utils.isEmpty(value) ? pc : value;
         request.setAttribute(ISession.CLIENT_DEVICE, device);
 
-        try (Jedis redis = JedisFactory.getJedis()) {
+        try (Redis redis = new Redis()) {
             redis.hset(key, ISession.CLIENT_DEVICE, device);
         }
     }
@@ -328,7 +326,7 @@ public class AppClient implements Serializable {
     @Override
     public String toString() {
         Map<String, String> items;
-        try (Jedis redis = JedisFactory.getJedis()) {
+        try (Redis redis = new Redis()) {
             items = redis.hgetAll(key);
         }
         return new Gson().toJson(items);
