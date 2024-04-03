@@ -36,6 +36,8 @@ public class Application implements ApplicationContextAware {
     private static final String servicePath;
     // 产品静态文件
     public static final String productStatic;
+    // cdn访问路径
+    public static final String cdnPath;
     // spring context
     private static ApplicationContext context;
     @Deprecated
@@ -48,15 +50,23 @@ public class Application implements ApplicationContextAware {
     public static final String userCode = ISession.USER_CODE;
 
     static {
-        productStatic = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
+        productStatic = String.format("/%s/%s/oss/host", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
+        cdnPath = String.format("/%s/%s/common/cdn", ServerConfig.getAppProduct(), ServerConfig.getAppVersion());
         servicePath = config.getString("app.service.path", "");
     }
 
-    // 图片静态路径
-    public static String getStaticPath() {
-        // zookeeper 路径 /diteng/main/common/cdn
+    // cdn访问路径
+    public static String getCdnPath() {
+        // zookeeper 路径 /diteng/main/oss/host
         return ZkNode.get()
-                .getNodeValue(productStatic, () -> config.getString("app.static.path", "http://oss.diteng.top/static"));
+                .getNodeValue(cdnPath, () -> config.getString("app.static.path", "http://oss.diteng.top/static"));
+    }
+
+    // 图片、css、js静态资源路径
+    public static String getStaticPath() {
+        // zookeeper 路径 /diteng/main/oss/host
+        return ZkNode.get()
+                .getNodeValue(productStatic, () -> config.getString("app.static.path", "http://oss.diteng.top"));
     }
 
     // aui静态资源路径
