@@ -29,7 +29,6 @@ import cn.cerc.mis.core.IService;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceMethod;
 import cn.cerc.mis.core.ServiceState;
-import cn.cerc.mis.log.JayunLogParser;
 
 public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(ServiceSign.class);
@@ -106,9 +105,8 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
     public ServiceSign callLocal(IHandle handle, DataSet dataIn) {
         if (handle instanceof BookHandle) {
             RuntimeException exception = new RuntimeException(
-                    String.format("BookHandle 不得使用 callLocal 调用 %s, dataIn %s", this.id(), dataIn.json()));
-            JayunLogParser.warn(ServiceSign.class, exception);
-            log.info(exception.getMessage(), exception);
+                    String.format("BookHandle 不可以用于 callLocal 调用, service %s, dataIn %s", this.id(), dataIn.json()));
+            log.warn(exception.getMessage(), exception);
         }
 
         this.setSession(handle.getSession());
@@ -151,7 +149,7 @@ public final class ServiceSign extends ServiceProxy implements ServiceSignImpl, 
         } catch (Throwable e) {
             String message = String.format("代理类型 %s, 远程服务 %s, 目标帐套 %s, 服务入参 %s -> 异常消息 %s", corpConfig.getClass(), id(),
                     corpConfig.getCorpNo(), dataIn.json(), e.getMessage());
-            JayunLogParser.error(ServiceSign.class, e, message);
+            log.error(message, e);
             dataOut = new DataSet().setError().setMessage(e.getMessage());
         }
         sign.setDataOut(dataOut);

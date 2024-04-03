@@ -42,7 +42,6 @@ import cn.cerc.db.redis.Redis;
 import cn.cerc.db.sqlite.SqliteDatabase;
 import cn.cerc.db.testsql.TestsqlServer;
 import cn.cerc.mis.core.Application;
-import cn.cerc.mis.log.JayunLogParser;
 import redis.clients.jedis.Jedis;
 
 public abstract class EntityHome<T extends EntityImpl> extends Handle implements EntityHomeImpl {
@@ -246,10 +245,9 @@ public abstract class EntityHome<T extends EntityImpl> extends Handle implements
             this.insert(obj);
         else {
             if (entity.getEntityHome() != this || entity.getClass() != this.clazz) {
-                InvalidEntityException exception = new InvalidEntityException(
+                InvalidEntityException e = new InvalidEntityException(
                         String.format("%s 不是 %s 亲自创建的类对象，不允许跨子类修改 %s", entity.getClass(), this, query.sqlText()));
-                JayunLogParser.error(EntityHome.class, exception);
-                log.info(exception.getMessage(), exception);
+                log.warn(e.getMessage(), e);
             }
             save(recNo - 1, obj);
             query.current().saveToEntity(obj);

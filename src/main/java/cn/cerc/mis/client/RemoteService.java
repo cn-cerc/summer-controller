@@ -24,7 +24,6 @@ import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
 import cn.cerc.mis.core.LocalService;
 import cn.cerc.mis.core.ServiceState;
-import cn.cerc.mis.log.JayunLogParser;
 
 public class RemoteService extends ServiceProxy {
     private static final Logger log = LoggerFactory.getLogger(RemoteService.class);
@@ -91,11 +90,10 @@ public class RemoteService extends ServiceProxy {
             String response = curl.doPost(endpoint + service);
             return new DataSet().setJson(response);
         } catch (IOException | JsonSyntaxException e) {
-            String message = String.format("请求地址 %s%s, 入参信息 %s -> 返回异常 %s", endpoint, service,
+            String message = String.format("访问服务 %s%s, 入参信息 %s -> 返回异常 %s", endpoint, service,
                     JsonTool.toJson(curl.getParameters()), e.getMessage());
             RuntimeException exception = new RuntimeException(message);
-            JayunLogParser.error(RemoteService.class, exception);
-            log.info(exception.getMessage(), exception);
+            log.error(exception.getMessage(), exception);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
         }
     }
@@ -112,8 +110,7 @@ public class RemoteService extends ServiceProxy {
                 String message = String.format("%s, %s 发起帐套和目标帐套相同，应改使用 callLocal 来调用，dataIn %s", key,
                         handle.getCorpNo(), dataIn.json());
                 RuntimeException exception = new RuntimeException(message);
-                JayunLogParser.warn(RemoteService.class, exception);
-                log.info("{}", message, exception);
+                log.warn("{}", message, exception);
             }
             return LocalService.call(key, handle, dataIn);
         } else if (serviceOption != null) {

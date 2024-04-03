@@ -19,7 +19,6 @@ import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.client.ServerConfigImpl;
 import cn.cerc.mis.core.Application;
-import cn.cerc.mis.log.JayunLogParser;
 
 public abstract class AbstractObjectQueue<T extends CustomMessageData> extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractObjectQueue.class);
@@ -89,14 +88,16 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
                 this.repairToken(data.getToken());
                 boolean loadToken = handle.getSession().loadToken(data.getToken());
                 if (!loadToken) {
-                    String error = String.format("已失效 %s，执行类 %s，消息体 %s", data.getToken(), this.getClass(), message);
-                    JayunLogParser.warn(this.getClass(), new RuntimeException(error));
-                    log.info(error);
+                    String error = String.format("队列 token 已失效 %s，执行对象 %s，消息内容 %s", data.getToken(), this.getClass(),
+                            message);
+                    RuntimeException e = new RuntimeException(error);
+                    log.warn(e.getMessage(), e);
                     return true;
                 }
             }
-            var result = this.execute(handle, data);
-            // 非Sqlmq队列执行失败后，将其插入到Sqlmq中继续执行
+
+            // 非 sqlmq 队列执行失败后，将其插入到 sqlmq 中继续执行
+            boolean result = this.execute(handle, data);
             if (repushOnError && !result && this.getDelayTime() > 0 && this.getService() != QueueServiceEnum.Sqlmq) {
                 super.pushToSqlmq(message);
                 return true;

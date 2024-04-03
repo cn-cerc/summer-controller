@@ -15,7 +15,6 @@ import cn.cerc.db.queue.QueueServiceEnum;
 import cn.cerc.mis.client.CorpConfigImpl;
 import cn.cerc.mis.client.RemoteService;
 import cn.cerc.mis.core.Application;
-import cn.cerc.mis.log.JayunLogParser;
 
 public abstract class AbstractDataRowQueue extends AbstractQueue {
     private static final Logger log = LoggerFactory.getLogger(AbstractDataRowQueue.class);
@@ -68,10 +67,10 @@ public abstract class AbstractDataRowQueue extends AbstractQueue {
                 this.repairToken(data.getString("token"));
                 boolean loadToken = handle.getSession().loadToken(data.getString("token"));
                 if (!loadToken) {
-                    String error = String.format("已失效 %s，执行类 %s，消息体 %s", data.getString("token"), this.getClass(),
+                    String error = String.format("队列 token 已失效 %s，执行对象 %s，消息内容 %s", data.getString("token"), this.getClass(),
                             message);
-                    JayunLogParser.error(this.getClass(), new RuntimeException(error));
-                    log.info(error);
+                    RuntimeException e = new RuntimeException(error);
+                    log.warn(e.getMessage(), e);
                     return true;
                 }
                 DataCell corpNo = data.bind("corp_no_");// 执行器的目标帐套

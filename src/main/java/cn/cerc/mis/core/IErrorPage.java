@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.IAppConfig;
-import cn.cerc.mis.log.JayunLogParser;
+import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.other.PageNotFoundException;
 import cn.cerc.mis.security.SecurityStopException;
 
@@ -19,28 +19,33 @@ public interface IErrorPage {
 
     default void output(HttpServletRequest request, HttpServletResponse response, Throwable throwable) {
         String clientIP = AppClient.getClientIP(request);
-        String error = throwable.getMessage();
+        String message = throwable.getMessage();
 
         if (throwable.getCause() != null) {
             throwable = throwable.getCause();
-            error = throwable.getMessage();
+            message = throwable.getMessage();
         }
 
-        String message;
         if (throwable instanceof PageNotFoundException)
-            log.info("client ip {}, page not found {}", clientIP, error, throwable);
+            log.info("用户地址 {}, 页面异常 {}", clientIP, message, throwable);
         else if (throwable instanceof UserRequestException)
-            log.info("client ip {}, user request error {}", clientIP, error, throwable);
+            log.info("用户地址 {}, 请求异常 {}", clientIP, message, throwable);
         else if (throwable instanceof SecurityStopException)
-            log.info("client ip {}, security check error {}", clientIP, error, throwable);
-        else {
-            message = String.format("clientIP %s, %s", clientIP, error);
-            if (throwable instanceof RuntimeException)
-                JayunLogParser.error(IErrorPage.class, throwable);
-            else
-                JayunLogParser.warn(IErrorPage.class, throwable);
-            log.info("{}", message, throwable);
-        }
+            log.warn("用户地址 {}, 权限校验异常 {}", clientIP, message, throwable);
+        else if (throwable instanceof IOException)
+            log.error("用户地址 {}, io异常 {}", clientIP, message, throwable);
+        else if (throwable instanceof ServiceExecuteException)
+            log.error("用户地址 {}, 服务执行异常 {}", clientIP, message, throwable);
+        else if (throwable instanceof ServletException)
+            log.error("用户地址 {}, servlet异常 {}", clientIP, message, throwable);
+        else if (throwable instanceof IllegalArgumentException)
+            log.error("用户地址 {}, 参数异常 {}", clientIP, message, throwable);
+        else if (throwable instanceof ReflectiveOperationException)
+            log.error("用户地址 {}, 反射异常 {}", clientIP, message, throwable);
+        else if (throwable instanceof RuntimeException)
+            log.error("用户地址 {}, 运行异常 {}", clientIP, message, throwable);
+        else
+            log.warn("用户地址 {}, 其他异常 {}", clientIP, message, throwable);
 
         String errorPage = this.getErrorPage(request, response, throwable);
         if (errorPage != null) {

@@ -20,7 +20,6 @@ import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.ado.CustomEntity;
 import cn.cerc.mis.ado.EmptyEntity;
-import cn.cerc.mis.log.JayunLogParser;
 
 public abstract class CustomEntityService<HI extends CustomEntity, BI extends CustomEntity, HO extends CustomEntity, BO extends CustomEntity>
         implements IService {
@@ -101,8 +100,8 @@ public abstract class CustomEntityService<HI extends CustomEntity, BI extends Cu
                             String name = Utils.isEmpty(column.name()) ? field.getName() : column.name();
                             String message = String.format("%s 输出单身数据字段 %s 必须有值", this.getClass().getSimpleName(),
                                     name);
-                            RuntimeException exception = new RuntimeException(message);
-                            JayunLogParser.warn(this.getClass(), exception);
+                            RuntimeException e = new RuntimeException(message);
+                            log.warn(e.getMessage(), e);
                             flag = true;
                         }
                     }
