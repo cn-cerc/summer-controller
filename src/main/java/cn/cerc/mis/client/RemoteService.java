@@ -86,14 +86,14 @@ public class RemoteService extends ServiceProxy {
         if (Utils.isEmpty(service))
             throw new RuntimeException("service is null");
         curl.put("dataIn", dataIn.json());
+        String response = "";
         try {
-            String response = curl.doPost(endpoint + service);
+            response = curl.doPost(endpoint + service);
             return new DataSet().setJson(response);
         } catch (IOException | JsonSyntaxException e) {
-            String message = String.format("访问服务 %s%s, 入参信息 %s -> 返回异常 %s", endpoint, service,
-                    JsonTool.toJson(curl.getParameters()), e.getMessage());
-            RuntimeException exception = new RuntimeException(message);
-            log.error(exception.getMessage(), exception);
+            String message = String.format("访问服务 %s%s, 入参信息 %s -> 返回信息 %s，解析异常 %s", endpoint, service,
+                    JsonTool.toJson(curl.getParameters()), response, e.getMessage());
+            log.error(message, e);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
         }
     }
