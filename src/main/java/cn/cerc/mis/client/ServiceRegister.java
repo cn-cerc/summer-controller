@@ -2,6 +2,7 @@ package cn.cerc.mis.client;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,12 +39,12 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
     /**
      * 内部验证域名
      */
-    public static final String extranet_validate = config.getProperty("application.extranet.validate", "http://127.0.0.1");
+    public static final String extranet_validate = config.getProperty("application.extranet.validate",
+            "http://127.0.0.1");
     /**
      * 内网节点信息列表
      */
     private static final Map<String, ServiceRegisterRecord> intranets = new ConcurrentHashMap<>();
-    private static boolean registered = false;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -81,8 +82,6 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             }
         }
 
-        if (registered)
-            return true;
         String original = ServerConfig.getAppOriginal();
         // 取得内网节点信息
         String port = config.getProperty("application.port", ApplicationEnvironment.hostPort());
@@ -92,10 +91,21 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String hostname = ApplicationEnvironment.hostname();
         String intranet = config.getString("application.intranet", host);
 
+        ServiceRegisterRecord record = intranets.get(original);
+        if (record != null) {
+            // 判断自身是否已经注册过节点
+            for (String json : record.getIntranets()) {
+                DataRow dataRow = new DataRow().setJson(json);
+                if (Objects.equals(hostname, dataRow.getString("hostname")))
+                    return true;
+                if (Objects.equals(intranet, dataRow.getString("intranet")))
+                    return true;
+            }
+        }
+
         String nodeKey = buildRootPath(original) + "/" + ApplicationEnvironment.group() + "-";
         DataRow node = DataRow.of("intranet", intranet, "hostname", hostname, "time", new Datetime());
         ZkServer.get().create(nodeKey, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
-        registered = true;
         return true;
     }
 
