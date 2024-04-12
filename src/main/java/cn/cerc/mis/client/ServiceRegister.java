@@ -36,6 +36,10 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
      */
     public static final String extranet = config.getProperty("application.extranet", "http://127.0.0.1");
     /**
+     * 内部验证域名
+     */
+    public static final String extranet_validate = config.getProperty("application.extranet.validate", "http://127.0.0.1");
+    /**
      * 内网节点信息列表
      */
     private static final Map<String, ServiceRegisterRecord> intranets = new ConcurrentHashMap<>();
