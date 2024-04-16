@@ -91,17 +91,24 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
         String hostname = ApplicationEnvironment.hostname();
         String intranet = config.getString("application.intranet", host);
 
-        ServiceRegisterRecord record = intranets.get(original);
-        if (record != null) {
+        ZkServer server = ZkServer.get();
+        String rootPath = buildRootPath(original);
+        String groupPath = buildGroupPath(original);
+        List<String> childNodes = server.getNodes(rootPath);
+        for (String node : childNodes) {
+            String path = rootPath + "/" + node;
+            if (Objects.equals(path, groupPath))
+                continue; // 跳过 group 节点
+            String json = server.getValue(node);
+            if (Utils.isEmpty(json))
+                continue;
             // 判断自身是否已经注册过节点
-            for (String json : record.getIntranets()) {
-                DataRow dataRow = new DataRow().setJson(json);
-                if (Objects.equals(intranet, dataRow.getString("intranet")))
-                    return true;
-            }
+            DataRow dataRow = new DataRow().setJson(json);
+            if (Objects.equals(intranet, dataRow.getString("intranet")))
+                return true;
         }
 
-        String nodeKey = buildRootPath(original) + "/" + ApplicationEnvironment.group() + "-";
+        String nodeKey = rootPath + "/" + ApplicationEnvironment.group() + "-";
         DataRow node = DataRow.of("intranet", intranet, "hostname", hostname, "time", new Datetime());
         ZkServer.get().create(nodeKey, node.json(), CreateMode.EPHEMERAL_SEQUENTIAL);
         return true;
