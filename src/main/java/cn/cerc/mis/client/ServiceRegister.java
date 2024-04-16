@@ -96,8 +96,6 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             // 判断自身是否已经注册过节点
             for (String json : record.getIntranets()) {
                 DataRow dataRow = new DataRow().setJson(json);
-                if (Objects.equals(hostname, dataRow.getString("hostname")))
-                    return true;
                 if (Objects.equals(intranet, dataRow.getString("intranet")))
                     return true;
             }
