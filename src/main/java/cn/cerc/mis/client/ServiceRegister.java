@@ -99,7 +99,7 @@ public class ServiceRegister implements ApplicationContextAware, ApplicationList
             String path = rootPath + "/" + node;
             if (Objects.equals(path, groupPath))
                 continue; // 跳过 group 节点
-            String json = server.getValue(node);
+            String json = server.getValue(path);
             if (Utils.isEmpty(json))
                 continue;
             // 判断自身是否已经注册过节点
