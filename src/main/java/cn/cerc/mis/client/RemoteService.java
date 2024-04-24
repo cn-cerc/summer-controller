@@ -93,7 +93,7 @@ public class RemoteService extends ServiceProxy {
         } catch (IOException | JsonSyntaxException e) {
             String message = String.format("访问服务 %s%s, 入参信息 %s -> 返回信息 %s，解析异常 %s", endpoint, service,
                     JsonTool.toJson(curl.getParameters()), response, e.getMessage());
-            log.info(message, e);
+            log.error(message, e);
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
         }
     }

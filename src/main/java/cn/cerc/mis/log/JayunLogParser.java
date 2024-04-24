@@ -71,7 +71,7 @@ public class JayunLogParser {
      */
     public static void analyze(String appender, final LoggingEvent event, final LocationInfo locationInfo) {
         executor.submit(() -> {
-                        // 本地开发不发送日志到测试平台
+            // 本地开发不发送日志到测试平台
             if (ServerConfig.isServerDevelop())
                 return;
             // 灰度发布不发送日志到测试平台
@@ -115,36 +115,37 @@ public class JayunLogParser {
                 e.printStackTrace();
             }
 
+            // 日志堆栈解析
             String[] stacks = event.getThrowableStrRep();
-            if (stacks != null)
+            if (stacks != null) {
                 builder.stack(stacks);
+                // 起源类没有在通缉名单上再抓堆栈信息
+                if (wanted.stream().noneMatch(className::contains)) {
+                    for (String stack : stacks) {
+                        // 如果捕捉到业务代码就重置触发器信息
+                        if (wanted.stream().anyMatch(stack::contains)) {
+                            stack = stack.trim();
+                            String trigger = JayunLogParser.trigger(stack);
+                            if (Utils.isEmpty(trigger))
+                                continue;
+                            builder.id(trigger);
 
-            // 起源类没有在通缉名单上再抓堆栈信息
-            if (wanted.stream().noneMatch(className::contains)) {
-                for (String stack : stacks) {
-                    // 如果捕捉到业务代码就重置触发器信息
-                    if (wanted.stream().anyMatch(stack::contains)) {
-                        stack = stack.trim();
-                        String trigger = JayunLogParser.trigger(stack);
-                        if (Utils.isEmpty(trigger))
-                            continue;
-                        builder.id(trigger);
-
-                        String line = JayunLogParser.lineNumber(stack);
-                        builder.line(line);
-                        try {
-                            Class<?> caller = Class.forName(trigger);
-                            // 读取通缉令修改人
-                            LastModified modified = caller.getAnnotation(LastModified.class);
-                            if (modified != null) {
-                                builder.mainName(modified.main());
-                                builder.name(modified.name());
-                                builder.date(modified.date());
+                            String line = JayunLogParser.lineNumber(stack);
+                            builder.line(line);
+                            try {
+                                Class<?> caller = Class.forName(trigger);
+                                // 读取通缉令修改人
+                                LastModified modified = caller.getAnnotation(LastModified.class);
+                                if (modified != null) {
+                                    builder.mainName(modified.main());
+                                    builder.name(modified.name());
+                                    builder.date(modified.date());
+                                }
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
                             }
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
+                            break;
                         }
-                        break;
                     }
                 }
             }
