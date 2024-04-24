@@ -17,6 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 
+import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.core.LastModified;
 import cn.cerc.mis.security.SecurityStopException;
