@@ -134,7 +134,6 @@ public class ImportExcel extends ImportExcelFile {
     }
 
     public void setTemplate(ImportExcelTemplate template) {
-
         this.template = template;
     }
 

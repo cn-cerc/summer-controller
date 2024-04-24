@@ -1,11 +1,15 @@
 package cn.cerc.mis.core;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.cerc.db.core.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,26 +30,27 @@ public interface IErrorPage {
             message = throwable.getMessage();
         }
 
+        String url = this.getUrl(request);
         if (throwable instanceof PageNotFoundException)
-            log.info("用户地址 {}, 页面异常 {}", clientIP, message, throwable);
+            log.info("ip {}, url {}, 页面异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof UserRequestException)
-            log.info("用户地址 {}, 请求异常 {}", clientIP, message, throwable);
+            log.info("ip {}, url {}, 请求异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof SecurityStopException)
-            log.warn("用户地址 {}, 权限校验异常 {}", clientIP, message, throwable);
+            log.warn("ip {}, url {}, 权限校验异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof IOException)
-            log.error("用户地址 {}, io异常 {}", clientIP, message, throwable);
+            log.error("ip {}, url {}, io异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ServiceExecuteException)
-            log.error("用户地址 {}, 服务执行异常 {}", clientIP, message, throwable);
+            log.error("ip {}, url {}, 服务执行异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ServletException)
-            log.error("用户地址 {}, servlet异常 {}", clientIP, message, throwable);
+            log.error("ip {}, url {}, servlet异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof IllegalArgumentException)
-            log.error("用户地址 {}, 参数异常 {}", clientIP, message, throwable);
+            log.error("ip {}, url {}, 参数异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ReflectiveOperationException)
-            log.error("用户地址 {}, 反射异常 {}", clientIP, message, throwable);
+            log.error("ip {}, url {}, 反射异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof RuntimeException)
-            log.error("用户地址 {}, 运行异常 {}", clientIP, message, throwable);
+            log.error("ip {}, url {}, 运行异常 {}", clientIP, url, message, throwable);
         else
-            log.warn("用户地址 {}, 其他异常 {}", clientIP, message, throwable);
+            log.warn("ip {}, url {}, 其他异常 {}", clientIP, url, message, throwable);
 
         String errorPage = this.getErrorPage(request, response, throwable);
         if (errorPage != null) {
@@ -57,6 +62,43 @@ public interface IErrorPage {
                 log.error(e.getMessage(), e);
             }
         }
+    }
+
+    private String getUrl(HttpServletRequest request) {
+        StringBuilder builder = new StringBuilder();
+        String site = request.getRequestURL().toString();
+        builder.append(site);
+        Map<String, String> items = this.convert(request.getParameterMap());
+        int i = 0;
+        for (String key : items.keySet()) {
+            i++;
+            builder.append(i == 1 ? "?" : "&");
+            builder.append(key);
+            builder.append("=");
+            String value = items.get(key);
+            if (value != null) {
+                builder.append(Utils.encode(value, StandardCharsets.UTF_8.name()));
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 解析 request 的请求参数
+     */
+    private Map<String, String> convert(Map<String, String[]> params) {
+        Map<String, String> items = new LinkedHashMap<>();
+        params.forEach((key, value) -> {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < value.length; i++) {
+                builder.append(value[i]);
+                if (i < value.length - 1) {
+                    builder.append(",");
+                }
+            }
+            items.put(key, builder.toString());
+        });
+        return items;
     }
 
     String getErrorPage(HttpServletRequest req, HttpServletResponse resp, Throwable error);

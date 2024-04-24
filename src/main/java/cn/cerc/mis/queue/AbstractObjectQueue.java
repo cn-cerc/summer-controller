@@ -123,8 +123,6 @@ public abstract class AbstractObjectQueue<T extends CustomMessageData> extends A
      * @return 消息消费成功否
      */
     public abstract boolean execute(IHandle handle, T entity);
-
-//
 //    public boolean receive(OnObjectMessage<T> event) {
 //        QueueConsumer consumer = QueueConsumer.getConsumer(this.getTopic(), this.getTag());
 //        return consumer.receive(message -> event.execute(new Gson().fromJson(message, getClazz())));
