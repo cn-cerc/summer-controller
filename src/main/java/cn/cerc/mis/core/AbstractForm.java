@@ -124,8 +124,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
     }
 
     // 执行指定函数，并返回jsp文件名，若自行处理输出则直接返回null
-    @Override
-    public String _call(String funcCode)
+    protected String callDefault(String funcCode)
             throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, ServletException, IOException, ServiceExecuteException {
         long start = System.currentTimeMillis();

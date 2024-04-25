@@ -5,9 +5,13 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.ServletException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.mis.client.ServiceExecuteException;
 
 public class FormQuery {
+    private static final Logger log = LoggerFactory.getLogger(FormQuery.class);
 
     public static String call(AbstractForm owner, String id, String... pathVariables)
             throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
@@ -21,7 +25,12 @@ public class FormQuery {
         bean.setSession(owner.getSession());
         bean.setId(formId);
         bean.setPathVariables(pathVariables);
-        return bean._call(funcCode);
+        try {
+            return bean._call(funcCode);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
 }
