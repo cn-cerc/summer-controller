@@ -17,6 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.core.LastModified;
@@ -98,6 +99,8 @@ public class JayunLogParser {
                 if (throwable != null) {
                     if (throwable instanceof SecurityStopException) // 权限不足类警告写入 warn
                         builder.level(Level.WARN.toString().toLowerCase());
+                    if (throwable instanceof DataException) // 数据检查类警告写入 info
+                        builder.level(Level.INFO.toString().toLowerCase());
                 }
             }
 
