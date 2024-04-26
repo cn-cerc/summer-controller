@@ -1,9 +1,6 @@
 package cn.cerc.mis.core;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -61,13 +58,6 @@ public class FormFactory implements ApplicationContextAware {
                 }
                 if (context.containsBean(beanId))
                     form = context.getBean(beanId, IForm.class);
-                else {
-                    Map<String, IForm> formMap = context.getBeansOfType(IForm.class)
-                            .values()
-                            .stream()
-                            .collect(Collectors.toMap(item -> item.getClass().getSimpleName(), Function.identity()));
-                    form = formMap.get(formId);
-                }
             }
             if (form == null) {
                 try {
