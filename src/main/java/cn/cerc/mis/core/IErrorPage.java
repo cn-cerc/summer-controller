@@ -9,11 +9,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import cn.cerc.db.core.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.cerc.db.core.IAppConfig;
+import cn.cerc.db.core.Utils;
 import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.other.PageNotFoundException;
 import cn.cerc.mis.security.SecurityStopException;
@@ -36,7 +36,8 @@ public interface IErrorPage {
         else if (throwable instanceof UserRequestException)
             log.info("ip {}, url {}, 请求异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof SecurityStopException)
-            log.warn("ip {}, url {}, 权限校验异常 {}", clientIP, url, message, throwable);
+            // FIXME 暂时降低日志等级，等待后续能够捕捉权限不足超链接来源时再将日志等级恢复成警告
+            log.info("ip {}, url {}, 权限校验异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof IOException)
             log.error("ip {}, url {}, io异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ServiceExecuteException)
