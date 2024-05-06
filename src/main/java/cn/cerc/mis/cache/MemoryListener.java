@@ -76,7 +76,7 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
     public synchronized void sessionCreated(HttpSessionEvent event) {
         atomic.incrementAndGet();
         if (atomic.get() % 10 == 0)
-            log.info("session current size: {}", atomic.get());
+            log.debug("session current size: {}", atomic.get());
         log.debug("session MaxInactiveInterval: {}", event.getSession().getMaxInactiveInterval());
         log.debug("session: {}", event.getSession());
         // 过期时间设置，单位为秒
@@ -89,7 +89,7 @@ public class MemoryListener implements ServletContextListener, HttpSessionListen
         log.debug("session MaxInactiveInterval: {}", se.getSession().getMaxInactiveInterval());
         atomic.decrementAndGet();
         if (atomic.get() % 10 == 0)
-            log.info("session current size: {}", atomic);
+            log.debug("session current size: {}", atomic);
 
         if (atomic.get() != 0)
             return;
