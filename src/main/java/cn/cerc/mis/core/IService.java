@@ -53,7 +53,7 @@ public interface IService {
 
     default DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws IllegalAccessException,
             InvocationTargetException, ServiceException, DataException, RuntimeException {
-        // FIXME 去掉内存计算过滤器字段，使用原始 dataIn 进行数据查询
+        // FIXME 去掉内存计算过滤器字段，使用原始 dataIn 进行缓存构建
         if (dataIn.head().exists("_RecordFilter_")) {
             dataIn.head().fields().remove("_RecordFilter_");
         }
