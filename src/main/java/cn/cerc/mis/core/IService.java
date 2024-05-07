@@ -53,6 +53,10 @@ public interface IService {
 
     default DataSet _call(IHandle handle, DataSet dataIn, Variant function) throws IllegalAccessException,
             InvocationTargetException, ServiceException, DataException, RuntimeException {
+        // FIXME 去掉内存计算过滤器字段，使用原始 dataIn 进行数据查询
+        if (dataIn.head().exists("_RecordFilter_")) {
+            dataIn.head().fields().remove("_RecordFilter_");
+        }
         long startTime = System.currentTimeMillis();
         String redisKey = null;
         ServiceCache cacheConfig = this.getClass().getAnnotation(ServiceCache.class);
