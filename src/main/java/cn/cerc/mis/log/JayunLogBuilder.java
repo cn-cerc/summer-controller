@@ -1,5 +1,7 @@
 package cn.cerc.mis.log;
 
+import java.util.Arrays;
+
 public class JayunLogBuilder {
     public static final String info = "info";
     public static final String warn = "warn";
@@ -52,7 +54,7 @@ public class JayunLogBuilder {
     /**
      * 异常对象的参数
      */
-    private String[] args;
+    private Object args;
     /**
      * 创建时间
      */
@@ -119,10 +121,16 @@ public class JayunLogBuilder {
     }
 
     public String[] getArgs() {
-        return args;
+        if (args == null)
+            return null;
+        if (args instanceof String[] arr)
+            return arr;
+        if (args instanceof Object[] arr)
+            return Arrays.copyOf(arr, arr.length, String[].class);
+        return new String[] { String.valueOf(args) };
     }
 
-    public void setArgs(String[] args) {
+    public void setArgs(Object args) {
         this.args = args;
     }
 
