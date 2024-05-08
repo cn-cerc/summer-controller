@@ -14,6 +14,7 @@ import cn.cerc.db.core.Variant;
 import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
+import cn.cerc.mis.security.SecurityStopException;
 
 /**
  * 提供本地服务访问
@@ -109,12 +110,31 @@ public class LocalService extends ServiceProxy {
 
         try {
             return service._call(handle, dataIn, function);
-        } catch (RuntimeException | IllegalAccessException | InvocationTargetException | ServiceException
-                | DataException e) {
+        } catch (Exception e) {
             Throwable throwable = e.getCause() != null ? e.getCause() : e;
-            String message = String.format("service %s, corpNo %s, dataIn %s, message %s", key, handle.getCorpNo(),
-                    dataIn.json(), throwable.getMessage());
-            log.error("{}", message, throwable);
+
+            if (throwable instanceof IllegalArgumentException)
+                log.error("参数异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+            else if (throwable instanceof InvocationTargetException)
+                log.error("反射异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+            else if (throwable instanceof ServiceException)
+                log.error("服务异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+            else if (throwable instanceof DataException)
+                log.info("数据异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+            else if (throwable instanceof SecurityStopException)
+                log.warn("权限异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+            else if (throwable instanceof RuntimeException)
+                log.error("运行异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+            else
+                log.error("其他异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                        throwable.getMessage(), throwable);
+
             dataOut.setError().setMessage(throwable.getMessage());
             return dataOut;
         }
