@@ -18,6 +18,8 @@ import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 
 import cn.cerc.db.core.ServerConfig;
+import cn.cerc.db.core.Utils;
+import cn.cerc.mis.exception.IJayunArgsException;
 
 /**
  * 异常解析器用于读取堆栈的异常对象信息
@@ -91,8 +93,14 @@ public class JayunLogParser {
             // 检查日志事件是否包含异常
             if (event.getThrowableInformation() != null) {
                 Throwable throwable = event.getThrowableInformation().getThrowable();
-                if (throwable != null)
+                if (throwable != null) {
                     builder.setException(throwable.getClass().getName());
+                    if (throwable instanceof IJayunArgsException e) {
+                        String[] args = e.getArgs();
+                        if (!Utils.isEmpty(args))
+                            builder.setArgs(args);
+                    }
+                }
             }
 
             // 日志堆栈解析
