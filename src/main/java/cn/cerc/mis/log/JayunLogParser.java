@@ -17,11 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
 
-import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.ServerConfig;
-import cn.cerc.db.core.Utils;
-import cn.cerc.mis.core.LastModified;
-import cn.cerc.mis.security.SecurityStopException;
 
 /**
  * 异常解析器用于读取堆栈的异常对象信息
@@ -88,71 +84,22 @@ public class JayunLogParser {
             String lineNumber = locationInfo.getLineNumber();
             String message = event.getRenderedMessage();
 
-            JayunLogData.Builder builder = new JayunLogData.Builder(className, level.toString().toLowerCase(), message)
-                    .line(lineNumber)
-                    .project(appender);
+            JayunLogBuilder builder = new JayunLogBuilder(className, level.toString().toLowerCase(), message);
+            builder.setLine(lineNumber);
+            builder.setProject(appender);
 
             // 检查日志事件是否包含异常
             if (event.getThrowableInformation() != null) {
-                // 获取异常信息
                 Throwable throwable = event.getThrowableInformation().getThrowable();
-                if (throwable != null) {
-                    if (throwable instanceof SecurityStopException) // 权限不足类警告写入 warn
-                        builder.level(Level.WARN.toString().toLowerCase());
-                    if (throwable instanceof DataException) // 数据检查类警告写入 info
-                        builder.level(Level.INFO.toString().toLowerCase());
-                }
-            }
-
-            // 读取起源类修改人
-            try {
-                String trigger = event.getLoggerName();
-                Class<?> clazz = Class.forName(trigger);
-                LastModified modified = clazz.getAnnotation(LastModified.class);
-                if (modified != null) {
-                    builder.mainName(modified.main());
-                    builder.name(modified.name());
-                    builder.date(modified.date());
-                }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                if (throwable != null)
+                    builder.setException(throwable.getClass().getName());
             }
 
             // 日志堆栈解析
             String[] stacks = event.getThrowableStrRep();
-            if (stacks != null) {
-                builder.stack(stacks);
-                // 起源类没有在通缉名单上再抓堆栈信息
-                if (wanted.stream().noneMatch(className::contains)) {
-                    for (String stack : stacks) {
-                        // 如果捕捉到业务代码就重置触发器信息
-                        if (wanted.stream().anyMatch(stack::contains)) {
-                            stack = stack.trim();
-                            String trigger = JayunLogParser.trigger(stack);
-                            if (Utils.isEmpty(trigger))
-                                continue;
-                            builder.id(trigger);
-
-                            String line = JayunLogParser.lineNumber(stack);
-                            builder.line(line);
-                            try {
-                                Class<?> caller = Class.forName(trigger);
-                                // 读取通缉令修改人
-                                LastModified modified = caller.getAnnotation(LastModified.class);
-                                if (modified != null) {
-                                    builder.mainName(modified.main());
-                                    builder.name(modified.name());
-                                    builder.date(modified.date());
-                                }
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-            new QueueJayunLog().push(builder.build());
+            if (stacks != null)
+                builder.setStack(stacks);
+            new QueueJayunLog().push(builder);
         });
     }
 

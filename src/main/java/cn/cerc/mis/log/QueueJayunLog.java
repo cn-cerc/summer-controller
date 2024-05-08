@@ -21,7 +21,7 @@ public class QueueJayunLog extends AbstractQueue {
         this.setPushMode(true);
     }
 
-    public String push(JayunLogData logData) {
+    public String push(JayunLogBuilder logData) {
         try {
             return super.push(new Gson().toJson(logData));
         } catch (Exception e) {
@@ -35,7 +35,7 @@ public class QueueJayunLog extends AbstractQueue {
         if (Utils.isEmpty(site))
             return true;
 
-        JayunLogData data = new Gson().fromJson(message, JayunLogData.class);
+        JayunLogBuilder data = new Gson().fromJson(message, JayunLogBuilder.class);
         String profile = key(String.format("%s.log.token", data.getProject()));
         String token = config.getString(profile, "");
         if (Utils.isEmpty(token)) {
