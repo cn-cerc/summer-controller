@@ -1,7 +1,5 @@
 package cn.cerc.mis.log;
 
-import java.util.Arrays;
-
 public class JayunLogBuilder {
     public static final String info = "info";
     public static final String warn = "warn";
@@ -120,14 +118,8 @@ public class JayunLogBuilder {
         this.timestamp = timestamp;
     }
 
-    public String[] getArgs() {
-        if (args == null)
-            return null;
-        if (args instanceof String[] arr)
-            return arr;
-        if (args instanceof Object[] arr)
-            return Arrays.copyOf(arr, arr.length, String[].class);
-        return new String[] { String.valueOf(args) };
+    public Object getArgs() {
+        return args;
     }
 
     public void setArgs(Object args) {
