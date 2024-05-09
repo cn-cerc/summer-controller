@@ -49,7 +49,7 @@ public class QueueJayunLog extends AbstractQueue {
         executor.submit(() -> {
             try {
                 Curl curl = new Curl();
-                curl.put("origin", data.getId());
+                curl.put("origin", String.format("%s:%s", data.getId(), data.getLine()));
                 curl.put("message", data.getMessage());
                 curl.put("level", data.getLevel());
                 curl.put("group", data.getException());
