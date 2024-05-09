@@ -56,7 +56,7 @@ public class JayunLogBuilder {
     /**
      * 创建时间
      */
-    private long timestamp;
+    private long createTime;
     /**
      * 负责人
      */
@@ -79,7 +79,7 @@ public class JayunLogBuilder {
 
     private void init() {
         this.line = "?";
-        this.timestamp = System.currentTimeMillis();
+        this.createTime = System.currentTimeMillis();
         this.hostname = ApplicationEnvironment.hostname();
         this.ip = ApplicationEnvironment.hostIP();
         this.port = ApplicationEnvironment.hostPort();
@@ -110,12 +110,12 @@ public class JayunLogBuilder {
         this.mainName = mainName;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public long getCreateTime() {
+        return createTime;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 
     public Object getArgs() {
