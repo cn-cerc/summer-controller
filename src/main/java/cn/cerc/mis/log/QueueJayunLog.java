@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 
 import cn.cerc.db.core.ClassConfig;
 import cn.cerc.db.core.Curl;
+import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
@@ -83,6 +84,11 @@ public class QueueJayunLog extends AbstractQueue {
                 String response = curl.doPost(String.format("%s/public/log1?token=%s", site, token));
                 if (Utils.isEmpty(response))
                     System.err.println(String.format("token: %s, json: %s", token, message));
+                else {
+                    DataRow row = new DataRow().setJson(response);
+                    if (!row.getBoolean("result"))
+                        System.err.println(row.getString("message"));
+                }
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
