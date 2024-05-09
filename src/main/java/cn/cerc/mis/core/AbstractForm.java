@@ -194,7 +194,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                     method = findMethod(this.getClass(), funcCode);
                 }
                 if (method == null)
-                    throw new RuntimeException(String.format("找不到目标可执行函数 %s", funcCode));
+                    throw new NoSuchMethodException(String.format("找不到目标可执行函数 %s", funcCode));
                 SecurityPolice.check(this, method, this);
                 if (method.getParameterCount() > 0) {
                     Object[] args = new Object[method.getParameterCount()];
@@ -204,7 +204,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                         list.add(parameterNames.nextElement());
 
                     if (list.size() < method.getParameters().length)
-                        throw new RuntimeException("参数传入个数小于方法声明需要的参数数量");
+                        throw new IllegalArgumentException("参数传入个数小于方法声明需要的参数数量");
 
                     int i = 0;
                     for (Parameter arg : method.getParameters()) {
@@ -219,7 +219,7 @@ public abstract class AbstractForm implements IForm, InitializingBean {
                         else if (String.class.getName().equals(paramType))
                             args[i++] = tmp;
                         else
-                            throw new RuntimeException(String.format("不支持的参数类型 %s", paramType));
+                            throw new UnsupportedOperationException(String.format("不支持的参数类型 %s", paramType));
                     }
                     result = method.invoke(this, args);
                 } else {

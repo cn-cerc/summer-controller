@@ -35,6 +35,12 @@ public interface IErrorPage {
             log.info("ip {}, url {}, 页面异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof UserRequestException)
             log.info("ip {}, url {}, 请求异常 {}", clientIP, url, message, throwable);
+        if (throwable instanceof NoSuchMethodException)
+            log.info("ip {}, url {}, 方法异常 {}", clientIP, url, message, throwable);
+        else if (throwable instanceof IllegalArgumentException)
+            log.info("ip {}, url {}, 参数异常 {}", clientIP, url, message, throwable);
+        else if (throwable instanceof UnsupportedOperationException)
+            log.info("ip {}, url {}, 异常操作 {}", clientIP, url, message, throwable);
         else if (throwable instanceof SecurityStopException)
             // FIXME 暂时降低日志等级，等待后续能够捕捉权限不足超链接来源时再将日志等级恢复成警告
             log.info("ip {}, url {}, 权限校验异常 {}", clientIP, url, message, throwable);
@@ -44,8 +50,6 @@ public interface IErrorPage {
             log.error("ip {}, url {}, 服务执行异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ServletException)
             log.error("ip {}, url {}, servlet异常 {}", clientIP, url, message, throwable);
-        else if (throwable instanceof IllegalArgumentException)
-            log.error("ip {}, url {}, 参数异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ReflectiveOperationException)
             log.error("ip {}, url {}, 反射异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof RuntimeException)
