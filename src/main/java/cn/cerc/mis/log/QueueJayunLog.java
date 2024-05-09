@@ -52,7 +52,7 @@ public class QueueJayunLog extends AbstractQueue {
                 curl.put("message", data.getMessage());
                 curl.put("level", data.getLevel());
                 curl.put("group", data.getException());
-                curl.put("machine", data.getMainName());
+                curl.put("machine", data.getHostname());
                 curl.put("timestamp", data.getTimestamp());
                 StringBuilder builder = new StringBuilder();
                 String[] lines = data.getStack();
