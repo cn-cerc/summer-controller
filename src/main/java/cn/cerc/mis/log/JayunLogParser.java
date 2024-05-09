@@ -19,7 +19,7 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
-import cn.cerc.mis.exception.IKnowAll;
+import cn.cerc.mis.exception.IKnowall;
 
 /**
  * 异常解析器用于读取堆栈的异常对象信息
@@ -92,7 +92,7 @@ public class JayunLogParser {
                 Throwable throwable = event.getThrowableInformation().getThrowable();
                 if (throwable != null) {
                     builder.setException(throwable.getClass().getSimpleName());
-                    if (throwable instanceof IKnowAll e) {
+                    if (throwable instanceof IKnowall e) {
                         // 获取JayunLog的group值
                         builder.setException(e.getGroup());
                         String[] args = e.getData();
