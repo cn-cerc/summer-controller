@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.db.core.DataException;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.client.ServiceExecuteException;
@@ -33,6 +34,8 @@ public interface IErrorPage {
         String url = this.getUrl(request);
         if (throwable instanceof PageNotFoundException)
             log.info("ip {}, url {}, 页面异常 {}", clientIP, url, message, throwable);
+        if (throwable instanceof DataException)
+            log.info("ip {}, url {}, 数据检查异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof UserRequestException)
             log.info("ip {}, url {}, 请求异常 {}", clientIP, url, message, throwable);
         if (throwable instanceof NoSuchMethodException)
@@ -43,7 +46,7 @@ public interface IErrorPage {
             log.info("ip {}, url {}, 异常操作 {}", clientIP, url, message, throwable);
         else if (throwable instanceof SecurityStopException)
             // FIXME 暂时降低日志等级，等待后续能够捕捉权限不足超链接来源时再将日志等级恢复成警告
-            log.info("ip {}, url {}, 权限校验异常 {}", clientIP, url, message, throwable);
+            log.info("ip {}, url {}, 权限检查异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof IOException)
             log.error("ip {}, url {}, io异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ServiceExecuteException)
