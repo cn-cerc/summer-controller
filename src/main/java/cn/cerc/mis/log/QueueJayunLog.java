@@ -54,6 +54,7 @@ public class QueueJayunLog extends AbstractQueue {
                 curl.put("level", data.getLevel());
                 curl.put("group", data.getException());
                 curl.put("machine", data.getHostname());
+                curl.put("createTime", data.getTimestamp());
                 StringBuilder builder = new StringBuilder();
                 String[] lines = data.getStack();
                 if (!Utils.isEmpty(lines)) {
