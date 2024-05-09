@@ -50,9 +50,9 @@ public class JayunLogBuilder {
      */
     private String[] stack;
     /**
-     * 参数
+     * 异常对象的参数
      */
-    private String args;
+    private Object args;
     /**
      * 创建时间
      */
@@ -118,11 +118,11 @@ public class JayunLogBuilder {
         this.timestamp = timestamp;
     }
 
-    public String getArgs() {
+    public Object getArgs() {
         return args;
     }
 
-    public void setArgs(String args) {
+    public void setArgs(Object args) {
         this.args = args;
     }
 
