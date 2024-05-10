@@ -2,7 +2,7 @@ package cn.cerc.mis.print;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.net.URLEncoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +70,7 @@ public class ExportPdf implements IHandle {
         response.reset();
         if ("file".equals(template.getOutputDevice())) {
             response.setCharacterEncoding("UTF-8");// 设置相应内容的编码格式
-            String fname = new String(template.getFileName().getBytes(), StandardCharsets.ISO_8859_1);
+            String fname = URLEncoder.encode(template.getFileName(), "UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + fname + ".pdf");
             response.setContentType("application/pdf");// 定义输出类型
         }
