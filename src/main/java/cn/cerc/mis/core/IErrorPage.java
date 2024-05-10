@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import cn.cerc.db.core.IAppConfig;
 import cn.cerc.db.core.Utils;
 import cn.cerc.mis.client.ServiceExecuteException;
+import cn.cerc.mis.exceptions.ErrorPageException;
 import cn.cerc.mis.other.PageNotFoundException;
 import cn.cerc.mis.security.SecurityStopException;
 
@@ -52,10 +53,11 @@ public interface IErrorPage {
             log.error("ip {}, url {}, servlet异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof ReflectiveOperationException)
             log.error("ip {}, url {}, 反射异常 {}", clientIP, url, message, throwable);
-        else if (throwable instanceof RuntimeException)
+        else if (throwable instanceof RuntimeException) {
             log.error("ip {}, url {}, 运行异常 {}", clientIP, url, message, throwable);
-        else
-            log.warn("ip {}, url {}, 其他异常 {}", clientIP, url, message, throwable);
+        } else {
+            log.warn(message, new ErrorPageException(this.getClass(), message, clientIP, url), clientIP, url);
+        }
 
         String errorPage = this.getErrorPage(request, response, throwable);
         if (errorPage != null) {
