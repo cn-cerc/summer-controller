@@ -19,6 +19,8 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import cn.cerc.db.core.ServerConfig;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.log.KnowallData;
+import cn.cerc.db.log.KnowallLog;
 import cn.cerc.mis.exception.IKnowall;
 
 /**
@@ -68,7 +70,7 @@ public class JayunLogParser {
     /**
      * 采集 log 默认的数据，不解析堆栈的业务对象
      */
-    public static void analyze(String appender, final LoggingEvent event, final LocationInfo locationInfo) {
+    public static void analyze(final LoggingEvent event, final LocationInfo locationInfo) {
         executor.submit(() -> {
             // 灰度发布不发送日志到测试平台
             if (ServerConfig.isServerGray())
@@ -78,35 +80,44 @@ public class JayunLogParser {
             if (levels.stream().noneMatch(item -> level == item))
                 return;
 
-            // 获取类名和行号
-            String className = locationInfo.getClassName();
-            String lineNumber = locationInfo.getLineNumber();
-            String message = event.getRenderedMessage();
+            KnowallLog log = new KnowallLog(
+                    String.join(":", locationInfo.getClassName(), locationInfo.getLineNumber()));
+            log.setMessage(event.getRenderedMessage());
+            log.setLevel(level.toString().toLowerCase());
 
-            JayunLogBuilder builder = new JayunLogBuilder(className, level.toString().toLowerCase(), message);
-            builder.setLine(lineNumber);
-            builder.setProject(appender);
+            // 获取堆栈信息
+            StringBuilder builder = new StringBuilder();
+            String[] stacks = event.getThrowableStrRep();
+            if (!Utils.isEmpty(stacks)) {
+                for (String line : stacks) {
+                    if (line.contains("\t"))
+                        line = line.replaceAll("\t", System.lineSeparator() + "\t");
+                    builder.append(line);
+                }
+            }
+            log.addData(builder.toString());
 
             // 检查日志事件是否包含异常
             if (event.getThrowableInformation() != null) {
                 Throwable throwable = event.getThrowableInformation().getThrowable();
                 if (throwable != null) {
-                    builder.setException(throwable.getClass().getSimpleName());
+                    log.setType(throwable.getClass().getSimpleName());
+                    if (throwable instanceof KnowallData data) {
+                        for (int i = 0; i < data.getDataCount(); i++) {
+                            log.addData(data.getData(i));
+                        }
+                    }
                     if (throwable instanceof IKnowall e) {
-                        // 获取JayunLog的group值
-                        builder.setException(e.getGroup());
                         String[] args = e.getData();
-                        if (!Utils.isEmpty(args))
-                            builder.setArgs(args);
+                        if (!Utils.isEmpty(args)) {
+                            for (String arg : args) {
+                                log.addData(arg);
+                            }
+                        }
                     }
                 }
             }
-
-            // 日志堆栈解析
-            String[] stacks = event.getThrowableStrRep();
-            if (stacks != null)
-                builder.setStack(stacks);
-            new QueueJayunLog().push(builder);
+            log.post();
         });
     }
 

@@ -13,7 +13,7 @@ public class JayunLogAppender implements Appender {
 
     @Override
     public void doAppend(LoggingEvent event) {
-        JayunLogParser.analyze(this.getName(), event, event.getLocationInformation());
+        JayunLogParser.analyze(event, event.getLocationInformation());
     }
 
     @Override

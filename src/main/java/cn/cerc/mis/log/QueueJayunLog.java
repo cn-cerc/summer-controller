@@ -13,6 +13,7 @@ import cn.cerc.db.core.Utils;
 import cn.cerc.db.queue.AbstractQueue;
 import cn.cerc.db.queue.QueueServiceEnum;
 
+// FIXME 后续删除
 @Component
 public class QueueJayunLog extends AbstractQueue {
     private static final ClassConfig config = new ClassConfig();
