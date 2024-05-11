@@ -18,9 +18,4 @@ public class ErrorPageException extends RuntimeException implements IKnowall {
         return data;
     }
 
-    @Override
-    public String getGroup() {
-        return ErrorPageException.class.getSimpleName();
-    }
-
 }
