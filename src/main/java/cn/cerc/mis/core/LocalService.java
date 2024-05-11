@@ -123,7 +123,7 @@ public class LocalService extends ServiceProxy {
                 log.error("服务异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
                         throwable.getMessage(), throwable);
             else if (throwable instanceof DataException)
-                log.info("数据异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
+                log.warn("数据异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
                         throwable.getMessage(), throwable);
             else if (throwable instanceof SecurityStopException)
                 log.warn("权限异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
@@ -157,4 +157,5 @@ public class LocalService extends ServiceProxy {
     public String serviceId() {
         return this.service();
     }
+
 }
