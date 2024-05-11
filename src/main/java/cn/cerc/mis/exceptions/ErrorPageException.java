@@ -8,9 +8,9 @@ public class ErrorPageException extends RuntimeException implements IKnowall {
 
     private String[] data;
 
-    public ErrorPageException(Class<?> classz, String type, String message, String ip, String url) {
+    public ErrorPageException(Class<?> classz, String message, String ip, String url) {
         super(String.format("%s 执行异常：%s", classz.getSimpleName(), message));
-        data = new String[] { classz.getSimpleName(), type, ip, url };
+        data = new String[] { classz.getSimpleName(), ip, url };
     }
 
     @Override

@@ -54,9 +54,9 @@ public interface IErrorPage {
         else if (throwable instanceof ReflectiveOperationException)
             log.error("ip {}, url {}, 反射异常 {}", clientIP, url, message, throwable);
         else if (throwable instanceof RuntimeException)
-            log.warn(message, new ErrorPageException(this.getClass(), "运行异常", message, clientIP, url));
+            log.warn(message, new ErrorPageException(this.getClass(), message, clientIP, url));
         else
-            log.warn(message, new ErrorPageException(this.getClass(), "其他异常", message, clientIP, url));
+            log.warn(message, new ErrorPageException(this.getClass(), message, clientIP, url));
 
         String errorPage = this.getErrorPage(request, response, throwable);
         if (errorPage != null) {
