@@ -101,15 +101,13 @@ public class JayunLogParser {
             if (event.getThrowableInformation() != null) {
                 Throwable throwable = event.getThrowableInformation().getThrowable();
                 if (throwable != null) {
-                    log.setGroup(throwable.getClass().getSimpleName());
+                    log.setType(throwable.getClass().getSimpleName());
                     if (throwable instanceof KnowallData data) {
                         for (int i = 0; i < data.getDataCount(); i++) {
                             log.addData(data.getData(i));
                         }
                     }
                     if (throwable instanceof IKnowall e) {
-                        // 获取JayunLog的group值
-                        log.setGroup(e.getGroup());
                         String[] args = e.getData();
                         if (!Utils.isEmpty(args)) {
                             for (String arg : args) {
