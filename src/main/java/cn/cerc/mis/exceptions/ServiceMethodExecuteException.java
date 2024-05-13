@@ -11,10 +11,9 @@ public class ServiceMethodExecuteException extends RuntimeException implements I
     }
 
     // 运行异常, clientIP {}, token {}, service {}, corpNo {}, dataIn {}, message {}
-    public ServiceMethodExecuteException(String clientIP, String token, String corpNo, String dataIn,
-            Throwable cause) {
+    public ServiceMethodExecuteException(String clientIP, String token, String corpNo, String dataIn, Throwable cause) {
         super(cause);
-        this.data = new String[] { clientIP, token, corpNo, dataIn };
+        this.data = new String[] { "clientIP " + clientIP, "token " + token, "corpNo " + corpNo, "dataIn " + dataIn };
     }
 
     @Override
