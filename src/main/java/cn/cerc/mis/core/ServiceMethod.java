@@ -9,6 +9,7 @@ import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
+import cn.cerc.mis.exceptions.ServiceMethodExecuteException;
 import cn.cerc.mis.security.SecurityPolice;
 
 public final class ServiceMethod {
@@ -58,50 +59,56 @@ public final class ServiceMethod {
 
         // 执行具体的服务函数
         DataSet dataOut;
-        switch (this.version) {
-        case ResultBoolean: {
-            if (owner instanceof CustomService) {
-                boolean result = (Boolean) method.invoke(owner);
-                dataOut = ((CustomService) owner).dataOut();
-                dataOut.setState(result ? ServiceState.OK : ServiceState.ERROR);
-            } else {
-                dataOut = new DataSet().setMessage("It not is CustomService");
+        try {
+            switch (this.version) {
+            case ResultBoolean: {
+                if (owner instanceof CustomService) {
+                    boolean result = (Boolean) method.invoke(owner);
+                    dataOut = ((CustomService) owner).dataOut();
+                    dataOut.setState(result ? ServiceState.OK : ServiceState.ERROR);
+                } else {
+                    dataOut = new DataSet().setMessage("It not is CustomService");
+                }
+                break;
             }
-            break;
+            case ResultStatus: {
+                dataOut = new DataSet();
+                IStatus result = (IStatus) method.invoke(owner, dataIn, dataOut);
+                if (dataOut.state() == ServiceState.ERROR)
+                    dataOut.setState(result.getState());
+                if (dataOut.message() == null)
+                    dataOut.setMessage(result.getMessage());
+                break;
+            }
+            case ResultDataSetByDataIn: {
+                dataOut = (DataSet) method.invoke(owner, handle, dataIn);
+                break;
+            }
+            case ResultDataSetByHeadIn: {
+                dataOut = (DataSet) method.invoke(owner, handle, dataIn.head());
+                break;
+            }
+            case ResultBooleanByDataIn: {
+                boolean result = (Boolean) method.invoke(owner, handle, dataIn);
+                dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
+                break;
+            }
+            case ResultBooleanByHeadIn: {
+                boolean result = (Boolean) method.invoke(owner, handle, dataIn.head());
+                dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
+                break;
+            }
+            default: {
+                dataOut = new DataSet().setMessage("can't support " + this.version.name());
+                break;
+            }
+            }
+        } catch (Exception e) {
+            Throwable throwable = e.getCause() != null ? e.getCause() : e;
+            if (throwable instanceof RuntimeException)
+                throw new ServiceMethodExecuteException(throwable);
+            throw e;
         }
-        case ResultStatus: {
-            dataOut = new DataSet();
-            IStatus result = (IStatus) method.invoke(owner, dataIn, dataOut);
-            if (dataOut.state() == ServiceState.ERROR)
-                dataOut.setState(result.getState());
-            if (dataOut.message() == null)
-                dataOut.setMessage(result.getMessage());
-            break;
-        }
-        case ResultDataSetByDataIn: {
-            dataOut = (DataSet) method.invoke(owner, handle, dataIn);
-            break;
-        }
-        case ResultDataSetByHeadIn: {
-            dataOut = (DataSet) method.invoke(owner, handle, dataIn.head());
-            break;
-        }
-        case ResultBooleanByDataIn: {
-            boolean result = (Boolean) method.invoke(owner, handle, dataIn);
-            dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
-            break;
-        }
-        case ResultBooleanByHeadIn: {
-            boolean result = (Boolean) method.invoke(owner, handle, dataIn.head());
-            dataOut = new DataSet().setState(result ? ServiceState.OK : ServiceState.ERROR);
-            break;
-        }
-        default: {
-            dataOut = new DataSet().setMessage("can't support " + this.version.name());
-            break;
-        }
-        }
-
         // 防止调用者修改并回写到数据库
         dataOut.disableStorage().first();
         return dataOut;
