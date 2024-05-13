@@ -79,7 +79,6 @@ public class JayunLogParser {
             Level level = event.getLevel();
             if (levels.stream().noneMatch(item -> level == item))
                 return;
-
             KnowallLog log = new KnowallLog(
                     String.join(":", locationInfo.getClassName(), locationInfo.getLineNumber()));
             log.setMessage(event.getRenderedMessage());
@@ -103,9 +102,9 @@ public class JayunLogParser {
                 if (throwable != null) {
                     log.setType(throwable.getClass().getSimpleName());
                     if (throwable instanceof KnowallData data) {
-                        for (int i = 0; i < data.getDataCount(); i++) {
-                            log.addData(data.getData(i));
-                        }
+                        data.getData().forEach(log::addData);
+                        if (data.getStacks() != null)
+                            log.addData(data.getStacks());
                     }
                     if (throwable instanceof IKnowall e) {
                         String[] args = e.getData();
