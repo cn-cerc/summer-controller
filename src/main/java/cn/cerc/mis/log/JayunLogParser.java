@@ -79,11 +79,10 @@ public class JayunLogParser {
             Level level = event.getLevel();
             if (levels.stream().noneMatch(item -> level == item))
                 return;
-
-            KnowallLog log = new KnowallLog(
+            KnowallLog logger = new KnowallLog(
                     String.join(":", locationInfo.getClassName(), locationInfo.getLineNumber()));
-            log.setMessage(event.getRenderedMessage());
-            log.setLevel(level.toString().toLowerCase());
+            logger.setMessage(event.getRenderedMessage());
+            logger.setLevel(level.toString().toLowerCase());
 
             // 获取堆栈信息
             StringBuilder builder = new StringBuilder();
@@ -95,29 +94,29 @@ public class JayunLogParser {
                     builder.append(line);
                 }
             }
-            log.addData(builder.toString());
+            logger.addData(builder.toString());
 
             // 检查日志事件是否包含异常
             if (event.getThrowableInformation() != null) {
                 Throwable throwable = event.getThrowableInformation().getThrowable();
                 if (throwable != null) {
-                    log.setType(throwable.getClass().getSimpleName());
+                    logger.setType(throwable.getClass().getSimpleName());
                     if (throwable instanceof KnowallData data) {
-                        for (int i = 0; i < data.getDataCount(); i++) {
-                            log.addData(data.getData(i));
-                        }
+                        data.getData().forEach(logger::addData);
+                        if (data.getStacks() != null)
+                            logger.addData(data.getStacks());
                     }
                     if (throwable instanceof IKnowall e) {
                         String[] args = e.getData();
                         if (!Utils.isEmpty(args)) {
                             for (String arg : args) {
-                                log.addData(arg);
+                                logger.addData(arg);
                             }
                         }
                     }
                 }
             }
-            log.post();
+            logger.post();
         });
     }
 
