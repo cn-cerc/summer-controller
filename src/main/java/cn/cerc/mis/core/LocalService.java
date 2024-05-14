@@ -11,6 +11,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Variant;
+import cn.cerc.db.log.KnowallLog;
 import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
@@ -113,27 +114,48 @@ public class LocalService extends ServiceProxy {
         } catch (Exception e) {
             Throwable throwable = e.getCause() != null ? e.getCause() : e;
 
-            if (throwable instanceof IllegalArgumentException)
-                log.error("参数异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
-            else if (throwable instanceof InvocationTargetException)
-                log.error("反射异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+            if (throwable instanceof IllegalArgumentException) {
+                log.error("service {} 参数异常 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
+            } else if (throwable instanceof InvocationTargetException)
+                log.error("service {} 反射异常 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
             else if (throwable instanceof ServiceException)
-                log.error("服务异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+                log.error("service {} 服务异常 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
             else if (throwable instanceof DataException)
-                log.warn("数据异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+                log.warn("service {} 数据校验失败 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
             else if (throwable instanceof SecurityStopException)
-                log.warn("权限异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+                log.warn("service {} 用户权限不足 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
             else if (throwable instanceof RuntimeException)
-                log.error("运行异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+                log.error("service {} 运行异常 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
             else
-                log.error("其他异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+                log.error("service {} 其他异常 {}", key, throwable.getMessage(),
+                        KnowallLog.of(throwable)
+                                .add("service ", key)
+                                .add("corpNo", handle.getCorpNo())
+                                .add("dataIn", dataIn.json()));
 
             dataOut.setError().setMessage(throwable.getMessage());
             return dataOut;

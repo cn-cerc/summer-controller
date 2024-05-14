@@ -19,6 +19,7 @@ import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Utils;
+import cn.cerc.db.log.KnowallLog;
 import cn.cerc.local.tool.JsonTool;
 import cn.cerc.mis.SummerMIS;
 import cn.cerc.mis.core.Application;
@@ -91,9 +92,8 @@ public class RemoteService extends ServiceProxy {
             response = curl.doPost(endpoint + service);
             return new DataSet().setJson(response);
         } catch (IOException | JsonSyntaxException e) {
-            String message = String.format("访问服务 %s%s, 入参信息 %s -> 返回信息 %s，解析异常 %s", endpoint, service,
-                    JsonTool.toJson(curl.getParameters()), response, e.getMessage());
-            log.error(message, e);
+            log.error("{}{} 远程服务访问异常 {}", endpoint, service, e.getMessage(),
+                    KnowallLog.of(e).add("入参信息", JsonTool.toJson(curl.getParameters())).add("返回信息", response));
             return new DataSet().setState(ServiceState.CALL_TIMEOUT).setMessage("remote service error");
         }
     }
