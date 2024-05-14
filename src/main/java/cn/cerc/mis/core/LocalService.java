@@ -11,6 +11,7 @@ import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ServiceException;
 import cn.cerc.db.core.Variant;
+import cn.cerc.db.log.KnowallLog;
 import cn.cerc.mis.client.ServiceExport;
 import cn.cerc.mis.client.ServiceProxy;
 import cn.cerc.mis.client.ServiceSign;
@@ -120,8 +121,8 @@ public class LocalService extends ServiceProxy {
                 log.error("反射异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
                         throwable.getMessage(), throwable);
             else if (throwable instanceof ServiceException)
-                log.error("服务异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
-                        throwable.getMessage(), throwable);
+                log.error("服务异常, service {}, corpNo {}, message {}", key, handle.getCorpNo(), throwable.getMessage(),
+                        KnowallLog.of(throwable, dataIn.json()));
             else if (throwable instanceof DataException)
                 log.warn("数据异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
                         throwable.getMessage(), throwable);
