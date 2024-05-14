@@ -4,9 +4,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cn.cerc.db.core.DataRow;
 import cn.cerc.db.core.DataSet;
 import cn.cerc.db.core.EntityHelper;
@@ -17,7 +14,6 @@ import cn.cerc.db.core.SqlText;
 import cn.cerc.db.core.SqlWhere;
 
 public class EntityOne<T extends EntityImpl> extends EntityHome<T> {
-    private static final Logger log = LoggerFactory.getLogger(EntityOne.class);
 
     public static <T extends EntityImpl> EntityOne<T> open(IHandle handle, Class<T> clazz, String... values) {
         SqlText sql = SqlWhere.create(handle, clazz, values).build();
