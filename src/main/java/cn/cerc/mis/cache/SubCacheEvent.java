@@ -3,6 +3,7 @@ package cn.cerc.mis.cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.cerc.db.log.KnowallLog;
 import cn.cerc.mis.core.BasicHandle;
 import redis.clients.jedis.JedisPubSub;
 
@@ -29,7 +30,7 @@ public class SubCacheEvent extends JedisPubSub {
                     bean.resetCache(handle, CacheResetMode.Update, param);
                 }
             } else {
-                log.warn("not find beanId: {}", message);
+                log.warn("not find beanId: {}", beanId, KnowallLog.of(message));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
