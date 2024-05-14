@@ -122,7 +122,7 @@ public class LocalService extends ServiceProxy {
                         throwable.getMessage(), throwable);
             else if (throwable instanceof ServiceException)
                 log.error("{}", throwable.getMessage(), KnowallLog.of("service: " + key,
-                        "corpNo: " + handle.getCorpNo(), String.format("dataIn: %s", dataIn.json())));
+                        "corpNo: " + handle.getCorpNo(), "dataIn: " + dataIn.json()));
             else if (throwable instanceof DataException)
                 log.warn("数据异常, service {}, corpNo {}, dataIn {}, message {}", key, handle.getCorpNo(), dataIn.json(),
                         throwable.getMessage(), throwable);
