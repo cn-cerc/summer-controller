@@ -38,7 +38,7 @@ public interface IErrorPage {
             log.info("找不到页面 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
         else if (throwable instanceof UserRequestException)
             log.info("请求异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
-        if (throwable instanceof NoSuchMethodException)
+        else if (throwable instanceof NoSuchMethodException)
             log.info("找不到方法 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
         else if (throwable instanceof IllegalArgumentException)
             log.info("参数数量异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
