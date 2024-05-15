@@ -116,46 +116,25 @@ public class LocalService extends ServiceProxy {
 
             if (throwable instanceof IllegalArgumentException) {
                 log.error("service {} 参数异常 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
             } else if (throwable instanceof InvocationTargetException)
                 log.error("service {} 反射异常 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
             else if (throwable instanceof ServiceException)
                 log.error("service {} 服务异常 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
             else if (throwable instanceof DataException)
                 log.warn("service {} 数据校验失败 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
             else if (throwable instanceof SecurityStopException)
                 log.warn("service {} 用户权限不足 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
             else if (throwable instanceof RuntimeException)
                 log.error("service {} 运行异常 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
             else
                 log.error("service {} 其他异常 {}", key, throwable.getMessage(),
-                        KnowallLog.of(throwable)
-                                .add("service ", key)
-                                .add("corpNo", handle.getCorpNo())
-                                .add("dataIn", dataIn.json()));
+                        KnowallLog.of(throwable).add(key).add(handle.getCorpNo()).add("dataIn", dataIn.json()));
 
             dataOut.setError().setMessage(throwable.getMessage());
             return dataOut;
