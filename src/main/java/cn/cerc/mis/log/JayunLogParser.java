@@ -102,6 +102,9 @@ public class JayunLogParser {
                 if (throwable != null) {
                     log.setType(throwable.getClass().getSimpleName());
                     if (throwable instanceof KnowallData data) {
+                        // 因为KnowallData是包装类，需要获取异常原始异常类 作为分类对象
+                        if (throwable.getCause() != null)
+                            log.setType(throwable.getCause().getClass().getSimpleName());
                         data.getData().forEach(log::addData);
                         if (data.getStacks() != null)
                             log.addData(data.getStacks());
