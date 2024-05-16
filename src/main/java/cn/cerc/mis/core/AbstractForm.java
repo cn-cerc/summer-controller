@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import cn.cerc.db.core.ISession;
+import cn.cerc.db.log.KnowallLog;
 import cn.cerc.mis.client.ServiceExecuteException;
 import cn.cerc.mis.security.Permission;
 import cn.cerc.mis.security.SecurityPolice;
@@ -234,7 +235,9 @@ public abstract class AbstractForm implements IForm, InitializingBean {
             if (result instanceof IPage output) {
                 return output.execute();
             } else {
-                log.warn(String.format("%s pageOutput is not IView: %s", funcCode, result));
+                var data = KnowallLog.of(String.format("页面 %s.%s 返回值为 %s，它应该改为实现 IPage 接口的对象",
+                        this.getClass().getSimpleName(), funcCode, result));
+                log.warn(data.getMessage(), data);
                 return (String) result;
             }
         } catch (PageException e) {
