@@ -56,7 +56,9 @@ public interface IErrorPage {
             log.error("servlet异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
         else if (throwable instanceof ReflectiveOperationException)
             log.error("反射异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
-        else if (throwable instanceof RuntimeException) {
+        else if (throwable instanceof NullPointerException)
+            log.error("空指针异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
+       else if (throwable instanceof RuntimeException) {
             log.error("运行异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
         } else {
             log.error("未知异常 {}", message, KnowallLog.of(throwable).add(clientIP).add(method).add(url));
