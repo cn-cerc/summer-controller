@@ -6,11 +6,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.cerc.db.core.IHandle;
 import cn.cerc.db.core.ISession;
 
 @Deprecated
 public class BookHandle implements IHandle {
+    private static final Logger log = LoggerFactory.getLogger(BookHandle.class);
+
     private ISession session;
     private Map<String, Object> params = new HashMap<>();
     private String originCorpNo;
@@ -27,6 +32,7 @@ public class BookHandle implements IHandle {
     private void init(ISession owner, String corpNo) {
         this.originCorpNo = owner.getCorpNo();
         this.originUserCode = owner.getUserCode();
+        log.warn("BookHandle 不建议使用，请改进代码", new BookHandleException(originCorpNo, originUserCode));
         this.session = new ISession() {
             @Override
             public Object getProperty(String key) {
