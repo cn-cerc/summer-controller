@@ -29,15 +29,15 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <!-- 生成javadoc文档包的插件 -->
-            <!-- <plugin>
+             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin> -->
+            </plugin> 
             <!-- 生成sources源码包的插件 -->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-source-plugin</artifactId>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
