@@ -12,8 +12,8 @@ public class BookHandleException extends RuntimeException implements IKnowall {
 
     private static final long serialVersionUID = 5157802210363657558L;
 
-    private String corpNo;
-    private String userCode;
+    private final String corpNo;
+    private final String userCode;
 
     public BookHandleException(String corpNo, String userCode) {
         this.corpNo = corpNo;
