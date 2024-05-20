@@ -34,10 +34,10 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
             </plugin> -->
             <!-- 生成sources源码包的插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-source-plugin</artifactId>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
